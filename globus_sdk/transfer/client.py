@@ -1604,12 +1604,95 @@ class TransferClient(BaseClient):
                 an iterable of :class:`GlobusResponse
                 <globus_sdk.response.GlobusResponse>`
 
+        **Filters**
+
+        The following filters are supported (passed as keyword arguments in ``params``).
+        For any query that doesn’t specify a filter_status that is a subset of
+        ("ACTIVE", "INACTIVE"), at least one of filter_task_id or filter_endpoint is
+        required.
+
+        ====================== ================ ========================
+        Query Parameter        Filter Type      Description
+        ====================== ================ ========================
+        filter_status          equality list    |filter_status|
+        filter_task_id         equality list    |filter_task_id|
+        filter_owner_id        equality         |filter_owner_id|
+        filter_endpoint        equality         |filter_endpoint|
+        filter_is_paused       boolean equality |filter_is_paused|
+        filter_completion_time datetime range   |filter_completion_time|
+        filter_min_faults      int              |filter_min_faults|
+        filter_local_user      equality         |filter_local_user|
+        ====================== ================ ========================
+
+        .. |filter_status| replace::
+           Comma separated list of task statuses.  Return only tasks with any of the
+           specified statuses. Note that in-progress tasks will have status "ACTIVE" or
+           "INACTIVE", and completed tasks will have status "SUCCEEDED" or "FAILED".
+
+        .. |filter_task_id| replace::
+           Comma separated list of task_ids, limit 50. Return only tasks with any of
+           the specified ids. If any of the specified tasks do not involve an endpoint
+           the user has an appropriate role for, a ``PermissionDenied`` error will be
+           returned. This filter can't be combined with any other filter.  If another
+           filter is passed, a ``BadRequest`` will be returned.
+
+        .. |filter_owner_id| replace::
+           A Globus Auth identity id. Limit results to tasks submitted by the specified
+           identity, or linked to the specified identity, at submit time.  Returns
+           ``UserNotFound`` if the identity does not exist or has never used the Globus
+           Transfer service. If no tasks were submitted by this user to an endpoint the
+           current user has an appropriate role on, an empty result set will be
+           returned. Unless filtering for running tasks (i.e. ``filter_status`` is a
+           subset of ("ACTIVE", "INACTIVE"), ``filter_endpoint`` is required when using
+           ``filter_owner_id``.
+
+        .. |filter_endpoint| replace::
+           Single endpoint id or canonical name. Using canonical name is deprecated.
+           Return only tasks with a matching source or destination endpoint or matching
+           source or destination host endpoint.
+
+        .. |filter_is_paused| replace::
+           Return only tasks with the specified ``is_paused`` value. Requires that
+           ``filter_status`` is also passed and contains a subset of "ACTIVE" and
+           "INACTIVE". Completed tasks always have ``is_paused`` equal to "false" and
+           filtering on their paused state is not useful and not supported.  Note that
+           pausing is an async operation, and after a pause rule is inserted it will
+           take time before the is_paused flag is set on all affected tasks. Tasks
+           paused by id will have the ``is_paused`` flag set immediately.
+
+        .. |filter_completion_time| replace::
+           Start and end date-times separated by a comma. Each datetime should be
+           specified as a string in ISO 8601 format: YYYY-MM-DDTHH:MM:SS, where the "T"
+           separating date and time is literal, with optional \+/-HH:MM for timezone.
+           If no timezone is specified, UTC is assumed, or a trailing "Z" can be
+           specified to make UTC explicit. A space can be used between the date and time
+           instead of a space.  A blank string may be used for either the start or end
+           (but not both) to indicate no limit on that side.  Returns only complete
+           tasks with ``completion_time`` in the specified range. If the end date is
+           blank, it will also include all active tasks, since they will complete some
+           time in the future.
+
+        .. |filter_min_faults| replace::
+           Minimum number of cumulative faults, inclusive.  Return only tasks with
+           ``faults >= N``, where N is the filter value.  Use ``filter_min_faults=1`` to
+           find all tasks with at least one fault.  Note that many errors are not fatal
+           and the task may still be successful even if ``faults >= 1``.  See the
+           link:../task{outfilesuffix}#task_fields[faults field] documentation for
+           details.
+
+        .. |filter_local_user| replace::
+           A valid username for the target system running the endpoint, as a utf8
+           encoded string. Requires that ``filter_endpoint`` is also set. Return only
+           tasks that have successfully fetched the local user from the endpoint, and
+           match the values of ``filter_endpoint`` and ``filter_local_user`` on the
+           source or on the destination.
+
         **Examples**
 
         Fetch the default number (10) of tasks and print some basic info:
 
         >>> tc = TransferClient(...)
-        >>> for task in tc.endpoint_manager_task_list():
+        >>> for task in tc.endpoint_manager_task_list(filter_status="ACTIVE"):
         >>>     print("Task({}): {} -> {}\n  was submitted by\n  {}".format(
         >>>         task["task_id"], task["source_endpoint"],
         >>>         task["destination_endpoint"], task["owner_string"]))
@@ -1618,7 +1701,8 @@ class TransferClient(BaseClient):
         status:
 
         >>> tc = TransferClient(...)
-        >>> for task in tc.endpoint_manager_task_list(num_results=None):
+        >>> for task in tc.endpoint_manager_task_list(
+        >>>     num_results=None, filter_status="ACTIVE"):
         >>>     print("Task({}): {} -> {}\n  was submitted by\n  {}".format(
         >>>         task["task_id"], task["source_endpoint"],
         >>>         task["destination_endpoint"], task["owner_string"]))
