@@ -1662,12 +1662,12 @@ class TransferClient(BaseClient):
 
         .. |filter_completion_time| replace::
            Start and end date-times separated by a comma. Each datetime should be
-           specified as a string in ISO 8601 format: YYYY-MM-DDTHH:MM:SS, where the "T"
-           separating date and time is literal, with optional \+/-HH:MM for timezone.
-           If no timezone is specified, UTC is assumed, or a trailing "Z" can be
-           specified to make UTC explicit. A space can be used between the date and time
-           instead of a space.  A blank string may be used for either the start or end
-           (but not both) to indicate no limit on that side.  Returns only complete
+           specified as a string in ISO 8601 format: ``YYYY-MM-DDTHH:MM:SS``, where the
+           "T" separating date and time is literal, with optional \+/-HH:MM for
+           timezone.  If no timezone is specified, UTC is assumed, or a trailing "Z" can
+           be specified to make UTC explicit. A space can be used between the date and
+           time instead of a space.  A blank string may be used for either the start or
+           end (but not both) to indicate no limit on that side.  Returns only complete
            tasks with ``completion_time`` in the specified range. If the end date is
            blank, it will also include all active tasks, since they will complete some
            time in the future.
@@ -1676,9 +1676,7 @@ class TransferClient(BaseClient):
            Minimum number of cumulative faults, inclusive.  Return only tasks with
            ``faults >= N``, where N is the filter value.  Use ``filter_min_faults=1`` to
            find all tasks with at least one fault.  Note that many errors are not fatal
-           and the task may still be successful even if ``faults >= 1``.  See the
-           link:../task{outfilesuffix}#task_fields[faults field] documentation for
-           details.
+           and the task may still be successful even if ``faults >= 1``.
 
         .. |filter_local_user| replace::
            A valid username for the target system running the endpoint, as a utf8
@@ -1702,7 +1700,8 @@ class TransferClient(BaseClient):
 
         >>> tc = TransferClient(...)
         >>> for task in tc.endpoint_manager_task_list(
-        >>>     num_results=None, filter_status="ACTIVE"):
+        >>>     num_results=None, filter_status="ACTIVE"
+        >>> ):
         >>>     print("Task({}): {} -> {}\n  was submitted by\n  {}".format(
         >>>         task["task_id"], task["source_endpoint"],
         >>>         task["destination_endpoint"], task["owner_string"]))
