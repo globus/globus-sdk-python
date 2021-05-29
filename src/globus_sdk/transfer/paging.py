@@ -1,7 +1,6 @@
 import logging
 
 from globus_sdk.exc import GlobusSDKUsageError
-from globus_sdk.response import GlobusResponse
 from globus_sdk.transfer.response import IterableTransferResponse
 
 logger = logging.getLogger(__name__)
@@ -151,7 +150,6 @@ class PaginatedResource:
 
         self.client_path = path
         self.client_kwargs = client_kwargs
-        self.client_kwargs["response_class"] = IterableTransferResponse
 
         # convert the iterable_func method into a generator expression by
         # calling it
@@ -321,8 +319,10 @@ class PaginatedResource:
             # nicely, the __getitem__ for GlobusResponse will work on raw
             # dicts, so these handle well
             res = self.client_method(self.client_path, **self.client_kwargs)
+            if not isinstance(res, IterableTransferResponse):
+                res = IterableTransferResponse(res)
             for item in res:
-                yield GlobusResponse(item, client=self.client_object)
+                yield item
                 # increment the "num results" counter
                 self.num_results_fetched += 1
 

@@ -1,9 +1,9 @@
 import time
 
-from globus_sdk.response import GlobusHTTPResponse
+from globus_sdk.response import GlobusHTTPResponseProxy
 
 
-class ActivationRequirementsResponse(GlobusHTTPResponse):
+class ActivationRequirementsResponse(GlobusHTTPResponseProxy):
     """
     Response class for Activation Requirements responses.
 

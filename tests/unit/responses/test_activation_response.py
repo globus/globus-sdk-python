@@ -1,9 +1,11 @@
 import json
 import time
+from unittest import mock
 
 import pytest
 import requests
 
+from globus_sdk.response import GlobusHTTPResponse
 from globus_sdk.transfer.response import ActivationRequirementsResponse
 
 
@@ -28,7 +30,9 @@ def make_response(
     response = requests.Response()
     response.headers["Content-Type"] = "application/json"
     response._content = json.dumps(data).encode("utf-8")
-    return ActivationRequirementsResponse(response)
+    return ActivationRequirementsResponse(
+        GlobusHTTPResponse(response, client=mock.Mock())
+    )
 
 
 def test_expires_at():
