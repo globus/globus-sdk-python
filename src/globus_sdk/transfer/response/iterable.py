@@ -1,7 +1,7 @@
-from globus_sdk.response import GlobusHTTPResponse
+from globus_sdk.response import GlobusHTTPResponseProxy
 
 
-class IterableTransferResponse(GlobusHTTPResponse):
+class IterableTransferResponse(GlobusHTTPResponseProxy):
     """
     Response class for non-paged list oriented resources. Allows top level
     fields to be accessed normally via standard item access, and also

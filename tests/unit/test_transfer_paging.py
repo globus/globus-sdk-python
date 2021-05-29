@@ -1,8 +1,10 @@
 import json
+from unittest import mock
 
 import pytest
 import requests
 
+from globus_sdk.response import GlobusHTTPResponse
 from globus_sdk.transfer.paging import PaginatedResource
 from globus_sdk.transfer.response import IterableTransferResponse
 
@@ -13,9 +15,7 @@ class PagingSimulator:
     def __init__(self, n):
         self.n = n  # the number of simulated items
 
-    def simulate_get(
-        self, path, params=None, headers=None, response_class=None, retry_401=True
-    ):
+    def simulate_get(self, path, params=None, headers=None, retry_401=True):
         """
         Simulates a paginated response from a Globus API get supporting limit,
         offset, and has next page
@@ -36,7 +36,9 @@ class PagingSimulator:
         response = requests.Response()
         response._content = json.dumps(data).encode("utf-8")
         response.headers["Content-Type"] = "application/json"
-        return IterableTransferResponse(response)
+        return IterableTransferResponse(
+            GlobusHTTPResponse(response, client=mock.Mock())
+        )
 
 
 @pytest.fixture

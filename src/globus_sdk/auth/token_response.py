@@ -6,7 +6,7 @@ from typing import Dict, Optional
 import jwt
 
 from globus_sdk import exc
-from globus_sdk.response import GlobusHTTPResponse
+from globus_sdk.response import GlobusHTTPResponseProxy
 
 logger = logging.getLogger(__name__)
 
@@ -95,14 +95,14 @@ class _ByScopesGetter:
         return False
 
 
-class OAuthTokenResponse(GlobusHTTPResponse):
+class OAuthTokenResponse(GlobusHTTPResponseProxy):
     """
     Class for responses from the OAuth2 code for tokens exchange used in
     3-legged OAuth flows.
     """
 
     def __init__(self, *args, **kwargs):
-        GlobusHTTPResponse.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._init_rs_dict()
         self._init_scopes_getter()
 
@@ -186,7 +186,7 @@ class OAuthTokenResponse(GlobusHTTPResponse):
         :type jwt_params: dict
         """
         logger.info('Decoding ID Token "%s"', self["id_token"])
-        auth_client = self._client
+        auth_client = self.client
 
         jwt_params = jwt_params or {}
 

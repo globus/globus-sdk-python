@@ -1,6 +1,8 @@
 import collections.abc
 import json
 import logging
+import typing
+from typing import Type, TypeVar
 
 import jwt
 
@@ -10,6 +12,8 @@ from globus_sdk.authorizers import NullAuthorizer
 from globus_sdk.base import BaseClient
 
 log = logging.getLogger(__name__)
+
+T = TypeVar("T")
 
 
 class AuthClient(BaseClient):
@@ -330,6 +334,14 @@ class AuthClient(BaseClient):
             body.update(additional_params)
         return self.post("/v2/oauth2/token/revoke", data=body, encoding="form")
 
+    @typing.overload
+    def oauth2_token(self, form_data, response_class: Type[T]) -> T:
+        ...
+
+    @typing.overload
+    def oauth2_token(self, form_data) -> OAuthTokenResponse:
+        ...
+
     def oauth2_token(self, form_data, response_class=OAuthTokenResponse):
         """
         This is the generic form of calling the OAuth2 Token endpoint.
@@ -351,11 +363,12 @@ class AuthClient(BaseClient):
         log.info("Fetching new token from Globus Auth")
         # use the fact that requests implicitly encodes the `data` parameter as
         # a form POST
-        return self.post(
-            "/v2/oauth2/token",
-            response_class=response_class,
-            data=form_data,
-            encoding="form",
+        return response_class(
+            self.post(
+                "/v2/oauth2/token",
+                data=form_data,
+                encoding="form",
+            )
         )
 
     def oauth2_userinfo(self):
