@@ -5,9 +5,8 @@ from typing import Type, TypeVar, overload
 
 import jwt
 
-from globus_sdk import exc, utils
+from globus_sdk import client, exc, utils
 from globus_sdk.authorizers import NullAuthorizer
-from globus_sdk.base import BaseClient
 
 from ..errors import AuthAPIError
 from ..token_response import OAuthTokenResponse
@@ -17,14 +16,14 @@ log = logging.getLogger(__name__)
 T = TypeVar("T")
 
 
-class AuthClient(BaseClient):
+class AuthClient(client.BaseClient):
     """
     Client for the
     `Globus Auth API <https://docs.globus.org/api/auth/>`_
 
     This class provides helper methods for most common resources in the
     Auth API, and the common low-level interface from
-    :class:`BaseClient <globus_sdk.base.BaseClient>` of ``get``, ``put``,
+    :class:`BaseClient <globus_sdk.client.BaseClient>` of ``get``, ``put``,
     ``post``, and ``delete`` methods, which can be used to access any API
     resource.
 

@@ -1,9 +1,9 @@
-from globus_sdk.base import BaseClient
+from globus_sdk import client
 
 from .errors import GroupsAPIError
 
 
-class GroupsClient(BaseClient):
+class GroupsClient(client.BaseClient):
     """
     Client for the
     `Globus Groups API <https://docs.globus.org/api/groups/>`_.

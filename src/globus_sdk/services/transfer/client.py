@@ -3,8 +3,7 @@ import time
 import uuid
 from typing import Dict, Iterable, Optional, Union
 
-from globus_sdk import exc, response, utils
-from globus_sdk.base import BaseClient
+from globus_sdk import client, exc, response, utils
 
 from .errors import TransferAPIError
 from .paging import PaginatedResource
@@ -15,7 +14,7 @@ log = logging.getLogger(__name__)
 ID_PARAM_TYPE = Union[bytes, str, uuid.UUID]
 
 
-class TransferClient(BaseClient):
+class TransferClient(client.BaseClient):
     r"""
     Client for the
     `Globus Transfer API <https://docs.globus.org/api/transfer/>`_.

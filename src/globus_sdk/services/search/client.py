@@ -1,15 +1,14 @@
 import logging
 from typing import Optional
 
-from globus_sdk import response, utils
-from globus_sdk.base import BaseClient
+from globus_sdk import client, response, utils
 
 from .errors import SearchAPIError
 
 log = logging.getLogger(__name__)
 
 
-class SearchClient(BaseClient):
+class SearchClient(client.BaseClient):
     r"""
     Client for the Globus Search API
 

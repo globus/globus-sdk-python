@@ -12,6 +12,6 @@ authentication for requests.
 BaseClient
 ----------
 
-.. autoclass:: globus_sdk.base.BaseClient
+.. autoclass:: globus_sdk.client.BaseClient
    :members: retry_policy, get, put, post, patch, delete, request
    :member-order: bysource

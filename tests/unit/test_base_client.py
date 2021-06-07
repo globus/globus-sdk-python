@@ -6,7 +6,7 @@ from unittest import mock
 import pytest
 
 import globus_sdk
-from globus_sdk.base import BaseClient
+from globus_sdk.client import BaseClient
 from tests.common import get_last_request, register_api_route
 
 
