@@ -6,7 +6,7 @@ import pytest
 import requests
 
 from globus_sdk.response import GlobusHTTPResponse
-from globus_sdk.transfer.response import ActivationRequirementsResponse
+from globus_sdk.services.transfer.response import ActivationRequirementsResponse
 
 
 def make_response(

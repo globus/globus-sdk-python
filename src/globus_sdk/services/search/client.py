@@ -1,8 +1,10 @@
 import logging
 from typing import Optional
 
-from globus_sdk import exc, response, utils
+from globus_sdk import response, utils
 from globus_sdk.base import BaseClient
+
+from .errors import SearchAPIError
 
 log = logging.getLogger(__name__)
 
@@ -24,7 +26,7 @@ class SearchClient(BaseClient):
 
     .. automethodlist:: globus_sdk.SearchClient
     """
-    error_class = exc.SearchAPIError
+    error_class = SearchAPIError
     service_name = "search"
 
     #

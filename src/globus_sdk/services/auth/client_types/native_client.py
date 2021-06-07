@@ -1,9 +1,10 @@
 import logging
 
-from globus_sdk.auth.client_types.base import AuthClient
-from globus_sdk.auth.oauth2_native_app import GlobusNativeAppFlowManager
 from globus_sdk.authorizers import NullAuthorizer
 from globus_sdk.exc import GlobusSDKUsageError
+
+from ..oauth2_native_app import GlobusNativeAppFlowManager
+from .base import AuthClient
 
 log = logging.getLogger(__name__)
 
@@ -46,8 +47,7 @@ class NativeAppAuthClient(AuthClient):
         Starts a Native App OAuth2 flow.
 
         This is done internally by instantiating a
-        :class:`GlobusNativeAppFlowManager
-        <globus_sdk.auth.GlobusNativeAppFlowManager>`
+        :class:`GlobusNativeAppFlowManager <.GlobusNativeAppFlowManager>`
 
         While the flow is in progress, the ``NativeAppAuthClient`` becomes
         non thread-safe as temporary state is stored during the flow.

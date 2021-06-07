@@ -1,11 +1,5 @@
 import logging
 
-from globus_sdk.auth import (
-    AuthClient,
-    ConfidentialAppAuthClient,
-    IdentityMap,
-    NativeAppAuthClient,
-)
 from globus_sdk.authorizers import (
     AccessTokenAuthorizer,
     BasicAuthorizer,
@@ -14,24 +8,32 @@ from globus_sdk.authorizers import (
     RefreshTokenAuthorizer,
 )
 from globus_sdk.exc import (
-    AuthAPIError,
     GlobusAPIError,
     GlobusConnectionError,
     GlobusConnectionTimeoutError,
     GlobusError,
     GlobusSDKUsageError,
     GlobusTimeoutError,
-    GroupsAPIError,
     NetworkError,
-    SearchAPIError,
-    TransferAPIError,
 )
-from globus_sdk.groups import GroupsClient
 from globus_sdk.local_endpoint import LocalGlobusConnectPersonal
 from globus_sdk.response import GlobusHTTPResponse
-from globus_sdk.search import SearchClient, SearchQuery
-from globus_sdk.transfer import TransferClient
-from globus_sdk.transfer.data import DeleteData, TransferData
+from globus_sdk.services import (
+    AuthAPIError,
+    AuthClient,
+    ConfidentialAppAuthClient,
+    DeleteData,
+    GroupsAPIError,
+    GroupsClient,
+    IdentityMap,
+    NativeAppAuthClient,
+    SearchAPIError,
+    SearchClient,
+    SearchQuery,
+    TransferAPIError,
+    TransferClient,
+    TransferData,
+)
 from globus_sdk.version import __version__
 
 __all__ = (

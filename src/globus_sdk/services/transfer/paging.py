@@ -1,7 +1,8 @@
 import logging
 
 from globus_sdk.exc import GlobusSDKUsageError
-from globus_sdk.transfer.response import IterableTransferResponse
+
+from .response import IterableTransferResponse
 
 logger = logging.getLogger(__name__)
 

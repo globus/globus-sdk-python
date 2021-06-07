@@ -4,15 +4,7 @@ from collections import namedtuple
 import pytest
 import requests
 
-from globus_sdk.exc import (
-    AuthAPIError,
-    GlobusAPIError,
-    GlobusConnectionError,
-    GlobusTimeoutError,
-    NetworkError,
-    TransferAPIError,
-    convert_request_exception,
-)
+from globus_sdk import AuthAPIError, TransferAPIError, exc
 
 _TestResponse = namedtuple("_TestResponse", ("data", "r"))
 
@@ -83,31 +75,31 @@ def nested_auth_response():
 
 
 def test_raw_json_works(json_response):
-    err = GlobusAPIError(json_response.r)
+    err = exc.GlobusAPIError(json_response.r)
     assert err.raw_json == json_response.data
 
 
 def test_raw_json_fail(text_response, malformed_response):
-    err = GlobusAPIError(text_response.r)
+    err = exc.GlobusAPIError(text_response.r)
     assert err.raw_json is None
 
-    err = GlobusAPIError(malformed_response.r)
+    err = exc.GlobusAPIError(malformed_response.r)
     assert err.raw_json is None
 
 
 def test_raw_text_works(json_response, text_response):
-    err = GlobusAPIError(json_response.r)
+    err = exc.GlobusAPIError(json_response.r)
     assert err.raw_text == json.dumps(json_response.data)
-    err = GlobusAPIError(text_response.r)
+    err = exc.GlobusAPIError(text_response.r)
     assert err.raw_text == text_response.data
 
 
 def test_get_args(json_response, text_response, malformed_response):
-    err = GlobusAPIError(json_response.r)
+    err = exc.GlobusAPIError(json_response.r)
     assert err._get_args() == ("400", "Json Error", "json error message")
-    err = GlobusAPIError(text_response.r)
+    err = exc.GlobusAPIError(text_response.r)
     assert err._get_args() == ("401", "Error", "error message")
-    err = GlobusAPIError(malformed_response.r)
+    err = exc.GlobusAPIError(malformed_response.r)
     assert err._get_args() == ("403", "Error", "{")
 
 
@@ -151,29 +143,29 @@ def test_get_args_auth(
 
 
 @pytest.mark.parametrize(
-    "exc, wrap_class",
+    "orig, wrap_class",
     [
-        (requests.RequestException("exc_message"), NetworkError),
-        (requests.Timeout("timeout_message"), GlobusTimeoutError),
-        (requests.ConnectionError("connection_message"), GlobusConnectionError),
+        (requests.RequestException("exc_message"), exc.NetworkError),
+        (requests.Timeout("timeout_message"), exc.GlobusTimeoutError),
+        (requests.ConnectionError("connection_message"), exc.GlobusConnectionError),
     ],
 )
-def test_requests_err_wrappers(exc, wrap_class):
+def test_requests_err_wrappers(orig, wrap_class):
     msg = "dummy message"
-    err = wrap_class(msg, exc)
-    assert err.underlying_exception == exc
+    err = wrap_class(msg, orig)
+    assert err.underlying_exception == orig
     assert str(err) == msg
 
 
 @pytest.mark.parametrize(
-    "exc, conv_class",
+    "orig, conv_class",
     [
-        (requests.RequestException("exc_message"), NetworkError),
-        (requests.Timeout("timeout_message"), GlobusTimeoutError),
-        (requests.ConnectionError("connection_message"), GlobusConnectionError),
+        (requests.RequestException("exc_message"), exc.NetworkError),
+        (requests.Timeout("timeout_message"), exc.GlobusTimeoutError),
+        (requests.ConnectionError("connection_message"), exc.GlobusConnectionError),
     ],
 )
-def test_convert_requests_exception(exc, conv_class):
-    conv = convert_request_exception(exc)
-    assert conv.underlying_exception == exc
+def test_convert_requests_exception(orig, conv_class):
+    conv = exc.convert_request_exception(orig)
+    assert conv.underlying_exception == orig
     assert isinstance(conv, conv_class)

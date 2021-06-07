@@ -3,8 +3,8 @@ import urllib.parse
 import pytest
 
 import globus_sdk
-from globus_sdk.auth.oauth2_constants import DEFAULT_REQUESTED_SCOPES
-from globus_sdk.auth.oauth2_native_app import make_native_app_challenge
+from globus_sdk.services.auth.oauth2_constants import DEFAULT_REQUESTED_SCOPES
+from globus_sdk.services.auth.oauth2_native_app import make_native_app_challenge
 from tests.common import register_api_route
 
 CLIENT_ID = "d0f1d9b0-bd81-4108-be74-ea981664453a"
@@ -25,7 +25,7 @@ def test_oauth2_get_authorize_url_native(client):
     validates expected results with both default and specified parameters.
     """
     # default parameters for starting auth flow
-    flow_manager = globus_sdk.auth.GlobusNativeAppFlowManager(client)
+    flow_manager = globus_sdk.services.auth.GlobusNativeAppFlowManager(client)
     client.current_oauth2_flow_manager = flow_manager
 
     # get url_and validate results
@@ -45,7 +45,7 @@ def test_oauth2_get_authorize_url_native(client):
         assert val in url_res
 
     # starting flow with specified paramaters
-    flow_manager = globus_sdk.auth.GlobusNativeAppFlowManager(
+    flow_manager = globus_sdk.services.auth.GlobusNativeAppFlowManager(
         client,
         requested_scopes="scopes",
         redirect_uri="uri",
@@ -80,7 +80,9 @@ def test_oauth2_get_authorize_url_confidential(client):
     parameters.
     """
     # default parameters for starting auth flow
-    flow_manager = globus_sdk.auth.GlobusAuthorizationCodeFlowManager(client, "uri")
+    flow_manager = globus_sdk.services.auth.GlobusAuthorizationCodeFlowManager(
+        client, "uri"
+    )
     client.current_oauth2_flow_manager = flow_manager
 
     # get url_and validate results
@@ -99,7 +101,7 @@ def test_oauth2_get_authorize_url_confidential(client):
         assert val in url_res
 
     # starting flow with specified paramaters
-    flow_manager = globus_sdk.auth.GlobusAuthorizationCodeFlowManager(
+    flow_manager = globus_sdk.services.auth.GlobusAuthorizationCodeFlowManager(
         client,
         requested_scopes="scopes",
         redirect_uri="uri",
@@ -136,7 +138,7 @@ def test_oauth2_exchange_code_for_tokens_native(client):
         status=401,
     )
 
-    flow_manager = globus_sdk.auth.GlobusNativeAppFlowManager(client)
+    flow_manager = globus_sdk.services.auth.GlobusNativeAppFlowManager(client)
     client.current_oauth2_flow_manager = flow_manager
 
     with pytest.raises(globus_sdk.AuthAPIError) as excinfo:
@@ -158,7 +160,9 @@ def test_oauth2_exchange_code_for_tokens_confidential(client):
         status=401,
     )
 
-    flow_manager = globus_sdk.auth.GlobusAuthorizationCodeFlowManager(client, "uri")
+    flow_manager = globus_sdk.services.auth.GlobusAuthorizationCodeFlowManager(
+        client, "uri"
+    )
     client.current_oauth2_flow_manager = flow_manager
 
     with pytest.raises(globus_sdk.AuthAPIError) as excinfo:

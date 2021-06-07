@@ -15,6 +15,6 @@ Client Errors
 
 When an error occurs, a ``GroupsClient`` will raise this type of error:
 
-.. autoclass:: globus_sdk.exc.GroupsAPIError
+.. autoclass:: globus_sdk.GroupsAPIError
    :members:
    :show-inheritance:

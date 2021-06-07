@@ -2,7 +2,7 @@ import logging
 
 import requests
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class GlobusError(Exception):
@@ -40,21 +40,21 @@ class GlobusAPIError(GlobusError):
         if "Content-Type" in r.headers and (
             "application/json" in r.headers["Content-Type"]
         ):
-            logger.debug(
+            log.debug(
                 "Content-Type on error is application/json. "
                 "Doing error load from JSON"
             )
             try:
                 self._load_from_json(r.json())
             except (KeyError, ValueError):
-                logger.error(
+                log.error(
                     "Error body could not be JSON decoded! "
                     "This means the Content-Type is wrong, or the "
                     "body is malformed!"
                 )
                 self._load_from_text(r.text)
         else:
-            logger.debug(
+            log.debug(
                 "Content-Type on error is unknown. "
                 "Failing over to error load as text (default)"
             )
@@ -79,7 +79,7 @@ class GlobusAPIError(GlobusError):
             try:
                 return r.json()
             except ValueError:
-                logger.error(
+                log.error(
                     "Error body could not be JSON decoded! "
                     "This means the Content-Type is wrong, or the "
                     "body is malformed!"
@@ -109,7 +109,7 @@ class GlobusAPIError(GlobusError):
         """
         if "errors" in data:
             if len(data["errors"]) != 1:
-                logger.warning(
+                log.warning(
                     (
                         "Doing JSON load of error response with multiple "
                         "errors. Exception data will only include the "
@@ -120,7 +120,7 @@ class GlobusAPIError(GlobusError):
             data = data["errors"][0]
         self.code = data["code"]
         if "message" in data:
-            logger.debug(
+            log.debug(
                 "Doing JSON load of error response with 'message' "
                 "field. There may also be a useful 'detail' field "
                 "to inspect"
@@ -136,105 +136,6 @@ class GlobusAPIError(GlobusError):
         """
         self.code = "Error"
         self.message = text
-
-
-class GroupsAPIError(GlobusAPIError):
-    """Error class for the Globus Groups Service."""
-
-
-class SearchAPIError(GlobusAPIError):
-    """
-    Error class for the Search API client. In addition to the
-    inherited ``code`` and ``message`` instance variables, provides:
-
-    :ivar error_data: Additional object returned in the error response. May be
-                      a dict, list, or None.
-    """
-
-    def __init__(self, r):
-        self.error_data = None
-        GlobusAPIError.__init__(self, r)
-
-    def _get_args(self):
-        return (self.http_status, self.code, self.message)
-
-    def _load_from_json(self, data):
-        self.code = data["code"]
-        self.message = data["message"]
-        self.error_data = data.get("error_data")
-
-
-class TransferAPIError(GlobusAPIError):
-    """
-    Error class for the Transfer API client. In addition to the
-    inherited ``code`` and ``message`` instance variables, provides:
-
-    :ivar request_id: Unique identifier for the request, which should be
-                      provided when contacting support@globus.org.
-    """
-
-    def __init__(self, r):
-        self.request_id = None
-        GlobusAPIError.__init__(self, r)
-
-    def _get_args(self):
-        return (self.http_status, self.code, self.message, self.request_id)
-
-    def _load_from_json(self, data):
-        self.code = data["code"]
-        self.message = data["message"]
-        self.request_id = data["request_id"]
-
-
-class AuthAPIError(GlobusAPIError):
-    """
-    Error class for the API components of Globus Auth.
-
-    Customizes JSON parsing.
-    """
-
-    def _load_from_json(self, data):
-        """
-        Load error data from a JSON document.
-
-        Looks for a top-level "error" attribute in addition to the other
-        standard API error attributes. It's not clear whether or not this
-        should be a behavior of the base class.
-
-        Handles the case in which an error does not conform to base-class
-        expectations with a `no_extractable_message` message.
-        """
-        if "errors" in data:
-            if len(data["errors"]) != 1:
-                logger.warning(
-                    (
-                        "Doing JSON load of error response with multiple "
-                        "errors. Exception data will only include the "
-                        "first error, but there are really {} errors"
-                    ).format(len(data["errors"]))
-                )
-            # TODO: handle responses with more than one error
-            data = data["errors"][0]
-
-        self.code = data.get("code", "Error")
-
-        if "message" in data:
-            self.message = data["message"]
-        elif "detail" in data:
-            self.message = data["detail"]
-        elif "error" in data and isinstance(data["error"], str):
-            self.message = data["error"]
-        else:
-            self.message = "no_extractable_message"
-
-
-class InvalidDocumentBodyError(GlobusError):
-    """
-    The body of the document being sent to Globus is somehow malformed.
-
-    For example, a call that requires a specific format (XML, JSON, etc.) not
-    being given data in that format.
-    """
 
 
 # Wrappers around requests exceptions, so the SDK is API independent.

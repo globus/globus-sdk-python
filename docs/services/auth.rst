@@ -1,5 +1,3 @@
-.. module:: globus_sdk.auth
-
 Globus Auth
 ===========
 
@@ -48,11 +46,11 @@ batching, and other functionality.
 Auth Responses
 --------------
 
-.. autoclass:: globus_sdk.auth.token_response.OAuthTokenResponse
+.. autoclass:: globus_sdk.services.auth.token_response.OAuthTokenResponse
    :members:
    :show-inheritance:
 
-.. autoclass:: globus_sdk.auth.token_response.OAuthDependentTokenResponse
+.. autoclass:: globus_sdk.services.auth.token_response.OAuthDependentTokenResponse
    :members:
    :show-inheritance:
 
@@ -66,21 +64,21 @@ its ``oauth2_*`` methods.
 
 All Flow Managers inherit from the
 :class:`GlobusOAuthFlowManager \
-<globus_sdk.auth.oauth_flow_manager.GlobusOAuthFlowManager>` abstract class.
+<.GlobusOAuthFlowManager>` abstract class.
 They are a combination of a store for OAuth2 parameters specific to the
 authentication method you are using and methods which act upon those parameters.
 
-.. autoclass:: globus_sdk.auth.GlobusNativeAppFlowManager
+.. autoclass:: globus_sdk.services.auth.GlobusNativeAppFlowManager
    :members:
    :show-inheritance:
 
-.. autoclass:: globus_sdk.auth.GlobusAuthorizationCodeFlowManager
+.. autoclass:: globus_sdk.services.auth.GlobusAuthorizationCodeFlowManager
    :members:
    :show-inheritance:
 
 Abstract Flow Manager
 ~~~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: globus_sdk.auth.oauth2_flow_manager.GlobusOAuthFlowManager
+.. autoclass:: globus_sdk.services.auth.oauth2_flow_manager.GlobusOAuthFlowManager
    :members:
    :show-inheritance:

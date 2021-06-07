@@ -6,7 +6,7 @@ log = logging.getLogger(__name__)
 
 
 class ClientCredentialsAuthorizer(RenewingAuthorizer):
-    """
+    r"""
     Implementation of a RenewingAuthorizer that renews confidential app client
     Access Tokens using a ConfidentialAppAuthClient and a set of scopes to
     fetch a new Access Token when the old one expires.
@@ -43,7 +43,8 @@ class ClientCredentialsAuthorizer(RenewingAuthorizer):
     :type expires_at: int, optional
     :param on_refresh: A callback which is triggered any time this authorizer fetches a
         new access_token. The ``on_refresh`` callable is invoked on the
-        :class:`OAuthTokenResponse <globus_sdk.auth.token_response.OAuthTokenResponse>`
+        :class:`OAuthTokenResponse \
+        <globus_sdk.services.auth.token_response.OAuthTokenResponse>`
         object resulting from the token being refreshed. It should take only one
         argument, the token response object.
         This is useful for implementing storage for Access Tokens, as the

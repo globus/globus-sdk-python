@@ -14,7 +14,7 @@ def make_oauth_token_response():
 
     def f(client=None):
         return make_response(
-            response_class=globus_sdk.auth.token_response.OAuthTokenResponse,
+            response_class=globus_sdk.services.auth.token_response.OAuthTokenResponse,
             json_body={
                 "access_token": "access_token_1",
                 "expires_in": 3600,

@@ -1,15 +1,16 @@
 import collections.abc
 import json
 import logging
-import typing
-from typing import Type, TypeVar
+from typing import Type, TypeVar, overload
 
 import jwt
 
 from globus_sdk import exc, utils
-from globus_sdk.auth.token_response import OAuthTokenResponse
 from globus_sdk.authorizers import NullAuthorizer
 from globus_sdk.base import BaseClient
+
+from ..errors import AuthAPIError
+from ..token_response import OAuthTokenResponse
 
 log = logging.getLogger(__name__)
 
@@ -50,7 +51,7 @@ class AuthClient(BaseClient):
     """
 
     service_name = "auth"
-    error_class = exc.AuthAPIError
+    error_class = AuthAPIError
 
     def __init__(self, client_id=None, **kwargs):
         super().__init__(**kwargs)
@@ -179,8 +180,7 @@ class AuthClient(BaseClient):
         """
         Exchange an authorization code for a token or tokens.
 
-        :rtype: :class:`OAuthTokenResponse \
-        <globus_sdk.auth.token_response.OAuthTokenResponse>`
+        :rtype: :class:`OAuthTokenResponse <.OAuthTokenResponse>`
 
         :param auth_code: An auth code typically obtained by sending the user to the
             authorize URL. The code is a very short-lived credential which this method
@@ -204,8 +204,8 @@ class AuthClient(BaseClient):
 
     def oauth2_refresh_token(self, refresh_token, additional_params=None):
         r"""
-        Exchange a refresh token for a :class:`OAuthTokenResponse
-        <globus_sdk.auth.token_response.OAuthTokenResponse>`, containing
+        Exchange a refresh token for a
+        :class:`OAuthTokenResponse <.OAuthTokenResponse>`, containing
         an access token.
 
         Does a token call of the form
@@ -334,11 +334,11 @@ class AuthClient(BaseClient):
             body.update(additional_params)
         return self.post("/v2/oauth2/token/revoke", data=body, encoding="form")
 
-    @typing.overload
+    @overload
     def oauth2_token(self, form_data, response_class: Type[T]) -> T:
         ...
 
-    @typing.overload
+    @overload
     def oauth2_token(self, form_data) -> OAuthTokenResponse:
         ...
 

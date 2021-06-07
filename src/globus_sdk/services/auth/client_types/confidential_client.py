@@ -1,11 +1,12 @@
 import logging
 
-from globus_sdk.auth.client_types.base import AuthClient
-from globus_sdk.auth.oauth2_authorization_code import GlobusAuthorizationCodeFlowManager
-from globus_sdk.auth.oauth2_constants import DEFAULT_REQUESTED_SCOPES
-from globus_sdk.auth.token_response import OAuthDependentTokenResponse
 from globus_sdk.authorizers import BasicAuthorizer
 from globus_sdk.exc import GlobusSDKUsageError
+
+from ..oauth2_authorization_code import GlobusAuthorizationCodeFlowManager
+from ..oauth2_constants import DEFAULT_REQUESTED_SCOPES
+from ..token_response import OAuthDependentTokenResponse, OAuthTokenResponse
+from .base import AuthClient
 
 log = logging.getLogger(__name__)
 
@@ -43,7 +44,9 @@ class ConfidentialAppAuthClient(AuthClient):
         )
         log.info(f"Finished initializing client, client_id={client_id}")
 
-    def oauth2_client_credentials_tokens(self, requested_scopes=None):
+    def oauth2_client_credentials_tokens(
+        self, requested_scopes=None
+    ) -> OAuthTokenResponse:
         r"""
         Perform an OAuth2 Client Credentials Grant to get access tokens which
         directly represent your client and allow it to act on its own
@@ -54,8 +57,7 @@ class ConfidentialAppAuthClient(AuthClient):
         :param requested_scopes: Space-separated scope names being requested for the
             access token(s). Defaults to a set of commonly desired scopes for Globus.
         :type requested_scopes: str, optional
-        :rtype: :class:`OAuthTokenResponse
-                <globus_sdk.auth.token_response.OAuthTokenResponse>`
+        :rtype: :class:`OAuthTokenResponse <.OAuthTokenResponse>`
 
         For example, with a Client ID of "CID1001" and a Client Secret of
         "RAND2002", you could use this grant type like so:
@@ -88,7 +90,7 @@ class ConfidentialAppAuthClient(AuthClient):
 
         Under the hood, this is done by instantiating a
         :class:`GlobusAuthorizationCodeFlowManager
-        <globus_sdk.auth.GlobusAuthorizationCodeFlowManager>`
+        <.GlobusAuthorizationCodeFlowManager>`
 
         :param redirect_uri: The page that users should be directed to after
             authenticating at the authorize URL.
@@ -128,7 +130,9 @@ class ConfidentialAppAuthClient(AuthClient):
         )
         return self.current_oauth2_flow_manager
 
-    def oauth2_get_dependent_tokens(self, token, additional_params=None):
+    def oauth2_get_dependent_tokens(
+        self, token, additional_params=None
+    ) -> OAuthDependentTokenResponse:
         """
         Does a `Dependent Token Grant
         <https://docs.globus.org/api/auth/reference/#dependent_token_grant_post_v2_oauth2_token>`_
@@ -154,8 +158,7 @@ class ConfidentialAppAuthClient(AuthClient):
         :type token: str
         :param additional_params: Additional parameters to include in the request body
         :type additional_params: dict, optional
-        :rtype: :class:`OAuthTokenResponse
-                <globus_sdk.auth.token_response.OAuthTokenResponse>`
+        :rtype: :class:`OAuthDependentTokenResponse <.OAuthDependentTokenResponse>`
         """
         log.info("Getting dependent tokens from access token")
         log.debug(f"additional_params={additional_params}")

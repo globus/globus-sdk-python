@@ -1,5 +1,3 @@
-.. module:: globus_sdk.transfer
-
 Globus Transfer
 ===============
 
@@ -35,14 +33,14 @@ Client Errors
 When an error occurs, a ``TransferClient`` will raise this specialized type of
 error, rather than a generic ``GlobusAPIError``.
 
-.. autoclass:: globus_sdk.exc.TransferAPIError
+.. autoclass:: globus_sdk.TransferAPIError
    :members:
    :show-inheritance:
 
 Transfer Responses
 ------------------
 
-.. automodule:: globus_sdk.transfer.response
+.. automodule:: globus_sdk.services.transfer.response
    :members:
    :show-inheritance:
 
@@ -50,10 +48,9 @@ PaginatedResource Responses
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``PaginatedResource`` class should not typically be instantiated directly,
-but is returned from several :class:`TransferClient
-<globus_sdk.transfer.client.TransferClient>` methods.
+but is returned from several :class:`TransferClient <globus_sdk.TransferClient>` methods.
 It is an iterable of ``GlobusRepsonse`` objects.
 
-.. autoclass:: globus_sdk.transfer.paging.PaginatedResource
+.. autoclass:: globus_sdk.services.transfer.paging.PaginatedResource
    :members: data
    :show-inheritance:

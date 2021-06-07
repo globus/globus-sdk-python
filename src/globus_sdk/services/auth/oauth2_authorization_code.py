@@ -3,9 +3,11 @@ import urllib.parse
 from typing import Any, Dict, Optional, Sequence, Union
 
 from globus_sdk import utils
-from globus_sdk.auth.client_types.base import AuthClient
-from globus_sdk.auth.oauth2_constants import DEFAULT_REQUESTED_SCOPES
-from globus_sdk.auth.oauth2_flow_manager import GlobusOAuthFlowManager
+
+from .client_types.base import AuthClient
+from .oauth2_constants import DEFAULT_REQUESTED_SCOPES
+from .oauth2_flow_manager import GlobusOAuthFlowManager
+from .token_response import OAuthTokenResponse
 
 logger = logging.getLogger(__name__)
 
@@ -111,13 +113,12 @@ class GlobusAuthorizationCodeFlowManager(GlobusOAuthFlowManager):
         encoded_params = urllib.parse.urlencode(params)
         return f"{authorize_base_url}?{encoded_params}"
 
-    def exchange_code_for_tokens(self, auth_code: str):
+    def exchange_code_for_tokens(self, auth_code: str) -> OAuthTokenResponse:
         """
         The second step of the Authorization Code flow, exchange an
         authorization code for access tokens (and refresh tokens if specified)
 
-        :rtype: :class:`OAuthTokenResponse \
-        <globus_sdk.auth.token_response.OAuthTokenResponse>`
+        :rtype: :class:`OAuthTokenResponse <.OAuthTokenResponse>`
         """
         logger.debug(
             "Performing Authorization Code auth_code exchange. "

@@ -5,8 +5,8 @@ import pytest
 import requests
 
 from globus_sdk.response import GlobusHTTPResponse
-from globus_sdk.transfer.paging import PaginatedResource
-from globus_sdk.transfer.response import IterableTransferResponse
+from globus_sdk.services.transfer.paging import PaginatedResource
+from globus_sdk.services.transfer.response import IterableTransferResponse
 
 N = 25
 

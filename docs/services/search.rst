@@ -23,6 +23,6 @@ Client Errors
 When an error occurs, a ``SearchClient`` will raise this specialized type of
 error, rather than a generic ``GlobusAPIError``.
 
-.. autoclass:: globus_sdk.exc.SearchAPIError
+.. autoclass:: globus_sdk.SearchAPIError
    :members:
    :show-inheritance:

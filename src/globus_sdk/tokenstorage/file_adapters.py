@@ -1,7 +1,7 @@
 import json
 from typing import Dict, Optional, cast
 
-from globus_sdk.auth import OAuthTokenResponse
+from globus_sdk.services.auth import OAuthTokenResponse
 from globus_sdk.tokenstorage.base import FileAdapter
 from globus_sdk.version import __version__
 
@@ -72,7 +72,7 @@ class SimpleJSONFileAdapter(FileAdapter):
             }
         return self._handle_formats(data)
 
-    def store(self, token_response: "OAuthTokenResponse"):
+    def store(self, token_response: OAuthTokenResponse):
         """
         By default, ``self.on_refresh`` is just an alias for this function.
 
