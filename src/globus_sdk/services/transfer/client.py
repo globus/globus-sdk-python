@@ -1156,7 +1156,7 @@ class TransferClient(client.BaseClient):
         paging.LimitOffsetTotalPaginator,
         items_key="DATA",
         get_page_size=_get_page_size,
-        max_results_per_call=1000,
+        max_total_results=1000,
         page_size=1000,
     )
     def task_list(self, **params) -> IterableTransferResponse:
@@ -1194,7 +1194,7 @@ class TransferClient(client.BaseClient):
         paging.LimitOffsetTotalPaginator,
         items_key="DATA",
         get_page_size=_get_page_size,
-        max_results_per_call=1000,
+        max_total_results=1000,
         page_size=1000,
     )
     def task_event_list(
@@ -1759,7 +1759,7 @@ class TransferClient(client.BaseClient):
         paging.LimitOffsetTotalPaginator,
         items_key="DATA",
         get_page_size=_get_page_size,
-        max_results_per_call=1000,
+        max_total_results=1000,
         page_size=1000,
     )
     def endpoint_manager_task_event_list(
