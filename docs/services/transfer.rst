@@ -43,14 +43,3 @@ Transfer Responses
 .. automodule:: globus_sdk.services.transfer.response
    :members:
    :show-inheritance:
-
-PaginatedResource Responses
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The ``PaginatedResource`` class should not typically be instantiated directly,
-but is returned from several :class:`TransferClient <globus_sdk.TransferClient>` methods.
-It is an iterable of ``GlobusRepsonse`` objects.
-
-.. autoclass:: globus_sdk.services.transfer.paging.PaginatedResource
-   :members: data
-   :show-inheritance:

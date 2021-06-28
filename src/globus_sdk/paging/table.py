@@ -28,6 +28,15 @@ def has_paginator(
         func._paginator_class = paginator_class  # type: ignore
         func._paginator_items_key = items_key  # type: ignore
         func._paginator_params = paginator_params  # type: ignore
+        func.__doc__ = f"""{func.__doc__}
+
+        **Paginated Usage**
+
+        This method supports paginated access. To use the paginated variant, give the
+        same arguments as normal, but prefix the method name with ``paginated``, as in
+
+        >>> client.paginated.{func.__name__}(...)
+        """
         return func
 
     return decorate

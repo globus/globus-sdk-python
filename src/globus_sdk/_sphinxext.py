@@ -37,7 +37,11 @@ def _classname2methods(classname, include_methods):
             return False
         return True
 
-    return [name for name, value in methods if _methodname_is_good(name)]
+    return [(name, value) for name, value in methods if _methodname_is_good(name)]
+
+
+def _is_paginated(func):
+    return getattr(func, "_has_paginator", False)
 
 
 class AutoMethodList(Directive):
@@ -58,8 +62,14 @@ class AutoMethodList(Directive):
         yield ""
         yield "**Methods**"
         yield ""
-        for methodname in _classname2methods(classname, include_methods):
-            yield f"* :py:meth:`~{classname}.{methodname}`"
+        for methodname, method in _classname2methods(classname, include_methods):
+            if not _is_paginated(method):
+                yield f"* :py:meth:`~{classname}.{methodname}`"
+            else:
+                yield (
+                    f"* :py:meth:`~{classname}.{methodname}`, "
+                    f"``paginated.{methodname}()``"
+                )
 
         yield ""
 
