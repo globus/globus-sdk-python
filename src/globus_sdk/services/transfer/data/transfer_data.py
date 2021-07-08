@@ -1,19 +1,12 @@
-"""
-Data helper classes for constructing Transfer API documents. All classes should
-extend ``dict``, so they can be passed seamlessly to
-:class:`TransferClient <globus_sdk.TransferClient>` methods without
-conversion.
-"""
-
 import logging
 from typing import Any, Dict, Optional
 
 from globus_sdk import utils
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
-class TransferData(dict):
+class TransferData(utils.PayloadWrapper):
     r"""
     Convenience class for constructing a transfer document, to use as the
     `data` parameter to
@@ -149,38 +142,39 @@ class TransferData(dict):
         recursive_symlinks="ignore",
         additional_fields: Optional[Dict[str, Any]] = None,
     ):
+        super().__init__()
         source_endpoint = utils.safe_stringify(source_endpoint)
         destination_endpoint = utils.safe_stringify(destination_endpoint)
-        logger.info("Creating a new TransferData object")
+        log.info("Creating a new TransferData object")
         self["DATA_TYPE"] = "transfer"
         self["submission_id"] = (
             submission_id or transfer_client.get_submission_id()["value"]
         )
-        logger.info("TransferData.submission_id = {}".format(self["submission_id"]))
+        log.info("TransferData.submission_id = {}".format(self["submission_id"]))
         self["source_endpoint"] = source_endpoint
-        logger.info(f"TransferData.source_endpoint = {source_endpoint}")
+        log.info(f"TransferData.source_endpoint = {source_endpoint}")
         self["destination_endpoint"] = destination_endpoint
-        logger.info(f"TransferData.destination_endpoint = {destination_endpoint}")
+        log.info(f"TransferData.destination_endpoint = {destination_endpoint}")
         self["verify_checksum"] = verify_checksum
-        logger.info(f"TransferData.verify_checksum = {verify_checksum}")
+        log.info(f"TransferData.verify_checksum = {verify_checksum}")
         self["preserve_timestamp"] = preserve_timestamp
-        logger.info(f"TransferData.preserve_timestamp = {preserve_timestamp}")
+        log.info(f"TransferData.preserve_timestamp = {preserve_timestamp}")
         self["encrypt_data"] = encrypt_data
-        logger.info(f"TransferData.encrypt_data = {encrypt_data}")
+        log.info(f"TransferData.encrypt_data = {encrypt_data}")
         self["recursive_symlinks"] = recursive_symlinks
-        logger.info(f"TransferData.recursive_symlinks = {recursive_symlinks}")
+        log.info(f"TransferData.recursive_symlinks = {recursive_symlinks}")
         self["skip_source_errors"] = skip_source_errors
-        logger.info(f"TransferData.skip_source_errors = {skip_source_errors}")
+        log.info(f"TransferData.skip_source_errors = {skip_source_errors}")
         self["fail_on_quota_errors"] = fail_on_quota_errors
-        logger.info(f"TransferData.fail_on_quota_errors = {fail_on_quota_errors}")
+        log.info(f"TransferData.fail_on_quota_errors = {fail_on_quota_errors}")
 
         if label is not None:
             self["label"] = label
-            logger.debug(f"TransferData.label = {label}")
+            log.debug(f"TransferData.label = {label}")
 
         if deadline is not None:
             self["deadline"] = str(deadline)
-            logger.debug(f"TransferData.deadline = {deadline}")
+            log.debug(f"TransferData.deadline = {deadline}")
 
         # map the sync_level (if it's a nice string) to one of the known int
         # values
@@ -191,7 +185,7 @@ class TransferData(dict):
         if sync_level is not None:
             sync_dict = {"exists": 0, "size": 1, "mtime": 2, "checksum": 3}
             self["sync_level"] = sync_dict.get(sync_level, sync_level)
-            logger.info(
+            log.info(
                 "TransferData.sync_level = {} ({})".format(
                     self["sync_level"], sync_level
                 )
@@ -202,7 +196,7 @@ class TransferData(dict):
         if additional_fields is not None:
             self.update(additional_fields)
             for option, value in additional_fields.items():
-                logger.info(
+                log.info(
                     f"TransferData.{option} = {value} (option passed "
                     "in via additional_fields)"
                 )
@@ -262,7 +256,7 @@ class TransferData(dict):
         if additional_fields is not None:
             item_data.update(additional_fields)
 
-        logger.debug(
+        log.debug(
             'TransferData[{}, {}].add_item: "{}"->"{}"'.format(
                 self["source_endpoint"],
                 self["destination_endpoint"],
@@ -292,7 +286,7 @@ class TransferData(dict):
             "source_path": source_path,
             "destination_path": destination_path,
         }
-        logger.debug(
+        log.debug(
             'TransferData[{}, {}].add_symlink_item: "{}"->"{}"'.format(
                 self["source_endpoint"],
                 self["destination_endpoint"],
@@ -300,118 +294,4 @@ class TransferData(dict):
                 destination_path,
             )
         )
-        self["DATA"].append(item_data)
-
-
-class DeleteData(dict):
-    r"""
-    Convenience class for constructing a delete document, to use as the
-    `data` parameter to
-    :meth:`submit_delete <globus_sdk.TransferClient.submit_delete>`.
-
-    At least one item must be added using
-    :meth:`add_item <globus_sdk.DeleteData.add_item>`.
-
-    If ``submission_id`` isn't passed, one will be fetched automatically. The
-    submission ID can be pulled out of here to inspect, but the document
-    can be used as-is multiple times over to retry a potential submission
-    failure (so there shouldn't be any need to inspect it).
-
-    :param transfer_client: A ``TransferClient`` instance which will be used to get a
-        submission ID if one is not supplied. Should be the same instance that is used
-        to submit the deletion.
-    :type transfer_client: :class:`TransferClient <globus_sdk.TransferClient>`
-    :param endpoint: The endpoint ID which is targeted by this deletion Task
-    :type endpoint: str
-    :param label: A string label for the Task
-    :type label: str, optional
-    :param submission_id: A submission ID value fetched via
-        :meth:`get_submission_id <globus_sdk.TransferClient.get_submission_id>`.
-        Defaults to using ``transfer_client.get_submission_id``
-    :type submission_id: str, optional
-    :param recursive: Recursively delete subdirectories on the target endpoint
-      [default: ``False``]
-    :type recursive: bool
-    :param deadline: An ISO-8601 timestamp (as a string) or a datetime object which
-        defines a deadline for the deletion. At the deadline, even if the data deletion
-        is not complete, the job will be canceled. We recommend ensuring that the
-        timestamp is in UTC to avoid confusion and ambiguity. Examples of ISO-8601
-        timestamps include ``2017-10-12 09:30Z``, ``2017-10-12 12:33:54+00:00``, and
-        ``2017-10-12``
-    :type deadline: str or datetime, optional
-    :param additional_fields: additional fields to be added to the delete
-        document. Mostly intended for internal use
-    :type additional_fields: dict, optional
-
-    **Examples**
-
-    See the :meth:`submit_delete <globus_sdk.TransferClient.submit_delete>`
-    documentation for example usage.
-
-    **External Documentation**
-
-    See the
-    `Task document definition \
-    <https://docs.globus.org/api/transfer/task_submit/#document_types>`_
-    and
-    `Delete specific fields \
-    <https://docs.globus.org/api/transfer/task_submit/#delete_specific_fields>`_
-    in the REST documentation for more details on Delete Task documents.
-
-    .. automethodlist:: globus_sdk.TransferData
-    """
-
-    def __init__(
-        self,
-        transfer_client,
-        endpoint,
-        label=None,
-        submission_id=None,
-        recursive=False,
-        deadline=None,
-        additional_fields: Optional[Dict[str, Any]] = None,
-    ):
-        endpoint = utils.safe_stringify(endpoint)
-        logger.info("Creating a new DeleteData object")
-        self["DATA_TYPE"] = "delete"
-        self["submission_id"] = (
-            submission_id or transfer_client.get_submission_id()["value"]
-        )
-        logger.info("DeleteData.submission_id = {}".format(self["submission_id"]))
-        self["endpoint"] = endpoint
-        logger.info(f"DeleteData.endpoint = {endpoint}")
-        self["recursive"] = recursive
-        logger.info(f"DeleteData.recursive = {recursive}")
-
-        if label is not None:
-            self["label"] = label
-            logger.debug(f"DeleteData.label = {label}")
-
-        if deadline is not None:
-            self["deadline"] = str(deadline)
-            logger.debug(f"DeleteData.deadline = {deadline}")
-
-        self["DATA"] = []
-
-        if additional_fields is not None:
-            self.update(additional_fields)
-            for option, value in additional_fields.items():
-                logger.info(
-                    f"DeleteData.{option} = {value} (option passed in via kwargs)"
-                )
-
-    def add_item(self, path, additional_fields: Optional[Dict[str, Any]] = None):
-        """
-        Add a file or directory or symlink to be deleted. If any of the paths
-        are directories, ``recursive`` must be set True on the top level
-        ``DeleteData``. Symlinks will never be followed, only deleted.
-
-        Appends a delete_item document to the DATA key of the delete
-        document.
-        """
-        path = utils.safe_stringify(path)
-        item_data = {"DATA_TYPE": "delete_item", "path": path}
-        if additional_fields is not None:
-            item_data.update(additional_fields)
-        logger.debug('DeleteData[{}].add_item: "{}"'.format(self["endpoint"], path))
         self["DATA"].append(item_data)

@@ -6,6 +6,7 @@ from typing import Any, Dict, Iterable, List, Optional, Union
 from globus_sdk import client, exc, paging, response, utils
 from globus_sdk.scopes import TransferScopes
 
+from .data import DeleteData, TransferData
 from .errors import TransferAPIError
 from .response import ActivationRequirementsResponse, IterableTransferResponse
 
@@ -1255,7 +1256,9 @@ class TransferClient(client.BaseClient):
         log.info(f"TransferClient.get_submission_id({query_params})")
         return self.get("submission_id", query_params=query_params)
 
-    def submit_transfer(self, data) -> response.GlobusHTTPResponse:
+    def submit_transfer(
+        self, data: Union[Dict[str, Any], TransferData]
+    ) -> response.GlobusHTTPResponse:
         """
         ``POST /transfer``
 
@@ -1289,7 +1292,9 @@ class TransferClient(client.BaseClient):
         log.info("TransferClient.submit_transfer(...)")
         return self.post("/transfer", data=data)
 
-    def submit_delete(self, data) -> response.GlobusHTTPResponse:
+    def submit_delete(
+        self, data: Union[Dict[str, Any], DeleteData]
+    ) -> response.GlobusHTTPResponse:
         """
         ``POST /delete``
 

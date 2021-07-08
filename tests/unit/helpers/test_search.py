@@ -12,11 +12,17 @@ def test_init():
     query = SearchQuery()
     assert len(query) == 0
 
-    # init with params
-    params = {"param1": "value1", "param2": "value2"}
+    # init with supported fields
+    params = {"q": "foo", "limit": 10, "offset": 0, "advanced": False}
     param_query = SearchQuery(**params)
     for par in params:
         assert param_query[par] == params[par]
+
+    # init with additional_fields
+    add_params = {"param1": "value1", "param2": "value2"}
+    param_query = SearchQuery(additional_fields=add_params)
+    for par in add_params:
+        assert param_query[par] == add_params[par]
 
 
 @pytest.mark.parametrize("attrname", ["q", "limit", "offset", "advanced"])

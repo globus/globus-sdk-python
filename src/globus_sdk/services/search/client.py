@@ -1,9 +1,10 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 from globus_sdk import client, paging, response, utils
 from globus_sdk.scopes import SearchScopes
 
+from .data import SearchQuery
 from .errors import SearchAPIError
 
 log = logging.getLogger(__name__)
@@ -112,7 +113,7 @@ class SearchClient(client.BaseClient):
         path = self.qjoin_path("v1/index", index_id, "search")
         return self.get(path, query_params=query_params)
 
-    def post_search(self, index_id, data):
+    def post_search(self, index_id, data: Union[Dict[str, Any], SearchQuery]):
         """
         ``POST /v1/index/<index_id>/search``
 

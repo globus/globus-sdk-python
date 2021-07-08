@@ -1,5 +1,5 @@
 from .client import SearchClient
+from .data import SearchQuery
 from .errors import SearchAPIError
-from .query import SearchQuery
 
 __all__ = ("SearchClient", "SearchQuery", "SearchAPIError")

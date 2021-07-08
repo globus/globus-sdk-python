@@ -1,6 +1,6 @@
 import logging
 import urllib.parse
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, Optional, Type, Union
 
 from globus_sdk import config, exc, utils
 from globus_sdk.authorizers import GlobusAuthorizer
@@ -131,7 +131,7 @@ class BaseClient:
         path: str,
         *,
         query_params: Optional[Dict[str, Any]] = None,
-        data: Optional[Dict] = None,
+        data: Union[None, Dict, utils.PayloadWrapper] = None,
         headers: Optional[Dict] = None,
         encoding: Optional[str] = None,
     ) -> GlobusHTTPResponse:
@@ -176,7 +176,7 @@ class BaseClient:
         path: str,
         *,
         query_params: Optional[Dict[str, Any]] = None,
-        data: Optional[Dict] = None,
+        data: Union[None, Dict, utils.PayloadWrapper] = None,
         headers: Optional[Dict] = None,
         encoding: Optional[str] = None,
     ) -> GlobusHTTPResponse:
@@ -203,7 +203,7 @@ class BaseClient:
         path: str,
         *,
         query_params: Optional[Dict[str, Any]] = None,
-        data: Optional[Dict] = None,
+        data: Union[None, Dict, utils.PayloadWrapper] = None,
         headers: Optional[Dict] = None,
         encoding: Optional[str] = None,
     ) -> GlobusHTTPResponse:
@@ -231,7 +231,7 @@ class BaseClient:
         path: str,
         *,
         query_params: Optional[Dict[str, Any]] = None,
-        data: Optional[Dict] = None,
+        data: Union[None, Dict, utils.PayloadWrapper] = None,
         headers: Optional[Dict] = None,
         encoding: Optional[str] = None,
     ) -> GlobusHTTPResponse:
@@ -274,7 +274,7 @@ class BaseClient:
         r = self.transport.request(
             method=method,
             url=url,
-            data=data,
+            data=data.to_dict() if isinstance(data, utils.PayloadWrapper) else data,
             query_params=query_params,
             headers=rheaders,
             encoding=encoding,
