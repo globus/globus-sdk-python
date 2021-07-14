@@ -70,11 +70,13 @@ class ConsentRequiredInfo(ErrorInfo):
     """
 
     def __init__(self, error_data: Dict[str, Any]):
-        # data is considered present if this error has the code 'ConsentRequired'
-        self._has_data = error_data.get("code") == "ConsentRequired"
-        data = error_data if self._has_data else {}
-
+        # data is only considered parseable if this error has the code 'ConsentRequired'
+        has_code = error_data.get("code") == "ConsentRequired"
+        data = error_data if has_code else {}
         self.required_scopes = cast(Optional[List[str]], data.get("required_scopes"))
+
+        # but the result is only considered valid if both parts are present
+        self._has_data = has_code and isinstance(self.required_scopes, list)
 
 
 class ErrInfoContainer:
@@ -91,4 +93,4 @@ class ErrInfoContainer:
         self.consent_required = ConsentRequiredInfo(error_data or {})
 
     def __str__(self):
-        return f"{self.authorization_parameter_info}|{self.consent_required}"
+        return f"{self.authorization_parameters}|{self.consent_required}"

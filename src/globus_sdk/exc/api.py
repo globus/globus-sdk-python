@@ -72,7 +72,9 @@ class GlobusAPIError(GlobusError):
         could not be parsed.
         """
         if self._info is None:
-            self._info = ErrInfoContainer(cast(Optional[Dict[str, Any]], self.raw_json))
+            rawjson = self.raw_json
+            json_data = rawjson if isinstance(rawjson, dict) else None
+            self._info = ErrInfoContainer(cast(Optional[Dict[str, Any]], json_data))
         return self._info
 
     def _get_request_authorization_scheme(self):

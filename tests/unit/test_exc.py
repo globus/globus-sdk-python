@@ -1,3 +1,4 @@
+import itertools
 import json
 from collections import namedtuple
 
@@ -7,6 +8,13 @@ import requests
 from globus_sdk import AuthAPIError, TransferAPIError, exc
 
 _TestResponse = namedtuple("_TestResponse", ("data", "r", "method", "url"))
+
+
+def _strmatch_any_order(inputstr, prefix, midfixes, suffix, sep=", "):
+    # test for string matching, but without insisting on ordering of middle segments
+    assert inputstr in [
+        prefix + sep.join(m) + suffix for m in itertools.permutations(midfixes)
+    ]
 
 
 def _mk_response(
@@ -57,7 +65,7 @@ def text_response():
 
 @pytest.fixture
 def malformed_response():
-    return _mk_response("{", 403)
+    return _mk_response("{", 403, headers={"Content-Type": "application/json"})
 
 
 @pytest.fixture
@@ -79,7 +87,13 @@ def simple_auth_response():
 @pytest.fixture
 def nested_auth_response():
     auth_data = {
-        "errors": [{"detail": "nested auth error message", "code": "Auth Error"}]
+        "errors": [
+            {"detail": "nested auth error message", "code": "Auth Error"},
+            {
+                "message": "some other error which will not be seen",
+                "code": "HiddenError",
+            },
+        ]
     }
     return _mk_json_response(auth_data, 404)
 
@@ -238,6 +252,130 @@ def test_get_args_auth(
         "Error",
         "{",
     ]
+
+
+def test_get_args_on_unknown_json():
+    res = _mk_json_response({"foo": "bar"}, 400)
+    err = exc.GlobusAPIError(res.r)
+    assert err._get_args() == [
+        res.method,
+        res.url,
+        None,
+        "400",
+        "Error",
+        '{"foo": "bar"}',
+    ]
+
+
+def test_get_args_on_non_dict_json():
+    res = _mk_json_response(["foo", "bar"], 400)
+    err = exc.GlobusAPIError(res.r)
+    assert err._get_args() == [
+        res.method,
+        res.url,
+        None,
+        "400",
+        "Error",
+        '["foo", "bar"]',
+    ]
+
+
+def test_info_is_falsey_on_non_dict_json():
+    res = _mk_json_response(["foo", "bar"], 400)
+    err = exc.GlobusAPIError(res.r)
+    assert bool(err.info.consent_required) is False
+    assert bool(err.info.authorization_parameters) is False
+    assert str(err.info) == "AuthorizationParameterInfo(:)|ConsentRequiredInfo(:)"
+
+
+def test_consent_required_info():
+    res = _mk_json_response(
+        {"code": "ConsentRequired", "required_scopes": ["foo", "bar"]}, 401
+    )
+    err = exc.GlobusAPIError(res.r)
+    assert bool(err.info.consent_required) is True
+    assert err.info.consent_required.required_scopes == ["foo", "bar"]
+    assert str(err.info.consent_required) == (
+        "ConsentRequiredInfo(required_scopes=['foo', 'bar'])"
+    )
+
+    # if the code is right but the scope list is missing, it should be falsey
+    res = _mk_json_response({"code": "ConsentRequired"}, 401)
+    err = exc.GlobusAPIError(res.r)
+    assert bool(err.info.consent_required) is False
+    assert err.info.consent_required.required_scopes is None
+    assert str(err.info.consent_required) == "ConsentRequiredInfo(:)"
+
+
+def test_authz_params_info():
+    res = _mk_json_response(
+        {"authorization_parameters": {"session_message": "foo"}}, 401
+    )
+    err = exc.GlobusAPIError(res.r)
+    assert bool(err.info.authorization_parameters) is True
+    assert err.info.authorization_parameters.session_message == "foo"
+    assert err.info.authorization_parameters.session_required_identities is None
+    assert err.info.authorization_parameters.session_required_single_domain is None
+    _strmatch_any_order(
+        str(err.info.authorization_parameters),
+        "AuthorizationParameterInfo(",
+        [
+            "session_message=foo",
+            "session_required_identities=None",
+            "session_required_single_domain=None",
+        ],
+        ")",
+    )
+
+    res = _mk_json_response(
+        {"authorization_parameters": {"session_required_identities": ["foo", "bar"]}},
+        401,
+    )
+    err = exc.GlobusAPIError(res.r)
+    assert bool(err.info.authorization_parameters) is True
+    assert err.info.authorization_parameters.session_message is None
+    assert err.info.authorization_parameters.session_required_identities == [
+        "foo",
+        "bar",
+    ]
+    assert err.info.authorization_parameters.session_required_single_domain is None
+    _strmatch_any_order(
+        str(err.info.authorization_parameters),
+        "AuthorizationParameterInfo(",
+        [
+            "session_message=None",
+            "session_required_identities=['foo', 'bar']",
+            "session_required_single_domain=None",
+        ],
+        ")",
+    )
+
+    res = _mk_json_response(
+        {
+            "authorization_parameters": {
+                "session_required_single_domain": ["foo", "bar"]
+            }
+        },
+        401,
+    )
+    err = exc.GlobusAPIError(res.r)
+    assert bool(err.info.authorization_parameters) is True
+    assert err.info.authorization_parameters.session_message is None
+    assert err.info.authorization_parameters.session_required_identities is None
+    assert err.info.authorization_parameters.session_required_single_domain == [
+        "foo",
+        "bar",
+    ]
+    _strmatch_any_order(
+        str(err.info.authorization_parameters),
+        "AuthorizationParameterInfo(",
+        [
+            "session_message=None",
+            "session_required_identities=None",
+            "session_required_single_domain=['foo', 'bar']",
+        ],
+        ")",
+    )
 
 
 @pytest.mark.parametrize(
