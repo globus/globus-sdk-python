@@ -148,15 +148,15 @@ def test_get_args_transfer(
         123,
     ]
 
-    # wrong format
+    # wrong format (but still parseable)
     err = TransferAPIError(json_response.r)
     assert err._get_args() == [
         _DEFAULT_RESPONSE.method,
         _DEFAULT_RESPONSE.url,
         None,
         "400",
-        "Error",
-        json.dumps(json_response.data),
+        "Json Error",
+        "json error message",
         None,
     ]
     # defaults for non-json

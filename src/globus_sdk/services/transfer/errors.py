@@ -4,7 +4,7 @@ from globus_sdk import exc
 class TransferAPIError(exc.GlobusAPIError):
     """
     Error class for the Transfer API client. In addition to the
-    inherited ``code`` and ``message`` instance variables, provides:
+    inherited ``code`` and ``message`` instance variables, provides ``request_id``.
 
     :ivar request_id: Unique identifier for the request, which should be
                       provided when contacting support@globus.org.
@@ -20,6 +20,5 @@ class TransferAPIError(exc.GlobusAPIError):
         return args
 
     def _load_from_json(self, data):
-        self.code = data["code"]
-        self.message = data["message"]
-        self.request_id = data["request_id"]
+        super()._load_from_json(data)
+        self.request_id = data.get("request_id")
