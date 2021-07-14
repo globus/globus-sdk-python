@@ -2,7 +2,7 @@ import logging
 from typing import Any, Dict, Optional, cast
 
 from .base import GlobusError
-from .err_info import ErrInfoContainer
+from .err_info import ErrorInfoContainer
 
 log = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class GlobusAPIError(GlobusError):
         self.code = "Error"
         self.message = r.text
 
-        self._info: Optional[ErrInfoContainer] = None
+        self._info: Optional[ErrorInfoContainer] = None
         self._underlying_response = r
         self._parse_response()
         super().__init__(*self._get_args())
@@ -65,16 +65,16 @@ class GlobusAPIError(GlobusError):
         return self._underlying_response.text
 
     @property
-    def info(self) -> ErrInfoContainer:
+    def info(self) -> ErrorInfoContainer:
         """
-        An ``ErrInfoContainer`` with parsed error data. The ``info`` of an error is
+        An ``ErrorInfoContainer`` with parsed error data. The ``info`` of an error is
         guaranteed to be present, but all of its contents may be falsey if the error
         could not be parsed.
         """
         if self._info is None:
             rawjson = self.raw_json
             json_data = rawjson if isinstance(rawjson, dict) else None
-            self._info = ErrInfoContainer(cast(Optional[Dict[str, Any]], json_data))
+            self._info = ErrorInfoContainer(cast(Optional[Dict[str, Any]], json_data))
         return self._info
 
     def _get_request_authorization_scheme(self):

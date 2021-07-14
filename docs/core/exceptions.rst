@@ -96,3 +96,36 @@ Error Classes
 .. autoclass:: globus_sdk.GlobusConnectionTimeoutError
    :members:
    :show-inheritance:
+
+ErrorInfo
+---------
+
+``GlobusAPIError`` and its subclasses all support an ``info`` property which
+may contain parsed error data. The ``info`` is guaranteed to be there, but its
+attributes should be tested before use, as in
+
+.. code-block:: python
+
+    # if 'err' is an API error, then 'err.info' is an 'ErrorInfoContainer',
+    # a wrapper which holds ErrorInfo objects
+    # 'err.info.consent_required' is a 'ConsentRequiredInfo', which should be
+    # tested for truthy/falsey-ness before use
+    if err.info.consent_required:
+        print(
+            "Got a ConsentRequired error with scopes:",
+            err.info.consent_required.required_scopes,
+        )
+
+.. autoclass:: globus_sdk.exc.ErrorInfoContainer
+    :members:
+
+.. autoclass:: globus_sdk.exc.ErrorInfo
+    :members:
+
+.. autoclass:: globus_sdk.exc.AuthorizationParameterInfo
+    :members:
+    :show-inheritance:
+
+.. autoclass:: globus_sdk.exc.ConsentRequiredInfo
+    :members:
+    :show-inheritance:

@@ -28,11 +28,14 @@ class AuthorizationParameterInfo(ErrorInfo):
     'authorization_parameters' of an error. They test as truthy when the error has valid
     'authorization_parameters' data.
 
-    :ivar session_message: A string message from the server
+    :ivar session_message: A message from the server
+    :vartype session_message: optional str
     :ivar session_required_identities: A list of identity IDs as strings which are being
         requested by the server
+    :vartype session_required_identities: optional list of str
     :ivar session_required_single_domain: A list of domains which are being requested by
         the server ("single domain" because the user should choose one)
+    :vartype session_required_single_domain: optional list of str
 
     **Examples**
 
@@ -67,6 +70,7 @@ class ConsentRequiredInfo(ErrorInfo):
     test as truthy if the error was marked as a ConsentRequired error.
 
     :ivar required_scopes: A list of scopes requested by the server
+    :vartype required_scopes: optional list of str
     """
 
     def __init__(self, error_data: Dict[str, Any]):
@@ -79,7 +83,7 @@ class ConsentRequiredInfo(ErrorInfo):
         self._has_data = has_code and isinstance(self.required_scopes, list)
 
 
-class ErrInfoContainer:
+class ErrorInfoContainer:
     """
     This is a wrapper type which contains various error info objects for parsed error
     data. It is attached to API errors as the ``.info`` attribute.

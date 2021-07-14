@@ -10,8 +10,8 @@ from .convert import (
 from .err_info import (
     AuthorizationParameterInfo,
     ConsentRequiredInfo,
-    ErrInfoContainer,
     ErrorInfo,
+    ErrorInfoContainer,
 )
 
 __all__ = (
@@ -24,7 +24,7 @@ __all__ = (
     "GlobusConnectionError",
     "convert_request_exception",
     "ErrorInfo",
-    "ErrInfoContainer",
+    "ErrorInfoContainer",
     "AuthorizationParameterInfo",
     "ConsentRequiredInfo",
 )
