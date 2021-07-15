@@ -80,13 +80,10 @@ class GlobusAPIError(GlobusError):
     def _get_request_authorization_scheme(self):
         try:
             authz_h = self._underlying_response.request.headers["Authorization"]
-            try:
-                authz_scheme = authz_h.split()[0]
-                if authz_scheme.lower() in self.RECOGNIZED_AUTHZ_SCHEMES:
-                    return authz_scheme
-            except IndexError:
-                pass
-        except KeyError:
+            authz_scheme = authz_h.split()[0]
+            if authz_scheme.lower() in self.RECOGNIZED_AUTHZ_SCHEMES:
+                return authz_scheme
+        except (IndexError, KeyError):
             pass
         return None
 
