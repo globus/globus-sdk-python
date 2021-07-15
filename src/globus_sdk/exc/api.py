@@ -33,6 +33,12 @@ class GlobusAPIError(GlobusError):
         self._parse_response()
         super().__init__(*self._get_args())
 
+    def _json_content_type(self) -> bool:
+        r = self._underlying_response
+        return "Content-Type" in r.headers and (
+            "application/json" in r.headers["Content-Type"]
+        )
+
     @property
     def raw_json(self):
         """
@@ -42,19 +48,17 @@ class GlobusAPIError(GlobusError):
         If the body cannot be loaded as JSON, this is None
         """
         r = self._underlying_response
-        if "Content-Type" in r.headers and (
-            "application/json" in r.headers["Content-Type"]
-        ):
-            try:
-                return r.json()
-            except ValueError:
-                log.error(
-                    "Error body could not be JSON decoded! "
-                    "This means the Content-Type is wrong, or the "
-                    "body is malformed!"
-                )
-                return None
-        else:
+        if not self._json_content_type():
+            return None
+
+        try:
+            return r.json()
+        except ValueError:
+            log.error(
+                "Error body could not be JSON decoded! "
+                "This means the Content-Type is wrong, or the "
+                "body is malformed!"
+            )
             return None
 
     @property
@@ -116,39 +120,41 @@ class GlobusAPIError(GlobusError):
         json_data = self.raw_json
         if json_data is None:
             log.debug("Error body was not parsed as JSON")
-        elif isinstance(json_data, dict):
-            # if there appears to be a list of errors in the response data, grab the
-            # first error from that list for parsing
-            # this is only done if we determine that
-            # - 'errors' is present and is a non-empty list
-            # - 'errors[0]' is a dict
-            #
-            # this gracefully handles other uses of the key 'errors', e.g. as an int:
-            #   {"message": "foo", "errors": 6}
-            if (
-                isinstance(json_data.get("errors"), list)
-                and len(json_data["errors"]) > 0
-                and isinstance(json_data["errors"][0], dict)
-            ):
-                # log a warning only when there is more than one error in the list
-                # if an API sends back an error of the form
-                #   {"errors": [{"foo": "bar"}]}
-                # then the envelope doesn't matter and there's only one error to parse
-                if len(json_data["errors"]) != 1:
-                    log.warning(
-                        "Doing JSON load of error response with multiple "
-                        "errors. Exception data will only include the "
-                        "first error, but there are really %d errors",
-                        len(json_data["errors"]),
-                    )
-                # try to grab the first error in the list, but also check
-                # if it isn't a dict
-                json_data = json_data["errors"][0]
-            self._load_from_json(json_data)
-        else:
+            return
+        if not isinstance(json_data, dict):
             log.warning(
                 "Error body could not be parsed as JSON because it was not a dict"
             )
+            return
+
+        # if there appears to be a list of errors in the response data, grab the
+        # first error from that list for parsing
+        # this is only done if we determine that
+        # - 'errors' is present and is a non-empty list
+        # - 'errors[0]' is a dict
+        #
+        # this gracefully handles other uses of the key 'errors', e.g. as an int:
+        #   {"message": "foo", "errors": 6}
+        if (
+            isinstance(json_data.get("errors"), list)
+            and len(json_data["errors"]) > 0
+            and isinstance(json_data["errors"][0], dict)
+        ):
+            # log a warning only when there is more than one error in the list
+            # if an API sends back an error of the form
+            #   {"errors": [{"foo": "bar"}]}
+            # then the envelope doesn't matter and there's only one error to parse
+            if len(json_data["errors"]) != 1:
+                log.warning(
+                    "Doing JSON load of error response with multiple "
+                    "errors. Exception data will only include the "
+                    "first error, but there are really %d errors",
+                    len(json_data["errors"]),
+                )
+            # try to grab the first error in the list, but also check
+            # if it isn't a dict
+            json_data = json_data["errors"][0]
+        self._load_from_json(json_data)
 
     def _load_from_json(self, data):
         # rewrite 'code' if present and correct type
