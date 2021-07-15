@@ -57,29 +57,21 @@ def test_safe_stringify(value):
 
 
 def test_payload_wrapper_methods():
-    # comment on first use of each MutableMapping method to note which ones are ours
-    # (explicit) and which ones are inherited from MutableMapping
+    # just make sure that PayloadWrapper acts like a dict...
     data = utils.PayloadWrapper()
-
-    assert "foo" not in data  # __contains__() inherited
+    assert "foo" not in data
     with pytest.raises(KeyError):
-        data["foo"]  # __getitem__ explicitly defined
-
-    data["foo"] = 1  # __setitem__ explicitly defined
+        data["foo"]
+    data["foo"] = 1
     assert "foo" in data
-    assert data["foo"] == 1  # __delitem__ explicitly defined
+    assert data["foo"] == 1
     del data["foo"]
     assert "foo" not in data
-
-    assert len(data) == 0  # __len__ explicitly defined
-    assert list(data) == []  # __iter__ explicitly defined
-
+    assert len(data) == 0
+    assert list(data) == []
     data["foo"] = 1
     data["bar"] = 2
     assert len(data) == 2
-
-    # to_dict() is the only custom method we have added to MutableMapping
-    assert data.to_dict() == {"foo": 1, "bar": 2}
-
-    data.update({"x": "hello", "y": "world"})  # update() inherited
-    assert data.to_dict() == {"foo": 1, "bar": 2, "x": "hello", "y": "world"}
+    assert data.data == {"foo": 1, "bar": 2}
+    data.update({"x": "hello", "y": "world"})
+    assert data.data == {"foo": 1, "bar": 2, "x": "hello", "y": "world"}

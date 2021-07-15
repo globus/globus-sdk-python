@@ -1,7 +1,6 @@
 import hashlib
 from base64 import b64encode
-from collections.abc import MutableMapping
-from typing import Any, Dict
+from collections import UserDict
 
 
 def sha256_string(s):
@@ -46,29 +45,20 @@ def safe_stringify(value):
     return str(value)
 
 
-class PayloadWrapper(MutableMapping):
+class PayloadWrapper(UserDict):
     """
     A class for defining helper objects which wrap some kind of "payload" dict.
     Typical for helper objects which formulate a request payload, e.g. as JSON.
     """
 
-    def __init__(self):
-        self._payload: Dict[str, Any] = {}
-
-    def __getitem__(self, key: str):
-        return self._payload[key]
-
-    def __setitem__(self, key: str, value: Any):
-        self._payload[key] = value
-
-    def __delitem__(self, key: str):
-        del self._payload[key]
-
-    def __iter__(self):
-        return iter(self._payload)
-
-    def __len__(self):
-        return len(self._payload)
-
-    def to_dict(self) -> Dict[str, Any]:
-        return self._payload
+    # note: this class doesn't actually define any methods, properties, or attributes
+    # it's just our own flavor of UserDict, which wraps a 'data' dict
+    #
+    # use UserDict rather than subclassing dict so that our API is always consistent
+    # e.g. `dict.pop` does not invoke `dict.__delitem__`. Overriding `__delitem__` on a
+    # dict subclass can lead to inconsistent behavior between usages like these:
+    #   x = d["k"]; del d["k"]
+    #   x = d.pop("k")
+    #
+    # UserDict inherits from MutableMapping and only defines the dunder methods, so
+    # changing its behavior safely/consistently is simpler
