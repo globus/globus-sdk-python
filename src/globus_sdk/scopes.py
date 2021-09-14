@@ -22,6 +22,22 @@ class ScopeBuilder:
             for scope_name in known_scopes:
                 setattr(self, scope_name, self.urn_scope_string(scope_name))
 
+    # custom __getattr__ instructs `mypy` that unknown attributes of a ScopeBuilder are
+    # of type `str`, allowing for dynamic attribute names
+    # to test, try creating a module with
+    #
+    #       from globus_sdk.scopes import TransferScopes
+    #       x = TransferScopes.all
+    #
+    # the assignment to `x` will fail type checking without this because `all` will be
+    # unknown to `mypy`
+    #
+    # note that the implementation just raises AttributeError; this is okay because
+    # __getattr__ is only called as a last resort, when __getattribute__ has failed
+    # normal attribute access will not be disrupted
+    def __getattr__(self, name: str) -> str:
+        raise AttributeError
+
     def urn_scope_string(self, scope_name: str) -> str:
         """
         Return a complete string representing the scope with a given name for this

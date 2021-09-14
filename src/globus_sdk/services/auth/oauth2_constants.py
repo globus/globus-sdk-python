@@ -6,5 +6,5 @@ DEFAULT_REQUESTED_SCOPES = (
     AuthScopes.openid,
     AuthScopes.profile,
     AuthScopes.email,
-    TransferScopes.all,  # type: ignore[attr-defined]
+    TransferScopes.all,
 )
