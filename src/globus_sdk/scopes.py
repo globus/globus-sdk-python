@@ -29,8 +29,8 @@ class ScopeBuilder:
     #       from globus_sdk.scopes import TransferScopes
     #       x = TransferScopes.all
     #
-    # the assignment to `x` will fail type checking without this because `all` will be
-    # unknown to `mypy`
+    # without this method, the assignment to `x` would fail type checking
+    # because `all` is unknown to mypy
     #
     # note that the implementation just raises AttributeError; this is okay because
     # __getattr__ is only called as a last resort, when __getattribute__ has failed
