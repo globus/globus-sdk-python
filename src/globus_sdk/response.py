@@ -35,8 +35,6 @@ class GlobusHTTPResponse:
 
     >>> print("Response ID": r["id"]) # alias for r.data["id"]
 
-    :ivar http_status: HTTP status code returned by the server (int)
-    :ivar content_type: Content-Type header returned by the server (str)
     :ivar client: The client instance which made the request
     """
 
@@ -54,11 +52,8 @@ class GlobusHTTPResponse:
             self._response: Optional[Response] = None
             self.client: "globus_sdk.BaseClient" = self._wrapped.client
 
-            # copy attributes off of '_wrapped'
+            # copy parsed JSON data off of '_wrapped'
             self._parsed_json: Any = self._wrapped._parsed_json
-            self._text: str = self._wrapped.text
-            self.http_status: int = self._wrapped.http_status
-            self.content_type: Optional[str] = self._wrapped.content_type
 
         # init on a Response object, this is the "normal" case
         # _wrapped is None
@@ -82,18 +77,44 @@ class GlobusHTTPResponse:
                 log.warning("response data did not parse as JSON, data=None")
                 self._parsed_json = None
 
-            self._text = self._response.text
-            self.http_status = self._response.status_code
-            self.content_type = self._response.headers.get("Content-Type")
+    @property
+    def _raw_response(self) -> Response:
+        # this is an internal property which traverses any series of wrapped responses
+        # until reaching a requests response object
+        if self._response is not None:
+            return self._response
+        elif self._wrapped is not None:
+            return self._wrapped._raw_response
+        else:  # unreachable  # pragma: no cover
+            raise ValueError("could not find an inner response object")
 
     @property
-    def data(self) -> Any:
-        return self._parsed_json
+    def http_status(self) -> int:
+        """The HTTP response status, as an integer."""
+        return self._raw_response.status_code
+
+    @property
+    def headers(self) -> Mapping[str, str]:
+        """
+        The HTTP response headers as a case-insensitive mapping.
+
+        For example, ``headers["Content-Length"]`` and ``headers["content-length"]`` are
+        treated as equivalent.
+        """
+        return self._raw_response.headers
+
+    @property
+    def content_type(self) -> Optional[str]:
+        return self.headers.get("Content-Type")
 
     @property
     def text(self) -> str:
         """The raw response data as a string."""
-        return self._text
+        return self._raw_response.text
+
+    @property
+    def data(self) -> Any:
+        return self._parsed_json
 
     def get(self, key: str, default: Any = None) -> Any:
         """

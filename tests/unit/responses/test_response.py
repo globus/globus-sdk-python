@@ -10,7 +10,7 @@ from globus_sdk.response import GlobusHTTPResponse, IterableResponse
 _TestResponse = namedtuple("_TestResponse", ("data", "r"))
 
 
-def _response(data=None, encoding="utf-8", headers=None):
+def _response(data=None, encoding="utf-8", headers=None, status=None):
     r = requests.Response()
 
     is_json = isinstance(data, (dict, list))
@@ -28,6 +28,9 @@ def _response(data=None, encoding="utf-8", headers=None):
         r.headers.update(headers)
     elif is_json:
         r.headers["Content-Type"] = "application/json"
+
+    if status is not None:
+        r.status_code = status
 
     return r
 
@@ -182,3 +185,14 @@ def test_cannot_construct_base_iterable_response():
     r = _response(b"foo: bar, baz: buzz")
     with pytest.raises(TypeError):
         IterableResponse(r, client=mock.Mock())
+
+
+def test_http_status_code_on_response():
+    r1 = _response(status=404)
+    assert r1.status_code == 404
+
+    r2 = GlobusHTTPResponse(r1, client=mock.Mock())  # handle a Response object
+    assert r2.http_status == 404
+
+    r3 = GlobusHTTPResponse(r2)  # wrap another response
+    assert r3.http_status == 404
