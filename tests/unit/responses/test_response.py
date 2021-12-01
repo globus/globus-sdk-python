@@ -196,3 +196,14 @@ def test_http_status_code_on_response():
 
     r3 = GlobusHTTPResponse(r2)  # wrap another response
     assert r3.http_status == 404
+
+
+def test_http_headers_from_response():
+    r1 = _response(headers={"Content-Length": "5"})
+    assert r1.headers["content-length"] == "5"
+
+    r2 = GlobusHTTPResponse(r1, client=mock.Mock())  # handle a Response object
+    assert r2.headers["content-length"] == "5"
+
+    r3 = GlobusHTTPResponse(r2)  # wrap another response
+    assert r3.headers["content-length"] == "5"
