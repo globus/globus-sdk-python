@@ -1,0 +1,1 @@
+* Update to avoid deprecation warnings on py3.10 (:pr:`NUMBER`)

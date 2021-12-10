@@ -6,7 +6,6 @@ This does not include service URL env vars (see environments.py for loading of t
 """
 import logging
 import os
-from distutils.util import strtobool
 from typing import Any, Callable, Optional, cast
 
 log = logging.getLogger(__name__)
@@ -15,6 +14,16 @@ log = logging.getLogger(__name__)
 ENVNAME_VAR = "GLOBUS_SDK_ENVIRONMENT"
 HTTP_TIMEOUT_VAR = "GLOBUS_SDK_HTTP_TIMEOUT"
 SSL_VERIFY_VAR = "GLOBUS_SDK_VERIFY_SSL"
+
+
+def _str2bool(val: str) -> bool:
+    val = val.lower()
+    if val in ("y", "yes", "t", "true", "on", "1"):
+        return True
+    elif val in ("n", "no", "f", "false", "off", "0"):
+        return False
+    else:
+        raise ValueError(f"invalid truth value: {val}")
 
 
 def _load_var(
@@ -42,7 +51,9 @@ def _load_var(
 def _bool_cast(value: Any, default: Any) -> bool:
     if isinstance(value, bool):
         return value
-    return strtobool(value.lower())
+    elif not isinstance(value, str):
+        raise ValueError(f"cannot cast value {value} of type {type(value)} to bool")
+    return _str2bool(value)
 
 
 def _optfloat_cast(value: Any, default: Any) -> Optional[float]:
