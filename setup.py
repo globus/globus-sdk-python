@@ -30,7 +30,7 @@ setup(
             "flake8-bugbear==20.11.1",
             "mypy==0.800",
             # testing
-            "pytest<5.0",
+            "pytest<7.0",
             "pytest-cov<3.0",
             "pytest-xdist<2.0",
             # mocking HTTP responses
@@ -59,5 +59,6 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
 )

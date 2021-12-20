@@ -1,4 +1,4 @@
-import collections
+import collections.abc
 import logging
 
 from globus_sdk import exc
@@ -116,7 +116,7 @@ class AuthClient(BaseClient):
         """
 
         def _convert_listarg(val):
-            if isinstance(val, collections.Iterable) and not isinstance(val, str):
+            if isinstance(val, collections.abc.Iterable) and not isinstance(val, str):
                 return ",".join(safe_stringify(x) for x in val)
             else:
                 return safe_stringify(val)
