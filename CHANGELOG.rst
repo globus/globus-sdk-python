@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+v2.0.2
+------
+
+* Add support for python3.10
+
 v2.0.1
 ------
 
