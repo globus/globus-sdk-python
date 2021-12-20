@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+v2.0.3
+------
+
+* Fix a packaging bug in version 2.0.2 which led to files being incorrectly
+  included in the wheel release
+
 v2.0.2
 ------
 
