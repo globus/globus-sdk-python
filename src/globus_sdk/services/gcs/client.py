@@ -1,11 +1,11 @@
 import uuid
 from typing import Any, Callable, Dict, Iterable, Optional, TypeVar, Union
 
-from globus_sdk import client, response, scopes, utils
+from globus_sdk import client, paging, response, scopes, utils
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.types import UUIDLike
 
-from .data import CollectionDocument
+from .data import CollectionDocument, GCSRoleDocument
 from .errors import GCSAPIError
 from .response import IterableGCSResponse, UnpackingGCSResponse
 
@@ -212,3 +212,93 @@ class GCSClient(client.BaseClient):
         :type query_params: dict, optional
         """
         return self.delete(f"/collections/{collection_id}", query_params=query_params)
+
+    @_gcsdoc("List Roles", "openapi_Roles/#listRoles")
+    @paging.has_paginator(
+        paging.MarkerPaginator,
+        items_key="data",
+    )
+    def get_role_list(
+        self,
+        collection_id: Optional[UUIDLike] = None,
+        include: Optional[str] = None,
+        query_params: Optional[Dict[str, Any]] = None,
+    ) -> IterableGCSResponse:
+        """
+        ``GET /roles``
+
+        :param collection_id: UUID of a Collection. If given then only roles
+            related to that Collection are returned, otherwise only Endpoint
+            roles are returned.
+        :type collection_id: str or UUID, optional
+        :param include: Pass "all_roles" to request all roles all roles
+            relevant to the resource instead of only those the caller has on
+            the resource
+        :type include: str, optional
+        :param query_params: Additional passthrough query parameters
+        :type query_params: dict, optional
+        """
+        if query_params is None:
+            query_params = {}
+        if include is not None:
+            query_params = {**query_params, "include": include}
+        if collection_id is not None:
+            query_params = {**query_params, "collection_id": collection_id}
+
+        path = "/roles"
+        return IterableGCSResponse(self.get(path, query_params=query_params))
+
+    @_gcsdoc("Create Role", "openapi_Roles/#postRole")
+    def create_role(
+        self,
+        data: Union[Dict[str, Any], GCSRoleDocument],
+        query_params: Optional[Dict[str, Any]] = None,
+    ) -> UnpackingGCSResponse:
+        """
+        POST /roles
+
+        :param data: Data in the format of a Role document, it is recommended
+            to use the `RoleDocumment` class to construct this data.
+        :type data: dict
+        :param query_params: Additional passthrough query parameters
+        :type query_params: dict, optional
+        """
+        path = "/roles"
+        return UnpackingGCSResponse(
+            self.post(path, data=data, query_params=query_params),
+            "role",
+        )
+
+    @_gcsdoc("Get a Role", "openapi_Roles/#getRole")
+    def get_role(
+        self,
+        role_id: UUIDLike,
+        query_params: Optional[Dict[str, Any]] = None,
+    ) -> UnpackingGCSResponse:
+        """
+        GET /roles/{role_id}
+
+        :param role_id: UUID for the Role to be gotten
+        :type role_id: str or UUID
+        :param query_params: Additional passthrough query parameters
+        :type query_params: dict, optional
+        """
+        path = f"/roles/{role_id}"
+        return UnpackingGCSResponse(self.get(path, query_params=query_params), "role")
+
+    @_gcsdoc("Delete a Role", "openapi_Roles/#deleteRole")
+    def delete_role(
+        self,
+        role_id: UUIDLike,
+        query_params: Optional[Dict[str, Any]] = None,
+    ) -> response.GlobusHTTPResponse:
+        """
+        DELETE /roles/{role_id}
+
+        :param role_id: UUID for the Role to be deleted
+        :type role_id: str or UUID
+        :param query_params: Additional passthrough query parameters
+        :type query_params: dict, optional
+        """
+        path = f"/roles/{role_id}"
+        return self.delete(path, query_params=query_params)

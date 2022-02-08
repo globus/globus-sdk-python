@@ -32,6 +32,7 @@ from .services.gcs import (
     CollectionDocument,
     GCSAPIError,
     GCSClient,
+    GCSRoleDocument,
     GuestCollectionDocument,
     MappedCollectionDocument,
 )
@@ -95,6 +96,7 @@ __all__ = (
     "GroupVisibility",
     "GroupsManager",
     "GCSClient",
+    "GCSRoleDocument",
     "CollectionDocument",
     "GuestCollectionDocument",
     "MappedCollectionDocument",

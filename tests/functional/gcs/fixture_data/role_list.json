@@ -1,0 +1,25 @@
+{
+    "DATA_TYPE": "result#1.0.0",
+    "code": "success",
+    "data": [
+        {
+            "DATA_TYPE": "role#1.0.0",
+            "id": "{role_id_1}",
+            "collection": null,
+            "principal": "rn:globus:auth:identity:{user_id_1}",
+            "role": "owner"
+        },
+        {
+            "DATA_TYPE": "role#1.0.0",
+            "id": "{role_id_2}",
+            "collection": "{collection_id_1}",
+            "principal": "rn:globus:auth:group:{group_id_1}",
+            "role": "administrator"
+        }
+
+    ],
+    "http_response_code": 200,
+    "detail": {},
+    "has_next_page": false,
+    "marker": ""
+}
