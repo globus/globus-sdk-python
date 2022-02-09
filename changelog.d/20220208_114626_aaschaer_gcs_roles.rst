@@ -7,8 +7,8 @@
 .. automatically replace it when the PR is merged.
 ..
 
-* Add role methods to GCSClient (:pr:`NUMBER`)
-    ** get_role_list
-    ** create_role
-    ** get_role
-    ** delete_role
+* Add role methods to ``GCSClient`` (:pr:`NUMBER`)
+    ** ``GCSClient.get_role_list`` lists endpoint or collection roles
+    ** ``GCSClient.create_role`` creates a role
+    ** ``GCSClient.get_role`` gets a single role
+    ** ``GCSClient.delete_role`` deletes a role
