@@ -72,7 +72,7 @@ def test_create_role(client):
 
     data = GCSRoleDocument(
         collection="{collection_id_1}",
-        principal="rn:globus:auth:identity:{user_id_1}",
+        principal="urn:globus:auth:identity:{user_id_1}",
         role="owner",
     )
     res = client.create_role(data)
@@ -81,7 +81,7 @@ def test_create_role(client):
     json_body = json.loads(get_last_request().body)
 
     assert json_body["collection"] in (None, "{collection_id_1}")
-    assert json_body["principal"] == "rn:globus:auth:identity:{user_id_1}"
+    assert json_body["principal"] == "urn:globus:auth:identity:{user_id_1}"
     assert json_body["role"] in ("owner", "administrator")
 
 
@@ -91,7 +91,7 @@ def test_get_role(client):
     assert res["DATA_TYPE"] == "role#1.0.0"
     assert res["id"] == "{role_id_1}"
     assert res["collection"] is None
-    assert res["principal"] == "rn:globus:auth:identity:{user_id_1}"
+    assert res["principal"] == "urn:globus:auth:identity:{user_id_1}"
     assert res["role"] == "owner"
 
 
