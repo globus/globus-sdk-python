@@ -8,7 +8,7 @@
 ..
 
 * Add role methods to ``GCSClient`` (:pr:`NUMBER`)
-    ** ``GCSClient.get_role_list`` lists endpoint or collection roles
-    ** ``GCSClient.create_role`` creates a role
-    ** ``GCSClient.get_role`` gets a single role
-    ** ``GCSClient.delete_role`` deletes a role
+    * ``GCSClient.get_role_list`` lists endpoint or collection roles
+    * ``GCSClient.create_role`` creates a role
+    * ``GCSClient.get_role`` gets a single role
+    * ``GCSClient.delete_role`` deletes a role
