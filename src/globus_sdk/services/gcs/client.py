@@ -241,9 +241,9 @@ class GCSClient(client.BaseClient):
         if query_params is None:
             query_params = {}
         if include is not None:
-            query_params = {**query_params, "include": include}
+            query_params["include"] = include
         if collection_id is not None:
-            query_params = {**query_params, "collection_id": collection_id}
+            query_params["collection_id"] = collection_id
 
         path = "/roles"
         return IterableGCSResponse(self.get(path, query_params=query_params))
