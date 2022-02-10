@@ -14,6 +14,10 @@
     :alt: License
     :target: https://opensource.org/licenses/Apache-2.0
 
+.. image:: https://results.pre-commit.ci/badge/github/globus/globus-sdk-python/main.svg
+   :target: https://results.pre-commit.ci/latest/github/globus/globus-sdk-python/main
+   :alt: pre-commit.ci status
+
 ..
     This is the badge style used by the isort repo itself, so we'll use their
     preferred colors
