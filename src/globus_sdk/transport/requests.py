@@ -41,7 +41,7 @@ def _exponential_backoff(ctx: RetryContext) -> float:
     if ctx.backoff is not None:
         return ctx.backoff
     # exponential backoff with jitter
-    return cast(float, (0.25 + 0.5 * random.random()) * (2 ** ctx.attempt))
+    return cast(float, (0.25 + 0.5 * random.random()) * (2**ctx.attempt))
 
 
 class RequestsTransport:
