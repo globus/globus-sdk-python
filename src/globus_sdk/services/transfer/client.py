@@ -1593,9 +1593,15 @@ class TransferClient(client.BaseClient):
     @utils.doc_api_method(
         "Get Task Successful Transfer", "transfer/task/#get_task_successful_transfers"
     )
-    @paging.has_paginator(paging.MarkerPaginator, items_key="DATA")
+    @paging.has_paginator(
+        paging.NullableMarkerPaginator, items_key="DATA", marker_key="next_marker"
+    )
     def task_successful_transfers(
-        self, task_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self,
+        task_id: UUIDLike,
+        *,
+        marker: Optional[str] = None,
+        query_params: Optional[Dict[str, Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /task/<task_id>/successful_transfers``
@@ -1611,6 +1617,8 @@ class TransferClient(client.BaseClient):
 
         :param task_id: The ID of the task to inspect
         :type task_id: str or UUID
+        :param marker: A marker for pagination
+        :type marker: str
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
@@ -1625,6 +1633,10 @@ class TransferClient(client.BaseClient):
         >>>         info["source_path"], info["destination_path"]))
         """
         log.info(f"TransferClient.task_successful_transfers({task_id}, ...)")
+        if query_params is None:
+            query_params = {}
+        if marker is not None:
+            query_params["marker"] = marker
         return IterableTransferResponse(
             self.get(f"task/{task_id}/successful_transfers", query_params=query_params)
         )
@@ -1632,9 +1644,15 @@ class TransferClient(client.BaseClient):
     @utils.doc_api_method(
         "Get Task Skipped Errors", "transfer/task/#get_task_skipped_errors"
     )
-    @paging.has_paginator(paging.MarkerPaginator, items_key="DATA")
+    @paging.has_paginator(
+        paging.NullableMarkerPaginator, items_key="DATA", marker_key="next_marker"
+    )
     def task_skipped_errors(
-        self, task_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self,
+        task_id: UUIDLike,
+        *,
+        marker: Optional[str] = None,
+        query_params: Optional[Dict[str, Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /task/<task_id>/skipped_errors``
@@ -1644,6 +1662,8 @@ class TransferClient(client.BaseClient):
 
         :param task_id: The ID of the task to inspect
         :type task_id: str or UUID
+        :param marker: A marker for pagination
+        :type marker: str
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
@@ -1658,6 +1678,10 @@ class TransferClient(client.BaseClient):
         >>>         info["error_code"], info["source_path"]))
         """
         log.info("TransferClient.task_skipped_errors(%s, ...)", task_id)
+        if query_params is None:
+            query_params = {}
+        if marker is not None:
+            query_params["marker"] = marker
         return IterableTransferResponse(
             self.get(f"task/{task_id}/skipped_errors", query_params=query_params)
         )
@@ -2009,9 +2033,15 @@ class TransferClient(client.BaseClient):
         "Get task successful transfers as admin",
         "transfer/advanced_endpoint_management/#get_task_successful_transfers_as_admin",
     )
-    @paging.has_paginator(paging.MarkerPaginator, items_key="DATA")
+    @paging.has_paginator(
+        paging.NullableMarkerPaginator, items_key="DATA", marker_key="next_marker"
+    )
     def endpoint_manager_task_successful_transfers(
-        self, task_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self,
+        task_id: UUIDLike,
+        *,
+        marker: Optional[str] = None,
+        query_params: Optional[Dict[str, Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /endpoint_manager/task/<task_id>/successful_transfers``
@@ -2020,6 +2050,8 @@ class TransferClient(client.BaseClient):
 
         :param task_id: The ID of the task to inspect
         :type task_id: str or UUID
+        :param marker: A marker for pagination
+        :type marker: str
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
         """
@@ -2027,6 +2059,10 @@ class TransferClient(client.BaseClient):
             "TransferClient.endpoint_manager_task_successful_transfers(%s, ...)",
             task_id,
         )
+        if query_params is None:
+            query_params = {}
+        if marker is not None:
+            query_params["marker"] = marker
         return IterableTransferResponse(
             self.get(
                 "endpoint_manager/task/{task_id}/successful_transfers",
@@ -2038,8 +2074,15 @@ class TransferClient(client.BaseClient):
         "Get task skipped errors as admin",
         "transfer/advanced_endpoint_management/#get_task_skipped_errors_as_admin",
     )
+    @paging.has_paginator(
+        paging.NullableMarkerPaginator, items_key="DATA", marker_key="next_marker"
+    )
     def endpoint_manager_task_skipped_errors(
-        self, task_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self,
+        task_id: UUIDLike,
+        *,
+        marker: Optional[str] = None,
+        query_params: Optional[Dict[str, Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /endpoint_manager/task/<task_id>/skipped_errors``
@@ -2048,10 +2091,16 @@ class TransferClient(client.BaseClient):
 
         :param task_id: The ID of the task to inspect
         :type task_id: str
+        :param marker: A marker for pagination
+        :type marker: str
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
         """
         log.info(f"TransferClient.endpoint_manager_task_skipped_errors({task_id}, ...)")
+        if query_params is None:
+            query_params = {}
+        if marker is not None:
+            query_params["marker"] = marker
         return IterableTransferResponse(
             self.get(
                 f"endpoint_manager/task/{task_id}/skipped_errors",

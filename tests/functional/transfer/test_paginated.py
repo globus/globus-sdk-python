@@ -1,4 +1,5 @@
 import random
+import uuid
 
 import pytest
 import responses
@@ -272,3 +273,50 @@ def test_shared_endpoint_list_iter_items(client, paging_variant):
         assert "id" in item
 
     assert count == 2100
+
+
+@pytest.mark.parametrize("paging_variant", ["attr", "wrap"])
+def test_task_skipped_errors_pagination(client, paging_variant):
+    task_id = str(uuid.uuid1())
+    # add each page (10 pages)
+    for page_number in range(10):
+        page_data = []
+        for item_number in range(100):
+            page_data.append(
+                {
+                    "DATA_TYPE": "skipped_error",
+                    "checksum_algorithm": None,
+                    "destination_path": f"/~/{page_number}-{item_number}.txt",
+                    "error_code": "PERMISSION_DENIED",
+                    "error_details": "Error bad stuff happened",
+                    "error_time": "2022-02-18T19:06:05+00:00",
+                    "external_checksum": None,
+                    "is_delete_destination_extra": False,
+                    "is_directory": False,
+                    "is_symlink": False,
+                    "source_path": f"/~/{page_number}-{item_number}.txt",
+                }
+            )
+        register_api_route(
+            "transfer",
+            f"/task/{task_id}/skipped_errors",
+            json={
+                "DATA_TYPE": "skipped_errors",
+                "next_marker": f"mark{page_number}" if page_number < 9 else None,
+                "DATA": page_data,
+            },
+        )
+
+    # paginator items() call gets an iterator of individual page items
+    if paging_variant == "attr":
+        paginator = client.paginated.task_skipped_errors(task_id)
+    elif paging_variant == "wrap":
+        paginator = Paginator.wrap(client.task_skipped_errors)(task_id)
+    else:
+        raise NotImplementedError
+    count = 0
+    for item in paginator.items():
+        count += 1
+        assert item["DATA_TYPE"] == "skipped_error"
+
+    assert count == 1000

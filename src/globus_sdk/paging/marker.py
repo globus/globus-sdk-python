@@ -16,6 +16,7 @@ class MarkerPaginator(Paginator[PageT]):
         method: Callable[..., Any],
         *,
         items_key: Optional[str] = None,
+        marker_key: str = "marker",
         client_args: List[Any],
         client_kwargs: Dict[str, Any]
     ):
@@ -26,6 +27,10 @@ class MarkerPaginator(Paginator[PageT]):
             client_kwargs=client_kwargs,
         )
         self.marker: Optional[str] = None
+        self.marker_key = marker_key
+
+    def _check_has_next_page(self, page: Dict[str, Any]) -> bool:
+        return bool(page.get("has_next_page", False))
 
     def pages(self) -> Iterator[PageT]:
         has_next_page = True
@@ -34,5 +39,18 @@ class MarkerPaginator(Paginator[PageT]):
                 self.client_kwargs["marker"] = self.marker
             current_page = self.method(*self.client_args, **self.client_kwargs)
             yield current_page
-            self.marker = current_page.get("marker")
-            has_next_page = current_page.get("has_next_page", False)
+            self.marker = current_page.get(self.marker_key)
+            has_next_page = self._check_has_next_page(current_page)
+
+
+class NullableMarkerPaginator(MarkerPaginator[PageT]):
+    """
+    A paginator which uses a ``marker`` from payloads and sets the ``marker`` query
+    param to page.
+
+    Unlike the base MarkerPaginator, it checks for a null marker to indicate an end to
+    pagination. (vs an explicit has_next_page key)
+    """
+
+    def _check_has_next_page(self, page: Dict[str, Any]) -> bool:
+        return page.get(self.marker_key) is not None
