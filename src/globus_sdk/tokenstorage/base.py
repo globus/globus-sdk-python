@@ -49,10 +49,16 @@ class FileAdapter(StorageAdapter, metaclass=abc.ABCMeta):
     @contextlib.contextmanager
     def user_only_umask(self) -> Iterator[None]:
         """
-        a context manager to deny rwx to Group and World, x to User
+        A context manager to deny rwx to Group and World, x to User
 
-        this does not create a file, but ensures that if a file is created while in the
-        context manager, its permissions will be correct on unix systems
+        This does not create a file, but ensures that if a file is created while in the
+        context manager, its permissions will be correct on unix systems.
+
+        .. note::
+
+            On Windows, this has no effect. To control the permissions on files used for
+            token storage, use ``%LOCALAPPDATA%`` or ``%APPDATA%``.
+            These directories should only be accessible to the current user.
         """
         old_umask = os.umask(0o177)
         try:
