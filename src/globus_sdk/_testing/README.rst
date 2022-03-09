@@ -124,9 +124,6 @@ override the builtin response sets, if names match.
     endpoint_id = str(uuid.uuid1())
     register_response_set(
         "foobar",
-        metadata={
-            "endpoint_id": endpoint_id,
-        },
         {
             "get_identities": {
                 "service": "auth",
@@ -138,6 +135,9 @@ override the builtin response sets, if names match.
                 "path": f"/operation/endpoint/{endpoint_id}/ls",
                 "json": {"foo": "bar"},
             },
+        },
+        metadata={
+            "endpoint_id": endpoint_id,
         },
     )
 
