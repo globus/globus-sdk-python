@@ -77,9 +77,6 @@ class BaseClient:
         self.transport = self.transport_class(**(transport_params or {}))
         log.debug(f"initialized transport of type {type(self.transport)}")
 
-        if not self.service_name and not base_url:
-            raise ValueError("Either service_name or base_url must be set")
-
         self.base_url = utils.slash_join(
             config.get_service_url(self.service_name, environment=self.environment)
             if base_url is None
