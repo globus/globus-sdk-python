@@ -68,18 +68,23 @@ def test_set_http_timeout(base_client):
         assert client.transport.http_timeout is None
 
 
-def test_set_app_name(base_client):
+@pytest.mark.parametrize("mode", ("init", "post_init"))
+def test_set_app_name(base_client, base_client_class, mode):
     """
     Sets app name, confirms results
     """
     # set app name
-    base_client.app_name = "SDK Test"
+    if mode == "post_init":
+        c = base_client
+        base_client.app_name = "SDK Test"
+    elif mode == "init":
+        c = base_client_class(app_name="SDK Test")
+    else:
+        raise NotImplementedError
+
     # confirm results
-    assert base_client.app_name == "SDK Test"
-    assert (
-        base_client.transport.user_agent
-        == f"{base_client.transport.BASE_USER_AGENT}/SDK Test"
-    )
+    assert c.app_name == "SDK Test"
+    assert c.transport.user_agent == f"{c.transport.BASE_USER_AGENT}/SDK Test"
 
 
 @pytest.mark.parametrize(
