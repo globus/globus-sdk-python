@@ -6,8 +6,8 @@ import pytest
 import responses
 
 import globus_sdk
-from globus_sdk._testing import load_response
-from tests.common import get_last_request, register_api_route_fixture_file
+from globus_sdk._testing import get_last_request, load_response
+from tests.common import register_api_route_fixture_file
 
 
 @pytest.fixture

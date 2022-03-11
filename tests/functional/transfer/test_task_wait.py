@@ -4,7 +4,8 @@ import pytest
 import responses
 
 import globus_sdk
-from tests.common import get_last_request, register_api_route_fixture_file
+from globus_sdk._testing import get_last_request
+from tests.common import register_api_route_fixture_file
 
 TASK1_ID = "b8872740-7edc-11ec-9f33-ed182a728dff"
 

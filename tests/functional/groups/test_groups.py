@@ -9,8 +9,8 @@ from globus_sdk import (
     GroupRequiredSignupFields,
     GroupVisibility,
 )
-from globus_sdk._testing import load_response
-from tests.common import get_last_request, register_api_route_fixture_file
+from globus_sdk._testing import get_last_request, load_response
+from tests.common import register_api_route_fixture_file
 
 
 def test_my_groups_simple(groups_client):

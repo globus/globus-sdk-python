@@ -1,7 +1,8 @@
 import pytest
 
 from globus_sdk import GCSAPIError, GuestCollectionDocument, MappedCollectionDocument
-from tests.common import get_last_request, register_api_route_fixture_file
+from globus_sdk._testing import get_last_request
+from tests.common import register_api_route_fixture_file
 
 
 def test_get_collection_list(client):

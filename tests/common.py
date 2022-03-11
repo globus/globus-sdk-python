@@ -25,13 +25,6 @@ GO_EP1_SERVER_ID = 207976
 # end constants
 
 
-def get_last_request():
-    try:
-        return responses.calls[-1].request
-    except IndexError:
-        return None
-
-
 def register_api_route(
     service, path, method=responses.GET, adding_headers=None, replace=False, **kwargs
 ):

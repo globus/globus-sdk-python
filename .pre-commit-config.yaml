@@ -44,3 +44,4 @@ repos:
         - types-docutils
         - types-jwt
         - types-requests
+        - responses  # signatures for code in `_testing`

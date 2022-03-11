@@ -5,11 +5,11 @@ import uuid
 import pytest
 
 import globus_sdk
+from globus_sdk._testing import get_last_request
 from tests.common import (
     GO_EP1_ID,
     GO_EP1_SERVER_ID,
     GO_EP2_ID,
-    get_last_request,
     register_api_route_fixture_file,
 )
 

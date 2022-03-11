@@ -3,8 +3,7 @@ import json
 import pytest
 
 import globus_sdk
-from globus_sdk._testing import load_response
-from tests.common import get_last_request
+from globus_sdk._testing import get_last_request, load_response
 
 
 @pytest.fixture
