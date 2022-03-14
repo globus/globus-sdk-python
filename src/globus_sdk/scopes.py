@@ -1,4 +1,6 @@
-from typing import List, Optional
+from typing import List, Union
+
+from globus_sdk import utils
 
 
 class ScopeBuilder:
@@ -10,17 +12,36 @@ class ScopeBuilder:
     :type resource_server: str
     :param known_scopes: A list of scope names to pre-populate on this instance. This
         will set attributes on the instance using the URN scope format.
-    :type known_scopes: list, optional
+    :type known_scopes: list of str, optional
+    :param known_url_scopes: A list of scope names to pre-populate on this instance.
+        This will set attributes on the instance using the URL scope format.
+    :type known_url_scopes: list of str, optional
     """
 
     def __init__(
-        self, resource_server: str, *, known_scopes: Optional[List[str]] = None
+        self,
+        resource_server: str,
+        *,
+        known_scopes: Union[List[str], str, None] = None,
+        known_url_scopes: Union[List[str], str, None] = None,
     ) -> None:
         self.resource_server = resource_server
-        self._known_scopes = known_scopes
-        if known_scopes:
-            for scope_name in known_scopes:
+        self._known_scopes = (
+            list(utils.safe_strseq_iter(known_scopes))
+            if known_scopes is not None
+            else []
+        )
+        self._known_url_scopes = (
+            list(utils.safe_strseq_iter(known_url_scopes))
+            if known_url_scopes is not None
+            else []
+        )
+        if self._known_scopes:
+            for scope_name in self._known_scopes:
                 setattr(self, scope_name, self.urn_scope_string(scope_name))
+        if self._known_url_scopes:
+            for scope_name in self._known_url_scopes:
+                setattr(self, scope_name, self.url_scope_string(scope_name))
 
     # custom __getattr__ instructs `mypy` that unknown attributes of a ScopeBuilder are
     # of type `str`, allowing for dynamic attribute names
