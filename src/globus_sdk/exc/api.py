@@ -129,7 +129,7 @@ class GlobusAPIError(GlobusError):
             log.debug("Error body was not parsed as JSON")
             return
         if not isinstance(json_data, dict):
-            log.warning(
+            log.warning(  # type: ignore[unreachable]
                 "Error body could not be parsed as JSON because it was not a dict"
             )
             return
