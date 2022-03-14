@@ -5,7 +5,7 @@ If your application needs to support Globus Connect Server version 4 and
 version 5, Globus Connect Personal, and Shared Endpoints, you may need to
 determine what type of endpoint or collection you are handling.
 
-The `Globus documentation site <docs.globus.org>`_ offers several references on
+The `Globus documentation site <https://docs.globus.org>`_ offers several references on
 this subject, including `a section on this exact subject matter
 <https://docs.globus.org/globus-connect-server/migrating-to-v5.4/application-migration/#determining_endpoint_or_collection_type>`_
 and Transfer API documentation `describing the different types of endpoints
@@ -58,10 +58,10 @@ one class, all as follows:
             endpoint or collection it is
             """
             if ep_doc.get("is_globus_connect") is True:
-                return EndpointType.GCP
+                return cls.GCP
 
             if ep_doc.get("non_functional") is True:
-                return EndpointType.GCSV5_ENDPOINT
+                return cls.GCSV5_ENDPOINT
 
             has_host = ep_doc.get("host_endpoint_id") is not None
 
@@ -77,11 +77,11 @@ one class, all as follows:
 
             if gcsv5:
                 if has_host:
-                    return EndpointType.GUEST_COLLECTION
+                    return cls.GUEST_COLLECTION
                 else:
-                    return EndpointType.MAPPED_COLLECTION
+                    return cls.MAPPED_COLLECTION
 
-            elif shared:
-                return EndpointType.SHARE
+            elif has_host:
+                return cls.SHARE
 
-            return EndpointType.NON_GCSV5_ENDPOINT
+            return cls.NON_GCSV5_ENDPOINT
