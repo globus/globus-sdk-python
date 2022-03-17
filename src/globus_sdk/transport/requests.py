@@ -1,7 +1,8 @@
+import contextlib
 import logging
 import random
 import time
-from typing import Any, Callable, Dict, List, Optional, Union, cast
+from typing import Any, Callable, Dict, Iterator, List, Optional, Union, cast
 
 import requests
 
@@ -70,7 +71,7 @@ class RequestsTransport:
         defaults to 60s but can be set via the ``GLOBUS_SDK_HTTP_TIMEOUT`` environment
         variable. Any value set via this parameter takes precedence over the environment
         variable.
-    :type http_timeout: int, optional
+    :type http_timeout: float, optional
     :param retry_backoff: A function which determines how long to sleep between calls
         based on the RetryContext. Defaults to exponential backoff with jitter based on
         the context ``attempt`` number.
@@ -140,6 +141,81 @@ class RequestsTransport:
     @property
     def _headers(self) -> Dict[str, str]:
         return {"Accept": "application/json", "User-Agent": self.user_agent}
+
+    @contextlib.contextmanager
+    def tune(
+        self,
+        *,
+        verify_ssl: Optional[bool] = None,
+        http_timeout: Optional[float] = None,
+        retry_backoff: Optional[Callable[[RetryContext], float]] = None,
+        max_sleep: Optional[int] = None,
+        max_retries: Optional[int] = None,
+    ) -> Iterator[None]:
+        """
+        Temporarily adjust some of the request sending settings of the transport.
+        This method works as a context manager, and will reset settings to their
+        original values after it exits.
+
+        In particular, this can be used to temporarily adjust request-sending minutiae
+        like the ``http_timeout`` used.
+
+        :param verify_ssl: Explicitly enable or disable SSL verification
+        :type verify_ssl: bool, optional
+        :param http_timeout: Explicitly set an HTTP timeout value in seconds
+        :type http_timeout: float, optional
+        :param retry_backoff: A function which determines how long to sleep between
+            calls based on the RetryContext
+        :type retry_backoff: callable, optional
+        :param max_sleep: The maximum sleep time between retries (in seconds). If the
+            computed sleep time or the backoff requested by a retry check exceeds this
+            value, this amount of time will be used instead
+        :type max_sleep: int, optional
+        :param max_retries: The maximum number of retries allowed by this transport
+        :type max_retries: int, optional
+
+        **Examples**
+
+        This can be used with any client class to temporarily set values in the context
+        of one or more HTTP requests. To increase the HTTP request timeout from the
+        default of 60 to 120 seconds,
+
+        >>> client = ...  # any client class
+        >>> with client.transport.tune(http_timeout=120):
+        >>>     foo = client.get_foo()
+
+        or to disable retries (note that this also disables the retry on
+        expired-and-refreshed credentials):
+
+        >>> client = ...  # any client class
+        >>> with client.transport.tune(max_retries=0):
+        >>>     foo = client.get_foo()
+        """
+        saved_settings = (
+            self.verify_ssl,
+            self.http_timeout,
+            self.retry_backoff,
+            self.max_sleep,
+            self.max_retries,
+        )
+        if verify_ssl is not None:
+            self.verify_ssl = verify_ssl
+        if http_timeout is not None:
+            self.http_timeout = http_timeout
+        if retry_backoff is not None:
+            self.retry_backoff = retry_backoff
+        if max_sleep is not None:
+            self.max_sleep = max_sleep
+        if max_retries is not None:
+            self.max_retries = max_retries
+        yield
+        (
+            self.verify_ssl,
+            self.http_timeout,
+            self.retry_backoff,
+            self.max_sleep,
+            self.max_retries,
+        ) = saved_settings
 
     def _encode(
         self,

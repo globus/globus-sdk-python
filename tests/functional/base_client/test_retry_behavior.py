@@ -25,6 +25,26 @@ def test_retry_on_transient_error(client, mocksleep, error_status):
     mocksleep.assert_called_once()
 
 
+def test_retry_disabled_via_tune(client, mocksleep):
+    load_response(
+        RegisteredResponse(
+            path="https://foo.api.globus.org/bar", status=500, body="Uh-oh!"
+        )
+    )
+    load_response(
+        RegisteredResponse(path="https://foo.api.globus.org/bar", json={"baz": 1})
+    )
+
+    # the error is seen by the client (automatic retry does not hide it)
+    with pytest.raises(globus_sdk.GlobusAPIError) as excinfo:
+        with client.transport.tune(max_retries=0):
+            client.get("/bar")
+    assert excinfo.value.http_status == 500
+
+    # there was a no sleep (retry was not triggered)
+    mocksleep.assert_not_called()
+
+
 def test_retry_on_network_error(client, mocksleep):
     # set the response to be a requests NetworkError -- responses will raise the
     # exception when the call is made
