@@ -35,9 +35,6 @@ registration.
 Make sure that the "Native App" checkbox is unchecked, and list
 ``http://localhost:5000/login`` in the "Redirect URIs".
 
-Set the Scopes to ``openid``, ``profile``, ``email``,
-``urn:globus:auth:scope:transfer.api.globus.org:all``.
-
 On the projects page, expand the client description and click "Generate
 Secret".
 Save the resulting secret a file named ``example_app.conf``, along with the client ID:

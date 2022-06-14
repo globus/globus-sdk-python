@@ -24,8 +24,6 @@ To do so, follow the relevant documentation for the
 registration.
 
 During registration, make sure that the "Native App" checkbox is unchecked.
-You will typically want your scopes to be ``openid``, ``profile``, ``email``,
-and ``urn:globus:auth:scope:transfer.api.globus.org:all``.
 
 Once your client is created, expand it on the Projects page and click "Generate
 Secret". Save the secret in a secure location accessible from your code.
