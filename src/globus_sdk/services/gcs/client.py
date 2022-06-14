@@ -5,7 +5,12 @@ from globus_sdk import client, paging, response, scopes, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 
-from .data import CollectionDocument, GCSRoleDocument, StorageGatewayDocument
+from .data import (
+    CollectionDocument,
+    GCSRoleDocument,
+    StorageGatewayDocument,
+    UserCredentialDocument,
+)
 from .errors import GCSAPIError
 from .response import IterableGCSResponse, UnpackingGCSResponse
 
@@ -96,6 +101,27 @@ class GCSClient(client.BaseClient):
         more information.
         """
         return scopes.GCSCollectionScopeBuilder(str(collection_id))
+
+    @staticmethod
+    def connector_id_to_name(connector_id: UUIDLike) -> str:
+        """
+        Helper that converts a given connector_id into a human readable
+        connector name string.
+        """
+        connector_dict = {
+            "7c100eae-40fe-11e9-95a3-9cb6d0d9fd63": "Box",
+            "1b6374b0-f6a4-4cf7-a26f-f262d9c6ca72": "Ceph",
+            "56366b96-ac98-11e9-abac-9cb6d0d9fd63": "Google Cloud Storage",
+            "976cf0cf-78c3-4aab-82d2-7c16adbcc281": "Google Drive",
+            "145812c8-decc-41f1-83cf-bb2a85a2a70b": "POSIX",
+            "7643e831-5f6c-4b47-a07f-8ee90f401d23": "S3",
+            "7e3f3f5e-350c-4717-891a-2f451c24b0d4": "SpectraLogic BlackPearl",
+        }
+
+        if str(connector_id) in connector_dict:
+            return connector_dict[str(connector_id)]
+        else:
+            return "Unknown Connector"
 
     #
     # collection methods
@@ -418,7 +444,7 @@ class GCSClient(client.BaseClient):
         POST /roles
 
         :param data: Data in the format of a Role document, it is recommended
-            to use the `RoleDocumment` class to construct this data.
+            to use the `GCSRoleDocumment` class to construct this data.
         :type data: dict
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
@@ -461,4 +487,110 @@ class GCSClient(client.BaseClient):
         :type query_params: dict, optional
         """
         path = f"/roles/{role_id}"
+        return self.delete(path, query_params=query_params)
+
+    @_gcsdoc("Get User Credential list", "openapi_User_Credentials/#getUserCredentials")
+    def get_user_credential_list(
+        self,
+        storage_gateway: Optional[UUIDLike] = None,
+        query_params: Optional[Dict[str, Any]] = None,
+    ) -> IterableGCSResponse:
+        """
+        GET /user_credentials
+
+        :param storage_gateway: UUID of a storage gateway to limit results to
+        :type storage_gateway
+        :param query_params: Additional passthrough query parameters
+        :type query_params: dict, optional
+        """
+        if query_params is None:
+            query_params = {}
+        if storage_gateway is not None:
+            query_params["storage_gateway"] = storage_gateway
+
+        path = "/user_credentials"
+        return IterableGCSResponse(self.get(path, query_params=query_params))
+
+    @_gcsdoc("Create a User Credential", "openapi_User_Credentials/#postUserCredential")
+    def create_user_credential(
+        self,
+        data: Union[Dict[str, Any], UserCredentialDocument],
+        query_params: Optional[Dict[str, Any]] = None,
+    ) -> UnpackingGCSResponse:
+        """
+        POST /user_credentials
+
+        :param data: Data in the format of a UserCredential document, it is
+            recommended to use the `UserCredential` class to construct this
+        :type data: dict
+        :param query_params: Additional passthrough query parameters
+        :type query_params: dict, optional
+        """
+        path = "/user_credentials"
+        return UnpackingGCSResponse(
+            self.post(path, data=data, query_params=query_params),
+            "user_credential",
+        )
+
+    @_gcsdoc("Get a User Credential", "openapi_User_Credentials/#getUserCredential")
+    def get_user_credential(
+        self,
+        user_credential_id: UUIDLike,
+        query_params: Optional[Dict[str, Any]] = None,
+    ) -> UnpackingGCSResponse:
+        """
+        GET /user_credentials/{user_credential_id}
+
+        :param user_credential_id: UUID for the UserCredential to be gotten
+        :type user_credential_id: str or UUID
+        :param query_params: Additional passthrough query parameters
+        :type query_params: dict, optional
+        """
+        path = f"/user_credentials/{user_credential_id}"
+        return UnpackingGCSResponse(
+            self.get(path, query_params=query_params), "user_credential"
+        )
+
+    @_gcsdoc(
+        "Update a User Credential", "openapi_User_Credentials/#patchUserCredential"
+    )
+    def update_user_credential(
+        self,
+        user_credential_id: UUIDLike,
+        data: Union[Dict[str, Any], UserCredentialDocument],
+        query_params: Optional[Dict[str, Any]] = None,
+    ) -> UnpackingGCSResponse:
+        """
+        PATCH /user_credentials/{user_credential_id}
+
+        :param user_credential_id: UUID for the UserCredential to be updated
+        :type user_credential_id: str or UUID
+        :param data: Data in the format of a UserCredential document, it is
+            recommended to use the `UserCredential` class to construct this
+        :type data: dict
+        :param query_params: Additional passthrough query parameters
+        :type query_params: dict, optional
+        """
+        path = f"/user_credentials/{user_credential_id}"
+        return UnpackingGCSResponse(
+            self.patch(path, data=data, query_params=query_params), "user_credential"
+        )
+
+    @_gcsdoc(
+        "Delete a User Credential", "openapi_User_Credentials/#deleteUserCredential"
+    )
+    def delete_user_credential(
+        self,
+        user_credential_id: UUIDLike,
+        query_params: Optional[Dict[str, Any]] = None,
+    ) -> response.GlobusHTTPResponse:
+        """
+        DELETE /user_credentials/{user_credential_id}
+
+        :param user_credential_id: UUID for the UserCredential to be deleted
+        :type user_credential_id: str or UUID
+        :param query_params: Additional passthrough query parameters
+        :type query_params: dict, optional
+        """
+        path = f"/user_credentials/{user_credential_id}"
         return self.delete(path, query_params=query_params)

@@ -21,6 +21,7 @@ from .storage_gateway import (
     StorageGatewayDocument,
     StorageGatewayPolicies,
 )
+from .user_credential import UserCredentialDocument
 
 __all__ = (
     "MappedCollectionDocument",
@@ -42,4 +43,5 @@ __all__ = (
     "ActiveScaleStoragePolicies",
     "IrodsStoragePolicies",
     "HPSSStoragePolicies",
+    "UserCredentialDocument",
 )

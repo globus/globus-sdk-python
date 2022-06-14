@@ -19,6 +19,7 @@ from .data import (
     S3StoragePolicies,
     StorageGatewayDocument,
     StorageGatewayPolicies,
+    UserCredentialDocument,
 )
 from .errors import GCSAPIError
 from .response import IterableGCSResponse, UnpackingGCSResponse
@@ -47,4 +48,5 @@ __all__ = (
     "GCSAPIError",
     "IterableGCSResponse",
     "UnpackingGCSResponse",
+    "UserCredentialDocument",
 )
