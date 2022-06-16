@@ -1,7 +1,7 @@
 import json
 
 from globus_sdk._testing import get_last_request, load_response
-from globus_sdk.services.gcs import UserCredentialDocument
+from globus_sdk import UserCredentialDocument
 
 
 def test_get_user_credential_list(client):

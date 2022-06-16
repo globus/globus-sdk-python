@@ -103,10 +103,13 @@ class GCSClient(client.BaseClient):
         return scopes.GCSCollectionScopeBuilder(str(collection_id))
 
     @staticmethod
-    def connector_id_to_name(connector_id: UUIDLike) -> str:
+    def connector_id_to_name(connector_id: UUIDLike) -> Optional[str]:
         """
         Helper that converts a given connector_id into a human readable
-        connector name string.
+        connector name string. Will return None if the id is not recognized.
+
+        Note that it is possible for valid connector_ids to be unrecognized
+        due to differing SDK and GCS versions.
         """
         connector_dict = {
             "7c100eae-40fe-11e9-95a3-9cb6d0d9fd63": "Box",
@@ -117,11 +120,7 @@ class GCSClient(client.BaseClient):
             "7643e831-5f6c-4b47-a07f-8ee90f401d23": "S3",
             "7e3f3f5e-350c-4717-891a-2f451c24b0d4": "SpectraLogic BlackPearl",
         }
-
-        if str(connector_id) in connector_dict:
-            return connector_dict[str(connector_id)]
-        else:
-            return "Unknown Connector"
+        return connector_dict.get(str(connector_id))
 
     #
     # collection methods

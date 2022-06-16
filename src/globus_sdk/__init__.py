@@ -77,6 +77,7 @@ _LAZY_IMPORT_TABLE = {
         "ActiveScaleStoragePolicies",
         "IrodsStoragePolicies",
         "HPSSStoragePolicies",
+        "UserCredentialDocument",
     },
     "services.groups": {
         "BatchMembershipActions",
@@ -155,6 +156,7 @@ if typing.TYPE_CHECKING or sys.version_info < (3, 7):
     from .services.gcs import ActiveScaleStoragePolicies
     from .services.gcs import IrodsStoragePolicies
     from .services.gcs import HPSSStoragePolicies
+    from .services.gcs import UserCredentialDocument
     from .services.groups import BatchMembershipActions
     from .services.groups import GroupMemberVisibility
     from .services.groups import GroupPolicies
@@ -236,6 +238,7 @@ __all__ = (
     "ActiveScaleStoragePolicies",
     "IrodsStoragePolicies",
     "HPSSStoragePolicies",
+    "UserCredentialDocument",
     "BatchMembershipActions",
     "GroupMemberVisibility",
     "GroupPolicies",
