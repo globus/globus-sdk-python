@@ -352,7 +352,6 @@ TransferScopes = ScopeBuilder(
     known_scopes=[
         "all",
         "gcp_install",
-        "monitor_ongoing",
     ],
 )
 """Globus Transfer scopes.
