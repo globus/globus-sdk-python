@@ -22,6 +22,5 @@ RESPONSES = ResponseSet(
             },
             "success": True,
         },
-        metadata={"index_id": INDEX_ID, "identity_id": IDENTITY_ID, "role_id": ROLE_ID},
     ),
 )

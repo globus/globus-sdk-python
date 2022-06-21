@@ -46,8 +46,18 @@ class RegisteredResponse:
             headers = {"Content-Type": "application/json"}
         self.headers = headers
 
-        self.metadata = metadata or {}
+        self._metadata = metadata
         self.kwargs = kwargs
+
+        self.parent: Optional["ResponseSet"] = None
+
+    @property
+    def metadata(self) -> Dict[str, Any]:
+        if self._metadata is not None:
+            return self._metadata
+        if self.parent is not None:
+            return self.parent.metadata
+        return {}
 
     def add(self) -> "RegisteredResponse":
         kwargs: Dict[str, Any] = {
@@ -65,13 +75,21 @@ class RegisteredResponse:
 
 
 class ResponseSet:
+    """
+    A collection of responses. On init, this implicitly sets the parent of
+    any response objects to this response set. On register() it does not do
+    so automatically.
+    """
+
     def __init__(
         self,
         metadata: Optional[Dict[str, Any]] = None,
         **kwargs: RegisteredResponse,
     ) -> None:
-        self.metadata = metadata
+        self.metadata = metadata or {}
         self._data: Dict[str, RegisteredResponse] = {**kwargs}
+        for res in self._data.values():
+            res.parent = self
 
     def register(self, case: str, value: RegisteredResponse) -> None:
         self._data[case] = value

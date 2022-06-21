@@ -33,10 +33,5 @@ RESPONSES = ResponseSet(
                 },
             ]
         },
-        metadata={
-            "index_id": INDEX_ID,
-            "identity_ids": IDENTITY_IDS,
-            "role_ids": ROLE_IDS,
-        },
     ),
 )

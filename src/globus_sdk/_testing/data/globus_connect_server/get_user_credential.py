@@ -29,6 +29,5 @@ RESPONSES = ResponseSet(
             "has_next_page": False,
             "http_response_code": 200,
         },
-        metadata={"id": CREDENTIAL_ID},
     ),
 )

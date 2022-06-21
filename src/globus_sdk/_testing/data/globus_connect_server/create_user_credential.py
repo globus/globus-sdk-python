@@ -30,6 +30,5 @@ RESPONSES = ResponseSet(
             "http_response_code": 201,
             "message": f"Created User Credential {CREDENTIAL_ID}",
         },
-        metadata={"id": CREDENTIAL_ID},
     ),
 )

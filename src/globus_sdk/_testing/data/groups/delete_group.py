@@ -9,6 +9,5 @@ RESPONSES = ResponseSet(
         path=f"/groups/{GROUP_ID}",
         method="DELETE",
         json=BASE_GROUP_DOC,
-        metadata={"group_id": GROUP_ID},
     ),
 )

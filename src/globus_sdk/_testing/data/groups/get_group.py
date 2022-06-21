@@ -8,6 +8,5 @@ RESPONSES = ResponseSet(
         service="groups",
         path=f"/groups/{GROUP_ID}",
         json=BASE_GROUP_DOC,
-        metadata={"group_id": GROUP_ID},
     ),
 )

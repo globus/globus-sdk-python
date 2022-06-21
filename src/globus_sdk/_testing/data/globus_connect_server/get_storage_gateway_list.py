@@ -60,6 +60,5 @@ RESPONSES = ResponseSet(
                 },
             ],
         },
-        metadata={"ids": GATEWAY_IDS},
     ),
 )

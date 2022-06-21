@@ -117,6 +117,5 @@ RESPONSES = ResponseSet(
         path=f"/jobs/{JOB_ID}",
         method="GET",
         json=JOB_JSON,
-        metadata={"job_id": JOB_ID},
     ),
 )

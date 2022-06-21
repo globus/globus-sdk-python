@@ -30,6 +30,5 @@ RESPONSES = ResponseSet(
             "offset": 0,
             "total": 10,
         },
-        metadata={"index_id": INDEX_ID},
     ),
 )

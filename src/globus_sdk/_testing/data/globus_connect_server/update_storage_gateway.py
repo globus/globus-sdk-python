@@ -1,16 +1,16 @@
 from globus_sdk._testing.models import RegisteredResponse, ResponseSet
 
-_common_meta = {
+metadata = {
     "id": "daa09846-eb92-11e9-b89c-9cb6d0d9fd63",
     "display_name": "example gateway 1",
 }
 
 RESPONSES = ResponseSet(
-    metadata=_common_meta,
+    metadata=metadata,
     default=RegisteredResponse(
         service="gcs",
         method="PATCH",
-        path=f"/storage_gateways/{_common_meta['id']}",
+        path=f"/storage_gateways/{metadata['id']}",
         json={
             "DATA_TYPE": "result#1.0.0",
             "http_response_code": 200,
@@ -20,8 +20,8 @@ RESPONSES = ResponseSet(
             "data": [
                 {
                     "DATA_TYPE": "storage_gateway#1.0.0",
-                    "id": _common_meta["id"],
-                    "display_name": _common_meta["display_name"],
+                    "id": metadata["id"],
+                    "display_name": metadata["display_name"],
                     "connector_id": "145812c8-decc-41f1-83cf-bb2a85a2a70b",
                     "require_high_assurance": False,
                     "high_assurance": False,
@@ -43,6 +43,5 @@ RESPONSES = ResponseSet(
                 }
             ],
         },
-        metadata=_common_meta,
     ),
 )

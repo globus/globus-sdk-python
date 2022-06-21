@@ -6,15 +6,12 @@ UPDATED_NAME = "updated name"
 UPDATED_JSON = dict(JOB_JSON)
 UPDATED_JSON["name"] = UPDATED_NAME  # mypy complains if this is onelinerized
 
-metadata = {"job_id": JOB_ID, "name": UPDATED_NAME}
-
 RESPONSES = ResponseSet(
-    metadata=metadata,
+    metadata={"job_id": JOB_ID, "name": UPDATED_NAME},
     default=RegisteredResponse(
         service="timer",
         path=f"/jobs/{JOB_ID}",
         method="PATCH",
         json=UPDATED_JSON,
-        metadata=metadata,
     ),
 )

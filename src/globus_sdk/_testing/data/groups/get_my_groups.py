@@ -164,18 +164,16 @@ member_ids = {
     group["id"]: [m["identity_id"] for m in group["my_memberships"]]
     for group in raw_data
 }
-common_metadata = {
-    "group_ids": group_ids,
-    "group_names": group_names,
-    "member_ids": member_ids,
-}
 
 RESPONSES = ResponseSet(
-    metadata=common_metadata,
+    metadata={
+        "group_ids": group_ids,
+        "group_names": group_names,
+        "member_ids": member_ids,
+    },
     default=RegisteredResponse(
         service="groups",
         path="/groups/my_groups",
         json=raw_data,
-        metadata=common_metadata,
     ),
 )
