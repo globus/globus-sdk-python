@@ -3,7 +3,6 @@ from unittest import mock
 
 import pytest
 import requests
-import six
 
 from globus_sdk.paging import HasNextPaginator
 from globus_sdk.response import GlobusHTTPResponse
@@ -35,7 +34,7 @@ class PagingSimulator:
 
         # make the simulated response
         response = requests.Response()
-        response._content = six.b(json.dumps(data))
+        response._content = json.dumps(data).encode()
         response.headers["Content-Type"] = "application/json"
         return IterableTransferResponse(GlobusHTTPResponse(response, mock.Mock()))
 
