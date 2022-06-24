@@ -5,42 +5,24 @@ import uuid
 import pytest
 
 import globus_sdk
-from globus_sdk._testing import get_last_request
-from tests.common import (
-    GO_EP1_ID,
-    GO_EP1_SERVER_ID,
-    GO_EP2_ID,
-    register_api_route_fixture_file,
-)
+from globus_sdk._testing import get_last_request, load_response
+from tests.common import GO_EP1_ID, register_api_route_fixture_file
 
 
 def test_get_endpoint(client):
     """
-    Gets endpoint on go#ep1 and go#ep2, validate results
+    Gets endpoint on fixture, validate results
     """
-    # register get_endpoint mock data
-    register_api_route_fixture_file(
-        "transfer", f"/endpoint/{GO_EP1_ID}", "get_endpoint_goep1.json"
-    )
-    register_api_route_fixture_file(
-        "transfer", f"/endpoint/{GO_EP2_ID}", "get_endpoint_goep2.json"
-    )
+    meta = load_response(client.get_endpoint).metadata
+    epid = meta["endpoint_id"]
 
-    # load the tutorial endpoint documents
-    ep1_doc = client.get_endpoint(GO_EP1_ID)
-    ep2_doc = client.get_endpoint(GO_EP2_ID)
+    # load the endpoint document
+    ep_doc = client.get_endpoint(epid)
 
-    # check that their contents are at least basically sane (i.e. we didn't
-    # get empty dicts or something)
-    assert "display_name" in ep1_doc
-    assert "display_name" in ep2_doc
-    assert "canonical_name" in ep1_doc
-    assert "canonical_name" in ep2_doc
-
-    # double check a couple of fields, consider this done
-    assert ep1_doc["canonical_name"] == "go#ep1"
-    assert ep1_doc["DATA"][0]["id"] == GO_EP1_SERVER_ID
-    assert ep2_doc["canonical_name"] == "go#ep2"
+    # check that the contents are basically OK
+    assert ep_doc["DATA_TYPE"] == "endpoint"
+    assert ep_doc["id"] == epid
+    assert "display_name" in ep_doc
 
 
 def test_update_endpoint(client):
