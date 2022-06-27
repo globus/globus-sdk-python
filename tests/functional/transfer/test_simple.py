@@ -25,16 +25,15 @@ def test_get_endpoint(client):
     assert "display_name" in ep_doc
 
 
-def test_update_endpoint(client):
-    epid = uuid.uuid1()
-    register_api_route_fixture_file(
-        "transfer", f"/endpoint/{epid}", "ep_update.json", method="PUT"
-    )
+@pytest.mark.parametrize("epid_type", [uuid.UUID, str])
+def test_update_endpoint(epid_type, client):
+    meta = load_response(client.update_endpoint).metadata
+    epid = meta["endpoint_id"]
 
-    # NOTE: pass epid as UUID, not str
-    # requires that TransferClient correctly translates it
+    # NOTE: pass epid as UUID or str
+    # requires that TransferClient correctly translates UUID
     update_data = {"display_name": "Updated Name", "description": "Updated description"}
-    update_doc = client.update_endpoint(epid, update_data)
+    update_doc = client.update_endpoint(epid_type(epid), update_data)
 
     # make sure response is a successful update
     assert update_doc["DATA_TYPE"] == "result"
@@ -49,10 +48,8 @@ def test_update_endpoint_rewrites_activation_servers(client):
     """
     Update endpoint, validate results
     """
-    epid = "example-id"
-    register_api_route_fixture_file(
-        "transfer", f"/endpoint/{epid}", "ep_create.json", method="PUT"
-    )
+    meta = load_response(client.update_endpoint).metadata
+    epid = meta["endpoint_id"]
 
     # sending myproxy_server implicitly adds oauth_server=null
     update_data = {"myproxy_server": "foo"}
@@ -81,9 +78,7 @@ def test_update_endpoint_invalid_activation_servers(client):
 
 
 def test_create_endpoint(client):
-    register_api_route_fixture_file(
-        "transfer", "/endpoint", "ep_create.json", method="POST"
-    )
+    load_response(client.create_endpoint)
 
     create_data = {"display_name": "Name", "description": "desc"}
     create_doc = client.create_endpoint(create_data)
