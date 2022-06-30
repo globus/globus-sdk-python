@@ -39,19 +39,14 @@ policy documents passed to create the user credential.
 
     # The scope the client will need, note that primary scope is for the endpoint,
     # but it has a dependency on the mapped collection's data_access scope
-    scope = scopes.GCSEndpointScopeBuilder(
-        endpoint_id).make_mutable("manage_collections")
-    scope.add_dependency(
-        scopes.GCSCollectionScopeBuilder(mapped_collection_id).data_access)
+    scope = scopes.GCSEndpointScopeBuilder(endpoint_id).make_mutable("manage_collections")
+    scope.add_dependency(scopes.GCSCollectionScopeBuilder(mapped_collection_id).data_access)
 
     # Build a GCSClient to act as the client by using a ClientCredentialsAuthorizor
     confidential_client = globus_sdk.ConfidentialAppAuthClient(
-        client_id=client_id,
-        client_secret=client_secret
+        client_id=client_id, client_secret=client_secret
     )
-    authorizer = globus_sdk.ClientCredentialsAuthorizer(
-        confidential_client, scopes=scope
-    )
+    authorizer = globus_sdk.ClientCredentialsAuthorizer(confidential_client, scopes=scope)
     client = globus_sdk.GCSClient(endpoint_hostname, authorizer=authorizer)
 
     # The identity creating the guest collection must have a user credential on
