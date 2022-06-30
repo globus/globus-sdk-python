@@ -16,3 +16,4 @@ Each of these pages contains an example of a piece of SDK functionality.
    recursive_ls
    endpoint_type_enum
    timer_operations
+   guest_collection_creation
