@@ -186,7 +186,9 @@ else:
         for modname, items in _LAZY_IMPORT_TABLE.items():
             if name in items:
                 mod = importlib.import_module("." + modname, __name__)
-                return getattr(mod, name)
+                value = getattr(mod, name)
+                setattr(sys.modules[__name__], name, value)
+                return value
 
         raise AttributeError(f"module {__name__} has no attribute {name}")
 
