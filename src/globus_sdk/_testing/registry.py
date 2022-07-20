@@ -1,6 +1,8 @@
 import importlib
 from typing import Any, Dict, Optional, Union
 
+import responses
+
 import globus_sdk
 
 from .models import RegisteredResponse, ResponseSet
@@ -71,16 +73,23 @@ def get_response_set(set_id: Any) -> ResponseSet:
     return module.RESPONSES
 
 
-def load_response_set(set_id: Any) -> ResponseSet:
+def load_response_set(
+    set_id: Any, *, requests_mock: Optional[responses.RequestsMock] = None
+) -> ResponseSet:
     if isinstance(set_id, ResponseSet):
-        return set_id.activate_all()
+        return set_id.activate_all(requests_mock=requests_mock)
     ret = get_response_set(set_id)
-    ret.activate_all()
+    ret.activate_all(requests_mock=requests_mock)
     return ret
 
 
-def load_response(set_id: Any, *, case: str = "default") -> RegisteredResponse:
+def load_response(
+    set_id: Any,
+    *,
+    case: str = "default",
+    requests_mock: Optional[responses.RequestsMock] = None,
+) -> RegisteredResponse:
     if isinstance(set_id, RegisteredResponse):
-        return set_id.add()
+        return set_id.add(requests_mock=requests_mock)
     rset = get_response_set(set_id)
-    return rset.activate(case)
+    return rset.activate(case, requests_mock=requests_mock)

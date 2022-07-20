@@ -34,6 +34,43 @@ guaranteeing that requests are sent to the production hostnames:
         responses.stop()
         responses.reset()
 
+Methods and Classes
+-------------------
+
+Users of ``globus_sdk._testing`` have the following methods and classes
+available:
+
+``get_last_request``
+    Get the last request which was received, or None if there were no requests.
+
+``ResponseSet``
+    A collection of mock responses, potentially all meant to be activated together
+    (``.activate_all()``), or to be individually selected as options/alternatives
+    (``.activate("case_foo")``).
+
+``RegisteredResponse``
+    A mock response along with descriptive metadata to let a fixture "pass data
+    forward" to the consuming test cases. (e.g. a ``GET Task`` fixture which
+    shares the ``task_id`` it uses with consumers via ``.metadata["task_id"]``)
+
+``load_response_set``
+    Optionally lookup a response set and activate all of its responses. If
+    passed a ``ResponseSet``, activate it, otherwise the first argument is an
+    ID used for lookup.
+
+``load_response``
+    Optionally lookup and activate an individual response. If given a
+    ``RegisteredResponse``, activate it, otherwise the first argument is an ID
+    of a ``ResponseSet`` used for lookup. By default, looks for the response
+    registered under ``case="default"``.
+
+``get_response_set``
+    Lookup a ``ResponseSet`` as in ``load_response_set``, but without
+    activating it.
+
+``register_response_set``
+    Register a new ``ResponseSet`` object.
+
 Usage
 -----
 
@@ -152,7 +189,7 @@ a tetstsuite run (e.g. as an autouse session-level fixture), for reference
 later in the testsuite.
 
 Loading Responses without Registering
--------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Because ``RegisteredResponse`` takes care of resolving ``"auth"`` to the Auth
 URL, ``"transfer"`` to the Transfer URL, and so forth, you might want to use
@@ -191,3 +228,31 @@ Consider the following example of a parametrized test which uses
 In this mode of usage, the response set registry is skipped altogether. It is
 not necessary to name or organize the response fixtures in a way that is usable
 outside of the specific test.
+
+Using non-default responses.RequestsMock objects
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default, all methods in ``globus_sdk._testing`` which converse with
+``responses`` use the default mock. This is the behavior offered by
+``responses.add(...)`` and similar methods.
+
+However, you can pass a custom ``RequestsMock`` if so desired to the following
+methods:
+
+* ``get_last_request``
+* ``load_response_set``
+* ``load_response``
+
+as a keyword argument, ``requests_mock``.
+e.g.
+
+
+.. code-block:: python
+
+    from globus_sdk._testing import get_last_request
+    import responses
+
+    custom_mock = responses.RequestsMock(...)
+    ...
+
+    get_last_request(requests_mock=custom_mock)

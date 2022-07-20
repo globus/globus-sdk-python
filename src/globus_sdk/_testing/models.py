@@ -59,7 +59,9 @@ class RegisteredResponse:
             return self.parent.metadata
         return {}
 
-    def add(self) -> "RegisteredResponse":
+    def add(
+        self, *, requests_mock: Optional[responses.RequestsMock] = None
+    ) -> "RegisteredResponse":
         kwargs: Dict[str, Any] = {
             "headers": self.headers,
             "match_querystring": None,
@@ -70,7 +72,10 @@ class RegisteredResponse:
         if self.body is not None:
             kwargs["body"] = self.body
 
-        responses.add(self.method, self.full_url, **kwargs)
+        if requests_mock is None:
+            responses.add(self.method, self.full_url, **kwargs)
+        else:
+            requests_mock.add(self.method, self.full_url, **kwargs)
         return self
 
 
@@ -106,12 +111,16 @@ class ResponseSet:
     def __iter__(self) -> Iterator[RegisteredResponse]:
         return iter(self._data.values())
 
-    def activate(self, case: str) -> RegisteredResponse:
-        return self.lookup(case).add()
+    def activate(
+        self, case: str, *, requests_mock: Optional[responses.RequestsMock] = None
+    ) -> RegisteredResponse:
+        return self.lookup(case).add(requests_mock=requests_mock)
 
-    def activate_all(self) -> "ResponseSet":
+    def activate_all(
+        self, *, requests_mock: Optional[responses.RequestsMock] = None
+    ) -> "ResponseSet":
         for x in self:
-            x.add()
+            x.add(requests_mock=requests_mock)
         return self
 
     @classmethod
