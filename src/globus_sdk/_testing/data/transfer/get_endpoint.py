@@ -1,8 +1,6 @@
-import uuid
-
 from globus_sdk._testing.models import RegisteredResponse, ResponseSet
 
-ENDPOINT_ID = str(uuid.UUID(int=1234))
+from ._common import ENDPOINT_ID
 
 ENDPOINT_DOC = {
     "DATA_TYPE": "endpoint",

@@ -36,7 +36,7 @@ def test_get_job(timer_client):
 def test_create_job(timer_client, start, interval):
     meta = load_response(timer_client.create_job).metadata
     transfer_client = TransferClient()
-    transfer_client.get_submission_id = lambda *_0, **_1: {"value": "mock"}
+    load_response(transfer_client.get_submission_id)
     transfer_data = TransferData(transfer_client, GO_EP1_ID, GO_EP2_ID)
     timer_job = TimerJob.from_transfer_data(transfer_data, start, interval)
     response = timer_client.create_job(timer_job)

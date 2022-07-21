@@ -1,17 +1,14 @@
 import pytest
 
 import globus_sdk
+from globus_sdk._testing import load_response
 from tests.common import GO_EP1_ID, GO_EP2_ID
 
 
 @pytest.fixture
 def client():
-    def _mock_submission_id(*args, **kwargs):
-        return {"value": "fooid"}
-
     tc = globus_sdk.TransferClient()
-    tc.get_submission_id = _mock_submission_id
-
+    load_response(tc.get_submission_id)
     return tc
 
 
