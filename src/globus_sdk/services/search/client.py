@@ -47,7 +47,7 @@ class SearchClient(client.BaseClient):
 
         >>> sc = globus_sdk.SearchClient(...)
         >>> index = sc.get_index(index_id)
-        >>> assert index['index_id'] == index_id
+        >>> assert index['id'] == index_id
         >>> print(index["display_name"],
         >>>       "(" + index_id + "):",
         >>>       index["description"])
