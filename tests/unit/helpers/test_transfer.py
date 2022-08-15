@@ -71,8 +71,8 @@ def test_transfer_add_item(transfer_data):
     assert data["source_path"] == source_path
     assert data["destination_path"] == dest_path
     assert not data["recursive"]
-    assert data["external_checksum"] is None
-    assert data["checksum_algorithm"] is None
+    assert "external_checksum" not in data
+    assert "checksum_algorithm" not in data
 
     # add recursive item
     tdata.add_item(source_path, dest_path, recursive=True)
@@ -83,8 +83,8 @@ def test_transfer_add_item(transfer_data):
     assert r_data["source_path"] == source_path
     assert r_data["destination_path"] == dest_path
     assert r_data["recursive"]
-    assert r_data["external_checksum"] is None
-    assert r_data["checksum_algorithm"] is None
+    assert "external_checksum" not in data
+    assert "checksum_algorithm" not in data
 
     # item with checksum
     checksum = "d577273ff885c3f84dadb8578bb41399"
@@ -145,9 +145,9 @@ def test_delete_init(delete_data):
     # init with params
     label = "label"
     params = {"param1": "value1", "param2": "value2"}
-    param_ddata = delete_data(label=label, recursive="True", additional_fields=params)
+    param_ddata = delete_data(label=label, recursive=True, additional_fields=params)
     assert param_ddata["label"] == label
-    assert param_ddata["recursive"] == "True"
+    assert param_ddata["recursive"]
     for par in params:
         assert param_ddata[par] == params[par]
 
@@ -272,20 +272,21 @@ def test_tranfer_sync_levels_result(transfer_data, sync_level, result):
         assert tdata["sync_level"] == result
 
 
-def test_skip_activation_check_supported(transfer_data, delete_data):
-    # default, false
-    tdata = transfer_data()
-    ddata = delete_data()
-    for data in [tdata, ddata]:
-        assert "skip_activation_check" in data
-        assert data["skip_activation_check"] is False
-
-    # can set to True
-    tdata = transfer_data(skip_activation_check=True)
-    ddata = delete_data(skip_activation_check=True)
-    for data in [tdata, ddata]:
+@pytest.mark.parametrize("datatype", ("transfer", "delete"))
+@pytest.mark.parametrize("value", (None, True, False))
+def test_skip_activation_check_supported(transfer_data, delete_data, datatype, value):
+    method = transfer_data if datatype == "transfer" else delete_data
+    if value is None:
+        # not present if not provided as a param or provided as explicit None
+        assert "skip_activation_check" not in method()
+    elif value:
+        data = method(skip_activation_check=True)
         assert "skip_activation_check" in data
         assert data["skip_activation_check"] is True
+    else:
+        data = method(skip_activation_check=False)
+        assert "skip_activation_check" in data
+        assert data["skip_activation_check"] is False
 
 
 def test_add_filter_rule(transfer_data):

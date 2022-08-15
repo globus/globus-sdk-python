@@ -15,6 +15,27 @@ if TYPE_CHECKING:
     import globus_sdk
 
 log = logging.getLogger(__name__)
+_StrSyncLevel = Literal["exists", "size", "mtime", "checksum"]
+_sync_level_dict: Dict[_StrSyncLevel, int] = {
+    "exists": 0,
+    "size": 1,
+    "mtime": 2,
+    "checksum": 3,
+}
+
+
+def _parse_sync_level(sync_level: Union[_StrSyncLevel, int]) -> int:
+    """
+    Map sync_level strings to known int values
+
+    Important: if more levels are added in the future you can always pass as an int
+    """
+    if isinstance(sync_level, str):
+        try:
+            sync_level = _sync_level_dict[sync_level]
+        except KeyError as err:
+            raise ValueError(f"Unrecognized sync_level {sync_level}") from err
+    return sync_level
 
 
 class TransferData(utils.PayloadWrapper):
@@ -34,7 +55,7 @@ class TransferData(utils.PayloadWrapper):
     :param transfer_client: A ``TransferClient`` instance which will be used to get a
         submission ID if one is not supplied. Should be the same instance that is used
         to submit the transfer.
-    :type transfer_client: :class:`TransferClient <globus_sdk.TransferClient>`
+    :type transfer_client: :class:`TransferClient <globus_sdk.TransferClient>` or None
     :param source_endpoint: The endpoint ID of the source endpoint
     :type source_endpoint: str or UUID
     :param destination_endpoint: The endpoint ID of the destination endpoint
@@ -158,20 +179,18 @@ class TransferData(utils.PayloadWrapper):
 
     def __init__(
         self,
-        transfer_client: "globus_sdk.TransferClient",
+        transfer_client: Optional["globus_sdk.TransferClient"],
         source_endpoint: UUIDLike,
         destination_endpoint: UUIDLike,
         *,
         label: Optional[str] = None,
         submission_id: Optional[UUIDLike] = None,
-        sync_level: Union[
-            Literal["exists", "size", "mtime", "checksum"], int, None
-        ] = None,
+        sync_level: Union[_StrSyncLevel, int, None] = None,
         verify_checksum: bool = False,
         preserve_timestamp: bool = False,
         encrypt_data: bool = False,
-        deadline: Optional[Union[datetime.datetime, str]] = None,
-        skip_activation_check: bool = False,
+        deadline: Union[datetime.datetime, str, None] = None,
+        skip_activation_check: Optional[bool] = None,
         skip_source_errors: bool = False,
         fail_on_quota_errors: bool = False,
         recursive_symlinks: str = "ignore",
@@ -184,42 +203,33 @@ class TransferData(utils.PayloadWrapper):
         super().__init__()
         log.info("Creating a new TransferData object")
         self["DATA_TYPE"] = "transfer"
-        self["submission_id"] = (
-            submission_id or transfer_client.get_submission_id()["value"]
-        )
-        self["source_endpoint"] = str(source_endpoint)
-        self["destination_endpoint"] = str(destination_endpoint)
-        self["verify_checksum"] = verify_checksum
-        self["preserve_timestamp"] = preserve_timestamp
-        self["encrypt_data"] = encrypt_data
-        self["recursive_symlinks"] = recursive_symlinks
-        self["skip_activation_check"] = skip_activation_check
-        self["skip_source_errors"] = skip_source_errors
-        self["fail_on_quota_errors"] = fail_on_quota_errors
-        self["delete_destination_extra"] = delete_destination_extra
-        self["notify_on_succeeded"] = notify_on_succeeded
-        self["notify_on_failed"] = notify_on_failed
-        self["notify_on_inactive"] = notify_on_inactive
-        if label is not None:
-            self["label"] = label
-        if deadline is not None:
-            self["deadline"] = str(deadline)
-
-        # map the sync_level (if it's a nice string) to one of the known int
-        # values
-        # you can get away with specifying an invalid sync level -- the API
-        # will just reject you with an error. This is kind of important: if
-        # more levels are added in the future you can pass as an int
-        if sync_level is not None:
-            if isinstance(sync_level, str):
-                sync_dict = {"exists": 0, "size": 1, "mtime": 2, "checksum": 3}
-                try:
-                    sync_level = sync_dict[sync_level]
-                except KeyError as err:
-                    raise ValueError(f"Unrecognized sync_level {sync_level}") from err
-            self["sync_level"] = sync_level
-
         self["DATA"] = []
+        self._set_optstrs(
+            source_endpoint=source_endpoint,
+            destination_endpoint=destination_endpoint,
+            label=label,
+            submission_id=submission_id
+            or (
+                transfer_client.get_submission_id()["value"]
+                if transfer_client
+                else None
+            ),
+            recursive_symlinks=recursive_symlinks,
+            deadline=deadline,
+        )
+        self._set_optbools(
+            verify_checksum=verify_checksum,
+            preserve_timestamp=preserve_timestamp,
+            encrypt_data=encrypt_data,
+            skip_activation_check=skip_activation_check,
+            skip_source_errors=skip_source_errors,
+            fail_on_quota_errors=fail_on_quota_errors,
+            delete_destination_extra=delete_destination_extra,
+            notify_on_succeeded=notify_on_succeeded,
+            notify_on_failed=notify_on_failed,
+            notify_on_inactive=notify_on_inactive,
+        )
+        self._set_value("sync_level", sync_level, callback=_parse_sync_level)
 
         for k, v in self.items():
             log.info("TransferData.%s = %s", k, v)
@@ -282,9 +292,11 @@ class TransferData(utils.PayloadWrapper):
             "source_path": source_path,
             "destination_path": destination_path,
             "recursive": recursive,
-            "external_checksum": external_checksum,
-            "checksum_algorithm": checksum_algorithm,
         }
+        if external_checksum is not None:
+            item_data["external_checksum"] = external_checksum
+        if checksum_algorithm is not None:
+            item_data["checksum_algorithm"] = checksum_algorithm
         if additional_fields is not None:
             item_data.update(additional_fields)
 

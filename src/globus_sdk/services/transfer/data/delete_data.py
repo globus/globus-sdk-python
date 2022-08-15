@@ -28,14 +28,15 @@ class DeleteData(utils.PayloadWrapper):
     :param transfer_client: A ``TransferClient`` instance which will be used to get a
         submission ID if one is not supplied. Should be the same instance that is used
         to submit the deletion.
-    :type transfer_client: :class:`TransferClient <globus_sdk.TransferClient>`
+    :type transfer_client: :class:`TransferClient <globus_sdk.TransferClient>` or None
     :param endpoint: The endpoint ID which is targeted by this deletion Task
     :type endpoint: str or UUID
     :param label: A string label for the Task
     :type label: str, optional
     :param submission_id: A submission ID value fetched via
         :meth:`get_submission_id <globus_sdk.TransferClient.get_submission_id>`.
-        Defaults to using ``transfer_client.get_submission_id``
+        Defaults to using ``transfer_client.get_submission_id`` if a ``transfer_client``
+        is provided
     :type submission_id: str or UUID, optional
     :param recursive: Recursively delete subdirectories on the target endpoint
       [default: ``False``]
@@ -86,14 +87,14 @@ class DeleteData(utils.PayloadWrapper):
 
     def __init__(
         self,
-        transfer_client: "globus_sdk.TransferClient",
+        transfer_client: Optional["globus_sdk.TransferClient"],
         endpoint: UUIDLike,
         *,
         label: Optional[str] = None,
         submission_id: Optional[UUIDLike] = None,
         recursive: bool = False,
         deadline: Optional[Union[str, datetime.datetime]] = None,
-        skip_activation_check: bool = False,
+        skip_activation_check: Optional[bool] = None,
         notify_on_succeeded: bool = True,
         notify_on_failed: bool = True,
         notify_on_inactive: bool = True,
@@ -101,25 +102,25 @@ class DeleteData(utils.PayloadWrapper):
     ) -> None:
         super().__init__()
         self["DATA_TYPE"] = "delete"
-        self["submission_id"] = (
-            str(submission_id)
-            if submission_id is not None
-            else transfer_client.get_submission_id()["value"]
-        )
-        self["endpoint"] = str(endpoint)
-        self["recursive"] = recursive
-        self["skip_activation_check"] = skip_activation_check
-        self["notify_on_succeeded"] = notify_on_succeeded
-        self["notify_on_failed"] = notify_on_failed
-        self["notify_on_inactive"] = notify_on_inactive
-
-        if label is not None:
-            self["label"] = label
-
-        if deadline is not None:
-            self["deadline"] = str(deadline)
-
         self["DATA"] = []
+        self._set_optstrs(
+            endpoint=endpoint,
+            label=label,
+            submission_id=submission_id
+            or (
+                transfer_client.get_submission_id()["value"]
+                if transfer_client
+                else None
+            ),
+            deadline=deadline,
+        )
+        self._set_optbools(
+            recursive=recursive,
+            skip_activation_check=skip_activation_check,
+            notify_on_succeeded=notify_on_succeeded,
+            notify_on_failed=notify_on_failed,
+            notify_on_inactive=notify_on_inactive,
+        )
 
         for k, v in self.items():
             log.info("DeleteData.%s = %s", k, v)
