@@ -123,6 +123,11 @@ class TimerJob(PayloadWrapper):
         transfer_action_url = slash_join(
             get_service_url("actions", environment=environment), "transfer/transfer/run"
         )
+        for key in ("submission_id", "skip_activation_check"):
+            if key in transfer_data:
+                raise ValueError(
+                    f"cannot create TimerJob from TransferData which has {key} set"
+                )
         # dict will either convert a `TransferData` object or leave us with a dict here
         callback_body = {"body": dict(transfer_data)}
         return cls(

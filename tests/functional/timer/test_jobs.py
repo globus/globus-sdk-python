@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from globus_sdk import TimerClient, TimerJob, TransferClient, TransferData
+from globus_sdk import TimerClient, TimerJob, TransferData
 from globus_sdk._testing import get_last_request, load_response
 from globus_sdk.config import get_service_url
 from globus_sdk.utils import slash_join
@@ -35,9 +35,7 @@ def test_get_job(timer_client):
 )
 def test_create_job(timer_client, start, interval):
     meta = load_response(timer_client.create_job).metadata
-    transfer_client = TransferClient()
-    load_response(transfer_client.get_submission_id)
-    transfer_data = TransferData(transfer_client, GO_EP1_ID, GO_EP2_ID)
+    transfer_data = TransferData(None, GO_EP1_ID, GO_EP2_ID)
     timer_job = TimerJob.from_transfer_data(transfer_data, start, interval)
     response = timer_client.create_job(timer_job)
     assert response.http_status == 201
