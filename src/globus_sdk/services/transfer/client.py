@@ -1220,9 +1220,8 @@ class TransferClient(client.BaseClient):
         :meth:`submit_delete <.submit_delete>` methods.
 
         Most users will not need to call this method directly, as the
-        convenience classes :class:`TransferData <globus_sdk.TransferData>`
-        and :class:`DeleteData <globus_sdk.DeleteData>` will call it
-        automatically if they are not passed a ``submission_id`` explicitly.
+        methods :meth:`~submit_transfer` and :meth:`~submit_delete` will call it
+        automatically if the data does not contain a ``submission_id``.
         """
         log.info(f"TransferClient.get_submission_id({query_params})")
         return self.get("submission_id", query_params=query_params)
@@ -1240,6 +1239,12 @@ class TransferClient(client.BaseClient):
             various options. See :class:`TransferData <globus_sdk.TransferData>` for
             details
         :type data: dict or TransferData
+
+        Submit a Transfer Task.
+
+        If no ``submission_id`` is included in the payload, one will be requested and
+        used automatically. The data passed to this method will be modified to include
+        the ``submission_id``.
 
         **Examples**
 
@@ -1259,6 +1264,9 @@ class TransferClient(client.BaseClient):
         a :class:`TransferData <globus_sdk.TransferData>` object.
         """
         log.info("TransferClient.submit_transfer(...)")
+        if "submission_id" not in data:
+            log.debug("submit_transfer autofetching submission_id")
+            data["submission_id"] = self.get_submission_id()["value"]
         return self.post("/transfer", data=data)
 
     @utils.doc_api_method(
@@ -1275,6 +1283,12 @@ class TransferClient(client.BaseClient):
             details
         :type data: dict or DeleteData
 
+        Submit a Delete Task.
+
+        If no ``submission_id`` is included in the payload, one will be requested and
+        used automatically. The data passed to this method will be modified to include
+        the ``submission_id``.
+
         **Examples**
 
         >>> tc = globus_sdk.TransferClient(...)
@@ -1288,6 +1302,9 @@ class TransferClient(client.BaseClient):
         a :class:`DeleteData <globus_sdk.DeleteData>` object.
         """
         log.info("TransferClient.submit_delete(...)")
+        if "submission_id" not in data:
+            log.debug("submit_delete autofetching submission_id")
+            data["submission_id"] = self.get_submission_id()["value"]
         return self.post("/delete", data=data)
 
     #
