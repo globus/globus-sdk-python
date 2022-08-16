@@ -2,7 +2,7 @@ import datetime
 import logging
 from typing import TYPE_CHECKING, Any, Dict, Iterator, Optional, Union
 
-from globus_sdk import utils
+from globus_sdk import exc, utils
 from globus_sdk._types import UUIDLike
 
 if TYPE_CHECKING:
@@ -87,8 +87,8 @@ class DeleteData(utils.PayloadWrapper):
 
     def __init__(
         self,
-        transfer_client: Optional["globus_sdk.TransferClient"],
-        endpoint: UUIDLike,
+        transfer_client: Optional["globus_sdk.TransferClient"] = None,
+        endpoint: Optional[UUIDLike] = None,
         *,
         label: Optional[str] = None,
         submission_id: Optional[UUIDLike] = None,
@@ -101,6 +101,11 @@ class DeleteData(utils.PayloadWrapper):
         additional_fields: Optional[Dict[str, Any]] = None,
     ) -> None:
         super().__init__()
+        # this must be checked explicitly to handle the fact that `transfer_client` is
+        # the first arg
+        if endpoint is None:
+            raise exc.GlobusSDKUsageError("endpoint is required")
+
         self["DATA_TYPE"] = "delete"
         self["DATA"] = []
         self._set_optstrs(

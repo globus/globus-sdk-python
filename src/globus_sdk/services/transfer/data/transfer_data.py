@@ -8,7 +8,7 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import Literal
 
-from globus_sdk import utils
+from globus_sdk import exc, utils
 from globus_sdk._types import UUIDLike
 
 if TYPE_CHECKING:
@@ -179,9 +179,9 @@ class TransferData(utils.PayloadWrapper):
 
     def __init__(
         self,
-        transfer_client: Optional["globus_sdk.TransferClient"],
-        source_endpoint: UUIDLike,
-        destination_endpoint: UUIDLike,
+        transfer_client: Optional["globus_sdk.TransferClient"] = None,
+        source_endpoint: Optional[UUIDLike] = None,
+        destination_endpoint: Optional[UUIDLike] = None,
         *,
         label: Optional[str] = None,
         submission_id: Optional[UUIDLike] = None,
@@ -193,7 +193,7 @@ class TransferData(utils.PayloadWrapper):
         skip_activation_check: Optional[bool] = None,
         skip_source_errors: bool = False,
         fail_on_quota_errors: bool = False,
-        recursive_symlinks: str = "ignore",
+        recursive_symlinks: Optional[str] = None,
         delete_destination_extra: bool = False,
         notify_on_succeeded: bool = True,
         notify_on_failed: bool = True,
@@ -201,6 +201,13 @@ class TransferData(utils.PayloadWrapper):
         additional_fields: Optional[Dict[str, Any]] = None,
     ) -> None:
         super().__init__()
+        # these must be checked explicitly to handle the fact that `transfer_client` is
+        # the first arg
+        if source_endpoint is None:
+            raise exc.GlobusSDKUsageError("source_endpoint is required")
+        if destination_endpoint is None:
+            raise exc.GlobusSDKUsageError("destination_endpoint is required")
+
         log.info("Creating a new TransferData object")
         self["DATA_TYPE"] = "transfer"
         self["DATA"] = []

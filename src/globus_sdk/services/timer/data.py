@@ -1,9 +1,12 @@
 import datetime
+import logging
 from typing import Any, Dict, Optional, Union
 
 from globus_sdk.config import get_service_url
 from globus_sdk.services.transfer import TransferData
 from globus_sdk.utils import PayloadWrapper, slash_join
+
+log = logging.getLogger(__name__)
 
 
 class TimerJob(PayloadWrapper):
@@ -122,6 +125,9 @@ class TimerJob(PayloadWrapper):
         """
         transfer_action_url = slash_join(
             get_service_url("actions", environment=environment), "transfer/transfer/run"
+        )
+        log.info(
+            "Creating TimerJob from TransferData, action_url=%s", transfer_action_url
         )
         for key in ("submission_id", "skip_activation_check"):
             if key in transfer_data:

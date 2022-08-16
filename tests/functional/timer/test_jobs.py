@@ -35,7 +35,9 @@ def test_get_job(timer_client):
 )
 def test_create_job(timer_client, start, interval):
     meta = load_response(timer_client.create_job).metadata
-    transfer_data = TransferData(None, GO_EP1_ID, GO_EP2_ID)
+    transfer_data = TransferData(
+        source_endpoint=GO_EP1_ID, destination_endpoint=GO_EP2_ID
+    )
     timer_job = TimerJob.from_transfer_data(transfer_data, start, interval)
     response = timer_client.create_job(timer_job)
     assert response.http_status == 201
