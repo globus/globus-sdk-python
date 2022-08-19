@@ -107,6 +107,7 @@ class ProductionEnvConfig(EnvConfig):
     domain = "globus.org"
     nexus_url = "https://nexus.api.globusonline.org/"
     timer_url = "https://timer.automate.globus.org/"
+    flows_url = "https://flows.automate.globus.org/"
     actions_url = "https://actions.automate.globus.org/"
 
 

@@ -17,6 +17,7 @@ class MarkerPaginator(Paginator[PageT]):
         *,
         items_key: Optional[str] = None,
         marker_key: str = "marker",
+        marker_param_name: str = "marker",
         client_args: List[Any],
         client_kwargs: Dict[str, Any]
     ):
@@ -28,6 +29,7 @@ class MarkerPaginator(Paginator[PageT]):
         )
         self.marker: Optional[str] = None
         self.marker_key = marker_key
+        self.marker_param_name = marker_param_name
 
     def _check_has_next_page(self, page: Dict[str, Any]) -> bool:
         return bool(page.get("has_next_page", False))
@@ -36,7 +38,7 @@ class MarkerPaginator(Paginator[PageT]):
         has_next_page = True
         while has_next_page:
             if self.marker:
-                self.client_kwargs["marker"] = self.marker
+                self.client_kwargs[self.marker_param_name] = self.marker
             current_page = self.method(*self.client_args, **self.client_kwargs)
             yield current_page
             self.marker = current_page.get(self.marker_key)

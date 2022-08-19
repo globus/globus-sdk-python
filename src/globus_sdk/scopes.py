@@ -299,6 +299,21 @@ AuthScopes = _AuthScopesBuilder(
 """
 
 
+FlowsScopes = ScopeBuilder(
+    "eec9b274-0c81-4334-bdc2-54e90e689b9a",
+    known_url_scopes=[
+        "manage_flows",
+        "view_flows",
+        "run",
+        "run_status",
+        "run_manage",
+    ],
+)
+"""Globus Flows scopes.
+.. listknownscopes:: globus_sdk.scopes.FlowsScopes
+"""
+
+
 GroupsScopes = ScopeBuilder(
     "groups.api.globus.org",
     known_scopes=[

@@ -41,6 +41,7 @@ very simply::
     :maxdepth: 1
 
     auth
+    flows
     groups
     search
     timer
