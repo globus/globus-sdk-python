@@ -179,6 +179,12 @@ def _init_pieces() -> Iterator[str]:
     yield from _generate_imports()
     yield """
 else:
+    def __dir__() -> typing.List[str]:
+        return [
+            name
+            for modname, items in _LAZY_IMPORT_TABLE.items()
+            for name in items
+        ]
 
     def __getattr__(name: str) -> typing.Any:
         for modname, items in _LAZY_IMPORT_TABLE.items():

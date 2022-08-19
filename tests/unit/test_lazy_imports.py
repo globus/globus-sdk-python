@@ -5,6 +5,10 @@ import pytest
 import globus_sdk
 
 
+def test_epxlicit_dir_func_works():
+    assert "TransferClient" in dir(globus_sdk)
+
+
 def test_force_eager_imports_can_run():
     # this check will not do much, other than ensuring that this does not crash
     globus_sdk._force_eager_imports()
