@@ -7,6 +7,7 @@ import globus_sdk
 
 def test_epxlicit_dir_func_works():
     assert "TransferClient" in dir(globus_sdk)
+    assert "__all__" in dir(globus_sdk)
 
 
 def test_force_eager_imports_can_run():

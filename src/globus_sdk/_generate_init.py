@@ -180,10 +180,18 @@ def _init_pieces() -> Iterator[str]:
     yield """
 else:
     def __dir__() -> typing.List[str]:
-        return [
-            name
-            for modname, items in _LAZY_IMPORT_TABLE.items()
-            for name in items
+        # dir(globus_sdk) should include everything exported in __all__
+        # as well as some explicitly selected attributes from the default dir() output
+        # on a module
+        #
+        # see also:
+        # https://discuss.python.org/t/how-to-properly-extend-standard-dir-search-with-module-level-dir/4202
+        return list(__all__) + [
+            # __all__ itself can be inspected
+            "__all__",
+            # useful to figure out where a package is installed
+            "__file__",
+            "__path__",
         ]
 
     def __getattr__(name: str) -> typing.Any:
