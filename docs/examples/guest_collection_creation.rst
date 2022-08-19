@@ -1,7 +1,7 @@
 .. _example_guest_collection_creation:
 
 Guest Collection Creation Script
-----------------------------
+--------------------------------
 
 The following is a script for a Globus client identity to create a GCSv5 guest
 collection on an existing mapped collection that it has a valid mapping for.

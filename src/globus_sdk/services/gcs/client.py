@@ -498,7 +498,7 @@ class GCSClient(client.BaseClient):
         GET /user_credentials
 
         :param storage_gateway: UUID of a storage gateway to limit results to
-        :type storage_gateway
+        :type storage_gateway: str or UUID, optional
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
         """
