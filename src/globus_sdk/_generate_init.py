@@ -111,6 +111,7 @@ _LAZY_IMPORT_TABLE: List[Tuple[str, Tuple[str, ...]]] = [
         (
             "FlowsClient",
             "FlowsAPIError",
+            "IterableFlowsResponse",
         ),
     ),
     (

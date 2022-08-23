@@ -1,9 +1,10 @@
 import logging
 from typing import Any, Callable, Dict, Optional, TypeVar
 
-from globus_sdk import client, paging, response, scopes, utils
+from globus_sdk import client, paging, scopes, utils
 
 from .errors import FlowsAPIError
+from .response import IterableFlowsResponse
 
 log = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ class FlowsClient(client.BaseClient):
         filter_role: Optional[str] = None,
         filter_fulltext: Optional[str] = None,
         query_params: Optional[Dict[str, Any]] = None,
-    ) -> response.GlobusHTTPResponse:
+    ) -> IterableFlowsResponse:
         """List deployed Flows
 
         :param filter_role: A role name specifying the minimum permissions required for
@@ -65,11 +66,11 @@ class FlowsClient(client.BaseClient):
         The valid values for ``role`` are, in order of precedence for ``filter_role``:
           - ``flow_viewer``
           - ``flow_starter``
-          - ``flow_administrators``
+          - ``flow_administrator``
           - ``flow_owner``
 
         For example, if ``flow_starter`` is specified then flows for which the user has
-        the ``flow_starter``, ``flow_administrators`` or ``flow_owner`` roles will be
+        the ``flow_starter``, ``flow_administrator`` or ``flow_owner`` roles will be
         returned.
         """
 
@@ -78,8 +79,8 @@ class FlowsClient(client.BaseClient):
         if filter_role is not None:
             query_params["filter_role"] = filter_role
         if filter_fulltext is not None:
-            query_params["filter_role"] = filter_role
+            query_params["filter_fulltext"] = filter_fulltext
         if pagination_token is not None:
             query_params["pagination_token"] = pagination_token
 
-        return self.get("/flows", query_params=query_params)
+        return IterableFlowsResponse(self.get("/flows", query_params=query_params))
