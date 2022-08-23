@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Callable, Dict, Optional, TypeVar
 
-from globus_sdk import client, paging, scopes, utils
+from globus_sdk import client, scopes, utils
 
 from .errors import FlowsAPIError
 from .response import IterableFlowsResponse
@@ -35,15 +35,9 @@ class FlowsClient(client.BaseClient):
     scopes = scopes.FlowsScopes
 
     @_flowdoc("List Flows", "Flows/paths/~1flows/get")
-    @paging.has_paginator(
-        paging.MarkerPaginator,
-        items_key="flows",
-        marker_param_name="pagination_token",
-    )
     def list_flows(
         self,
         *,
-        pagination_token: Optional[str] = None,
         filter_role: Optional[str] = None,
         filter_fulltext: Optional[str] = None,
         query_params: Optional[Dict[str, Any]] = None,
@@ -55,8 +49,6 @@ class FlowsClient(client.BaseClient):
         :type filter_role: str, optional
         :param filter_fulltext: A string to use in a full-text search to filter results
         :type filter_fulltext: str, optional
-        :param pagination_token: A marker for pagination
-        :type pagination_token: str, optional
         :param query_params: Any additional parameters to be passed through
             as query params.
         :type query_params: dict, optional
@@ -80,7 +72,5 @@ class FlowsClient(client.BaseClient):
             query_params["filter_role"] = filter_role
         if filter_fulltext is not None:
             query_params["filter_fulltext"] = filter_fulltext
-        if pagination_token is not None:
-            query_params["pagination_token"] = pagination_token
 
         return IterableFlowsResponse(self.get("/flows", query_params=query_params))
