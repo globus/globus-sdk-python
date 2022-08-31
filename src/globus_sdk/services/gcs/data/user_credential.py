@@ -49,8 +49,8 @@ class UserCredentialDocument(utils.PayloadWrapper):
             username=username,
             display_name=display_name,
             storage_gateway_id=storage_gateway_id,
-            policies=policies,
-            additional_fields=additional_fields,
         )
+        self._set_value("policies", policies, callback=dict)
+
         if additional_fields is not None:
             self.update(additional_fields)
