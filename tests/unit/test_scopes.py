@@ -2,7 +2,7 @@ import uuid
 
 import pytest
 
-from globus_sdk.scopes import MutableScope, ScopeBuilder
+from globus_sdk.scopes import FlowsScopes, MutableScope, ScopeBuilder
 
 
 def test_url_scope_string():
@@ -109,3 +109,11 @@ def test_scopebuilder_make_mutable_produces_same_strings():
     sb = ScopeBuilder(str(uuid.UUID(int=0)), known_scopes="foo", known_url_scopes="bar")
     assert str(sb.make_mutable("foo")) == sb.foo
     assert str(sb.make_mutable("bar")) == sb.bar
+
+
+def test_flows_scopes_creation():
+    assert FlowsScopes.resource_server == "flows.globus.org"
+    assert (
+        FlowsScopes.run
+        == "https://auth.globus.org/scopes/eec9b274-0c81-4334-bdc2-54e90e689b9a/run"
+    )
