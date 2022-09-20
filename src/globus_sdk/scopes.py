@@ -300,7 +300,7 @@ AuthScopes = _AuthScopesBuilder(
 
 
 FlowsScopes = ScopeBuilder(
-    "eec9b274-0c81-4334-bdc2-54e90e689b9a",
+    "flows.globus.org",
     known_url_scopes=[
         "manage_flows",
         "view_flows",
