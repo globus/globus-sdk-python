@@ -31,6 +31,13 @@ VALUES (?, ?, ?)""",
         adapter.get_token_data("foo_rs")
 
 
+def test_sqliteadapter_passes_connect_params():
+    with pytest.raises(TypeError):
+        SQLiteAdapter(":memory:", connect_params={"invalid_kwarg": True})
+
+    SQLiteAdapter(":memory:", connect_params={"timeout": 10})
+
+
 def test_simplejson_reading_bad_data(tmp_path):
     # non-dict data at root
     foo_file = tmp_path / "foo.json"

@@ -18,6 +18,9 @@ class SQLiteAdapter(FileAdapter):
         implement a multi-user system, or profile names to allow multiple Globus
         accounts to be used by a single user.
     :type namespace: str, optional
+    :param connect_params: A pass-through dictionary for fine-tuning the SQLite
+         connection.
+    :type connect_params: dict, optional
 
     A storage adapter for storing tokens in sqlite databases.
 
@@ -29,23 +32,38 @@ class SQLiteAdapter(FileAdapter):
     responses passed to the storage adapter are broken apart and stored indexed by
     *resource_server*. If you have a more complex use-case in which this scheme will be
     insufficient, you should encode that in your choice of ``namespace`` values.
+
+    The ``connect_params`` is an optional dictionary whose elements are passed directly
+    to the underlying ``sqlite3.connect()`` method, enabling developers to fine-tune the
+    connection to the SQLite database.  Refer to the ``sqlite3.connect()``
+    documentation for SQLite-specific parameters.
     """
 
-    def __init__(self, dbname: str, *, namespace: str = "DEFAULT"):
+    def __init__(
+        self,
+        dbname: str,
+        *,
+        namespace: str = "DEFAULT",
+        connect_params: Optional[Dict[str, Any]] = None
+    ):
         self.filename = self.dbname = dbname
         self.namespace = namespace
-        self._connection = self._init_and_connect()
+        self._connection = self._init_and_connect(connect_params)
 
     def _is_memory_db(self) -> bool:
         return self.dbname == ":memory:"
 
-    def _init_and_connect(self) -> sqlite3.Connection:
+    def _init_and_connect(
+        self,
+        connect_params: Optional[Dict[str, Any]],
+    ) -> sqlite3.Connection:
         init_tables = self._is_memory_db() or not self.file_exists()
+        connect_params = connect_params or {}
         if init_tables and not self._is_memory_db():  # real file needs to be created
             with self.user_only_umask():
-                conn = sqlite3.connect(self.dbname)
+                conn = sqlite3.connect(self.dbname, **connect_params)
         else:
-            conn = sqlite3.connect(self.dbname)
+            conn = sqlite3.connect(self.dbname, **connect_params)
         if init_tables:
             conn.executescript(
                 """
