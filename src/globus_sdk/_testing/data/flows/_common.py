@@ -80,9 +80,9 @@ TWO_HOP_TRANSFER_FLOW_DOC = {
     "title": "Multi Step Transfer",
     "subtitle": "",
     "description": "",
-    "keywords": [],
+    "keywords": ["two", "hop", "transfer"],
     "principal_urn": f"urn:globus:auth:identity:{TWO_HOP_TRANSFER_FLOW_ID}",
-    "globus_auth_username": (f"{TWO_HOP_TRANSFER_FLOW_ID}@clients.auth.globus.org"),
+    "globus_auth_username": f"{TWO_HOP_TRANSFER_FLOW_ID}@clients.auth.globus.org",
     "created_at": "2020-09-01T17:59:20.711845+00:00",
     "updated_at": "2020-09-01T17:59:20.711845+00:00",
     "user_role": "flow_starter",
@@ -93,7 +93,15 @@ TWO_HOP_TRANSFER_FLOW_DOC = {
     "action_url": f"https://flows.globus.org/flows/{TWO_HOP_TRANSFER_FLOW_ID}",
     "flow_url": f"https://flows.globus.org/flows/{TWO_HOP_TRANSFER_FLOW_ID}",
     "flow_owner": "urn:globus:auth:identity:b44bddda-d274-11e5-978a-9f15789a8150",
-    "flow_viewers": [],
-    "flow_starters": [],
-    "flow_administrators": [],
+    "flow_viewers": [
+        "public",
+        "urn:globus:auth:identity:b44bddda-d274-11e5-978a-9f15789a8150",
+    ],
+    "flow_starters": [
+        "all_authenticated_users",
+        "urn:globus:auth:identity:b44bddda-d274-11e5-978a-9f15789a8150",
+    ],
+    "flow_administrators": [
+        "urn:globus:auth:identity:b44bddda-d274-11e5-978a-9f15789a8150"
+    ],
 }

@@ -1,0 +1,3 @@
+
+* Added ``FlowsClient.create_flow(...)`` with ``FlowCreateRequest`` as ``PayloadWrapper`` (:pr:`NUMBER`)
+* Added ``globus_sdk.validation_utils`` to simplify and standardize the way we validate input values

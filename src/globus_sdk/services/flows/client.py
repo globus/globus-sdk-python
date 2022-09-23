@@ -1,8 +1,9 @@
 import logging
-from typing import Any, Callable, Dict, Optional, TypeVar
+from typing import Any, Callable, Dict, Optional, TypeVar, Union
 
-from globus_sdk import client, scopes, utils
+from globus_sdk import GlobusHTTPResponse, client, scopes, utils
 
+from .data import FlowCreateRequest
 from .errors import FlowsAPIError
 from .response import IterableFlowsResponse
 
@@ -33,6 +34,40 @@ class FlowsClient(client.BaseClient):
     error_class = FlowsAPIError
     service_name = "flows"
     scopes = scopes.FlowsScopes
+
+    @_flowdoc("Create Flow", "Flows/paths/~1flows/post")
+    def create_flow(
+        self, data: Union[FlowCreateRequest, Dict[str, Any]]
+    ) -> GlobusHTTPResponse:
+        """
+        Create a Flow
+
+        :param data: Flow creation request data.
+        :type data: globus_sdk.FlowCreateRequest or dict[str, any]
+
+        See documentation for :class:`globus_sdk.services.flows.data.FlowCreateRequest`
+            for more information on sdk request parameters, types, & meaning
+
+        Example Usage:
+
+        .. code-block:: python
+
+            from globus_sdk import FlowsClient, FlowCreateRequest
+
+            ...
+            flows = FlowsClient(...)
+            flows.create_flow(
+                data=FlowCreateRequest(
+                    title="my-cool-flow",
+                    definition={
+                        "StartAt": "the-one-true-state",
+                        "States": {"the-one-true-state": {"Type": "Pass", "End": True}},
+                    },
+                    input_schema={},
+                )
+            )
+        """
+        return self.post("/flows", data=data)
 
     @_flowdoc("List Flows", "Flows/paths/~1flows/get")
     def list_flows(
