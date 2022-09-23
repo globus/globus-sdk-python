@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Dict, List, Optional
 
 from globus_sdk.utils import PayloadWrapper
 from globus_sdk.validation_utils import (
@@ -95,15 +93,15 @@ class FlowCreateRequest(PayloadWrapper):
     def __init__(
         self,
         title: str,
-        definition: dict[str, Any],
-        input_schema: dict[str, Any],
-        subtitle: str | None = None,
-        description: str | None = None,
-        flow_viewers: list[str] | None = None,
-        flow_starters: list[str] | None = None,
-        flow_administrators: list[str] | None = None,
-        keywords: list[str] | None = None,
-        subscription_id: str | None = None,
+        definition: Dict[str, Any],
+        input_schema: Dict[str, Any],
+        subtitle: Optional[str] = None,
+        description: Optional[str] = None,
+        flow_viewers: Optional[List[str]] = None,
+        flow_starters: Optional[List[str]] = None,
+        flow_administrators: Optional[List[str]] = None,
+        keywords: Optional[List[str]] = None,
+        subscription_id: Optional[str] = None,
     ):
         super().__init__()
         title_validator = LenValidator(min_len=1, max_len=128)

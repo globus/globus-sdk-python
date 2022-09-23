@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 import re
-from typing import Any, Pattern
+from typing import Any, List, Optional, Pattern, Union
 
 UUID_REGEX = "([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})"  # noqa E501
 AUTH_URN_REGEX = f"(urn:globus:(auth:identity|groups:id):{UUID_REGEX})"
@@ -12,7 +10,7 @@ class Validator:
     Validation Interface
     """
 
-    def validate(self, value: Any, key: str | None = None) -> Any:
+    def validate(self, value: Any, key: Optional[str] = None) -> Any:
         """
         To be implemented by subclasses
 
@@ -33,12 +31,12 @@ class LenValidator(Validator):
     def __init__(
         self,
         min_len: int = 0,
-        max_len: int | float = float("inf"),
+        max_len: Union[int, float] = float("inf"),
     ):
         self._min_len = min_len
         self._max_len = max_len
 
-    def validate(self, value: Any, key: str | None = None) -> Any:
+    def validate(self, value: Any, key: Optional[str] = None) -> Any:
         if not (self._min_len <= len(value) <= self._max_len):
             identifier = f"Value '{value}'" if key is None else f"Key '{key}'"
 
@@ -55,10 +53,10 @@ class RegexValidator(Validator):
     Validates a string value matches a specified pattern
     """
 
-    def __init__(self, pattern: str | Pattern[str]):
+    def __init__(self, pattern: Union[str, Pattern[str]]):
         self._pattern = re.compile(pattern) if isinstance(pattern, str) else pattern
 
-    def validate(self, value: str, key: str | None = None) -> str:
+    def validate(self, value: str, key: Optional[str] = None) -> str:
         if self._pattern.fullmatch(value) is None:
             identifier = f"Value '{value}'" if key is None else f"Key '{key}'"
 
@@ -83,7 +81,7 @@ class ListValidator(Validator):
     ):
         self._validator = validator
 
-    def validate(self, value: list[Any], key: str | None = None) -> Any:
+    def validate(self, value: List[Any], key: Optional[str] = None) -> Any:
         for elem in value:
             try:
                 self._validator.validate(elem)
