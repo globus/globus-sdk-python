@@ -64,6 +64,9 @@ class AuthorizationParameterInfo(ErrorInfo):
         self.session_required_single_domain = t.cast(
             t.Optional[t.List[str]], data.get("session_required_single_domain")
         )
+        self.session_required_policy = t.cast(
+            t.Optional[str], data.get("session_required_policy")
+        )
 
 
 class ConsentRequiredInfo(ErrorInfo):

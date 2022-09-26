@@ -332,6 +332,7 @@ def test_authz_params_info():
     assert err.info.authorization_parameters.session_message == "foo"
     assert err.info.authorization_parameters.session_required_identities is None
     assert err.info.authorization_parameters.session_required_single_domain is None
+    assert err.info.authorization_parameters.session_required_policy is None
     _strmatch_any_order(
         str(err.info.authorization_parameters),
         "AuthorizationParameterInfo(",
@@ -339,6 +340,7 @@ def test_authz_params_info():
             "session_message=foo",
             "session_required_identities=None",
             "session_required_single_domain=None",
+            "session_required_policy=None",
         ],
         ")",
     )
@@ -355,6 +357,7 @@ def test_authz_params_info():
         "bar",
     ]
     assert err.info.authorization_parameters.session_required_single_domain is None
+    assert err.info.authorization_parameters.session_required_policy is None
     _strmatch_any_order(
         str(err.info.authorization_parameters),
         "AuthorizationParameterInfo(",
@@ -362,6 +365,7 @@ def test_authz_params_info():
             "session_message=None",
             "session_required_identities=['foo', 'bar']",
             "session_required_single_domain=None",
+            "session_required_policy=None",
         ],
         ")",
     )
@@ -382,6 +386,7 @@ def test_authz_params_info():
         "foo",
         "bar",
     ]
+    assert err.info.authorization_parameters.session_required_policy is None
     _strmatch_any_order(
         str(err.info.authorization_parameters),
         "AuthorizationParameterInfo(",
@@ -389,6 +394,28 @@ def test_authz_params_info():
             "session_message=None",
             "session_required_identities=None",
             "session_required_single_domain=['foo', 'bar']",
+            "session_required_policy=None",
+        ],
+        ")",
+    )
+
+    res = _mk_json_response(
+        {"authorization_parameters": {"session_required_policy": "foo,bar"}}, 401
+    )
+    err = exc.GlobusAPIError(res.r)
+    assert bool(err.info.authorization_parameters) is True
+    assert err.info.authorization_parameters.session_message is None
+    assert err.info.authorization_parameters.session_required_identities is None
+    assert err.info.authorization_parameters.session_required_single_domain is None
+    assert err.info.authorization_parameters.session_required_policy == "foo,bar"
+    _strmatch_any_order(
+        str(err.info.authorization_parameters),
+        "AuthorizationParameterInfo(",
+        [
+            "session_message=None",
+            "session_required_identities=None",
+            "session_required_single_domain=None",
+            "session_required_policy=foo,bar",
         ],
         ")",
     )
