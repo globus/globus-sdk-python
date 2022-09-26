@@ -86,7 +86,6 @@ _LAZY_IMPORT_TABLE = {
     "services.flows": {
         "FlowsClient",
         "FlowsAPIError",
-        "FlowCreateRequest",
         "IterableFlowsResponse",
     },
     "services.groups": {
@@ -173,7 +172,6 @@ if typing.TYPE_CHECKING or sys.version_info < (3, 7):
     from .services.gcs import UserCredentialDocument
     from .services.flows import FlowsClient
     from .services.flows import FlowsAPIError
-    from .services.flows import FlowCreateRequest
     from .services.flows import IterableFlowsResponse
     from .services.groups import BatchMembershipActions
     from .services.groups import GroupMemberVisibility
@@ -279,7 +277,6 @@ __all__ = (
     "UserCredentialDocument",
     "FlowsClient",
     "FlowsAPIError",
-    "FlowCreateRequest",
     "IterableFlowsResponse",
     "BatchMembershipActions",
     "GroupMemberVisibility",
