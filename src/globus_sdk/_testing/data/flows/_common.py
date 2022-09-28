@@ -104,5 +104,4 @@ TWO_HOP_TRANSFER_FLOW_DOC = {
     "flow_administrators": [
         "urn:globus:auth:identity:b44bddda-d274-11e5-978a-9f15789a8150"
     ],
-    "subscription_id": "7c53092e-3fa3-4660-b6ec-1a988e6f3f85",
 }

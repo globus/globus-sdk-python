@@ -16,7 +16,6 @@ _two_hop_transfer_create_request = {
         "flow_starters",
         "flow_administrators",
         "keywords",
-        "subscription_id",
     ]
 }
 RESPONSES = ResponseSet(

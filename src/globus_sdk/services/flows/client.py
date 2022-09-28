@@ -46,7 +46,6 @@ class FlowsClient(client.BaseClient):
         flow_starters: Optional[List[str]] = None,
         flow_administrators: Optional[List[str]] = None,
         keywords: Optional[List[str]] = None,
-        subscription_id: Optional[str] = None,
         additional_fields: Optional[Dict[str, Any]] = None,
     ) -> GlobusHTTPResponse:
         """
@@ -144,10 +143,6 @@ class FlowsClient(client.BaseClient):
         :param keywords: A set of terms used to categorize the flow used in query and
             discovery operations
         :type keywords: list[str] (0 - 1024 items), optional
-        :param subscription_id: A uuid subscription id associated with this Flow. If no
-            subscription_id is present, the Flow may be accepted, but have limits on how
-            long or how much it can be used.
-        :type subscription_id: str, optional
         :param additional_fields: Additional Key/Value pairs sent to the create API
         :type additional_fields: dict or str -> any, optional
         """  # noqa E501
@@ -162,7 +157,6 @@ class FlowsClient(client.BaseClient):
             "flow_starters": flow_starters,
             "flow_administrators": flow_administrators,
             "keywords": keywords,
-            "subscription_id": subscription_id,
             **(additional_fields or {}),
         }
 
