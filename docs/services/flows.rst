@@ -9,6 +9,12 @@ Globus Flows
    :show-inheritance:
    :exclude-members: error_class
 
+.. autoclass:: SpecificFlowClient
+   :members:
+   :member-order: bysource
+   :show-inheritance:
+   :exclude-members: error_class
+
 Client Errors
 -------------
 

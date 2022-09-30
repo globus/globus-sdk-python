@@ -1,3 +1,5 @@
+from typing import Any, Dict
+
 TWO_HOP_TRANSFER_FLOW_ID = "24bc4997-b483-4c25-a19c-64b0afc00743"
 TWO_HOP_TRANSFER_FLOW_DEFINITION = {
     "States": {
@@ -96,4 +98,42 @@ TWO_HOP_TRANSFER_FLOW_DOC = {
     "flow_viewers": [],
     "flow_starters": [],
     "flow_administrators": [],
+}
+
+TWO_HOP_TRANSFER_RUN_ID = "36ad9f9a-ad29-488f-beb4-c22ab729643a"
+TWO_HOP_TRANSFER_RUN: Dict[str, Any] = {
+    "run_id": TWO_HOP_TRANSFER_RUN_ID,
+    "flow_id": TWO_HOP_TRANSFER_FLOW_ID,
+    "flow_title": TWO_HOP_TRANSFER_FLOW_DOC["title"],
+    "flow_last_updated": "2020-09-01T17:59:20.711845+00:00",
+    "start_time": "2020-09-12T15:00:20.711845+00:00",
+    "status": "ACTIVE",
+    "display_status": "ACTIVE",
+    "details": {
+        "code": "FlowStarting",
+        "description": "The Flow is starting execution",
+        "details": {
+            "input": {
+                "source_endpoint_id": "7e1b8ec7-a606-4c23-96c7-a2d930a3a55f",
+                "source_path": "/path/to/the/source/dir",
+                "staging_endpoint_id": "d5049dd6-ce9c-4f9e-853f-c25069f369f8",
+                "staging_path": "/path/to/the/staging/dir",
+                "destination_endpoint_id": "f3bd0daf-be5a-4df8-b53f-76b932113b7c",
+                "destination_path": "/path/to/the/dest/dir",
+            }
+        },
+    },
+    "run_owner": TWO_HOP_TRANSFER_FLOW_DOC["flow_owner"],
+    "run_managers": ["urn:globus:auth:identity:7d6064ef-5368-473a-b15b-e99c3561aa9b"],
+    "run_monitors": [
+        "urn:globus:auth:identity:58cf49f4-06ea-4b76-934c-d5c9f6c3ea9d",
+        "urn:globus:auth:identity:57088a17-d5cb-4cfa-871a-c5cce48f2aec",
+    ],
+    "user_role": "run_owner",
+    "label": "Transfer all of these files!",
+    "tags": [
+        "my-transfer-run",
+        "jazz-fans",
+    ],
+    "search": {"task_id": "20ba91a8-eb90-470a-9477-2ad68808b276"},
 }
