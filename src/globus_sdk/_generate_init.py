@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import itertools
 import pathlib
 import textwrap
 from typing import Iterator, List, Tuple
@@ -177,9 +178,10 @@ def _generate_all_tuple() -> Iterator[str]:
     yield "__all__ = ("
     yield '    "__version__",'
     yield '    "_force_eager_imports",'
-    for _modname, items in _LAZY_IMPORT_TABLE:
-        for item in items:
-            yield f'    "{item}",'
+    yield from (
+        f'    "{item}",'
+        for item in sorted(itertools.chain(*[items for _, items in _LAZY_IMPORT_TABLE]))
+    )
     yield ")"
 
 
