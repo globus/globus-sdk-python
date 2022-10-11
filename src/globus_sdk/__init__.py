@@ -87,6 +87,7 @@ _LAZY_IMPORT_TABLE = {
         "FlowsClient",
         "FlowsAPIError",
         "IterableFlowsResponse",
+        "SpecificFlowClient",
     },
     "services.groups": {
         "BatchMembershipActions",
@@ -173,6 +174,7 @@ if typing.TYPE_CHECKING or sys.version_info < (3, 7):
     from .services.flows import FlowsClient
     from .services.flows import FlowsAPIError
     from .services.flows import IterableFlowsResponse
+    from .services.flows import SpecificFlowClient
     from .services.groups import BatchMembershipActions
     from .services.groups import GroupMemberVisibility
     from .services.groups import GroupPolicies
@@ -278,6 +280,7 @@ __all__ = (
     "FlowsClient",
     "FlowsAPIError",
     "IterableFlowsResponse",
+    "SpecificFlowClient",
     "BatchMembershipActions",
     "GroupMemberVisibility",
     "GroupPolicies",
