@@ -148,22 +148,23 @@ class FlowsClient(client.BaseClient):
         """  # noqa E501
 
         data = {
-            "title": title,
-            "definition": definition,
-            "input_schema": input_schema,
-            "subtitle": subtitle,
-            "description": description,
-            "flow_viewers": flow_viewers,
-            "flow_starters": flow_starters,
-            "flow_administrators": flow_administrators,
-            "keywords": keywords,
-            **(additional_fields or {}),
+            k: v
+            for k, v in {
+                "title": title,
+                "definition": definition,
+                "input_schema": input_schema,
+                "subtitle": subtitle,
+                "description": description,
+                "flow_viewers": flow_viewers,
+                "flow_starters": flow_starters,
+                "flow_administrators": flow_administrators,
+                "keywords": keywords,
+            }.items()
+            if v is not None
         }
+        data.update(additional_fields or {})
 
-        return self.post(
-            "/flows",
-            data={k: v for k, v in data.items() if v is not None},
-        )
+        return self.post("/flows", data=data)
 
     @_flowdoc("List Flows", "Flows/paths/~1flows/get")
     def list_flows(
