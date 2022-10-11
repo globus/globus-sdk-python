@@ -1,3 +1,3 @@
 
-* Added `globus_sdk.SpecificFlowClient` to manage interactions performed against
+* Added ``globus_sdk.SpecificFlowClient`` to manage interactions performed against
     a specific flow. (:pr:`NUMBER`)

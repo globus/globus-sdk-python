@@ -5,7 +5,7 @@ from globus_sdk._testing import load_response
 
 
 def test_run_flow(specific_flow_client_class: Type[SpecificFlowClient]):
-    metadata = load_response("flows.run_flow").metadata
+    metadata = load_response(SpecificFlowClient.run_flow).metadata
 
     flow_client = specific_flow_client_class(flow_id=metadata["flow_id"])
 

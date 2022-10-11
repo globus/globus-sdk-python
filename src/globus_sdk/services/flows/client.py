@@ -2,10 +2,10 @@ import logging
 from typing import Any, Callable, Dict, List, Optional, TypeVar
 
 from globus_sdk import GlobusHTTPResponse, client, scopes, utils
+from globus_sdk._types import UUIDLike
+from globus_sdk.authorizers import GlobusAuthorizer
+from globus_sdk.scopes import ScopeBuilder
 
-from ..._types import UUIDLike
-from ...authorizers import GlobusAuthorizer
-from ...scopes import ScopeBuilder
 from .errors import FlowsAPIError
 from .response import IterableFlowsResponse
 
@@ -87,7 +87,7 @@ class SpecificFlowClient(client.BaseClient):
         arguments are the same as those for `~globus_sdk.BaseClient`.
 
     :param flow_id: The generated UUID associated with a flow
-    :type flow_id: UUIDLike
+    :type flow_id: str or uuid
 
     .. automethodlist:: globus_sdk.SpecificFlowClient
     """
@@ -156,9 +156,9 @@ class SpecificFlowClient(client.BaseClient):
                 "label": label,
                 "run_monitors": run_monitors,
                 "run_managers": run_managers,
-                **(additional_fields or {}),
             }.items()
             if v is not None
         }
+        data.update(additional_fields or {})
 
         return self.post(f"/flows/{self._flow_id}/run", data=data)
