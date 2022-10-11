@@ -6,7 +6,6 @@ from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.scopes import ScopeBuilder
 
-
 from .errors import FlowsAPIError
 from .response import IterableFlowsResponse
 
