@@ -52,6 +52,6 @@ repos:
     - id: generate-init
       name: "Check generated __init__.py"
       entry: ./src/globus_sdk/_generate_init.py
-      language: script
+      language: python
       always_run: true
       pass_filenames: false
