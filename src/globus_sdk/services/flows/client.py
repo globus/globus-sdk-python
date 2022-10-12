@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Callable, Dict, List, Optional, TypeVar
 
-from globus_sdk import GlobusHTTPResponse, client, scopes, utils
+from globus_sdk import GlobusHTTPResponse, client, paging, scopes, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.scopes import ScopeBuilder
@@ -170,11 +170,13 @@ class FlowsClient(client.BaseClient):
         return self.post("/flows", data=data)
 
     @_flowdoc("List Flows", "Flows/paths/~1flows/get")
+    @paging.has_paginator(paging.MarkerPaginator, items_key="flows")
     def list_flows(
         self,
         *,
         filter_role: Optional[str] = None,
         filter_fulltext: Optional[str] = None,
+        marker: Optional[str] = None,
         query_params: Optional[Dict[str, Any]] = None,
     ) -> IterableFlowsResponse:
         """List deployed Flows
@@ -184,6 +186,8 @@ class FlowsClient(client.BaseClient):
         :type filter_role: str, optional
         :param filter_fulltext: A string to use in a full-text search to filter results
         :type filter_fulltext: str, optional
+        :param marker: A marker for pagination
+        :type marker: str, optional
         :param query_params: Any additional parameters to be passed through
             as query params.
         :type query_params: dict, optional
@@ -207,6 +211,8 @@ class FlowsClient(client.BaseClient):
             query_params["filter_role"] = filter_role
         if filter_fulltext is not None:
             query_params["filter_fulltext"] = filter_fulltext
+        if marker is not None:
+            query_params["marker"] = marker
 
         return IterableFlowsResponse(self.get("/flows", query_params=query_params))
 
