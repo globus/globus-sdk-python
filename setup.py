@@ -3,19 +3,12 @@ import re
 
 from setuptools import find_packages, setup
 
-MYPY_REQUIREMENTS = [
-    "mypy==0.960",
-    "types-docutils",
-    "types-jwt",
-    "types-requests",
-    "typing-extensions",
-]
 LINT_REQUIREMENTS = [
     "flake8<5",
     "isort<6",
     "black==21.12b0",
     "flake8-bugbear==21.11.29",
-] + MYPY_REQUIREMENTS
+]
 TEST_REQUIREMENTS = [
     "pytest<7",
     "coverage<7",
