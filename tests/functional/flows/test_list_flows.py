@@ -138,7 +138,8 @@ def setup_paginated_responses() -> None:
 
 @pytest.mark.parametrize("filter_fulltext", [None, "foo"])
 @pytest.mark.parametrize("filter_role", [None, "bar"])
-def test_list_flows_simple(flows_client, filter_fulltext, filter_role):
+@pytest.mark.parametrize("orderby", [None, "created_at ASC"])
+def test_list_flows_simple(flows_client, filter_fulltext, filter_role, orderby):
     meta = load_response(flows_client.list_flows).metadata
 
     add_kwargs = {}
@@ -146,6 +147,8 @@ def test_list_flows_simple(flows_client, filter_fulltext, filter_role):
         add_kwargs["filter_fulltext"] = filter_fulltext
     if filter_role:
         add_kwargs["filter_role"] = filter_role
+    if orderby:
+        add_kwargs["orderby"] = orderby
 
     res = flows_client.list_flows(**add_kwargs)
     assert res.http_status == 200
@@ -159,7 +162,11 @@ def test_list_flows_simple(flows_client, filter_fulltext, filter_role):
     parsed_qs = urllib.parse.parse_qs(urllib.parse.urlparse(req.url).query)
     expect_query_params = {
         k: [v]
-        for k, v in (("filter_fulltext", filter_fulltext), ("filter_role", filter_role))
+        for k, v in (
+            ("filter_fulltext", filter_fulltext),
+            ("filter_role", filter_role),
+            ("orderby", orderby),
+        )
         if v is not None
     }
     assert parsed_qs == expect_query_params

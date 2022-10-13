@@ -176,6 +176,7 @@ class FlowsClient(client.BaseClient):
         *,
         filter_role: Optional[str] = None,
         filter_fulltext: Optional[str] = None,
+        orderby: Optional[str] = None,
         marker: Optional[str] = None,
         query_params: Optional[Dict[str, Any]] = None,
     ) -> IterableFlowsResponse:
@@ -186,6 +187,8 @@ class FlowsClient(client.BaseClient):
         :type filter_role: str, optional
         :param filter_fulltext: A string to use in a full-text search to filter results
         :type filter_fulltext: str, optional
+        :param orderby: A criterion for ordering flows in the listing
+        :type orderby: str, optional
         :param marker: A marker for pagination
         :type marker: str, optional
         :param query_params: Any additional parameters to be passed through
@@ -203,6 +206,22 @@ class FlowsClient(client.BaseClient):
         For example, if ``flow_starter`` is specified then flows for which the user has
         the ``flow_starter``, ``flow_administrator`` or ``flow_owner`` roles will be
         returned.
+
+        **OrderBy Values**
+
+        Values for ``orderby`` consist of a field name, a space, and an
+        ordering mode -- ``ASC`` for "ascending" and ``DESC`` for "descending".
+        Supported field names are
+          - ``id``
+          - ``scope_string``
+          - ``flow_owners``
+          - ``flow_administrators``
+          - ``title``
+          - ``created_at``
+          - ``updated_at``
+
+        For example, ``orderby="updated_at DESC"`` requests a descending sort on update
+        times, getting the most recently updated flow first.
         """
 
         if query_params is None:
@@ -211,6 +230,8 @@ class FlowsClient(client.BaseClient):
             query_params["filter_role"] = filter_role
         if filter_fulltext is not None:
             query_params["filter_fulltext"] = filter_fulltext
+        if orderby is not None:
+            query_params["orderby"] = orderby
         if marker is not None:
             query_params["marker"] = marker
 
