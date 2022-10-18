@@ -1,23 +1,13 @@
 import collections.abc
 import json
 import logging
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    ClassVar,
-    Iterator,
-    List,
-    Mapping,
-    Optional,
-    Union,
-    cast,
-)
+import typing as t
 
 from requests import Response
 
 log = logging.getLogger(__name__)
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import globus_sdk
 
 
@@ -43,20 +33,20 @@ class GlobusHTTPResponse:
 
     def __init__(
         self,
-        response: Union[Response, "GlobusHTTPResponse"],
-        client: Optional["globus_sdk.BaseClient"] = None,
+        response: t.Union[Response, "GlobusHTTPResponse"],
+        client: t.Optional["globus_sdk.BaseClient"] = None,
     ):
         # init on a GlobusHTTPResponse: we are wrapping this data
         # the _response is None
         if isinstance(response, GlobusHTTPResponse):
             if client is not None:
                 raise ValueError("Redundant client with wrapped response")
-            self._wrapped: Optional[GlobusHTTPResponse] = response
-            self._response: Optional[Response] = None
+            self._wrapped: t.Optional[GlobusHTTPResponse] = response
+            self._response: t.Optional[Response] = None
             self.client: "globus_sdk.BaseClient" = self._wrapped.client
 
             # copy parsed JSON data off of '_wrapped'
-            self._parsed_json: Any = self._wrapped._parsed_json
+            self._parsed_json: t.Any = self._wrapped._parsed_json
 
         # init on a Response object, this is the "normal" case
         # _wrapped is None
@@ -108,7 +98,7 @@ class GlobusHTTPResponse:
         return self._raw_response.reason
 
     @property
-    def headers(self) -> Mapping[str, str]:
+    def headers(self) -> t.Mapping[str, str]:
         """
         The HTTP response headers as a case-insensitive mapping.
 
@@ -118,7 +108,7 @@ class GlobusHTTPResponse:
         return self._raw_response.headers
 
     @property
-    def content_type(self) -> Optional[str]:
+    def content_type(self) -> t.Optional[str]:
         return self.headers.get("Content-Type")
 
     @property
@@ -127,10 +117,10 @@ class GlobusHTTPResponse:
         return self._raw_response.text
 
     @property
-    def data(self) -> Any:
+    def data(self) -> t.Any:
         return self._parsed_json
 
-    def get(self, key: str, default: Any = None) -> Any:
+    def get(self, key: str, default: t.Any = None) -> t.Any:
         """
         ``get`` is just an alias for ``data.get(key, default)``, but with the added
         check that if ``data`` is ``None``, it returns the default.
@@ -151,7 +141,7 @@ class GlobusHTTPResponse:
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.text})"
 
-    def __getitem__(self, key: Union[str, int, slice]) -> Any:
+    def __getitem__(self, key: t.Union[str, int, slice]) -> t.Any:
         # force evaluation of the data property outside of the upcoming
         # try-catch so that we don't accidentally catch TypeErrors thrown
         # during the getter function itself
@@ -172,7 +162,7 @@ class GlobusHTTPResponse:
                 "This type of response data does not support indexing."
             ) from err
 
-    def __contains__(self, item: Any) -> bool:
+    def __contains__(self, item: t.Any) -> bool:
         """
         ``x in response`` is an alias for ``x in response.data``
         """
@@ -191,15 +181,15 @@ class IterableResponse(GlobusHTTPResponse):
     """This response class adds an __iter__ method on an 'iter_key' variable.
     The assumption is that iter produces dicts or dict-like mappings."""
 
-    default_iter_key: ClassVar[str]
+    default_iter_key: t.ClassVar[str]
     iter_key: str
 
     def __init__(
         self,
-        response: Union[Response, "GlobusHTTPResponse"],
-        client: Optional["globus_sdk.BaseClient"] = None,
+        response: t.Union[Response, "GlobusHTTPResponse"],
+        client: t.Optional["globus_sdk.BaseClient"] = None,
         *,
-        iter_key: Optional[str] = None,
+        iter_key: t.Optional[str] = None,
     ) -> None:
         if not hasattr(self, "default_iter_key"):
             raise TypeError(
@@ -210,16 +200,16 @@ class IterableResponse(GlobusHTTPResponse):
         self.iter_key = iter_key
         super().__init__(response, client)
 
-    def __iter__(self) -> Iterator[Mapping[Any, Any]]:
-        return iter(cast(Mapping[Any, Any], self)[self.iter_key])
+    def __iter__(self) -> t.Iterator[t.Mapping[t.Any, t.Any]]:
+        return iter(t.cast(t.Mapping[t.Any, t.Any], self)[self.iter_key])
 
 
 class ArrayResponse(GlobusHTTPResponse):
     """This response class adds an ``__iter__`` method which assumes that the top-level
     data of the response is a JSON array."""
 
-    def __iter__(self) -> Iterator[Any]:
-        return iter(cast(List[Any], self.data))
+    def __iter__(self) -> t.Iterator[t.Any]:
+        return iter(t.cast(t.List[t.Any], self.data))
 
     def __len__(self) -> int:
         """

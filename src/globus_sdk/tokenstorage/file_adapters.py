@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict, Optional, cast
+import typing as t
 
 from globus_sdk.services.auth import OAuthTokenResponse
 from globus_sdk.tokenstorage.base import FileAdapter
@@ -24,7 +24,7 @@ class SimpleJSONFileAdapter(FileAdapter):
     def __init__(self, filename: str):
         self.filename = filename
 
-    def _raw_load(self) -> Dict[str, Any]:
+    def _raw_load(self) -> t.Dict[str, t.Any]:
         """
         Load the file contents as JSON and return the resulting dict
         object. If a dict is not found, raises an error.
@@ -35,7 +35,7 @@ class SimpleJSONFileAdapter(FileAdapter):
             raise ValueError("reading from json file got non-dict data")
         return val
 
-    def _handle_formats(self, read_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _handle_formats(self, read_data: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
         """Handle older data formats supported by globus_sdk.tokenstorage
 
         if the data is not in a known/recognized format, this will error
@@ -55,7 +55,7 @@ class SimpleJSONFileAdapter(FileAdapter):
             )
         return read_data
 
-    def _load(self) -> Dict[str, Any]:
+    def _load(self) -> t.Dict[str, t.Any]:
         """
         Load data from the file and ensure that the data is in a modern format which can
         be handled by the rest of the adapter.
@@ -101,7 +101,7 @@ class SimpleJSONFileAdapter(FileAdapter):
             with open(self.filename, "w", encoding="utf-8") as f:
                 json.dump(to_write, f)
 
-    def get_by_resource_server(self) -> Dict[str, Any]:
+    def get_by_resource_server(self) -> t.Dict[str, t.Any]:
         """
         Read only the by_resource_server formatted data from the file, discarding any
         other keys.
@@ -112,7 +112,7 @@ class SimpleJSONFileAdapter(FileAdapter):
         # TODO: when the Globus SDK drops support for py3.6 and py3.7, we can update
         # `_load` to return a TypedDict which guarantees that `by_rs` is a dict
         # see: https://www.python.org/dev/peps/pep-0589/
-        return cast(Dict[str, Any], self._load()["by_rs"])
+        return t.cast(t.Dict[str, t.Any], self._load()["by_rs"])
 
-    def get_token_data(self, resource_server: str) -> Optional[Dict[str, Any]]:
+    def get_token_data(self, resource_server: str) -> t.Optional[t.Dict[str, t.Any]]:
         return self.get_by_resource_server().get(resource_server)

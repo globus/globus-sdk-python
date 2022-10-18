@@ -1,6 +1,6 @@
 import json
 import sqlite3
-from typing import Any, Dict, Iterator, Mapping, Optional, Set
+import typing as t
 
 from globus_sdk.services.auth import OAuthTokenResponse
 from globus_sdk.tokenstorage.base import FileAdapter
@@ -44,7 +44,7 @@ class SQLiteAdapter(FileAdapter):
         dbname: str,
         *,
         namespace: str = "DEFAULT",
-        connect_params: Optional[Dict[str, Any]] = None
+        connect_params: t.Optional[t.Dict[str, t.Any]] = None
     ):
         self.filename = self.dbname = dbname
         self.namespace = namespace
@@ -55,7 +55,7 @@ class SQLiteAdapter(FileAdapter):
 
     def _init_and_connect(
         self,
-        connect_params: Optional[Dict[str, Any]],
+        connect_params: t.Optional[t.Dict[str, t.Any]],
     ) -> sqlite3.Connection:
         init_tables = self._is_memory_db() or not self.file_exists()
         connect_params = connect_params or {}
@@ -100,7 +100,9 @@ CREATE TABLE sdk_storage_adapter_internal (
             conn.commit()
         return conn
 
-    def store_config(self, config_name: str, config_dict: Mapping[str, Any]) -> None:
+    def store_config(
+        self, config_name: str, config_dict: t.Mapping[str, t.Any]
+    ) -> None:
         """
         :param config_name: A string name for the configuration value
         :type config_name: str
@@ -120,7 +122,7 @@ CREATE TABLE sdk_storage_adapter_internal (
         )
         self._connection.commit()
 
-    def read_config(self, config_name: str) -> Optional[Dict[str, Any]]:
+    def read_config(self, config_name: str) -> t.Optional[t.Dict[str, t.Any]]:
         """
         :param config_name: A string name for the configuration value
         :type config_name: str
@@ -183,7 +185,7 @@ CREATE TABLE sdk_storage_adapter_internal (
         )
         self._connection.commit()
 
-    def get_token_data(self, resource_server: str) -> Optional[Dict[str, Any]]:
+    def get_token_data(self, resource_server: str) -> t.Optional[t.Dict[str, t.Any]]:
         """
         Load the token data JSON for a specific resource server.
 
@@ -205,7 +207,7 @@ CREATE TABLE sdk_storage_adapter_internal (
             return val
         return None
 
-    def get_by_resource_server(self) -> Dict[str, Any]:
+    def get_by_resource_server(self) -> t.Dict[str, t.Any]:
         """
         Load the token data JSON and return the resulting dict objects, indexed by
         resource server.
@@ -245,7 +247,7 @@ CREATE TABLE sdk_storage_adapter_internal (
 
     def iter_namespaces(
         self, *, include_config_namespaces: bool = False
-    ) -> Iterator[str]:
+    ) -> t.Iterator[str]:
         """
         Iterate over the namespaces which are in use in this storage adapter's database.
         The presence of tokens for a namespace does not indicate that those tokens are
@@ -256,7 +258,7 @@ CREATE TABLE sdk_storage_adapter_internal (
             namespaces which were used for token storage will be returned
         :type include_config_namespaces: bool, optional
         """
-        seen: Set[str] = set()
+        seen: t.Set[str] = set()
         for row in self._connection.execute(
             "SELECT DISTINCT namespace FROM token_storage;"
         ):

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Iterator, List, Optional
+import typing as t
 
 from .base import PageT, Paginator
 
@@ -6,14 +6,14 @@ from .base import PageT, Paginator
 class _LimitOffsetBasedPaginator(Paginator[PageT]):  # pylint: disable=abstract-method
     def __init__(
         self,
-        method: Callable[..., Any],
+        method: t.Callable[..., t.Any],
         *,
-        items_key: Optional[str] = None,
-        get_page_size: Callable[[Dict[str, Any]], int],
+        items_key: t.Optional[str] = None,
+        get_page_size: t.Callable[[t.Dict[str, t.Any]], int],
         max_total_results: int,
         page_size: int,
-        client_args: List[Any],
-        client_kwargs: Dict[str, Any],
+        client_args: t.List[t.Any],
+        client_kwargs: t.Dict[str, t.Any],
     ):
         super().__init__(
             method,
@@ -34,7 +34,7 @@ class _LimitOffsetBasedPaginator(Paginator[PageT]):  # pylint: disable=abstract-
             self.limit = self.max_total_results - self.offset
         self.client_kwargs["limit"] = self.limit
 
-    def _update_and_check_offset(self, current_page: Dict[str, Any]) -> bool:
+    def _update_and_check_offset(self, current_page: t.Dict[str, t.Any]) -> bool:
         self.offset += self.get_page_size(current_page)
         self.client_kwargs["offset"] = self.offset
         return (
@@ -43,7 +43,7 @@ class _LimitOffsetBasedPaginator(Paginator[PageT]):  # pylint: disable=abstract-
 
 
 class HasNextPaginator(_LimitOffsetBasedPaginator[PageT]):
-    def pages(self) -> Iterator[PageT]:
+    def pages(self) -> t.Iterator[PageT]:
         has_next_page = True
         while has_next_page:
             self._update_limit()
@@ -55,7 +55,7 @@ class HasNextPaginator(_LimitOffsetBasedPaginator[PageT]):
 
 
 class LimitOffsetTotalPaginator(_LimitOffsetBasedPaginator[PageT]):
-    def pages(self) -> Iterator[PageT]:
+    def pages(self) -> t.Iterator[PageT]:
         has_next_page = True
         while has_next_page:
             self._update_limit()

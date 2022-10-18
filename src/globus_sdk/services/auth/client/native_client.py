@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Iterable, Optional, Union
+import typing as t
 
 from globus_sdk import exc, utils
 from globus_sdk.authorizers import NullAuthorizer
@@ -28,7 +28,7 @@ class NativeAppAuthClient(AuthClient):
     .. automethodlist:: globus_sdk.NativeAppAuthClient
     """
 
-    def __init__(self, client_id: str, **kwargs: Any) -> None:
+    def __init__(self, client_id: str, **kwargs: t.Any) -> None:
         if "authorizer" in kwargs:
             log.error("ArgumentError(NativeAppClient.authorizer)")
             raise exc.GlobusSDKUsageError(
@@ -48,13 +48,13 @@ class NativeAppAuthClient(AuthClient):
     )
     def oauth2_start_flow(
         self,
-        requested_scopes: Optional[Union[str, Iterable[str]]] = None,
+        requested_scopes: t.Optional[t.Union[str, t.Iterable[str]]] = None,
         *,
-        redirect_uri: Optional[str] = None,
+        redirect_uri: t.Optional[str] = None,
         state: str = "_default",
-        verifier: Optional[str] = None,
+        verifier: t.Optional[str] = None,
         refresh_tokens: bool = False,
-        prefill_named_grant: Optional[str] = None,
+        prefill_named_grant: t.Optional[str] = None,
     ) -> GlobusNativeAppFlowManager:
         """
         Starts a Native App OAuth2 flow.
@@ -106,7 +106,7 @@ class NativeAppAuthClient(AuthClient):
         return self.current_oauth2_flow_manager
 
     def oauth2_refresh_token(
-        self, refresh_token: str, *, body_params: Optional[Dict[str, Any]] = None
+        self, refresh_token: str, *, body_params: t.Optional[t.Dict[str, t.Any]] = None
     ) -> OAuthTokenResponse:
         """
         ``NativeAppAuthClient`` specializes the refresh token grant to include

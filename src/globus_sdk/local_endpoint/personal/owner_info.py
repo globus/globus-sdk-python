@@ -1,7 +1,7 @@
 import base64
 import shlex
+import typing as t
 import uuid
-from typing import Optional, Tuple
 
 
 class _B32DecodeError(ValueError):
@@ -28,7 +28,7 @@ def _b32decode(v: str) -> str:
         raise _B32DecodeError("decode and load as UUID failed") from err
 
 
-def _parse_dn_username(s: str) -> Tuple[str, bool]:
+def _parse_dn_username(s: str) -> t.Tuple[str, bool]:
     try:
         user, is_id = _b32decode(s), True
     except _B32DecodeError:
@@ -59,8 +59,8 @@ class GlobusConnectPersonalOwnerInfo:
 
     _GRIDMAP_DN_START = '"/C=US/O=Globus Consortium/OU=Globus Connect User/CN='
 
-    username: Optional[str]
-    id: Optional[str]
+    username: t.Optional[str]
+    id: t.Optional[str]
 
     def __init__(self, *, config_dn: str) -> None:
         lineinfo = shlex.split(config_dn)

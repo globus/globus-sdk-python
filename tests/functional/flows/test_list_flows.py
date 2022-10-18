@@ -1,8 +1,8 @@
 import datetime
 import sys
+import typing as t
 import urllib.parse
 import uuid
-from typing import Any, Dict
 
 import pytest
 from responses import matchers
@@ -17,7 +17,7 @@ from globus_sdk._testing import (
 OWNER_ID = "e061df5a-b7b9-4578-a73b-6d4a4edfd66e"
 
 
-def generate_hello_world_example_flow(n: int) -> Dict[str, Any]:
+def generate_hello_world_example_flow(n: int) -> t.Dict[str, t.Any]:
     flow_id = str(uuid.UUID(int=n))
     if sys.version_info < (3, 7):
         # old branch which pyupgrade will remove when we drop py3.6

@@ -1,6 +1,6 @@
 import logging
+import typing as t
 import urllib.parse
-from typing import Any, Dict, Optional, Type, Union
 
 from globus_sdk import config, exc, utils
 from globus_sdk.authorizers import GlobusAuthorizer
@@ -11,7 +11,7 @@ from globus_sdk.transport import RequestsTransport
 
 log = logging.getLogger(__name__)
 
-DataParamType = Union[None, str, Dict[str, Any], utils.PayloadWrapper]
+DataParamType = t.Union[None, str, t.Dict[str, t.Any], utils.PayloadWrapper]
 
 
 class BaseClient:
@@ -37,22 +37,22 @@ class BaseClient:
 
     #: the class for errors raised by this client on HTTP 4xx and 5xx errors
     #: this can be set in subclasses, but must always be a subclass of GlobusError
-    error_class: Type[exc.GlobusAPIError] = exc.GlobusAPIError
+    error_class: t.Type[exc.GlobusAPIError] = exc.GlobusAPIError
 
     #: the type of Transport which will be used, defaults to ``RequestsTransport``
-    transport_class: Type[RequestsTransport] = RequestsTransport
+    transport_class: t.Type[RequestsTransport] = RequestsTransport
 
     #: the scopes for this client may be present as a ``ScopeBuilder``
-    scopes: Optional[ScopeBuilder] = None
+    scopes: t.Optional[ScopeBuilder] = None
 
     def __init__(
         self,
         *,
-        environment: Optional[str] = None,
-        base_url: Optional[str] = None,
-        authorizer: Optional[GlobusAuthorizer] = None,
-        app_name: Optional[str] = None,
-        transport_params: Optional[Dict[str, Any]] = None,
+        environment: t.Optional[str] = None,
+        base_url: t.Optional[str] = None,
+        authorizer: t.Optional[GlobusAuthorizer] = None,
+        app_name: t.Optional[str] = None,
+        transport_params: t.Optional[t.Dict[str, t.Any]] = None,
     ):
         # explicitly check the `service_name` to ensure that it was set
         #
@@ -97,7 +97,7 @@ class BaseClient:
         self.paginated = PaginatorTable(self)
 
     @property
-    def app_name(self) -> Optional[str]:
+    def app_name(self) -> t.Optional[str]:
         return self._app_name
 
     @app_name.setter
@@ -105,7 +105,7 @@ class BaseClient:
         self._app_name = self.transport.user_agent = value
 
     @utils.classproperty
-    def resource_server(cls) -> Optional[str]:
+    def resource_server(cls) -> t.Optional[str]:
         """
         The resource_server name for the API and scopes associated with this client.
 
@@ -120,8 +120,8 @@ class BaseClient:
         self,
         path: str,
         *,
-        query_params: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, str]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        headers: t.Optional[t.Dict[str, str]] = None,
     ) -> GlobusHTTPResponse:
         """
         Make a GET request to the specified path.
@@ -138,10 +138,10 @@ class BaseClient:
         self,
         path: str,
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
         data: DataParamType = None,
-        headers: Optional[Dict[str, str]] = None,
-        encoding: Optional[str] = None,
+        headers: t.Optional[t.Dict[str, str]] = None,
+        encoding: t.Optional[str] = None,
     ) -> GlobusHTTPResponse:
         """
         Make a POST request to the specified path.
@@ -165,8 +165,8 @@ class BaseClient:
         self,
         path: str,
         *,
-        query_params: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, str]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        headers: t.Optional[t.Dict[str, str]] = None,
     ) -> GlobusHTTPResponse:
         """
         Make a DELETE request to the specified path.
@@ -183,10 +183,10 @@ class BaseClient:
         self,
         path: str,
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
         data: DataParamType = None,
-        headers: Optional[Dict[str, str]] = None,
-        encoding: Optional[str] = None,
+        headers: t.Optional[t.Dict[str, str]] = None,
+        encoding: t.Optional[str] = None,
     ) -> GlobusHTTPResponse:
         """
         Make a PUT request to the specified path.
@@ -210,10 +210,10 @@ class BaseClient:
         self,
         path: str,
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
         data: DataParamType = None,
-        headers: Optional[Dict[str, str]] = None,
-        encoding: Optional[str] = None,
+        headers: t.Optional[t.Dict[str, str]] = None,
+        encoding: t.Optional[str] = None,
     ) -> GlobusHTTPResponse:
         """
         Make a PATCH request to the specified path.
@@ -238,10 +238,10 @@ class BaseClient:
         method: str,
         path: str,
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
         data: DataParamType = None,
-        headers: Optional[Dict[str, str]] = None,
-        encoding: Optional[str] = None,
+        headers: t.Optional[t.Dict[str, str]] = None,
+        encoding: t.Optional[str] = None,
         allow_redirects: bool = True,
         stream: bool = False,
     ) -> GlobusHTTPResponse:

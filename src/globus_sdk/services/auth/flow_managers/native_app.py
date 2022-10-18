@@ -3,8 +3,8 @@ import hashlib
 import logging
 import os
 import re
+import typing as t
 import urllib.parse
-from typing import TYPE_CHECKING, Any, Dict, Optional, Tuple
 
 from globus_sdk import scopes, utils
 from globus_sdk.exc import GlobusSDKUsageError
@@ -13,13 +13,13 @@ from ..oauth2_constants import DEFAULT_REQUESTED_SCOPES
 from ..response import OAuthTokenResponse
 from .base import GlobusOAuthFlowManager
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import globus_sdk
 
 logger = logging.getLogger(__name__)
 
 
-def make_native_app_challenge(verifier: Optional[str] = None) -> Tuple[str, str]:
+def make_native_app_challenge(verifier: t.Optional[str] = None) -> t.Tuple[str, str]:
     """
     Produce a challenge and verifier for the Native App flow.
     The verifier is an unhashed secret, and the challenge is a hashed version
@@ -106,12 +106,12 @@ class GlobusNativeAppFlowManager(GlobusOAuthFlowManager):
     def __init__(
         self,
         auth_client: "globus_sdk.AuthClient",
-        requested_scopes: Optional[scopes._ScopeCollectionType] = None,
-        redirect_uri: Optional[str] = None,
+        requested_scopes: t.Optional[scopes._ScopeCollectionType] = None,
+        redirect_uri: t.Optional[str] = None,
         state: str = "_default",
-        verifier: Optional[str] = None,
+        verifier: t.Optional[str] = None,
         refresh_tokens: bool = False,
-        prefill_named_grant: Optional[str] = None,
+        prefill_named_grant: t.Optional[str] = None,
     ):
         self.auth_client = auth_client
 
@@ -160,7 +160,9 @@ class GlobusNativeAppFlowManager(GlobusOAuthFlowManager):
         if prefill_named_grant is not None:
             logger.debug(f"prefill_named_grant={self.prefill_named_grant}")
 
-    def get_authorize_url(self, query_params: Optional[Dict[str, Any]] = None) -> str:
+    def get_authorize_url(
+        self, query_params: t.Optional[t.Dict[str, t.Any]] = None
+    ) -> str:
         """
         Start a Native App flow by getting the authorization URL to which users
         should be sent.

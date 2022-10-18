@@ -1,5 +1,5 @@
 import abc
-from typing import Any, Dict, Iterable, Optional, Tuple, Union
+import typing as t
 
 from globus_sdk import utils
 from globus_sdk._types import UUIDLike
@@ -62,25 +62,25 @@ class StorageGatewayDocument(utils.PayloadWrapper):
     """
 
     DATATYPE_BASE: str = "storage_gateway"
-    DATATYPE_VERSION_IMPLICATIONS: Dict[str, Tuple[int, int, int]] = {
+    DATATYPE_VERSION_IMPLICATIONS: t.Dict[str, t.Tuple[int, int, int]] = {
         "require_mfa": (1, 1, 0),
     }
 
     def __init__(
         self,
-        DATA_TYPE: Optional[str] = None,
-        display_name: Optional[str] = None,
-        connector_id: Optional[UUIDLike] = None,
-        root: Optional[str] = None,
-        identity_mappings: Optional[Iterable[Dict[str, Any]]] = None,
-        policies: Union["StorageGatewayPolicies", Dict[str, Any], None] = None,
-        allowed_domains: Optional[Iterable[str]] = None,
-        high_assurance: Optional[bool] = None,
-        require_mfa: Optional[bool] = None,
-        authentication_timeout_mins: Optional[int] = None,
-        users_allow: Optional[Iterable[str]] = None,
-        users_deny: Optional[Iterable[str]] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        DATA_TYPE: t.Optional[str] = None,
+        display_name: t.Optional[str] = None,
+        connector_id: t.Optional[UUIDLike] = None,
+        root: t.Optional[str] = None,
+        identity_mappings: t.Optional[t.Iterable[t.Dict[str, t.Any]]] = None,
+        policies: t.Union["StorageGatewayPolicies", t.Dict[str, t.Any], None] = None,
+        allowed_domains: t.Optional[t.Iterable[str]] = None,
+        high_assurance: t.Optional[bool] = None,
+        require_mfa: t.Optional[bool] = None,
+        authentication_timeout_mins: t.Optional[int] = None,
+        users_allow: t.Optional[t.Iterable[str]] = None,
+        users_deny: t.Optional[t.Iterable[str]] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(
@@ -134,9 +134,9 @@ class POSIXStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "posix_storage_policies#1.0.0",
-        groups_allow: Optional[Iterable[str]] = None,
-        groups_deny: Optional[Iterable[str]] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        groups_allow: t.Optional[t.Iterable[str]] = None,
+        groups_deny: t.Optional[t.Iterable[str]] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(DATA_TYPE=DATA_TYPE)
@@ -171,11 +171,11 @@ class POSIXStagingStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "posix_staging_storage_policies#1.0.0",
-        groups_allow: Optional[Iterable[str]] = None,
-        groups_deny: Optional[Iterable[str]] = None,
-        stage_app: Optional[str] = None,
-        environment: Optional[Iterable[Dict[str, str]]] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        groups_allow: t.Optional[t.Iterable[str]] = None,
+        groups_deny: t.Optional[t.Iterable[str]] = None,
+        stage_app: t.Optional[str] = None,
+        environment: t.Optional[t.Iterable[t.Dict[str, str]]] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(DATA_TYPE=DATA_TYPE, stage_app=stage_app)
@@ -211,9 +211,9 @@ class BlackPearlStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "blackpearl_storage_policies#1.0.0",
-        s3_endpoint: Optional[str] = None,
-        bp_access_id_file: Optional[str] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        s3_endpoint: t.Optional[str] = None,
+        bp_access_id_file: t.Optional[str] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(
@@ -246,9 +246,9 @@ class BoxStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "box_storage_policies#1.0.0",
-        enterpriseID: Optional[str] = None,
-        boxAppSettings: Optional[Dict[str, Any]] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        enterpriseID: t.Optional[str] = None,
+        boxAppSettings: t.Optional[t.Dict[str, t.Any]] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(DATA_TYPE=DATA_TYPE, enterpriseID=enterpriseID)
@@ -283,11 +283,11 @@ class CephStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "ceph_storage_policies#1.0.0",
-        s3_endpoint: Optional[str] = None,
-        s3_buckets: Optional[Iterable[str]] = None,
-        ceph_admin_key_id: Optional[str] = None,
-        ceph_admin_secret_key: Optional[str] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        s3_endpoint: t.Optional[str] = None,
+        s3_buckets: t.Optional[t.Iterable[str]] = None,
+        ceph_admin_key_id: t.Optional[str] = None,
+        ceph_admin_secret_key: t.Optional[str] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(
@@ -324,10 +324,10 @@ class GoogleDriveStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "google_drive_storage_policies#1.0.0",
-        client_id: Optional[str] = None,
-        secret: Optional[str] = None,
-        user_api_rate_quota: Optional[int] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        client_id: t.Optional[str] = None,
+        secret: t.Optional[str] = None,
+        user_api_rate_quota: t.Optional[int] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(DATA_TYPE=DATA_TYPE, client_id=client_id, secret=secret)
@@ -371,12 +371,12 @@ class GoogleCloudStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "google_cloud_storage_policies#1.0.0",
-        client_id: Optional[str] = None,
-        secret: Optional[str] = None,
-        service_account_key: Optional[Dict[str, Any]] = None,
-        buckets: Optional[Iterable[str]] = None,
-        projects: Optional[Iterable[str]] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        client_id: t.Optional[str] = None,
+        secret: t.Optional[str] = None,
+        service_account_key: t.Optional[t.Dict[str, t.Any]] = None,
+        buckets: t.Optional[t.Iterable[str]] = None,
+        projects: t.Optional[t.Iterable[str]] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(DATA_TYPE=DATA_TYPE, client_id=client_id, secret=secret)
@@ -411,11 +411,11 @@ class OneDriveStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "onedrive_storage_policies#1.0.0",
-        client_id: Optional[str] = None,
-        secret: Optional[str] = None,
-        tenant: Optional[str] = None,
-        user_api_rate_limit: Optional[int] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        client_id: t.Optional[str] = None,
+        secret: t.Optional[str] = None,
+        tenant: t.Optional[str] = None,
+        user_api_rate_limit: t.Optional[int] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(
@@ -455,13 +455,13 @@ class AzureBlobStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "azure_blob_storage_policies#1.0.0",
-        client_id: Optional[str] = None,
-        secret: Optional[str] = None,
-        tenant: Optional[str] = None,
-        account: Optional[str] = None,
-        auth_type: Optional[str] = None,
-        adls: Optional[bool] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        client_id: t.Optional[str] = None,
+        secret: t.Optional[str] = None,
+        tenant: t.Optional[str] = None,
+        account: t.Optional[str] = None,
+        auth_type: t.Optional[str] = None,
+        adls: t.Optional[bool] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(
@@ -502,10 +502,10 @@ class S3StoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "s3_storage_policies#1.0.0",
-        s3_endpoint: Optional[str] = None,
-        s3_buckets: Optional[Iterable[str]] = None,
-        s3_user_credential_required: Optional[bool] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        s3_endpoint: t.Optional[str] = None,
+        s3_buckets: t.Optional[t.Iterable[str]] = None,
+        s3_user_credential_required: t.Optional[bool] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(DATA_TYPE=DATA_TYPE, s3_endpoint=s3_endpoint)
@@ -541,9 +541,9 @@ class IrodsStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "irods_storage_policies#1.0.0",
-        irods_environment_file: Optional[str] = None,
-        irods_authentication_file: Optional[str] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        irods_environment_file: t.Optional[str] = None,
+        irods_authentication_file: t.Optional[str] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(
@@ -577,10 +577,10 @@ class HPSSStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "hpss_storage_policies#1.0.0",
-        authentication_mech: Optional[str] = None,
-        authenticator: Optional[str] = None,
-        uda_checksum_support: Optional[bool] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        authentication_mech: t.Optional[str] = None,
+        authenticator: t.Optional[str] = None,
+        uda_checksum_support: t.Optional[bool] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(

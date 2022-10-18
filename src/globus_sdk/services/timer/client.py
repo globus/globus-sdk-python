@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional, Union
+import typing as t
 
 from globus_sdk import client, response
 from globus_sdk._types import UUIDLike
@@ -32,7 +32,7 @@ class TimerClient(client.BaseClient):
     scopes = TimerScopes
 
     def list_jobs(
-        self, *, query_params: Optional[Dict[str, Any]] = None
+        self, *, query_params: t.Optional[t.Dict[str, t.Any]] = None
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /jobs/``
@@ -46,7 +46,7 @@ class TimerClient(client.BaseClient):
         return self.get("/jobs/", query_params=query_params)
 
     def get_job(
-        self, job_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self, job_id: UUIDLike, *, query_params: t.Optional[t.Dict[str, t.Any]] = None
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /jobs/<job_id>``
@@ -61,7 +61,7 @@ class TimerClient(client.BaseClient):
         return self.get(f"/jobs/{job_id}", query_params=query_params)
 
     def create_job(
-        self, data: Union[TimerJob, Dict[str, Any]]
+        self, data: t.Union[TimerJob, t.Dict[str, t.Any]]
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /jobs/``
@@ -84,7 +84,7 @@ class TimerClient(client.BaseClient):
         return self.post("/jobs/", data=data)
 
     def update_job(
-        self, job_id: UUIDLike, data: Dict[str, Any]
+        self, job_id: UUIDLike, data: t.Dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
         ``PATCH /jobs/<job_id>``

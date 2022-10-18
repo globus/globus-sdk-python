@@ -1,4 +1,4 @@
-from typing import Iterable, Optional
+import typing as t
 
 from globus_sdk import response
 from globus_sdk._types import UUIDLike
@@ -22,11 +22,11 @@ class GroupsManager:
     .. automethodlist:: globus_sdk.GroupsManager
     """
 
-    def __init__(self, client: Optional[GroupsClient] = None) -> None:
+    def __init__(self, client: t.Optional[GroupsClient] = None) -> None:
         self.client = client or GroupsClient()
 
     def create_group(
-        self, name: str, description: str, *, parent_id: Optional[UUIDLike] = None
+        self, name: str, description: str, *, parent_id: t.Optional[UUIDLike] = None
     ) -> response.GlobusHTTPResponse:
         """
         Create a group with the given name.  If a parent id is included, the
@@ -47,8 +47,8 @@ class GroupsManager:
         group_visibility: GroupVisibility,
         group_members_visibility: GroupMemberVisibility,
         join_requests: bool,
-        signup_fields: Iterable[GroupRequiredSignupFields],
-        authentication_assurance_timeout: Optional[int] = None,
+        signup_fields: t.Iterable[GroupRequiredSignupFields],
+        authentication_assurance_timeout: t.Optional[int] = None,
     ) -> response.GlobusHTTPResponse:
         """
         Set the group policies for the given group.

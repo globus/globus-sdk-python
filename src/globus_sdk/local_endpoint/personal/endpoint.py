@@ -1,11 +1,11 @@
 import os
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union, cast, overload
+import typing as t
 
 from globus_sdk.exc import GlobusSDKUsageError
 
 from .owner_info import GlobusConnectPersonalOwnerInfo
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import globus_sdk
 
 
@@ -32,9 +32,9 @@ class LocalGlobusConnectPersonal:
     :type config_dir: str, optional
     """
 
-    def __init__(self, *, config_dir: Optional[str] = None) -> None:
+    def __init__(self, *, config_dir: t.Optional[str] = None) -> None:
         self._config_dir = config_dir
-        self._endpoint_id: Optional[str] = None
+        self._endpoint_id: t.Optional[str] = None
 
     def _detect_config_dir(self) -> str:
         if _on_windows():
@@ -66,25 +66,25 @@ class LocalGlobusConnectPersonal:
             self.config_dir if _on_windows() else os.path.join(self.config_dir, "lta")
         )
 
-    @overload
-    def get_owner_info(self) -> Optional["globus_sdk.GlobusConnectPersonalOwnerInfo"]:
+    @t.overload
+    def get_owner_info(self) -> t.Optional["globus_sdk.GlobusConnectPersonalOwnerInfo"]:
         ...
 
-    @overload
+    @t.overload
     def get_owner_info(
         self, auth_client: None
-    ) -> Optional["globus_sdk.GlobusConnectPersonalOwnerInfo"]:
+    ) -> t.Optional["globus_sdk.GlobusConnectPersonalOwnerInfo"]:
         ...
 
-    @overload
+    @t.overload
     def get_owner_info(
         self, auth_client: "globus_sdk.AuthClient"
-    ) -> Optional[Dict[str, Any]]:
+    ) -> t.Optional[t.Dict[str, t.Any]]:
         ...
 
     def get_owner_info(
-        self, auth_client: Optional["globus_sdk.AuthClient"] = None
-    ) -> Union[None, "globus_sdk.GlobusConnectPersonalOwnerInfo", Dict[str, Any]]:
+        self, auth_client: t.Optional["globus_sdk.AuthClient"] = None
+    ) -> t.Union[None, "globus_sdk.GlobusConnectPersonalOwnerInfo", t.Dict[str, t.Any]]:
         """
         Look up the local GCP information, returning a
         :class:`GlobusConnectPersonalOwnerInfo` object. The result may have an ``id`` or
@@ -153,12 +153,12 @@ class LocalGlobusConnectPersonal:
             raise ValueError("Something went wrong. Could not parse owner info.")
 
         try:  # could get no data back in theory, if the identity isn't visible
-            return cast(Dict[str, Any], res["identities"][0])
+            return t.cast(t.Dict[str, t.Any], res["identities"][0])
         except (KeyError, IndexError):
             return None
 
     @property
-    def endpoint_id(self) -> Optional[str]:
+    def endpoint_id(self) -> t.Optional[str]:
         """
         :type: str
 

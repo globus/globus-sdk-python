@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Iterator, List, Optional
+import typing as t
 
 from .base import PageT, Paginator
 
@@ -13,12 +13,12 @@ class MarkerPaginator(Paginator[PageT]):
 
     def __init__(
         self,
-        method: Callable[..., Any],
+        method: t.Callable[..., t.Any],
         *,
-        items_key: Optional[str] = None,
+        items_key: t.Optional[str] = None,
         marker_key: str = "marker",
-        client_args: List[Any],
-        client_kwargs: Dict[str, Any]
+        client_args: t.List[t.Any],
+        client_kwargs: t.Dict[str, t.Any]
     ):
         super().__init__(
             method,
@@ -26,13 +26,13 @@ class MarkerPaginator(Paginator[PageT]):
             client_args=client_args,
             client_kwargs=client_kwargs,
         )
-        self.marker: Optional[str] = None
+        self.marker: t.Optional[str] = None
         self.marker_key = marker_key
 
-    def _check_has_next_page(self, page: Dict[str, Any]) -> bool:
+    def _check_has_next_page(self, page: t.Dict[str, t.Any]) -> bool:
         return bool(page.get("has_next_page", False))
 
-    def pages(self) -> Iterator[PageT]:
+    def pages(self) -> t.Iterator[PageT]:
         has_next_page = True
         while has_next_page:
             if self.marker:
@@ -52,5 +52,5 @@ class NullableMarkerPaginator(MarkerPaginator[PageT]):
     pagination. (vs an explicit has_next_page key)
     """
 
-    def _check_has_next_page(self, page: Dict[str, Any]) -> bool:
+    def _check_has_next_page(self, page: t.Dict[str, t.Any]) -> bool:
         return page.get(self.marker_key) is not None

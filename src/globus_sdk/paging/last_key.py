@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, Iterator, List, Optional
+import typing as t
 
 from .base import PageT, Paginator
 
@@ -6,11 +6,11 @@ from .base import PageT, Paginator
 class LastKeyPaginator(Paginator[PageT]):
     def __init__(
         self,
-        method: Callable[..., Any],
+        method: t.Callable[..., t.Any],
         *,
-        items_key: Optional[str] = None,
-        client_args: List[Any],
-        client_kwargs: Dict[str, Any]
+        items_key: t.Optional[str] = None,
+        client_args: t.List[t.Any],
+        client_kwargs: t.Dict[str, t.Any]
     ):
         super().__init__(
             method,
@@ -18,9 +18,9 @@ class LastKeyPaginator(Paginator[PageT]):
             client_args=client_args,
             client_kwargs=client_kwargs,
         )
-        self.last_key: Optional[str] = None
+        self.last_key: t.Optional[str] = None
 
-    def pages(self) -> Iterator[PageT]:
+    def pages(self) -> t.Iterator[PageT]:
         has_next_page = True
         while has_next_page:
             if self.last_key:

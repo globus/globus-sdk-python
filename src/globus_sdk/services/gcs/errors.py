@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+import typing as t
 
 import requests
 
@@ -11,11 +11,11 @@ class GCSAPIError(exc.GlobusAPIError):
     """
 
     def __init__(self, r: requests.Response) -> None:
-        self.detail_data_type: Optional[str] = None
-        self.detail: Union[None, str, Dict[str, Any]] = None
+        self.detail_data_type: t.Optional[str] = None
+        self.detail: t.Union[None, str, t.Dict[str, t.Any]] = None
         super().__init__(r)
 
-    def _get_args(self) -> List[Any]:
+    def _get_args(self) -> t.List[t.Any]:
         args = super()._get_args()
         args.append(self.detail_data_type)
         # only add detail if it's a string (don't want to put a large object into
@@ -24,7 +24,7 @@ class GCSAPIError(exc.GlobusAPIError):
             args.append(self.detail)
         return args
 
-    def _load_from_json(self, data: Dict[str, Any]) -> None:
+    def _load_from_json(self, data: t.Dict[str, t.Any]) -> None:
         super()._load_from_json(data)
         # detail can be a full document, so fetch, then look for a DATA_TYPE
         # and expose it as a top-level attribute for easy access

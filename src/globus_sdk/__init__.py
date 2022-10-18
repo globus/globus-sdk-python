@@ -6,7 +6,7 @@
 import importlib
 import logging
 import sys
-import typing
+import typing as t
 
 from .version import __version__
 
@@ -121,7 +121,7 @@ _LAZY_IMPORT_TABLE = {
     },
 }
 
-if typing.TYPE_CHECKING or sys.version_info < (3, 7):
+if t.TYPE_CHECKING or sys.version_info < (3, 7):
     from .authorizers import AccessTokenAuthorizer
     from .authorizers import BasicAuthorizer
     from .authorizers import ClientCredentialsAuthorizer
@@ -199,7 +199,7 @@ if typing.TYPE_CHECKING or sys.version_info < (3, 7):
     from .services.transfer import TransferData
 
 else:
-    def __dir__() -> typing.List[str]:
+    def __dir__() -> t.List[str]:
         # dir(globus_sdk) should include everything exported in __all__
         # as well as some explicitly selected attributes from the default dir() output
         # on a module
@@ -214,7 +214,7 @@ else:
             "__path__",
         ]
 
-    def __getattr__(name: str) -> typing.Any:
+    def __getattr__(name: str) -> t.Any:
         for modname, items in _LAZY_IMPORT_TABLE.items():
             if name in items:
                 mod = importlib.import_module("." + modname, __name__)

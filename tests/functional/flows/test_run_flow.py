@@ -1,10 +1,10 @@
-from typing import Type
+import typing as t
 
 from globus_sdk import SpecificFlowClient
 from globus_sdk._testing import load_response
 
 
-def test_run_flow(specific_flow_client_class: Type[SpecificFlowClient]):
+def test_run_flow(specific_flow_client_class: t.Type[SpecificFlowClient]):
     metadata = load_response(SpecificFlowClient.run_flow).metadata
 
     flow_client = specific_flow_client_class(flow_id=metadata["flow_id"])

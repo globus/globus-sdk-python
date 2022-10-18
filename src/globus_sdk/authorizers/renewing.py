@@ -1,13 +1,13 @@
 import abc
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
+import typing as t
 
 from globus_sdk import exc, utils
 
 from .base import GlobusAuthorizer
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from globus_sdk.services.auth import OAuthTokenResponse
 
 log = logging.getLogger(__name__)
@@ -50,9 +50,9 @@ class RenewingAuthorizer(GlobusAuthorizer, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        access_token: Optional[str] = None,
-        expires_at: Optional[int] = None,
-        on_refresh: Optional[Callable[["OAuthTokenResponse"], Any]] = None,
+        access_token: t.Optional[str] = None,
+        expires_at: t.Optional[int] = None,
+        on_refresh: t.Optional[t.Callable[["OAuthTokenResponse"], t.Any]] = None,
     ):
         self._access_token = None
         self._access_token_hash = None
@@ -88,11 +88,11 @@ class RenewingAuthorizer(GlobusAuthorizer, metaclass=abc.ABCMeta):
             self._get_new_access_token()
 
     @property
-    def access_token(self) -> Optional[str]:
+    def access_token(self) -> t.Optional[str]:
         return self._access_token
 
     @access_token.setter
-    def access_token(self, value: Optional[str]) -> None:
+    def access_token(self, value: t.Optional[str]) -> None:
         self._access_token = value
         if value:
             self._access_token_hash = utils.sha256_string(value)
@@ -105,7 +105,7 @@ class RenewingAuthorizer(GlobusAuthorizer, metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def _extract_token_data(self, res: "OAuthTokenResponse") -> Dict[str, Any]:
+    def _extract_token_data(self, res: "OAuthTokenResponse") -> t.Dict[str, t.Any]:
         """
         Given a token response object, get the first element of
         token_response.by_resource_server

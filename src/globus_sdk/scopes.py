@@ -1,18 +1,18 @@
-from typing import Dict, Iterable, Iterator, List, Tuple, Union
+import typing as t
 
 from globus_sdk import utils
 
 # this type alias is meant for internal use, which is why it's named with an underscore
-_ScopeCollectionType = Union[
+_ScopeCollectionType = t.Union[
     str,
     "MutableScope",
-    Iterable[str],
-    Iterable["MutableScope"],
-    Iterable[Union[str, "MutableScope"]],
+    t.Iterable[str],
+    t.Iterable["MutableScope"],
+    t.Iterable[t.Union[str, "MutableScope"]],
 ]
 
 
-def _iter_scope_collection(obj: _ScopeCollectionType) -> Iterator[str]:
+def _iter_scope_collection(obj: _ScopeCollectionType) -> t.Iterator[str]:
     if isinstance(obj, str):
         yield obj
     elif isinstance(obj, MutableScope):
@@ -43,7 +43,7 @@ class MutableScope:
         # map from scope name to optional=t/f
         # this means that dependencies are not ordered, but that adding the same
         # dependency twice is a no-op
-        self._dependencies: Dict[str, bool] = {}
+        self._dependencies: t.Dict[str, bool] = {}
 
     def add_dependency(self, scope: str, *, optional: bool = False) -> "MutableScope":
         """
@@ -67,14 +67,14 @@ class MutableScope:
         return self
 
     def __repr__(self) -> str:
-        parts: List[str] = [f"'{self._scope_string}'"]
+        parts: t.List[str] = [f"'{self._scope_string}'"]
         if self.optional:
             parts.append("optional=True")
         if self._dependencies:
             parts.append(f"dependencies={self._dependencies}")
         return "MutableScope(" + ", ".join(parts) + ")"
 
-    def _formatted_dependencies(self) -> Iterator[str]:
+    def _formatted_dependencies(self) -> t.Iterator[str]:
         for scope in self._dependencies:
             optional_prefix = "*" if self._dependencies[scope] else ""
             yield optional_prefix + scope
@@ -110,14 +110,14 @@ class ScopeBuilder:
     :type known_url_scopes: list of str, optional
     """
 
-    _classattr_scope_names: List[str] = []
+    _classattr_scope_names: t.List[str] = []
 
     def __init__(
         self,
         resource_server: str,
         *,
-        known_scopes: Union[List[str], str, None] = None,
-        known_url_scopes: Union[List[str], str, None] = None,
+        known_scopes: t.Union[t.List[str], str, None] = None,
+        known_url_scopes: t.Union[t.List[str], str, None] = None,
     ) -> None:
         self.resource_server = resource_server
         self._known_scopes = (
@@ -130,7 +130,7 @@ class ScopeBuilder:
             if known_url_scopes is not None
             else []
         )
-        self._known_scope_names: List[str] = []
+        self._known_scope_names: t.List[str] = []
         if self._known_scopes:
             for scope_name in self._known_scopes:
                 self._known_scope_names.append(scope_name)
@@ -218,7 +218,7 @@ class ScopeBuilder:
         """
         return MutableScope(getattr(self, scope))
 
-    def _iter_scopes(self) -> Iterator[Tuple[str, str]]:
+    def _iter_scopes(self) -> t.Iterator[t.Tuple[str, str]]:
         for name in self._classattr_scope_names:
             yield (name, getattr(self, name))
         for name in self._known_scope_names:
@@ -312,8 +312,8 @@ class _FlowsScopeBuilder(ScopeBuilder):
         self,
         domain_name: str,
         client_id: str,
-        known_scopes: Union[List[str], str, None] = None,
-        known_url_scopes: Union[List[str], str, None] = None,
+        known_scopes: t.Union[t.List[str], str, None] = None,
+        known_url_scopes: t.Union[t.List[str], str, None] = None,
     ) -> None:
         self._client_id = client_id
         super().__init__(

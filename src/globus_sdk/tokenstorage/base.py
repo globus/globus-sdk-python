@@ -1,7 +1,7 @@
 import abc
 import contextlib
 import os
-from typing import Any, Dict, Iterator, Optional
+import typing as t
 
 from globus_sdk.services.auth import OAuthTokenResponse
 
@@ -14,7 +14,7 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def get_token_data(self, resource_server: str) -> Optional[Dict[str, Any]]:
+    def get_token_data(self, resource_server: str) -> t.Optional[t.Dict[str, t.Any]]:
         """
         Lookup token data for a resource server
 
@@ -47,7 +47,7 @@ class FileAdapter(StorageAdapter, metaclass=abc.ABCMeta):
         return os.path.exists(self.filename)
 
     @contextlib.contextmanager
-    def user_only_umask(self) -> Iterator[None]:
+    def user_only_umask(self) -> t.Iterator[None]:
         """
         A context manager to deny rwx to Group and World, x to User
 

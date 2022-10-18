@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Iterable, Optional, Union
+import typing as t
 
 from globus_sdk import exc, utils
 from globus_sdk.authorizers import BasicAuthorizer
@@ -33,7 +33,7 @@ class ConfidentialAppAuthClient(AuthClient):
     .. automethodlist:: globus_sdk.ConfidentialAppAuthClient
     """
 
-    def __init__(self, client_id: str, client_secret: str, **kwargs: Any):
+    def __init__(self, client_id: str, client_secret: str, **kwargs: t.Any):
         if "authorizer" in kwargs:
             log.error("ArgumentError(ConfidentialAppClient.authorizer)")
             raise exc.GlobusSDKUsageError(
@@ -47,7 +47,7 @@ class ConfidentialAppAuthClient(AuthClient):
         log.info(f"Finished initializing client, client_id={client_id}")
 
     def oauth2_client_credentials_tokens(
-        self, requested_scopes: Optional[Union[str, Iterable[str]]] = None
+        self, requested_scopes: t.Optional[t.Union[str, t.Iterable[str]]] = None
     ) -> OAuthTokenResponse:
         r"""
         Perform an OAuth2 Client Credentials Grant to get access tokens which
@@ -91,7 +91,7 @@ class ConfidentialAppAuthClient(AuthClient):
     def oauth2_start_flow(
         self,
         redirect_uri: str,
-        requested_scopes: Optional[Union[str, Iterable[str]]] = None,
+        requested_scopes: t.Optional[t.Union[str, t.Iterable[str]]] = None,
         *,
         state: str = "_default",
         refresh_tokens: bool = False,
@@ -136,7 +136,7 @@ class ConfidentialAppAuthClient(AuthClient):
         return self.current_oauth2_flow_manager
 
     def oauth2_get_dependent_tokens(
-        self, token: str, *, additional_params: Optional[Dict[str, Any]] = None
+        self, token: str, *, additional_params: t.Optional[t.Dict[str, t.Any]] = None
     ) -> OAuthDependentTokenResponse:
         """
         Does a `Dependent Token Grant
@@ -181,7 +181,7 @@ class ConfidentialAppAuthClient(AuthClient):
         "auth/reference/#token_introspection_post_v2_oauth2_token_introspect",
     )
     def oauth2_token_introspect(
-        self, token: str, *, include: Optional[str] = None
+        self, token: str, *, include: t.Optional[str] = None
     ) -> GlobusHTTPResponse:
         """
         POST /v2/oauth2/token/introspect

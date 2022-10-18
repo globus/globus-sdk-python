@@ -1,4 +1,4 @@
-from typing import Any, Dict
+import typing as t
 
 import requests
 
@@ -21,6 +21,6 @@ class SearchAPIError(exc.GlobusAPIError):
         self.error_data = None
         super().__init__(r)
 
-    def _load_from_json(self, data: Dict[str, Any]) -> None:
+    def _load_from_json(self, data: t.Dict[str, t.Any]) -> None:
         super()._load_from_json(data)
         self.error_data = data.get("error_data")

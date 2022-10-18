@@ -1,9 +1,9 @@
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
+import typing as t
 
 from globus_sdk.scopes import MutableScope, _ScopeCollectionType
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from globus_sdk.services.auth import ConfidentialAppAuthClient, OAuthTokenResponse
 
 from .renewing import RenewingAuthorizer
@@ -63,9 +63,9 @@ class ClientCredentialsAuthorizer(RenewingAuthorizer):
         confidential_client: "ConfidentialAppAuthClient",
         scopes: _ScopeCollectionType,
         *,
-        access_token: Optional[str] = None,
-        expires_at: Optional[int] = None,
-        on_refresh: Optional[Callable[["OAuthTokenResponse"], Any]] = None,
+        access_token: t.Optional[str] = None,
+        expires_at: t.Optional[int] = None,
+        on_refresh: t.Optional[t.Callable[["OAuthTokenResponse"], t.Any]] = None,
     ):
 
         # values for _get_token_data
@@ -87,7 +87,7 @@ class ClientCredentialsAuthorizer(RenewingAuthorizer):
             requested_scopes=self.scopes
         )
 
-    def _extract_token_data(self, res: "OAuthTokenResponse") -> Dict[str, Any]:
+    def _extract_token_data(self, res: "OAuthTokenResponse") -> t.Dict[str, t.Any]:
         """
         Get the tokens .by_resource_server,
         Ensure that only one token was gotten, and return that token.

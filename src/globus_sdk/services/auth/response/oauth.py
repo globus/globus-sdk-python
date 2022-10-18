@@ -1,7 +1,7 @@
 import json
 import logging
 import time
-from typing import TYPE_CHECKING, Any, Dict, Iterator, Optional, Union, cast
+import typing as t
 
 import jwt
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
@@ -11,11 +11,11 @@ from globus_sdk.response import GlobusHTTPResponse
 
 logger = logging.getLogger(__name__)
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from ..client import AuthClient
 
 
-def _convert_token_info_dict(source_dict: GlobusHTTPResponse) -> Dict[str, Any]:
+def _convert_token_info_dict(source_dict: GlobusHTTPResponse) -> t.Dict[str, t.Any]:
     """
     Extract a set of fields into a new dict for indexing by resource server.
     Allow for these fields to be `None` when absent:
@@ -43,17 +43,17 @@ class _ByScopesGetter:
     >>> tok = tokens.by_scopes['openid profile']['access_token']
     """
 
-    def __init__(self, scope_map: Dict[str, Any]) -> None:
+    def __init__(self, scope_map: t.Dict[str, t.Any]) -> None:
         self.scope_map = scope_map
 
     def __str__(self) -> str:
         return json.dumps(self.scope_map)
 
-    def __iter__(self) -> Iterator[str]:
+    def __iter__(self) -> t.Iterator[str]:
         """iteration gets you every individual scope"""
         return iter(self.scope_map.keys())
 
-    def __getitem__(self, scopename: str) -> Dict[str, Union[str, int]]:
+    def __getitem__(self, scopename: str) -> t.Dict[str, t.Union[str, int]]:
         if not isinstance(scopename, str):
             raise KeyError(f'by_scopes cannot contain non-string value "{scopename}"')
 
@@ -82,7 +82,7 @@ class _ByScopesGetter:
                 )
             )
         # pop the only element in the set
-        return cast(Dict[str, Union[str, int]], toks.pop())
+        return t.cast(t.Dict[str, t.Union[str, int]], toks.pop())
 
     def __contains__(self, item: str) -> bool:
         """
@@ -105,7 +105,7 @@ class OAuthTokenResponse(GlobusHTTPResponse):
     3-legged OAuth flows.
     """
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
         super().__init__(*args, **kwargs)
         self._init_rs_dict()
         self._init_scopes_getter()
@@ -133,7 +133,7 @@ class OAuthTokenResponse(GlobusHTTPResponse):
         )
 
     @property
-    def by_resource_server(self) -> Dict[str, Dict[str, Any]]:
+    def by_resource_server(self) -> t.Dict[str, t.Dict[str, t.Any]]:
         """
         Representation of the token response in a ``dict`` indexed by resource
         server.
@@ -169,12 +169,12 @@ class OAuthTokenResponse(GlobusHTTPResponse):
 
     def decode_id_token(
         self,
-        openid_configuration: Optional[
-            Union[GlobusHTTPResponse, Dict[str, Any]]
+        openid_configuration: t.Optional[
+            t.Union[GlobusHTTPResponse, t.Dict[str, t.Any]]
         ] = None,
-        jwk: Optional[RSAPublicKey] = None,
-        jwt_params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        jwk: t.Optional[RSAPublicKey] = None,
+        jwt_params: t.Optional[t.Dict[str, t.Any]] = None,
+    ) -> t.Dict[str, t.Any]:
 
         """
         Parse the included ID Token (OIDC) as a dict and return it.
@@ -192,7 +192,7 @@ class OAuthTokenResponse(GlobusHTTPResponse):
         :type jwt_params: dict
         """
         logger.info('Decoding ID Token "%s"', self["id_token"])
-        auth_client = cast("AuthClient", self.client)
+        auth_client = t.cast("AuthClient", self.client)
 
         jwt_params = jwt_params or {}
 
@@ -202,8 +202,8 @@ class OAuthTokenResponse(GlobusHTTPResponse):
                     "passing jwk without openid configuration is not allowed"
                 )
             logger.debug("No OIDC Config provided, autofetching...")
-            oidc_config: Union[
-                GlobusHTTPResponse, Dict[str, Any]
+            oidc_config: t.Union[
+                GlobusHTTPResponse, t.Dict[str, t.Any]
             ] = auth_client.get_openid_configuration()
         else:
             oidc_config = openid_configuration
@@ -249,12 +249,12 @@ class OAuthDependentTokenResponse(OAuthTokenResponse):
 
     def decode_id_token(
         self,
-        openid_configuration: Optional[
-            Union[GlobusHTTPResponse, Dict[str, Any]]
+        openid_configuration: t.Optional[
+            t.Union[GlobusHTTPResponse, t.Dict[str, t.Any]]
         ] = None,
-        jwk: Optional[RSAPublicKey] = None,
-        jwt_params: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        jwk: t.Optional[RSAPublicKey] = None,
+        jwt_params: t.Optional[t.Dict[str, t.Any]] = None,
+    ) -> t.Dict[str, t.Any]:
         # just in case
         raise NotImplementedError(
             "OAuthDependentTokenResponse.decode_id_token() is not and cannot "

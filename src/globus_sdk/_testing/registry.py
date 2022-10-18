@@ -1,5 +1,5 @@
 import importlib
-from typing import Any, Dict, Optional, Union
+import typing as t
 
 import responses
 
@@ -7,13 +7,13 @@ import globus_sdk
 
 from .models import RegisteredResponse, ResponseSet
 
-_RESPONSE_SET_REGISTRY: Dict[Any, ResponseSet] = {}
+_RESPONSE_SET_REGISTRY: t.Dict[t.Any, ResponseSet] = {}
 
 
 def register_response_set(
-    set_id: Any,
-    rset: Union[ResponseSet, Dict[str, Dict[str, Any]]],
-    metadata: Optional[Dict[str, Any]] = None,
+    set_id: t.Any,
+    rset: t.Union[ResponseSet, t.Dict[str, t.Dict[str, t.Any]]],
+    metadata: t.Optional[t.Dict[str, t.Any]] = None,
 ) -> ResponseSet:
     if isinstance(rset, dict):
         rset = ResponseSet.from_dict(rset, metadata=metadata)
@@ -44,7 +44,7 @@ def _resolve_qualname(name: str) -> str:
     return f"{service_name}.{suffix}"
 
 
-def get_response_set(set_id: Any) -> ResponseSet:
+def get_response_set(set_id: t.Any) -> ResponseSet:
     # first priority: check the explicit registry
     if set_id in _RESPONSE_SET_REGISTRY:
         return _RESPONSE_SET_REGISTRY[set_id]
@@ -74,7 +74,7 @@ def get_response_set(set_id: Any) -> ResponseSet:
 
 
 def load_response_set(
-    set_id: Any, *, requests_mock: Optional[responses.RequestsMock] = None
+    set_id: t.Any, *, requests_mock: t.Optional[responses.RequestsMock] = None
 ) -> ResponseSet:
     if isinstance(set_id, ResponseSet):
         return set_id.activate_all(requests_mock=requests_mock)
@@ -84,10 +84,10 @@ def load_response_set(
 
 
 def load_response(
-    set_id: Any,
+    set_id: t.Any,
     *,
     case: str = "default",
-    requests_mock: Optional[responses.RequestsMock] = None,
+    requests_mock: t.Optional[responses.RequestsMock] = None,
 ) -> RegisteredResponse:
     if isinstance(set_id, RegisteredResponse):
         return set_id.add(requests_mock=requests_mock)

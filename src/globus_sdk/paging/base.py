@@ -2,42 +2,30 @@ import abc
 import functools
 import inspect
 import sys
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Generic,
-    Iterable,
-    Iterator,
-    List,
-    Optional,
-    Type,
-    TypeVar,
-    cast,
-)
+import typing as t
 
 from globus_sdk.response import GlobusHTTPResponse
 
 if sys.version_info >= (3, 10):
-    from typing import ParamSpec
+    from typing import ParamSpec  # noqa: TYT03
 else:
     from typing_extensions import ParamSpec
 
-PageT = TypeVar("PageT", bound=GlobusHTTPResponse)
+PageT = t.TypeVar("PageT", bound=GlobusHTTPResponse)
 P = ParamSpec("P")
-R = TypeVar("R", bound=GlobusHTTPResponse)
-C = TypeVar("C", bound=Callable[..., GlobusHTTPResponse])
+R = t.TypeVar("R", bound=GlobusHTTPResponse)
+C = t.TypeVar("C", bound=t.Callable[..., GlobusHTTPResponse])
 
 
 # stub for mypy
-class _PaginatedFunc(Generic[PageT]):
+class _PaginatedFunc(t.Generic[PageT]):
     _has_paginator: bool
-    _paginator_class: Type["Paginator[PageT]"]
-    _paginator_items_key: Optional[str]
-    _paginator_params: Dict[str, Any]
+    _paginator_class: t.Type["Paginator[PageT]"]
+    _paginator_items_key: t.Optional[str]
+    _paginator_params: t.Dict[str, t.Any]
 
 
-class Paginator(Iterable[PageT], metaclass=abc.ABCMeta):
+class Paginator(t.Iterable[PageT], metaclass=abc.ABCMeta):
     """
     Base class for all paginators.
     This guarantees is that they have generator methods named ``pages`` and ``items``.
@@ -61,29 +49,29 @@ class Paginator(Iterable[PageT], metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        method: Callable[..., Any],
+        method: t.Callable[..., t.Any],
         *,
-        items_key: Optional[str] = None,
-        client_args: List[Any],
-        client_kwargs: Dict[str, Any],
+        items_key: t.Optional[str] = None,
+        client_args: t.List[t.Any],
+        client_kwargs: t.Dict[str, t.Any],
         # the Base paginator must accept arbitrary additional kwargs to indicate that
         # its child classes could define and use additional kwargs
-        **kwargs: Any,
+        **kwargs: t.Any,
     ):
         self.method = method
         self.items_key = items_key
         self.client_args = client_args
         self.client_kwargs = client_kwargs
 
-    def __iter__(self) -> Iterator[PageT]:
+    def __iter__(self) -> t.Iterator[PageT]:
         yield from self.pages()
 
     @abc.abstractmethod
-    def pages(self) -> Iterator[PageT]:
+    def pages(self) -> t.Iterator[PageT]:
         """``pages()`` yields GlobusHTTPResponse objects, each one representing a page
         of results."""
 
-    def items(self) -> Iterator[Any]:
+    def items(self) -> t.Iterator[t.Any]:
         """
         ``items()`` of a paginator is a generator which yields each item in each page of
         results.
@@ -101,7 +89,7 @@ class Paginator(Iterable[PageT], metaclass=abc.ABCMeta):
             yield from page[self.items_key]
 
     @classmethod
-    def wrap(cls, method: Callable[P, R]) -> Callable[P, "Paginator[R]"]:
+    def wrap(cls, method: t.Callable[P, R]) -> t.Callable[P, "Paginator[R]"]:
         """
         This is an alternate method for getting a paginator for a paginated method which
         correctly preserves the type signature of the paginated method.
@@ -126,13 +114,13 @@ class Paginator(Iterable[PageT], metaclass=abc.ABCMeta):
         if not getattr(method, "_has_paginator", False):
             raise ValueError(f"'{method}' is not a paginated method")
 
-        as_paginated = cast(_PaginatedFunc[PageT], method)
+        as_paginated = t.cast(_PaginatedFunc[PageT], method)
         paginator_class = as_paginated._paginator_class
         paginator_params = as_paginated._paginator_params
         paginator_items_key = as_paginated._paginator_items_key
 
         @functools.wraps(method)
-        def paginated_method(*args: Any, **kwargs: Any) -> Paginator[PageT]:
+        def paginated_method(*args: t.Any, **kwargs: t.Any) -> Paginator[PageT]:
             return paginator_class(
                 method,
                 client_args=list(args),
@@ -141,14 +129,14 @@ class Paginator(Iterable[PageT], metaclass=abc.ABCMeta):
                 **paginator_params,
             )
 
-        return cast(Callable[P, Paginator[R]], paginated_method)
+        return t.cast(t.Callable[P, Paginator[R]], paginated_method)
 
 
 def has_paginator(
-    paginator_class: Type[Paginator[PageT]],
-    items_key: Optional[str] = None,
-    **paginator_params: Any,
-) -> Callable[[C], C]:
+    paginator_class: t.Type[Paginator[PageT]],
+    items_key: t.Optional[str] = None,
+    **paginator_params: t.Any,
+) -> t.Callable[[C], C]:
     """
     Mark a callable -- typically a client method -- as having pagination parameters.
     Usage:
@@ -165,7 +153,7 @@ def has_paginator(
     """
 
     def decorate(func: C) -> C:
-        as_paginated = cast(_PaginatedFunc[PageT], func)
+        as_paginated = t.cast(_PaginatedFunc[PageT], func)
         as_paginated._has_paginator = True
         as_paginated._paginator_class = paginator_class
         as_paginated._paginator_items_key = items_key

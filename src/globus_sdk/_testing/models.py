@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterator, List, Optional, Union
+import typing as t
 
 import responses
 
@@ -21,13 +21,13 @@ class RegisteredResponse:
         self,
         *,
         path: str,
-        service: Optional[str] = None,
+        service: t.Optional[str] = None,
         method: str = responses.GET,
-        headers: Optional[Dict[str, str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
-        json: Union[None, List[Any], Dict[str, Any]] = None,
-        body: Optional[str] = None,
-        **kwargs: Any,
+        headers: t.Optional[t.Dict[str, str]] = None,
+        metadata: t.Optional[t.Dict[str, t.Any]] = None,
+        json: t.Union[None, t.List[t.Any], t.Dict[str, t.Any]] = None,
+        body: t.Optional[str] = None,
+        **kwargs: t.Any,
     ) -> None:
         self.service = service
         self.path = path
@@ -50,10 +50,10 @@ class RegisteredResponse:
         self._metadata = metadata
         self.kwargs = kwargs
 
-        self.parent: Optional["ResponseSet"] = None
+        self.parent: t.Optional["ResponseSet"] = None
 
     @property
-    def metadata(self) -> Dict[str, Any]:
+    def metadata(self) -> t.Dict[str, t.Any]:
         if self._metadata is not None:
             return self._metadata
         if self.parent is not None:
@@ -61,9 +61,9 @@ class RegisteredResponse:
         return {}
 
     def add(
-        self, *, requests_mock: Optional[responses.RequestsMock] = None
+        self, *, requests_mock: t.Optional[responses.RequestsMock] = None
     ) -> "RegisteredResponse":
-        kwargs: Dict[str, Any] = {
+        kwargs: t.Dict[str, t.Any] = {
             "headers": self.headers,
             "match_querystring": None,
             **self.kwargs,
@@ -89,11 +89,11 @@ class ResponseSet:
 
     def __init__(
         self,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: t.Optional[t.Dict[str, t.Any]] = None,
         **kwargs: RegisteredResponse,
     ) -> None:
         self.metadata = metadata or {}
-        self._data: Dict[str, RegisteredResponse] = {**kwargs}
+        self._data: t.Dict[str, RegisteredResponse] = {**kwargs}
         for res in self._data.values():
             res.parent = self
 
@@ -109,16 +109,16 @@ class ResponseSet:
     def __bool__(self) -> bool:
         return bool(self._data)
 
-    def __iter__(self) -> Iterator[RegisteredResponse]:
+    def __iter__(self) -> t.Iterator[RegisteredResponse]:
         return iter(self._data.values())
 
     def activate(
-        self, case: str, *, requests_mock: Optional[responses.RequestsMock] = None
+        self, case: str, *, requests_mock: t.Optional[responses.RequestsMock] = None
     ) -> RegisteredResponse:
         return self.lookup(case).add(requests_mock=requests_mock)
 
     def activate_all(
-        self, *, requests_mock: Optional[responses.RequestsMock] = None
+        self, *, requests_mock: t.Optional[responses.RequestsMock] = None
     ) -> "ResponseSet":
         for x in self:
             x.add(requests_mock=requests_mock)
@@ -127,9 +127,9 @@ class ResponseSet:
     @classmethod
     def from_dict(
         cls,
-        data: Dict[str, Dict[str, Any]],
-        metadata: Optional[Dict[str, Any]] = None,
-        **kwargs: Dict[str, Dict[str, Any]],
+        data: t.Dict[str, t.Dict[str, t.Any]],
+        metadata: t.Optional[t.Dict[str, t.Any]] = None,
+        **kwargs: t.Dict[str, t.Dict[str, t.Any]],
     ) -> "ResponseSet":
         # constructor which expects native dicts and converts them to RegisteredResponse
         # objects, then puts them into the ResponseSet

@@ -3,28 +3,17 @@ import collections.abc
 import hashlib
 import os
 import sys
+import typing as t
 from base64 import b64encode
 from enum import Enum
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Generator,
-    Generic,
-    Iterable,
-    Optional,
-    Type,
-    TypeVar,
-    cast,
-)
 
-C = TypeVar("C", bound=Callable[..., Any])
-T = TypeVar("T")
-R = TypeVar("R")
+C = t.TypeVar("C", bound=t.Callable[..., t.Any])
+T = t.TypeVar("T")
+R = t.TypeVar("R")
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     # pylint: disable=unsubscriptable-object
-    PayloadWrapperBase = collections.UserDict[str, Any]
+    PayloadWrapperBase = collections.UserDict[str, t.Any]
 else:
     PayloadWrapperBase = collections.UserDict
 
@@ -37,7 +26,7 @@ def b64str(s: str) -> str:
     return b64encode(s.encode("utf-8")).decode("utf-8")
 
 
-def slash_join(a: str, b: Optional[str]) -> str:
+def slash_join(a: str, b: t.Optional[str]) -> str:
     """
     Join a and b with a single slash, regardless of whether they already
     contain a trailing/leading slash or neither.
@@ -62,7 +51,7 @@ def doc_api_method(
     external_format_str: str = (
         "See `{message} <{base_url}/{link}>`_ in the API documentation for details."
     ),
-) -> Callable[[C], C]:
+) -> t.Callable[[C], C]:
     def decorate(func: C) -> C:
         func.__doc__ = f"""{func.__doc__}
 
@@ -76,7 +65,7 @@ def doc_api_method(
     return decorate
 
 
-def safe_strseq_iter(value: Iterable[Any]) -> Generator[str, None, None]:
+def safe_strseq_iter(value: t.Iterable[t.Any]) -> t.Generator[str, None, None]:
     """
     Given an Iterable (typically of strings), produce an iterator over it of strings.
     This is a passthrough with two caveats:
@@ -94,7 +83,7 @@ def safe_strseq_iter(value: Iterable[Any]) -> Generator[str, None, None]:
             yield str(x)
 
 
-def render_enums_for_api(value: Any) -> Any:
+def render_enums_for_api(value: t.Any) -> t.Any:
     """
     Convert enum values to their underlying value.
 
@@ -135,24 +124,27 @@ class PayloadWrapper(PayloadWrapperBase):
     #
 
     def _set_value(
-        self, key: str, val: Any, callback: Optional[Callable[[Any], Any]] = None
+        self,
+        key: str,
+        val: t.Any,
+        callback: t.Optional[t.Callable[[t.Any], t.Any]] = None,
     ) -> None:
         if val is not None:
             self[key] = callback(val) if callback else val
 
-    def _set_optstrs(self, **kwargs: Any) -> None:
+    def _set_optstrs(self, **kwargs: t.Any) -> None:
         for k, v in kwargs.items():
             self._set_value(k, v, callback=str)
 
-    def _set_optstrlists(self, **kwargs: Optional[Iterable[Any]]) -> None:
+    def _set_optstrlists(self, **kwargs: t.Optional[t.Iterable[t.Any]]) -> None:
         for k, v in kwargs.items():
             self._set_value(k, v, callback=lambda x: list(safe_strseq_iter(x)))
 
-    def _set_optbools(self, **kwargs: Optional[bool]) -> None:
+    def _set_optbools(self, **kwargs: t.Optional[bool]) -> None:
         for k, v in kwargs.items():
             self._set_value(k, v, callback=bool)
 
-    def _set_optints(self, **kwargs: Any) -> None:
+    def _set_optints(self, **kwargs: t.Any) -> None:
         for k, v in kwargs.items():
             self._set_value(k, v, callback=int)
 
@@ -162,7 +154,7 @@ def in_sphinx_build() -> bool:  # pragma: no cover
     return os.path.basename(sys.argv[0]) in ["sphinx-build", "sphinx-build.exe"]
 
 
-class _classproperty(Generic[T, R]):
+class _classproperty(t.Generic[T, R]):
     """
     WARNING: for internal use only.
     Everything in `globus_sdk.utils` is meant to be internal only, but that holds
@@ -187,10 +179,10 @@ class _classproperty(Generic[T, R]):
       https://docs.python.org/3/howto/descriptor.html#properties
     """
 
-    def __init__(self, func: Callable[[Type[T]], R]) -> None:
+    def __init__(self, func: t.Callable[[t.Type[T]], R]) -> None:
         self.func = func
 
-    def __get__(self, obj: Any, cls: Type[T]) -> R:
+    def __get__(self, obj: t.Any, cls: t.Type[T]) -> R:
         return self.func(cls)
 
 
@@ -198,7 +190,7 @@ class _classproperty(Generic[T, R]):
 # decoration, so that proper autodoc generation happens
 if in_sphinx_build():  # pragma: no cover
 
-    def classproperty(func: Callable[[T], R]) -> _classproperty[T, R]:
+    def classproperty(func: t.Callable[[T], R]) -> _classproperty[T, R]:
         # type ignore this because
         # - it doesn't match the return type
         # - mypy doesn't understand classmethod(property(...)) on older pythons
@@ -206,6 +198,6 @@ if in_sphinx_build():  # pragma: no cover
 
 else:
 
-    def classproperty(func: Callable[[T], R]) -> _classproperty[T, R]:
+    def classproperty(func: t.Callable[[T], R]) -> _classproperty[T, R]:
         # type cast to convert instance method to class method
-        return _classproperty(cast(Callable[[Type[T]], R], func))
+        return _classproperty(t.cast(t.Callable[[t.Type[T]], R], func))

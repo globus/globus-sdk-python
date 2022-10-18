@@ -1,5 +1,5 @@
 import re
-from typing import Any, Callable, Dict, Optional, Union
+import typing as t
 
 from globus_sdk.response import GlobusHTTPResponse, IterableResponse
 
@@ -36,11 +36,13 @@ class UnpackingGCSResponse(GlobusHTTPResponse):
     :type match: str or callable
     """
 
-    def _default_unpacking_match(self, spec: str) -> Callable[[Dict[str, Any]], bool]:
+    def _default_unpacking_match(
+        self, spec: str
+    ) -> t.Callable[[t.Dict[str, t.Any]], bool]:
         if not re.fullmatch(r"\w+", spec):
             raise ValueError("Invalid UnpackingGCSResponse specification.")
 
-        def match_func(data: Dict[str, Any]) -> bool:
+        def match_func(data: t.Dict[str, t.Any]) -> bool:
             if not ("DATA_TYPE" in data and isinstance(data["DATA_TYPE"], str)):
                 return False
             if "#" not in data["DATA_TYPE"]:
@@ -53,7 +55,7 @@ class UnpackingGCSResponse(GlobusHTTPResponse):
     def __init__(
         self,
         response: GlobusHTTPResponse,
-        match: Union[str, Callable[[Dict[str, Any]], bool]],
+        match: t.Union[str, t.Callable[[t.Dict[str, t.Any]], bool]],
     ):
         super().__init__(response)
 
@@ -62,18 +64,18 @@ class UnpackingGCSResponse(GlobusHTTPResponse):
         else:
             self._match_func = self._default_unpacking_match(match)
 
-        self._unpacked_data: Optional[Dict[str, Any]] = None
+        self._unpacked_data: t.Optional[t.Dict[str, t.Any]] = None
         self._did_unpack = False
 
     @property
-    def full_data(self) -> Any:
+    def full_data(self) -> t.Any:
         """
         The full, parsed JSON response data.
         ``None`` if the data cannot be parsed as JSON.
         """
         return self._parsed_json
 
-    def _unpack(self) -> Optional[Dict[str, Any]]:
+    def _unpack(self) -> t.Optional[t.Dict[str, t.Any]]:
         """
         Unpack the response from the `"data"` array, returning the first match found.
         If no matches are founds, or the data is the wrong shape, return None.
@@ -87,7 +89,7 @@ class UnpackingGCSResponse(GlobusHTTPResponse):
         return None
 
     @property
-    def data(self) -> Any:
+    def data(self) -> t.Any:
         # only do the unpacking operation once, as it may be expensive on large payloads
         if not self._did_unpack:
             self._unpacked_data = self._unpack()

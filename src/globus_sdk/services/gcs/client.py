@@ -1,5 +1,5 @@
+import typing as t
 import uuid
-from typing import Any, Callable, Dict, Iterable, Optional, TypeVar, Union
 
 from globus_sdk import client, paging, response, scopes, utils
 from globus_sdk._types import UUIDLike
@@ -14,10 +14,10 @@ from .data import (
 from .errors import GCSAPIError
 from .response import IterableGCSResponse, UnpackingGCSResponse
 
-C = TypeVar("C", bound=Callable[..., Any])
+C = t.TypeVar("C", bound=t.Callable[..., t.Any])
 
 
-def _gcsdoc(message: str, link: str) -> Callable[[C], C]:
+def _gcsdoc(message: str, link: str) -> t.Callable[[C], C]:
     # do not use functools.partial because it doesn't preserve type information
     # see: https://github.com/python/mypy/issues/1484
     def partial(func: C) -> C:
@@ -53,10 +53,10 @@ class GCSClient(client.BaseClient):
         self,
         gcs_address: str,
         *,
-        environment: Optional[str] = None,
-        authorizer: Optional[GlobusAuthorizer] = None,
-        app_name: Optional[str] = None,
-        transport_params: Optional[Dict[str, Any]] = None,
+        environment: t.Optional[str] = None,
+        authorizer: t.Optional[GlobusAuthorizer] = None,
+        app_name: t.Optional[str] = None,
+        transport_params: t.Optional[t.Dict[str, t.Any]] = None,
     ):
         # check if the provided address was a DNS name or an HTTPS URL
         # if it was a URL, do not modify, but if it's a DNS name format it accordingly
@@ -74,7 +74,7 @@ class GCSClient(client.BaseClient):
 
     @staticmethod
     def get_gcs_endpoint_scopes(
-        endpoint_id: Union[uuid.UUID, str]
+        endpoint_id: t.Union[uuid.UUID, str]
     ) -> scopes.GCSEndpointScopeBuilder:
         """Given a GCS Endpoint ID, this helper constructs an object containing the
         scopes for that Endpoint.
@@ -89,7 +89,7 @@ class GCSClient(client.BaseClient):
 
     @staticmethod
     def get_gcs_collection_scopes(
-        collection_id: Union[uuid.UUID, str]
+        collection_id: t.Union[uuid.UUID, str]
     ) -> scopes.GCSCollectionScopeBuilder:
         """Given a GCS Collection ID, this helper constructs an object containing the
         scopes for that Collection.
@@ -103,7 +103,7 @@ class GCSClient(client.BaseClient):
         return scopes.GCSCollectionScopeBuilder(str(collection_id))
 
     @staticmethod
-    def connector_id_to_name(connector_id: UUIDLike) -> Optional[str]:
+    def connector_id_to_name(connector_id: UUIDLike) -> t.Optional[str]:
         """
         Helper that converts a given connector_id into a human readable
         connector name string. Will return None if the id is not recognized.
@@ -130,12 +130,12 @@ class GCSClient(client.BaseClient):
     def get_collection_list(
         self,
         *,
-        mapped_collection_id: Optional[UUIDLike] = None,
-        filter: Union[  # pylint: disable=redefined-builtin
-            str, Iterable[str], None
+        mapped_collection_id: t.Optional[UUIDLike] = None,
+        filter: t.Union[  # pylint: disable=redefined-builtin
+            str, t.Iterable[str], None
         ] = None,
-        include: Union[str, Iterable[str], None] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        include: t.Union[str, t.Iterable[str], None] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableGCSResponse:
         """
         ``GET /collections``
@@ -171,7 +171,7 @@ class GCSClient(client.BaseClient):
         self,
         collection_id: UUIDLike,
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> UnpackingGCSResponse:
         """
         ``GET /collections/{collection_id}``
@@ -191,7 +191,7 @@ class GCSClient(client.BaseClient):
     @_gcsdoc("Create Collection", "openapi_Collections/#createCollection")
     def create_collection(
         self,
-        collection_data: Union[Dict[str, Any], CollectionDocument],
+        collection_data: t.Union[t.Dict[str, t.Any], CollectionDocument],
     ) -> UnpackingGCSResponse:
         """
         ``POST /collections``
@@ -217,9 +217,9 @@ class GCSClient(client.BaseClient):
     def update_collection(
         self,
         collection_id: UUIDLike,
-        collection_data: Union[Dict[str, Any], CollectionDocument],
+        collection_data: t.Union[t.Dict[str, t.Any], CollectionDocument],
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> UnpackingGCSResponse:
         """
         ``PATCH /collections/{collection_id}``
@@ -245,7 +245,7 @@ class GCSClient(client.BaseClient):
         self,
         collection_id: UUIDLike,
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``DELETE /collections/{collection_id}``
@@ -269,8 +269,8 @@ class GCSClient(client.BaseClient):
     def get_storage_gateway_list(
         self,
         *,
-        include: Union[None, str, Iterable[str]] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        include: t.Union[None, str, t.Iterable[str]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableGCSResponse:
         """
         ``GET /storage_gateways``
@@ -294,9 +294,9 @@ class GCSClient(client.BaseClient):
     @_gcsdoc("Create a Storage Gateway", "openapi_Storage_Gateways/#postStorageGateway")
     def create_storage_gateway(
         self,
-        data: Union[Dict[str, Any], StorageGatewayDocument],
+        data: t.Union[t.Dict[str, t.Any], StorageGatewayDocument],
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> UnpackingGCSResponse:
         """
         ``POST /storage_gateways``
@@ -317,8 +317,8 @@ class GCSClient(client.BaseClient):
         self,
         storage_gateway_id: UUIDLike,
         *,
-        include: Union[None, str, Iterable[str]] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        include: t.Union[None, str, t.Iterable[str]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> UnpackingGCSResponse:
         """
         ``GET /storage_gateways/<storage_gateway_id>``
@@ -352,9 +352,9 @@ class GCSClient(client.BaseClient):
     def update_storage_gateway(
         self,
         storage_gateway_id: UUIDLike,
-        data: Union[Dict[str, Any], StorageGatewayDocument],
+        data: t.Union[t.Dict[str, t.Any], StorageGatewayDocument],
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``PATCH /storage_gateways/<storage_gateway_id>``
@@ -378,9 +378,9 @@ class GCSClient(client.BaseClient):
     )
     def delete_storage_gateway(
         self,
-        storage_gateway_id: Union[str, uuid.UUID],
+        storage_gateway_id: t.Union[str, uuid.UUID],
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``DELETE /storage_gateways/<storage_gateway_id>``
@@ -405,9 +405,9 @@ class GCSClient(client.BaseClient):
     )
     def get_role_list(
         self,
-        collection_id: Optional[UUIDLike] = None,
-        include: Optional[str] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        collection_id: t.Optional[UUIDLike] = None,
+        include: t.Optional[str] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableGCSResponse:
         """
         ``GET /roles``
@@ -436,8 +436,8 @@ class GCSClient(client.BaseClient):
     @_gcsdoc("Create Role", "openapi_Roles/#postRole")
     def create_role(
         self,
-        data: Union[Dict[str, Any], GCSRoleDocument],
-        query_params: Optional[Dict[str, Any]] = None,
+        data: t.Union[t.Dict[str, t.Any], GCSRoleDocument],
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> UnpackingGCSResponse:
         """
         POST /roles
@@ -458,7 +458,7 @@ class GCSClient(client.BaseClient):
     def get_role(
         self,
         role_id: UUIDLike,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> UnpackingGCSResponse:
         """
         GET /roles/{role_id}
@@ -475,7 +475,7 @@ class GCSClient(client.BaseClient):
     def delete_role(
         self,
         role_id: UUIDLike,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         DELETE /roles/{role_id}
@@ -491,8 +491,8 @@ class GCSClient(client.BaseClient):
     @_gcsdoc("Get User Credential list", "openapi_User_Credentials/#getUserCredentials")
     def get_user_credential_list(
         self,
-        storage_gateway: Optional[UUIDLike] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        storage_gateway: t.Optional[UUIDLike] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableGCSResponse:
         """
         GET /user_credentials
@@ -513,8 +513,8 @@ class GCSClient(client.BaseClient):
     @_gcsdoc("Create a User Credential", "openapi_User_Credentials/#postUserCredential")
     def create_user_credential(
         self,
-        data: Union[Dict[str, Any], UserCredentialDocument],
-        query_params: Optional[Dict[str, Any]] = None,
+        data: t.Union[t.Dict[str, t.Any], UserCredentialDocument],
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> UnpackingGCSResponse:
         """
         POST /user_credentials
@@ -535,7 +535,7 @@ class GCSClient(client.BaseClient):
     def get_user_credential(
         self,
         user_credential_id: UUIDLike,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> UnpackingGCSResponse:
         """
         GET /user_credentials/{user_credential_id}
@@ -556,8 +556,8 @@ class GCSClient(client.BaseClient):
     def update_user_credential(
         self,
         user_credential_id: UUIDLike,
-        data: Union[Dict[str, Any], UserCredentialDocument],
-        query_params: Optional[Dict[str, Any]] = None,
+        data: t.Union[t.Dict[str, t.Any], UserCredentialDocument],
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> UnpackingGCSResponse:
         """
         PATCH /user_credentials/{user_credential_id}
@@ -581,7 +581,7 @@ class GCSClient(client.BaseClient):
     def delete_user_credential(
         self,
         user_credential_id: UUIDLike,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         DELETE /user_credentials/{user_credential_id}

@@ -1,8 +1,8 @@
-from typing import Any, Dict, List
+import typing as t
 
 from globus_sdk._testing.models import RegisteredResponse, ResponseSet
 
-raw_data: List[Dict[str, Any]] = [
+raw_data: t.List[t.Dict[str, t.Any]] = [
     {
         "name": "Claptrap's Rough Riders",
         "parent_id": None,

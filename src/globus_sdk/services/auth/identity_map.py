@@ -1,5 +1,5 @@
+import typing as t
 import uuid
-from typing import Any, Dict, Iterable, MutableMapping, Optional, Set, Tuple
 
 from .client import AuthClient
 
@@ -16,7 +16,9 @@ def is_username(val: str) -> bool:
         return True
 
 
-def split_ids_and_usernames(identity_ids: Iterable[str]) -> Tuple[Set[str], Set[str]]:
+def split_ids_and_usernames(
+    identity_ids: t.Iterable[str],
+) -> t.Tuple[t.Set[str], t.Set[str]]:
     ids = set()
     usernames = set()
 
@@ -134,10 +136,10 @@ class IdentityMap:
     def __init__(
         self,
         auth_client: AuthClient,
-        identity_ids: Optional[Iterable[str]] = None,
+        identity_ids: t.Optional[t.Iterable[str]] = None,
         *,
-        id_batch_size: Optional[int] = None,
-        cache: Optional[MutableMapping[str, Dict[str, Any]]] = None,
+        id_batch_size: t.Optional[int] = None,
+        cache: t.Optional[t.MutableMapping[str, t.Dict[str, t.Any]]] = None,
     ):
         self.auth_client = auth_client
         self.id_batch_size = id_batch_size or self._default_id_batch_size
@@ -151,7 +153,7 @@ class IdentityMap:
         # IdentityMap objects share a cache
         self._cache = cache if cache is not None else {}
 
-    def _create_batch(self, key: str) -> Set[str]:
+    def _create_batch(self, key: str) -> t.Set[str]:
         """
         Create a batch to do a lookup.
 
@@ -225,7 +227,7 @@ class IdentityMap:
         self.unresolved_ids.add(identity_id)
         return True
 
-    def get(self, key: str, default: Optional[Any] = None) -> Any:
+    def get(self, key: str, default: t.Optional[t.Any] = None) -> t.Any:
         """
         A dict-like get() method which accepts a default value.
         """
@@ -234,7 +236,7 @@ class IdentityMap:
         except KeyError:
             return default
 
-    def __getitem__(self, key: str) -> Any:
+    def __getitem__(self, key: str) -> t.Any:
         """
         ``IdentityMap`` supports dict-like lookups with ``map[key]``
         """

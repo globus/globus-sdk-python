@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import Any, Dict, List, Optional, Type, cast
+import typing as t
 
 from .env_vars import get_environment_name
 
@@ -14,11 +14,11 @@ _SERVICE_URL_VAR_FORMAT = "GLOBUS_SDK_SERVICE_URL_{}"
 class EnvConfig:
     envname: str
     domain: str
-    no_dotapi: List[str] = ["app", "auth"]
-    automate_services: List[str] = ["actions", "flows", "timer"]
+    no_dotapi: t.List[str] = ["app", "auth"]
+    automate_services: t.List[str] = ["actions", "flows", "timer"]
 
     # this same dict is inherited (and therefore shared!) by all subclasses
-    _registry: Dict[str, Type["EnvConfig"]] = {}
+    _registry: t.Dict[str, t.Type["EnvConfig"]] = {}
 
     # this is an easier hook to use than metaclass definition -- register every subclass
     # in this dict automatically
@@ -30,7 +30,7 @@ class EnvConfig:
     #           envname = "beta"
     #
     # and retrieve it with get_config_by_name("beta")
-    def __init_subclass__(cls, **kwargs: Any):
+    def __init_subclass__(cls, **kwargs: t.Any):
         super().__init_subclass__(**kwargs)
         cls._registry[cls.envname] = cls
 
@@ -39,7 +39,7 @@ class EnvConfig:
         # you can override any name with a config attribute
         service_url_attr = f"{service}_url"
         if hasattr(cls, service_url_attr):
-            return cast(str, getattr(cls, service_url_attr))
+            return t.cast(str, getattr(cls, service_url_attr))
 
         # the typical pattern for a service hostname is X.api.Y
         # X=transfer, Y=preview.globus.org => transfer.api.preview.globus.org
@@ -51,11 +51,11 @@ class EnvConfig:
         return f"https://{service}.api.{cls.domain}/"
 
     @classmethod
-    def get_by_name(cls, env: str) -> Optional[Type["EnvConfig"]]:
+    def get_by_name(cls, env: str) -> t.Optional[t.Type["EnvConfig"]]:
         return cls._registry.get(env)
 
 
-def get_service_url(service: str, environment: Optional[str] = None) -> str:
+def get_service_url(service: str, environment: t.Optional[str] = None) -> str:
     """
     Return the base URL for the given service in this environment. For example:
 
@@ -86,7 +86,7 @@ def get_service_url(service: str, environment: Optional[str] = None) -> str:
     return url
 
 
-def get_webapp_url(environment: Optional[str] = None) -> str:
+def get_webapp_url(environment: t.Optional[str] = None) -> str:
     """
     Return the URL to access the Globus web app in the given environment. For example:
 

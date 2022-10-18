@@ -24,7 +24,9 @@ repos:
   hooks:
     - id: flake8
       name: "Lint python files"
-      additional_dependencies: ['flake8-bugbear==22.7.1']
+      additional_dependencies:
+        - 'flake8-bugbear==22.7.1'
+        - 'flake8-typing-as-t==0.0.1'
 - repo: https://github.com/PyCQA/isort
   rev: 5.10.1
   hooks:

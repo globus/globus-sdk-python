@@ -4,7 +4,7 @@ include = src/*
 omit =
     src/globus_sdk/_sphinxext.py
     src/globus_sdk/_testing/*
-    src/globus_sdk/__generate_init.py
+    src/globus_sdk/_generate_init.py
 
 [report]
 show_missing = True
@@ -18,6 +18,6 @@ exclude_lines =
     # don't check on executable components of importable modules
     if __name__ == .__main__.:
     # don't check coverage on type checking conditionals
-    if TYPE_CHECKING:
+    if t.TYPE_CHECKING:
     # skip overloads
-    @overload
+    @t.overload

@@ -1,9 +1,9 @@
 import logging
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional
+import typing as t
 
 from .renewing import RenewingAuthorizer
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     from globus_sdk.services.auth import AuthClient, OAuthTokenResponse
 
 log = logging.getLogger(__name__)
@@ -56,9 +56,9 @@ class RefreshTokenAuthorizer(RenewingAuthorizer):
         refresh_token: str,
         auth_client: "AuthClient",
         *,
-        access_token: Optional[str] = None,
-        expires_at: Optional[int] = None,
-        on_refresh: Optional[Callable[["OAuthTokenResponse"], Any]] = None,
+        access_token: t.Optional[str] = None,
+        expires_at: t.Optional[int] = None,
+        on_refresh: t.Optional[t.Callable[["OAuthTokenResponse"], t.Any]] = None,
     ):
         log.info(
             "Setting up RefreshTokenAuthorizer with auth_client="
@@ -77,7 +77,7 @@ class RefreshTokenAuthorizer(RenewingAuthorizer):
         """
         return self.auth_client.oauth2_refresh_token(self.refresh_token)
 
-    def _extract_token_data(self, res: "OAuthTokenResponse") -> Dict[str, Any]:
+    def _extract_token_data(self, res: "OAuthTokenResponse") -> t.Dict[str, t.Any]:
         """
         Get the tokens .by_resource_server,
         Ensure that only one token was gotten, and return that token.

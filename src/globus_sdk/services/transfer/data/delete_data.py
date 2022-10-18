@@ -1,11 +1,11 @@
 import datetime
 import logging
-from typing import TYPE_CHECKING, Any, Dict, Iterator, Optional, Union
+import typing as t
 
 from globus_sdk import exc, utils
 from globus_sdk._types import UUIDLike
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import globus_sdk
 
 log = logging.getLogger(__name__)
@@ -87,18 +87,18 @@ class DeleteData(utils.PayloadWrapper):
 
     def __init__(
         self,
-        transfer_client: Optional["globus_sdk.TransferClient"] = None,
-        endpoint: Optional[UUIDLike] = None,
+        transfer_client: t.Optional["globus_sdk.TransferClient"] = None,
+        endpoint: t.Optional[UUIDLike] = None,
         *,
-        label: Optional[str] = None,
-        submission_id: Optional[UUIDLike] = None,
+        label: t.Optional[str] = None,
+        submission_id: t.Optional[UUIDLike] = None,
         recursive: bool = False,
-        deadline: Optional[Union[str, datetime.datetime]] = None,
-        skip_activation_check: Optional[bool] = None,
+        deadline: t.Optional[t.Union[str, datetime.datetime]] = None,
+        skip_activation_check: t.Optional[bool] = None,
         notify_on_succeeded: bool = True,
         notify_on_failed: bool = True,
         notify_on_inactive: bool = True,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> None:
         super().__init__()
         # this must be checked explicitly to handle the fact that `transfer_client` is
@@ -139,7 +139,7 @@ class DeleteData(utils.PayloadWrapper):
                 )
 
     def add_item(
-        self, path: str, *, additional_fields: Optional[Dict[str, Any]] = None
+        self, path: str, *, additional_fields: t.Optional[t.Dict[str, t.Any]] = None
     ) -> None:
         """
         Add a file or directory or symlink to be deleted. If any of the paths
@@ -155,7 +155,7 @@ class DeleteData(utils.PayloadWrapper):
         log.debug('DeleteData[{}].add_item: "{}"'.format(self["endpoint"], path))
         self["DATA"].append(item_data)
 
-    def iter_items(self) -> Iterator[Dict[str, Any]]:
+    def iter_items(self) -> t.Iterator[t.Dict[str, t.Any]]:
         """
         An iterator of items created by ``add_item``.
 

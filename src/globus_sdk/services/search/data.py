@@ -1,11 +1,11 @@
-from typing import Any, Dict, List, Optional, Tuple, TypeVar, Union
+import typing as t
 
 from globus_sdk import utils
 
 # workaround for absence of Self type
 # for the workaround and some background, see:
 #   https://github.com/python/mypy/issues/11871
-SearchQueryT = TypeVar("SearchQueryT", bound="SearchQueryBase")
+SearchQueryT = t.TypeVar("SearchQueryT", bound="SearchQueryBase")
 
 
 # an internal class for declaring multiple related types with shared methods
@@ -57,11 +57,11 @@ class SearchQueryBase(utils.PayloadWrapper):
     def add_filter(
         self: SearchQueryT,
         field_name: str,
-        values: List[str],
+        values: t.List[str],
         *,
         # pylint: disable=redefined-builtin
         type: str = "match_all",
-        additional_fields: Optional[Dict[str, Any]] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> SearchQueryT:
         """
         Add a filter subdocument to the query.
@@ -117,12 +117,12 @@ class SearchQuery(SearchQueryBase):
 
     def __init__(
         self,
-        q: Optional[str] = None,
+        q: t.Optional[str] = None,
         *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-        advanced: Optional[bool] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        limit: t.Optional[int] = None,
+        offset: t.Optional[int] = None,
+        advanced: t.Optional[bool] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ):
         super().__init__()
         if q is not None:
@@ -153,10 +153,10 @@ class SearchQuery(SearchQueryBase):
         *,
         # pylint: disable=redefined-builtin
         type: str = "terms",
-        size: Optional[int] = None,
-        date_interval: Optional[str] = None,
-        histogram_range: Optional[Tuple[Any, Any]] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        size: t.Optional[int] = None,
+        date_interval: t.Optional[str] = None,
+        histogram_range: t.Optional[t.Tuple[t.Any, t.Any]] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> "SearchQuery":
         """
         Add a facet subdocument to the query.
@@ -177,7 +177,7 @@ class SearchQuery(SearchQueryBase):
         :type additional_fields: dict, optional
         """
         self["facets"] = self.get("facets", [])
-        facet: Dict[str, Any] = {
+        facet: t.Dict[str, t.Any] = {
             "name": name,
             "field_name": field_name,
             "type": type,
@@ -196,9 +196,9 @@ class SearchQuery(SearchQueryBase):
     def add_boost(
         self,
         field_name: str,
-        factor: Union[str, int, float],
+        factor: t.Union[str, int, float],
         *,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> "SearchQuery":
         """
         Add a boost subdocument to the query.
@@ -224,8 +224,8 @@ class SearchQuery(SearchQueryBase):
         self,
         field_name: str,
         *,
-        order: Optional[str] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        order: t.Optional[str] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> "SearchQuery":
         """
         Add a sort subdocument to the query.
@@ -272,12 +272,12 @@ class SearchScrollQuery(SearchQueryBase):
 
     def __init__(
         self,
-        q: Optional[str] = None,
+        q: t.Optional[str] = None,
         *,
-        limit: Optional[int] = None,
-        advanced: Optional[bool] = None,
-        marker: Optional[str] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        limit: t.Optional[int] = None,
+        advanced: t.Optional[bool] = None,
+        marker: t.Optional[str] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ):
         super().__init__()
         if q is not None:

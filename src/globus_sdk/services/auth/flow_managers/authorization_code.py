@@ -1,6 +1,6 @@
 import logging
+import typing as t
 import urllib.parse
-from typing import TYPE_CHECKING, Any, Dict, Optional
 
 from globus_sdk import scopes, utils
 
@@ -8,7 +8,7 @@ from ..oauth2_constants import DEFAULT_REQUESTED_SCOPES
 from ..response import OAuthTokenResponse
 from .base import GlobusOAuthFlowManager
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import globus_sdk
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ class GlobusAuthorizationCodeFlowManager(GlobusOAuthFlowManager):
         self,
         auth_client: "globus_sdk.AuthClient",
         redirect_uri: str,
-        requested_scopes: Optional[scopes._ScopeCollectionType] = None,
+        requested_scopes: t.Optional[scopes._ScopeCollectionType] = None,
         state: str = "_default",
         refresh_tokens: bool = False,
     ):
@@ -80,7 +80,9 @@ class GlobusAuthorizationCodeFlowManager(GlobusOAuthFlowManager):
         logger.debug(f"state={state}")
         logger.debug(f"requested_scopes={self.requested_scopes}")
 
-    def get_authorize_url(self, query_params: Optional[Dict[str, Any]] = None) -> str:
+    def get_authorize_url(
+        self, query_params: t.Optional[t.Dict[str, t.Any]] = None
+    ) -> str:
         """
         Start a Authorization Code flow by getting the authorization URL to
         which users should be sent.

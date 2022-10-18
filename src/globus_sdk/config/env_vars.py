@@ -6,10 +6,10 @@ This does not include service URL env vars (see environments.py for loading of t
 """
 import logging
 import os
-from typing import Any, Callable, Optional, TypeVar, cast, overload
+import typing as t
 
 log = logging.getLogger(__name__)
-T = TypeVar("T")
+T = t.TypeVar("T")
 
 
 ENVNAME_VAR = "GLOBUS_SDK_ENVIRONMENT"
@@ -27,31 +27,31 @@ def _str2bool(val: str) -> bool:
         raise ValueError(f"invalid truth value: {val}")
 
 
-@overload
+@t.overload
 def _load_var(
     varname: str,
-    default: Any,
-    explicit_value: Optional[Any],
-    convert: Callable[[Any, Any], T],
+    default: t.Any,
+    explicit_value: t.Optional[t.Any],
+    convert: t.Callable[[t.Any, t.Any], T],
 ) -> T:
     ...
 
 
-@overload
+@t.overload
 def _load_var(
     varname: str,
     default: str,
-    explicit_value: Optional[str],
+    explicit_value: t.Optional[str],
 ) -> str:
     ...
 
 
 def _load_var(
     varname: str,
-    default: Any,
-    explicit_value: Optional[Any] = None,
-    convert: Optional[Callable[[Any, Any], T]] = None,
-) -> Any:
+    default: t.Any,
+    explicit_value: t.Optional[t.Any] = None,
+    convert: t.Optional[t.Callable[[t.Any, t.Any], T]] = None,
+) -> t.Any:
     # use the explicit value if given and non-None, otherwise, do an env lookup
     value = (
         explicit_value if explicit_value is not None else os.getenv(varname, default)
@@ -68,7 +68,7 @@ def _load_var(
     return value
 
 
-def _bool_cast(value: Any, default: Any) -> bool:  # pylint: disable=unused-argument
+def _bool_cast(value: t.Any, default: t.Any) -> bool:  # pylint: disable=unused-argument
     if isinstance(value, bool):
         return value
     elif not isinstance(value, str):
@@ -76,26 +76,26 @@ def _bool_cast(value: Any, default: Any) -> bool:  # pylint: disable=unused-argu
     return _str2bool(value)
 
 
-def _optfloat_cast(value: Any, default: Any) -> Optional[float]:
+def _optfloat_cast(value: t.Any, default: t.Any) -> t.Optional[float]:
     try:
         return float(value)
     except ValueError:
         pass
     if value == "":
-        return cast(float, default)
+        return t.cast(float, default)
     log.error(f'Value "{value}" can\'t cast to optfloat')
     raise ValueError(f"Invalid config float: {value}")
 
 
-def get_environment_name(inputenv: Optional[str] = None) -> str:
+def get_environment_name(inputenv: t.Optional[str] = None) -> str:
     return _load_var(ENVNAME_VAR, "production", explicit_value=inputenv)
 
 
-def get_ssl_verify(value: Optional[bool] = None) -> bool:
+def get_ssl_verify(value: t.Optional[bool] = None) -> bool:
     return _load_var(SSL_VERIFY_VAR, True, explicit_value=value, convert=_bool_cast)
 
 
-def get_http_timeout(value: Optional[float] = None) -> Optional[float]:
+def get_http_timeout(value: t.Optional[float] = None) -> t.Optional[float]:
     ret = _load_var(
         HTTP_TIMEOUT_VAR, 60.0, explicit_value=value, convert=_optfloat_cast
     )

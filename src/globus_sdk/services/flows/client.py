@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, Dict, List, Optional, TypeVar
+import typing as t
 
 from globus_sdk import GlobusHTTPResponse, client, paging, scopes, utils
 from globus_sdk._types import UUIDLike
@@ -11,10 +11,10 @@ from .response import IterableFlowsResponse
 
 log = logging.getLogger(__name__)
 
-C = TypeVar("C", bound=Callable[..., Any])
+C = t.TypeVar("C", bound=t.Callable[..., t.Any])
 
 
-def _flowdoc(message: str, link: str) -> Callable[[C], C]:
+def _flowdoc(message: str, link: str) -> t.Callable[[C], C]:
     # do not use functools.partial because it doesn't preserve type information
     # see: https://github.com/python/mypy/issues/1484
     def partial(func: C) -> C:
@@ -41,15 +41,15 @@ class FlowsClient(client.BaseClient):
     def create_flow(
         self,
         title: str,
-        definition: Dict[str, Any],
-        input_schema: Dict[str, Any],
-        subtitle: Optional[str] = None,
-        description: Optional[str] = None,
-        flow_viewers: Optional[List[str]] = None,
-        flow_starters: Optional[List[str]] = None,
-        flow_administrators: Optional[List[str]] = None,
-        keywords: Optional[List[str]] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        definition: t.Dict[str, t.Any],
+        input_schema: t.Dict[str, t.Any],
+        subtitle: t.Optional[str] = None,
+        description: t.Optional[str] = None,
+        flow_viewers: t.Optional[t.List[str]] = None,
+        flow_starters: t.Optional[t.List[str]] = None,
+        flow_administrators: t.Optional[t.List[str]] = None,
+        keywords: t.Optional[t.List[str]] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> GlobusHTTPResponse:
         """
         Create a Flow
@@ -174,11 +174,11 @@ class FlowsClient(client.BaseClient):
     def list_flows(
         self,
         *,
-        filter_role: Optional[str] = None,
-        filter_fulltext: Optional[str] = None,
-        orderby: Optional[str] = None,
-        marker: Optional[str] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        filter_role: t.Optional[str] = None,
+        filter_fulltext: t.Optional[str] = None,
+        orderby: t.Optional[str] = None,
+        marker: t.Optional[str] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableFlowsResponse:
         """List deployed Flows
 
@@ -258,10 +258,10 @@ class SpecificFlowClient(client.BaseClient):
         self,
         flow_id: UUIDLike,
         *,
-        environment: Optional[str] = None,
-        authorizer: Optional[GlobusAuthorizer] = None,
-        app_name: Optional[str] = None,
-        transport_params: Optional[Dict[str, Any]] = None,
+        environment: t.Optional[str] = None,
+        authorizer: t.Optional[GlobusAuthorizer] = None,
+        app_name: t.Optional[str] = None,
+        transport_params: t.Optional[t.Dict[str, t.Any]] = None,
     ):
         super().__init__(
             environment=environment,
@@ -278,13 +278,13 @@ class SpecificFlowClient(client.BaseClient):
     @_flowdoc("Run Flow", "~1flows~1{flow_id}~1run/post")
     def run_flow(
         self,
-        body: Dict[str, Any],
+        body: t.Dict[str, t.Any],
         *,
-        label: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        run_monitors: Optional[List[str]] = None,
-        run_managers: Optional[List[str]] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        label: t.Optional[str] = None,
+        tags: t.Optional[t.List[str]] = None,
+        run_monitors: t.Optional[t.List[str]] = None,
+        run_managers: t.Optional[t.List[str]] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> GlobusHTTPResponse:
         """
 

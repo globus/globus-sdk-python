@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+import typing as t
 
 from globus_sdk import utils
 from globus_sdk._types import UUIDLike
@@ -26,10 +26,10 @@ class GCSRoleDocument(utils.PayloadWrapper):
     def __init__(
         self,
         DATA_TYPE: str = "role#1.0.0",
-        collection: Optional[UUIDLike] = None,
-        principal: Optional[str] = None,
-        role: Optional[str] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        collection: t.Optional[UUIDLike] = None,
+        principal: t.Optional[str] = None,
+        role: t.Optional[str] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(

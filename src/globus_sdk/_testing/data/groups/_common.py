@@ -1,8 +1,8 @@
-from typing import Any, Dict
+import typing as t
 
 GROUP_ID = "d3974728-6458-11e4-b72d-123139141556"
 
-BASE_GROUP_DOC: Dict[str, Any] = {
+BASE_GROUP_DOC: t.Dict[str, t.Any] = {
     "name": "Claptrap's Rough Riders",
     "description": "No stairs allowed.",
     "parent_id": None,

@@ -1,4 +1,4 @@
-from typing import Any, Dict
+import typing as t
 
 TWO_HOP_TRANSFER_FLOW_ID = "24bc4997-b483-4c25-a19c-64b0afc00743"
 TWO_HOP_TRANSFER_FLOW_DEFINITION = {
@@ -109,7 +109,7 @@ TWO_HOP_TRANSFER_FLOW_DOC = {
 }
 
 TWO_HOP_TRANSFER_RUN_ID = "36ad9f9a-ad29-488f-beb4-c22ab729643a"
-TWO_HOP_TRANSFER_RUN: Dict[str, Any] = {
+TWO_HOP_TRANSFER_RUN: t.Dict[str, t.Any] = {
     "run_id": TWO_HOP_TRANSFER_RUN_ID,
     "flow_id": TWO_HOP_TRANSFER_FLOW_ID,
     "flow_title": TWO_HOP_TRANSFER_FLOW_DOC["title"],

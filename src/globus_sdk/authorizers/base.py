@@ -1,5 +1,5 @@
 import abc
-from typing import Optional
+import typing as t
 
 
 class GlobusAuthorizer(metaclass=abc.ABCMeta):
@@ -11,7 +11,7 @@ class GlobusAuthorizer(metaclass=abc.ABCMeta):
     """
 
     @abc.abstractmethod
-    def get_authorization_header(self) -> Optional[str]:
+    def get_authorization_header(self) -> t.Optional[str]:
         """
         Get the value for the ``Authorization`` header from this authorizer.
         If this method returns ``None``, then no ``Authorization`` header should be

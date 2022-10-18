@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Mapping, Optional, Union, cast
+import typing as t
 
 import requests
 
@@ -24,13 +24,13 @@ class GlobusAPIError(GlobusError):
     MESSAGE_FIELDS = ["message", "detail"]
     RECOGNIZED_AUTHZ_SCHEMES = ["bearer", "basic", "globus-goauthtoken"]
 
-    def __init__(self, r: requests.Response, *args: Any, **kwargs: Any):
+    def __init__(self, r: requests.Response, *args: t.Any, **kwargs: t.Any):
         self.http_status = r.status_code
         # defaults, may be rewritten during parsing
         self.code = "Error"
         self.message = r.text
 
-        self._info: Optional[ErrorInfoContainer] = None
+        self._info: t.Optional[ErrorInfoContainer] = None
         self._underlying_response = r
         self._parse_response()
         super().__init__(*self._get_args())
@@ -47,7 +47,7 @@ class GlobusAPIError(GlobusError):
         return self._underlying_response.reason
 
     @property
-    def headers(self) -> Mapping[str, str]:
+    def headers(self) -> t.Mapping[str, str]:
         """
         The HTTP response headers as a case-insensitive mapping.
 
@@ -63,7 +63,7 @@ class GlobusAPIError(GlobusError):
         )
 
     @property
-    def raw_json(self) -> Optional[Dict[str, Any]]:
+    def raw_json(self) -> t.Optional[t.Dict[str, t.Any]]:
         """
         Get the verbatim error message received from a Globus API, interpreted
         as JSON data
@@ -77,7 +77,7 @@ class GlobusAPIError(GlobusError):
         try:
             # technically, this could be a non-dict JSON type, like a list or string
             # but in those cases the user can just cast -- the "normal" case is a dict
-            return cast(Dict[str, Any], r.json())
+            return t.cast(t.Dict[str, t.Any], r.json())
         except ValueError:
             log.error(
                 "Error body could not be JSON decoded! "
@@ -106,7 +106,7 @@ class GlobusAPIError(GlobusError):
             self._info = ErrorInfoContainer(json_data)
         return self._info
 
-    def _get_request_authorization_scheme(self) -> Union[str, None]:
+    def _get_request_authorization_scheme(self) -> t.Union[str, None]:
         try:
             authz_h = self._underlying_response.request.headers["Authorization"]
             authz_scheme = authz_h.split()[0]
@@ -116,7 +116,7 @@ class GlobusAPIError(GlobusError):
             pass
         return None
 
-    def _get_args(self) -> List[Any]:
+    def _get_args(self) -> t.List[t.Any]:
         """
         Get arguments to pass to the Exception base class. These args are
         displayed in stack traces.
@@ -184,7 +184,7 @@ class GlobusAPIError(GlobusError):
             json_data = json_data["errors"][0]
         self._load_from_json(json_data)
 
-    def _load_from_json(self, data: Dict[str, Any]) -> None:
+    def _load_from_json(self, data: t.Dict[str, t.Any]) -> None:
         # rewrite 'code' if present and correct type
         if isinstance(data.get("code"), str):
             self.code = data["code"]

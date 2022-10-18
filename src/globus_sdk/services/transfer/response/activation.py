@@ -1,5 +1,5 @@
 import time
-from typing import Any, Optional, cast
+import typing as t
 
 from globus_sdk.response import GlobusHTTPResponse
 
@@ -20,7 +20,7 @@ class ActivationRequirementsResponse(GlobusHTTPResponse):
     in the API documentation for details.
     """
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
         super().__init__(*args, **kwargs)
 
         # at initialization time, capture expires_in and convert to an absolute
@@ -28,7 +28,7 @@ class ActivationRequirementsResponse(GlobusHTTPResponse):
         # querying its status will start to matter
         if self["expires_in"] == -1:
             # expires_in=-1 is the "infinite lifetime" case
-            self.expires_at: Optional[int] = None
+            self.expires_at: t.Optional[int] = None
         else:
             self.expires_at = int(time.time() + self["expires_in"])
 
@@ -54,7 +54,7 @@ class ActivationRequirementsResponse(GlobusHTTPResponse):
 
         :rtype: ``bool``
         """
-        return cast(bool, self["auto_activation_supported"])
+        return t.cast(bool, self["auto_activation_supported"])
 
     @property
     def supports_web_activation(self) -> bool:
@@ -152,4 +152,4 @@ class ActivationRequirementsResponse(GlobusHTTPResponse):
 
         :rtype: ``bool``
         """
-        return cast(int, self["expires_in"]) == -1
+        return t.cast(int, self["expires_in"]) == -1

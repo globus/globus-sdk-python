@@ -1,10 +1,10 @@
-from typing import Any, Callable, Dict, TypeVar
+import typing as t
 
 from globus_sdk.response import GlobusHTTPResponse
 
 from .base import PageT, Paginator
 
-C = TypeVar("C", bound=Callable[..., GlobusHTTPResponse])
+C = t.TypeVar("C", bound=t.Callable[..., GlobusHTTPResponse])
 
 
 class PaginatorTable:
@@ -34,16 +34,18 @@ class PaginatorTable:
     Creation of ``PaginatorTable`` objects is considered a private API.
     """
 
-    def __init__(self, client: Any):
+    def __init__(self, client: t.Any):
         self._client = client
         # _bindings is a lazily loaded table of names -> callables which
         # return paginators
-        self._bindings: Dict[str, Callable[..., Paginator[PageT]]] = {}
+        self._bindings: t.Dict[str, t.Callable[..., Paginator[PageT]]] = {}
 
-    def _add_binding(self, methodname: str, bound_method: Callable[..., PageT]) -> None:
+    def _add_binding(
+        self, methodname: str, bound_method: t.Callable[..., PageT]
+    ) -> None:
         self._bindings[methodname] = Paginator.wrap(bound_method)
 
-    def __getattr__(self, attrname: str) -> Callable[..., Paginator[PageT]]:
+    def __getattr__(self, attrname: str) -> t.Callable[..., Paginator[PageT]]:
         if attrname not in self._bindings:
             # this could raise AttributeError -- in which case, let it!
             method = getattr(self._client, attrname)
@@ -57,7 +59,7 @@ class PaginatorTable:
 
     # customize pickling methods to ensure that the object is pickle-safe
 
-    def __getstate__(self) -> Dict[str, Any]:
+    def __getstate__(self) -> t.Dict[str, t.Any]:
         # when pickling, drop any bound methods
         d = dict(self.__dict__)  # copy
         d["_bindings"] = {}
@@ -66,5 +68,5 @@ class PaginatorTable:
     # custom __setstate__ to avoid an infinite loop on `getattr` before `_bindings` is
     # populated
     # see: https://docs.python.org/3/library/pickle.html#object.__setstate__
-    def __setstate__(self, d: Dict[str, Any]) -> None:
+    def __setstate__(self, d: t.Dict[str, t.Any]) -> None:
         self.__dict__.update(d)

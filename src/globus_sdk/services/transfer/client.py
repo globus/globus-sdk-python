@@ -1,7 +1,7 @@
 import logging
 import time
+import typing as t
 import uuid
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
 
 from globus_sdk import client, exc, paging, response, utils
 from globus_sdk._types import DateLike, IntLike, UUIDLike
@@ -14,20 +14,20 @@ from .transport import TransferRequestsTransport
 
 log = logging.getLogger(__name__)
 
-TransferFilterDict = Dict[str, Union[str, List[str]]]
+TransferFilterDict = t.Dict[str, t.Union[str, t.List[str]]]
 
 
 def _datelike_to_str(x: DateLike) -> str:
     return x if isinstance(x, str) else x.isoformat(timespec="seconds")
 
 
-def _format_filter_value(x: Union[str, List[str]]) -> str:
+def _format_filter_value(x: t.Union[str, t.List[str]]) -> str:
     if isinstance(x, str):
         return x
     return ",".join(x)
 
 
-def _format_filter(x: Union[str, TransferFilterDict]) -> str:
+def _format_filter(x: t.Union[str, TransferFilterDict]) -> str:
     if isinstance(x, str):
         return x
     return "/".join(f"{k}:{_format_filter_value(v)}" for k, v in x.items())
@@ -98,7 +98,7 @@ class TransferClient(client.BaseClient):
     """
     service_name = "transfer"
     base_path = "/v0.10/"
-    transport_class: Type[TransferRequestsTransport] = TransferRequestsTransport
+    transport_class: t.Type[TransferRequestsTransport] = TransferRequestsTransport
     error_class = TransferAPIError
     scopes = TransferScopes
 
@@ -111,7 +111,10 @@ class TransferClient(client.BaseClient):
 
     @utils.doc_api_method("Get Endpoint by ID", "transfer/endpoint/#get_endpoint_by_id")
     def get_endpoint(
-        self, endpoint_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self,
+        endpoint_id: UUIDLike,
+        *,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /endpoint/<endpoint_id>``
@@ -138,9 +141,9 @@ class TransferClient(client.BaseClient):
     def update_endpoint(
         self,
         endpoint_id: UUIDLike,
-        data: Dict[str, Any],
+        data: t.Dict[str, t.Any],
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``PUT /endpoint/<endpoint_id>``
@@ -176,7 +179,7 @@ class TransferClient(client.BaseClient):
         return self.put(f"endpoint/{endpoint_id}", data=data, query_params=query_params)
 
     @utils.doc_api_method("Create Endpoint", "transfer/endpoint/#create_endpoint")
-    def create_endpoint(self, data: Dict[str, Any]) -> response.GlobusHTTPResponse:
+    def create_endpoint(self, data: t.Dict[str, t.Any]) -> response.GlobusHTTPResponse:
         """
         ``POST /endpoint/<endpoint_id>``
 
@@ -237,15 +240,15 @@ class TransferClient(client.BaseClient):
     )
     def endpoint_search(
         self,
-        filter_fulltext: Optional[str] = None,
+        filter_fulltext: t.Optional[str] = None,
         *,
-        filter_scope: Optional[str] = None,
-        filter_owner_id: Optional[str] = None,
-        filter_host_endpoint: Optional[UUIDLike] = None,
-        filter_non_functional: Optional[bool] = None,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        filter_scope: t.Optional[str] = None,
+        filter_owner_id: t.Optional[str] = None,
+        filter_host_endpoint: t.Optional[UUIDLike] = None,
+        filter_non_functional: t.Optional[bool] = None,
+        limit: t.Optional[int] = None,
+        offset: t.Optional[int] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         r"""
         .. parsed-literal::
@@ -325,8 +328,8 @@ class TransferClient(client.BaseClient):
         self,
         endpoint_id: UUIDLike,
         *,
-        if_expires_in: Optional[int] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        if_expires_in: t.Optional[int] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         r"""
         ``POST /endpoint/<endpoint_id>/autoactivate``
@@ -400,7 +403,10 @@ class TransferClient(client.BaseClient):
         "Deactivate Endpoint", "transfer/endpoint_activation/#deactivate_endpoint"
     )
     def endpoint_deactivate(
-        self, endpoint_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self,
+        endpoint_id: UUIDLike,
+        *,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /endpoint/<endpoint_id>/deactivate``
@@ -423,8 +429,8 @@ class TransferClient(client.BaseClient):
         self,
         endpoint_id: UUIDLike,
         *,
-        requirements_data: Optional[Dict[str, Any]],
-        query_params: Optional[Dict[str, Any]] = None,
+        requirements_data: t.Optional[t.Dict[str, t.Any]],
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /endpoint/<endpoint_id>/activate``
@@ -456,7 +462,10 @@ class TransferClient(client.BaseClient):
         "transfer/endpoint_activation/#get_activation_requirements",
     )
     def endpoint_get_activation_requirements(
-        self, endpoint_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self,
+        endpoint_id: UUIDLike,
+        *,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> ActivationRequirementsResponse:
         """
         ``GET /endpoint/<endpoint_id>/activation_requirements``
@@ -480,7 +489,10 @@ class TransferClient(client.BaseClient):
         "transfer/endpoint/#get_endpoint_pause_rules",
     )
     def my_effective_pause_rule_list(
-        self, endpoint_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self,
+        endpoint_id: UUIDLike,
+        *,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /endpoint/<endpoint_id>/my_effective_pause_rule_list``
@@ -505,7 +517,10 @@ class TransferClient(client.BaseClient):
         "Get shared endpoint list", "transfer/endpoint/#get_shared_endpoint_list"
     )
     def my_shared_endpoint_list(
-        self, endpoint_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self,
+        endpoint_id: UUIDLike,
+        *,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /endpoint/<endpoint_id>/my_shared_endpoint_list``
@@ -534,9 +549,9 @@ class TransferClient(client.BaseClient):
         self,
         endpoint_id: UUIDLike,
         *,
-        max_results: Optional[int] = None,
-        next_token: Optional[str] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        max_results: t.Optional[int] = None,
+        next_token: t.Optional[str] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /endpoint/<endpoint_id>/shared_endpoint_list``
@@ -572,7 +587,7 @@ class TransferClient(client.BaseClient):
         "Create Shared Endpoint", "transfer/endpoint/#create_shared_endpoint"
     )
     def create_shared_endpoint(
-        self, data: Dict[str, Any]
+        self, data: t.Dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /shared_endpoint``
@@ -603,7 +618,10 @@ class TransferClient(client.BaseClient):
         "Get endpoint server list", "transfer/endpoint/#get_endpoint_server_list"
     )
     def endpoint_server_list(
-        self, endpoint_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self,
+        endpoint_id: UUIDLike,
+        *,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /endpoint/<endpoint_id>/server_list``
@@ -627,7 +645,7 @@ class TransferClient(client.BaseClient):
         endpoint_id: UUIDLike,
         server_id: IntLike,
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /endpoint/<endpoint_id>/server/<server_id>``
@@ -650,7 +668,7 @@ class TransferClient(client.BaseClient):
         "Add endpoint server", "transfer/endpoint/#add_endpoint_server"
     )
     def add_endpoint_server(
-        self, endpoint_id: UUIDLike, server_data: Dict[str, Any]
+        self, endpoint_id: UUIDLike, server_data: t.Dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /endpoint/<endpoint_id>/server``
@@ -668,7 +686,7 @@ class TransferClient(client.BaseClient):
         "transfer/endpoint/#update_endpoint_server_by_id",
     )
     def update_endpoint_server(
-        self, endpoint_id: UUIDLike, server_id: IntLike, server_data: Dict[str, Any]
+        self, endpoint_id: UUIDLike, server_id: IntLike, server_data: t.Dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
         ``PUT /endpoint/<endpoint_id>/server/<server_id>``
@@ -715,7 +733,10 @@ class TransferClient(client.BaseClient):
         "Get list of endpoint roles", "transfer/endpoint_roles/#role_list"
     )
     def endpoint_role_list(
-        self, endpoint_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self,
+        endpoint_id: UUIDLike,
+        *,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /endpoint/<endpoint_id>/role_list``
@@ -735,7 +756,7 @@ class TransferClient(client.BaseClient):
         "Create endpoint role", "transfer/endpoint_roles/#create_role"
     )
     def add_endpoint_role(
-        self, endpoint_id: UUIDLike, role_data: Dict[str, Any]
+        self, endpoint_id: UUIDLike, role_data: t.Dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /endpoint/<endpoint_id>/role``
@@ -756,7 +777,7 @@ class TransferClient(client.BaseClient):
         endpoint_id: UUIDLike,
         role_id: str,
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /endpoint/<endpoint_id>/role/<role_id>``
@@ -799,7 +820,10 @@ class TransferClient(client.BaseClient):
         "Get list of access rules", "transfer/acl/#rest_access_get_list"
     )
     def endpoint_acl_list(
-        self, endpoint_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self,
+        endpoint_id: UUIDLike,
+        *,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /endpoint/<endpoint_id>/access_list``
@@ -822,7 +846,7 @@ class TransferClient(client.BaseClient):
         endpoint_id: UUIDLike,
         rule_id: str,
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /endpoint/<endpoint_id>/access/<rule_id>``
@@ -843,7 +867,7 @@ class TransferClient(client.BaseClient):
 
     @utils.doc_api_method("Create access rule", "transfer/acl/#rest_access_create")
     def add_endpoint_acl_rule(
-        self, endpoint_id: UUIDLike, rule_data: Dict[str, Any]
+        self, endpoint_id: UUIDLike, rule_data: t.Dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /endpoint/<endpoint_id>/access``
@@ -874,7 +898,7 @@ class TransferClient(client.BaseClient):
 
     @utils.doc_api_method("Update access rule", "transfer/acl/#update_access_rule")
     def update_endpoint_acl_rule(
-        self, endpoint_id: UUIDLike, rule_id: str, rule_data: Dict[str, Any]
+        self, endpoint_id: UUIDLike, rule_id: str, rule_data: t.Dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
         ``PUT /endpoint/<endpoint_id>/access/<rule_id>``
@@ -918,7 +942,7 @@ class TransferClient(client.BaseClient):
         "Get list of bookmarks", "transfer/endpoint_bookmarks/#get_list_of_bookmarks"
     )
     def bookmark_list(
-        self, *, query_params: Optional[Dict[str, Any]] = None
+        self, *, query_params: t.Optional[t.Dict[str, t.Any]] = None
     ) -> IterableTransferResponse:
         """
         ``GET /bookmark_list``
@@ -935,7 +959,7 @@ class TransferClient(client.BaseClient):
         "Create bookmark", "transfer/endpoint_bookmarks/#create_bookmark"
     )
     def create_bookmark(
-        self, bookmark_data: Dict[str, Any]
+        self, bookmark_data: t.Dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /bookmark``
@@ -950,7 +974,10 @@ class TransferClient(client.BaseClient):
         "Get bookmark by ID", "transfer/endpoint_bookmarks/#get_bookmark_by_id"
     )
     def get_bookmark(
-        self, bookmark_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self,
+        bookmark_id: UUIDLike,
+        *,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /bookmark/<bookmark_id>``
@@ -967,7 +994,7 @@ class TransferClient(client.BaseClient):
         "Update bookmark", "transfer/endpoint_bookmarks/#update_bookmark"
     )
     def update_bookmark(
-        self, bookmark_id: UUIDLike, bookmark_data: Dict[str, Any]
+        self, bookmark_id: UUIDLike, bookmark_data: t.Dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
         ``PUT /bookmark/<bookmark_id>``
@@ -1003,14 +1030,14 @@ class TransferClient(client.BaseClient):
     def operation_ls(
         self,
         endpoint_id: UUIDLike,
-        path: Optional[str] = None,
+        path: t.Optional[str] = None,
         *,
-        show_hidden: Optional[bool] = None,
-        orderby: Optional[Union[str, List[str]]] = None,
+        show_hidden: t.Optional[bool] = None,
+        orderby: t.Optional[t.Union[str, t.List[str]]] = None,
         # note: filter is a soft keyword in python, so using this name is okay
         # pylint: disable=redefined-builtin
-        filter: Union[str, TransferFilterDict, None] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        filter: t.Union[str, TransferFilterDict, None] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /operation/endpoint/<endpoint_id>/ls``
@@ -1088,7 +1115,7 @@ class TransferClient(client.BaseClient):
         endpoint_id: UUIDLike,
         path: str,
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /operation/endpoint/<endpoint_id>/mkdir``
@@ -1124,7 +1151,7 @@ class TransferClient(client.BaseClient):
         oldpath: str,
         newpath: str,
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /operation/endpoint/<endpoint_id>/rename``
@@ -1163,7 +1190,7 @@ class TransferClient(client.BaseClient):
         symlink_target: str,
         path: str,
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /operation/endpoint/<endpoint_id>/symlink``
@@ -1207,7 +1234,7 @@ class TransferClient(client.BaseClient):
         "Get a submission ID", "transfer/task_submit/#get_submission_id"
     )
     def get_submission_id(
-        self, *, query_params: Optional[Dict[str, Any]] = None
+        self, *, query_params: t.Optional[t.Dict[str, t.Any]] = None
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /submission_id``
@@ -1230,7 +1257,7 @@ class TransferClient(client.BaseClient):
         "Submit a transfer task", "transfer/task_submit/#submit_transfer_task"
     )
     def submit_transfer(
-        self, data: Union[Dict[str, Any], TransferData]
+        self, data: t.Union[t.Dict[str, t.Any], TransferData]
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /transfer``
@@ -1273,7 +1300,7 @@ class TransferClient(client.BaseClient):
         "Submit a delete task", "transfer/task_submit/#submit_delete_task"
     )
     def submit_delete(
-        self, data: Union[Dict[str, Any], DeleteData]
+        self, data: t.Union[t.Dict[str, t.Any], DeleteData]
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /delete``
@@ -1322,11 +1349,11 @@ class TransferClient(client.BaseClient):
     def task_list(
         self,
         *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
+        limit: t.Optional[int] = None,
+        offset: t.Optional[int] = None,
         # pylint: disable=redefined-builtin
-        filter: Union[str, TransferFilterDict, None] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        filter: t.Union[str, TransferFilterDict, None] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /task_list``
@@ -1401,9 +1428,9 @@ class TransferClient(client.BaseClient):
         self,
         task_id: UUIDLike,
         *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        limit: t.Optional[int] = None,
+        offset: t.Optional[int] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         r"""
         ``GET /task/<task_id>/event_list``
@@ -1442,7 +1469,7 @@ class TransferClient(client.BaseClient):
 
     @utils.doc_api_method("Get task by ID", "transfer/task/#get_task_by_id")
     def get_task(
-        self, task_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self, task_id: UUIDLike, *, query_params: t.Optional[t.Dict[str, t.Any]] = None
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /task/<task_id>``
@@ -1459,9 +1486,9 @@ class TransferClient(client.BaseClient):
     def update_task(
         self,
         task_id: UUIDLike,
-        data: Dict[str, Any],
+        data: t.Dict[str, t.Any],
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``PUT /task/<task_id>``
@@ -1594,7 +1621,7 @@ class TransferClient(client.BaseClient):
 
     @utils.doc_api_method("Get task pause info", "transfer/task/#get_task_pause_info")
     def task_pause_info(
-        self, task_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self, task_id: UUIDLike, *, query_params: t.Optional[t.Dict[str, t.Any]] = None
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /task/<task_id>/pause_info``
@@ -1619,8 +1646,8 @@ class TransferClient(client.BaseClient):
         self,
         task_id: UUIDLike,
         *,
-        marker: Optional[str] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        marker: t.Optional[str] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /task/<task_id>/successful_transfers``
@@ -1670,8 +1697,8 @@ class TransferClient(client.BaseClient):
         self,
         task_id: UUIDLike,
         *,
-        marker: Optional[str] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        marker: t.Optional[str] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /task/<task_id>/skipped_errors``
@@ -1714,7 +1741,7 @@ class TransferClient(client.BaseClient):
         "transfer/advanced_endpoint_management/#get_monitored_endpoints",
     )
     def endpoint_manager_monitored_endpoints(
-        self, *, query_params: Optional[Dict[str, Any]] = None
+        self, *, query_params: t.Optional[t.Dict[str, t.Any]] = None
     ) -> IterableTransferResponse:
         """
         ``GET endpoint_manager/monitored_endpoints``
@@ -1734,7 +1761,10 @@ class TransferClient(client.BaseClient):
         "transfer/advanced_endpoint_management/#get_hosted_endpoint_list",
     )
     def endpoint_manager_hosted_endpoint_list(
-        self, endpoint_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self,
+        endpoint_id: UUIDLike,
+        *,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /endpoint_manager/endpoint/<endpoint_id>/hosted_endpoint_list``
@@ -1759,7 +1789,10 @@ class TransferClient(client.BaseClient):
         "transfer/advanced_endpoint_management/#mc_get_endpoint",
     )
     def endpoint_manager_get_endpoint(
-        self, endpoint_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self,
+        endpoint_id: UUIDLike,
+        *,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /endpoint_manager/endpoint/<endpoint_id>``
@@ -1781,7 +1814,10 @@ class TransferClient(client.BaseClient):
         "transfer/advanced_endpoint_management/#get_endpoint_access_list_as_admin",
     )
     def endpoint_manager_acl_list(
-        self, endpoint_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self,
+        endpoint_id: UUIDLike,
+        *,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET endpoint_manager/endpoint/<endpoint_id>/access_list``
@@ -1815,15 +1851,15 @@ class TransferClient(client.BaseClient):
     def endpoint_manager_task_list(
         self,
         *,
-        filter_status: Union[None, str, Iterable[str]] = None,
-        filter_task_id: Union[None, UUIDLike, Iterable[UUIDLike]] = None,
-        filter_owner_id: Optional[UUIDLike] = None,
-        filter_endpoint: Optional[UUIDLike] = None,
-        filter_is_paused: Optional[bool] = None,
-        filter_completion_time: Union[None, str, Tuple[DateLike, DateLike]] = None,
-        filter_min_faults: Optional[int] = None,
-        filter_local_user: Optional[str] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        filter_status: t.Union[None, str, t.Iterable[str]] = None,
+        filter_task_id: t.Union[None, UUIDLike, t.Iterable[UUIDLike]] = None,
+        filter_owner_id: t.Optional[UUIDLike] = None,
+        filter_endpoint: t.Optional[UUIDLike] = None,
+        filter_is_paused: t.Optional[bool] = None,
+        filter_completion_time: t.Union[None, str, t.Tuple[DateLike, DateLike]] = None,
+        filter_min_faults: t.Optional[int] = None,
+        filter_local_user: t.Optional[str] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         r"""
         ``GET endpoint_manager/task_list``
@@ -1955,7 +1991,7 @@ class TransferClient(client.BaseClient):
         "Get task as admin", "transfer/advanced_endpoint_management/#get_task"
     )
     def endpoint_manager_get_task(
-        self, task_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self, task_id: UUIDLike, *, query_params: t.Optional[t.Dict[str, t.Any]] = None
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /endpoint_manager/task/<task_id>``
@@ -1986,10 +2022,10 @@ class TransferClient(client.BaseClient):
         self,
         task_id: UUIDLike,
         *,
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-        filter_is_error: Optional[bool] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        limit: t.Optional[int] = None,
+        offset: t.Optional[int] = None,
+        filter_is_error: t.Optional[bool] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /task/<task_id>/event_list``
@@ -2030,7 +2066,7 @@ class TransferClient(client.BaseClient):
         "transfer/advanced_endpoint_management/#get_task_pause_info_as_admin",
     )
     def endpoint_manager_task_pause_info(
-        self, task_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self, task_id: UUIDLike, *, query_params: t.Optional[t.Dict[str, t.Any]] = None
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /endpoint_manager/task/<task_id>/pause_info``
@@ -2059,8 +2095,8 @@ class TransferClient(client.BaseClient):
         self,
         task_id: UUIDLike,
         *,
-        marker: Optional[str] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        marker: t.Optional[str] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /endpoint_manager/task/<task_id>/successful_transfers``
@@ -2100,8 +2136,8 @@ class TransferClient(client.BaseClient):
         self,
         task_id: UUIDLike,
         *,
-        marker: Optional[str] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        marker: t.Optional[str] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /endpoint_manager/task/<task_id>/skipped_errors``
@@ -2132,10 +2168,10 @@ class TransferClient(client.BaseClient):
     )
     def endpoint_manager_cancel_tasks(
         self,
-        task_ids: Iterable[UUIDLike],
+        task_ids: t.Iterable[UUIDLike],
         message: str,
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /endpoint_manager/admin_cancel``
@@ -2167,7 +2203,7 @@ class TransferClient(client.BaseClient):
         self,
         admin_cancel_id: UUIDLike,
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /endpoint_manager/admin_cancel/<admin_cancel_id>``
@@ -2192,10 +2228,10 @@ class TransferClient(client.BaseClient):
     )
     def endpoint_manager_pause_tasks(
         self,
-        task_ids: Iterable[UUIDLike],
+        task_ids: t.Iterable[UUIDLike],
         message: str,
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /endpoint_manager/admin_pause``
@@ -2225,9 +2261,9 @@ class TransferClient(client.BaseClient):
     )
     def endpoint_manager_resume_tasks(
         self,
-        task_ids: Iterable[UUIDLike],
+        task_ids: t.Iterable[UUIDLike],
         *,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /endpoint_manager/admin_resume``
@@ -2257,8 +2293,8 @@ class TransferClient(client.BaseClient):
     def endpoint_manager_pause_rule_list(
         self,
         *,
-        filter_endpoint: Optional[UUIDLike] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        filter_endpoint: t.Optional[UUIDLike] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         """
         ``GET /endpoint_manager/pause_rule_list``
@@ -2286,7 +2322,7 @@ class TransferClient(client.BaseClient):
         "Create pause rule", "transfer/advanced_endpoint_management/#create_pause_rule"
     )
     def endpoint_manager_create_pause_rule(
-        self, data: Optional[Dict[str, Any]]
+        self, data: t.Optional[t.Dict[str, t.Any]]
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /endpoint_manager/pause_rule``
@@ -2317,7 +2353,10 @@ class TransferClient(client.BaseClient):
         "Get pause rule", "transfer/advanced_endpoint_management/#get_pause_rule"
     )
     def endpoint_manager_get_pause_rule(
-        self, pause_rule_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self,
+        pause_rule_id: UUIDLike,
+        *,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /endpoint_manager/pause_rule/<pause_rule_id>``
@@ -2339,7 +2378,7 @@ class TransferClient(client.BaseClient):
         "Update pause rule", "transfer/advanced_endpoint_management/#update_pause_rule"
     )
     def endpoint_manager_update_pause_rule(
-        self, pause_rule_id: UUIDLike, data: Optional[Dict[str, Any]]
+        self, pause_rule_id: UUIDLike, data: t.Optional[t.Dict[str, t.Any]]
     ) -> response.GlobusHTTPResponse:
         """
         ``PUT /endpoint_manager/pause_rule/<pause_rule_id>``
@@ -2370,7 +2409,10 @@ class TransferClient(client.BaseClient):
         "Delete pause rule", "transfer/advanced_endpoint_management/#delete_pause_rule"
     )
     def endpoint_manager_delete_pause_rule(
-        self, pause_rule_id: UUIDLike, *, query_params: Optional[Dict[str, Any]] = None
+        self,
+        pause_rule_id: UUIDLike,
+        *,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``DELETE /endpoint_manager/pause_rule/<pause_rule_id>``

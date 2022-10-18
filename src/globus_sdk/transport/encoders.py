@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+import typing as t
 
 import requests
 
@@ -15,9 +15,9 @@ class RequestEncoder:
         self,
         method: str,
         url: str,
-        params: Optional[Dict[str, Any]],
-        data: Any,
-        headers: Dict[str, str],
+        params: t.Optional[t.Dict[str, t.Any]],
+        data: t.Any,
+        headers: t.Dict[str, str],
     ) -> requests.Request:
         if not isinstance(data, (str, bytes)):
             raise TypeError(
@@ -38,9 +38,9 @@ class JSONRequestEncoder(RequestEncoder):
         self,
         method: str,
         url: str,
-        params: Optional[Dict[str, Any]],
-        data: Any,
-        headers: Dict[str, str],
+        params: t.Optional[t.Dict[str, t.Any]],
+        data: t.Any,
+        headers: t.Dict[str, str],
     ) -> requests.Request:
         if data is not None:
             headers = {"Content-Type": "application/json", **headers}
@@ -57,9 +57,9 @@ class FormRequestEncoder(RequestEncoder):
         self,
         method: str,
         url: str,
-        params: Optional[Dict[str, Any]],
-        data: Any,
-        headers: Dict[str, str],
+        params: t.Optional[t.Dict[str, t.Any]],
+        data: t.Any,
+        headers: t.Dict[str, str],
     ) -> requests.Request:
         if not isinstance(data, dict):
             raise TypeError("FormRequestEncoder cannot encode non-dict data")

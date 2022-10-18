@@ -2,7 +2,7 @@ import contextlib
 import logging
 import random
 import time
-from typing import Any, Callable, Dict, Iterator, List, Optional, Union, cast
+import typing as t
 
 import requests
 
@@ -27,7 +27,7 @@ from .retry import (
 log = logging.getLogger(__name__)
 
 
-def _parse_retry_after(response: requests.Response) -> Optional[int]:
+def _parse_retry_after(response: requests.Response) -> t.Optional[int]:
     val = response.headers.get("Retry-After")
     if not val:
         return None
@@ -42,7 +42,7 @@ def _exponential_backoff(ctx: RetryContext) -> float:
     if ctx.backoff is not None:
         return ctx.backoff
     # exponential backoff with jitter
-    return cast(float, (0.25 + 0.5 * random.random()) * (2**ctx.attempt))
+    return t.cast(float, (0.25 + 0.5 * random.random()) * (2**ctx.attempt))
 
 
 class RequestsTransport:
@@ -98,7 +98,7 @@ class RequestsTransport:
     EXPIRED_AUTHORIZATION_STATUS_CODES = (401,)
 
     #: the encoders are a mapping of encoding names to encoder objects
-    encoders: Dict[str, RequestEncoder] = {
+    encoders: t.Dict[str, RequestEncoder] = {
         "text": RequestEncoder(),
         "json": JSONRequestEncoder(),
         "form": FormRequestEncoder(),
@@ -108,12 +108,12 @@ class RequestsTransport:
 
     def __init__(
         self,
-        verify_ssl: Optional[bool] = None,
-        http_timeout: Optional[float] = None,
-        retry_backoff: Callable[[RetryContext], float] = _exponential_backoff,
-        retry_checks: Optional[List[RetryCheck]] = None,
+        verify_ssl: t.Optional[bool] = None,
+        http_timeout: t.Optional[float] = None,
+        retry_backoff: t.Callable[[RetryContext], float] = _exponential_backoff,
+        retry_checks: t.Optional[t.List[RetryCheck]] = None,
         max_sleep: int = 10,
-        max_retries: Optional[int] = None,
+        max_retries: t.Optional[int] = None,
     ):
         self.session = requests.Session()
         self.verify_ssl = config.get_ssl_verify(verify_ssl)
@@ -139,19 +139,19 @@ class RequestsTransport:
         self._user_agent = f"{self.BASE_USER_AGENT}/{value}"
 
     @property
-    def _headers(self) -> Dict[str, str]:
+    def _headers(self) -> t.Dict[str, str]:
         return {"Accept": "application/json", "User-Agent": self.user_agent}
 
     @contextlib.contextmanager
     def tune(
         self,
         *,
-        verify_ssl: Optional[bool] = None,
-        http_timeout: Optional[float] = None,
-        retry_backoff: Optional[Callable[[RetryContext], float]] = None,
-        max_sleep: Optional[int] = None,
-        max_retries: Optional[int] = None,
-    ) -> Iterator[None]:
+        verify_ssl: t.Optional[bool] = None,
+        http_timeout: t.Optional[float] = None,
+        retry_backoff: t.Optional[t.Callable[[RetryContext], float]] = None,
+        max_sleep: t.Optional[int] = None,
+        max_retries: t.Optional[int] = None,
+    ) -> t.Iterator[None]:
         """
         Temporarily adjust some of the request sending settings of the transport.
         This method works as a context manager, and will reset settings to their
@@ -221,10 +221,10 @@ class RequestsTransport:
         self,
         method: str,
         url: str,
-        query_params: Optional[Dict[str, Any]] = None,
-        data: Union[Dict[str, Any], List[Any], str, None] = None,
-        headers: Optional[Dict[str, str]] = None,
-        encoding: Optional[str] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        data: t.Union[t.Dict[str, t.Any], t.List[t.Any], str, None] = None,
+        headers: t.Optional[t.Dict[str, str]] = None,
+        encoding: t.Optional[str] = None,
     ) -> requests.Request:
         if not headers:
             headers = {}
@@ -244,7 +244,7 @@ class RequestsTransport:
         return self.encoders[encoding].encode(method, url, query_params, data, headers)
 
     def _set_authz_header(
-        self, authorizer: Optional[GlobusAuthorizer], req: requests.Request
+        self, authorizer: t.Optional[GlobusAuthorizer], req: requests.Request
     ) -> None:
         if authorizer:
             authz_header = authorizer.get_authorization_header()
@@ -267,11 +267,11 @@ class RequestsTransport:
         self,
         method: str,
         url: str,
-        query_params: Optional[Dict[str, Any]] = None,
-        data: Union[Dict[str, Any], str, None] = None,
-        headers: Optional[Dict[str, str]] = None,
-        encoding: Optional[str] = None,
-        authorizer: Optional[GlobusAuthorizer] = None,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        data: t.Union[t.Dict[str, t.Any], str, None] = None,
+        headers: t.Optional[t.Dict[str, str]] = None,
+        encoding: t.Optional[str] = None,
+        authorizer: t.Optional[GlobusAuthorizer] = None,
         allow_redirects: bool = True,
         stream: bool = False,
     ) -> requests.Response:
@@ -306,7 +306,7 @@ class RequestsTransport:
         :return: ``requests.Response`` object
         """
         log.debug("starting request for %s", url)
-        resp: Optional[requests.Response] = None
+        resp: t.Optional[requests.Response] = None
         req = self._encode(method, url, query_params, data, headers, encoding)
         checker = RetryCheckRunner(self.retry_checks)
         log.debug("transport request state initialized")

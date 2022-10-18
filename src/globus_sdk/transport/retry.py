@@ -1,6 +1,6 @@
 import enum
 import logging
-from typing import Any, Callable, Dict, List, Optional, TypeVar, cast
+import typing as t
 
 import requests
 
@@ -8,7 +8,7 @@ from globus_sdk.authorizers import GlobusAuthorizer
 
 log = logging.getLogger(__name__)
 
-C = TypeVar("C", bound=Callable[..., Any])
+C = t.TypeVar("C", bound=t.Callable[..., t.Any])
 
 
 class RetryContext:
@@ -36,9 +36,9 @@ class RetryContext:
         self,
         attempt: int,
         *,
-        authorizer: Optional[GlobusAuthorizer] = None,
-        response: Optional[requests.Response] = None,
-        exception: Optional[Exception] = None,
+        authorizer: t.Optional[GlobusAuthorizer] = None,
+        response: t.Optional[requests.Response] = None,
+        exception: t.Optional[Exception] = None,
     ):
         # retry attempt number
         self.attempt = attempt
@@ -49,7 +49,7 @@ class RetryContext:
         self.response = response
         self.exception = exception
         # the retry delay or "backoff" before retrying
-        self.backoff: Optional[float] = None
+        self.backoff: t.Optional[float] = None
 
 
 class RetryCheckResult(enum.Enum):
@@ -73,7 +73,7 @@ class _RetryCheckFunc:
     _retry_check_flags: RetryCheckFlags
 
 
-def set_retry_check_flags(flag: RetryCheckFlags) -> Callable[[C], C]:
+def set_retry_check_flags(flag: RetryCheckFlags) -> t.Callable[[C], C]:
     """
     A decorator for setting retry check flags on a retry check function.
     Usage:
@@ -83,7 +83,7 @@ def set_retry_check_flags(flag: RetryCheckFlags) -> Callable[[C], C]:
     """
 
     def decorator(func: C) -> C:
-        as_check = cast(_RetryCheckFunc, func)
+        as_check = t.cast(_RetryCheckFunc, func)
         as_check._retry_check_flags = flag
         return func
 
@@ -91,7 +91,7 @@ def set_retry_check_flags(flag: RetryCheckFlags) -> Callable[[C], C]:
 
 
 # types useful for declaring RetryCheckRunner and related types
-RetryCheck = Callable[[RetryContext], RetryCheckResult]
+RetryCheck = t.Callable[[RetryContext], RetryCheckResult]
 
 
 class RetryCheckRunner:
@@ -117,9 +117,9 @@ class RetryCheckRunner:
 
     # check configs: a list of pairs, (check, flags)
     # a check without flags is assumed to have flags=NONE
-    def __init__(self, checks: List[RetryCheck]):
-        self._checks: List[RetryCheck] = []
-        self._check_data: Dict[RetryCheck, Dict[str, Any]] = {}
+    def __init__(self, checks: t.List[RetryCheck]):
+        self._checks: t.List[RetryCheck] = []
+        self._check_data: t.Dict[RetryCheck, t.Dict[str, t.Any]] = {}
         for check in checks:
             self._checks.append(check)
             self._check_data[check] = {}

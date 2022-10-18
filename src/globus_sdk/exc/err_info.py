@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, cast
+import typing as t
 
 
 class ErrorInfo:
@@ -50,17 +50,19 @@ class AuthorizationParameterInfo(ErrorInfo):
     >>>     print("got authz params:", authz_params)
     """
 
-    def __init__(self, error_data: Dict[str, Any]):
+    def __init__(self, error_data: t.Dict[str, t.Any]):
         # data is there if this key is present and it is a dict
         self._has_data = isinstance(error_data.get("authorization_parameters"), dict)
-        data = cast(Dict[str, Any], error_data.get("authorization_parameters", {}))
-
-        self.session_message = cast(Optional[str], data.get("session_message"))
-        self.session_required_identities = cast(
-            Optional[List[str]], data.get("session_required_identities")
+        data = t.cast(
+            t.Dict[str, t.Any], error_data.get("authorization_parameters", {})
         )
-        self.session_required_single_domain = cast(
-            Optional[List[str]], data.get("session_required_single_domain")
+
+        self.session_message = t.cast(t.Optional[str], data.get("session_message"))
+        self.session_required_identities = t.cast(
+            t.Optional[t.List[str]], data.get("session_required_identities")
+        )
+        self.session_required_single_domain = t.cast(
+            t.Optional[t.List[str]], data.get("session_required_single_domain")
         )
 
 
@@ -73,11 +75,13 @@ class ConsentRequiredInfo(ErrorInfo):
     :vartype required_scopes: list of str, optional
     """
 
-    def __init__(self, error_data: Dict[str, Any]):
+    def __init__(self, error_data: t.Dict[str, t.Any]):
         # data is only considered parseable if this error has the code 'ConsentRequired'
         has_code = error_data.get("code") == "ConsentRequired"
         data = error_data if has_code else {}
-        self.required_scopes = cast(Optional[List[str]], data.get("required_scopes"))
+        self.required_scopes = t.cast(
+            t.Optional[t.List[str]], data.get("required_scopes")
+        )
 
         # but the result is only considered valid if both parts are present
         self._has_data = has_code and isinstance(self.required_scopes, list)
@@ -92,7 +96,7 @@ class ErrorInfoContainer:
     :ivar consent_required: A parsed ConsentRequiredInfo object
     """
 
-    def __init__(self, error_data: Optional[Dict[str, Any]]) -> None:
+    def __init__(self, error_data: t.Optional[t.Dict[str, t.Any]]) -> None:
         self.authorization_parameters = AuthorizationParameterInfo(error_data or {})
         self.consent_required = ConsentRequiredInfo(error_data or {})
 

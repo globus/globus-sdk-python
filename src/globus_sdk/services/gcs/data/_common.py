@@ -1,20 +1,20 @@
 import sys
-from typing import Any, Dict, Tuple
+import typing as t
 
 if sys.version_info < (3, 8):
     from typing_extensions import Protocol
 else:
-    from typing import Protocol
+    from typing import Protocol  # noqa: TYT03
 
 
 class DocumentWithInducedDatatype(Protocol):
     DATATYPE_BASE: str
-    DATATYPE_VERSION_IMPLICATIONS: Dict[str, Tuple[int, int, int]]
+    DATATYPE_VERSION_IMPLICATIONS: t.Dict[str, t.Tuple[int, int, int]]
 
     def __contains__(self, key: str) -> bool:  # pragma: no cover
         ...
 
-    def __setitem__(self, key: str, value: Any) -> None:  # pragma: no cover
+    def __setitem__(self, key: str, value: t.Any) -> None:  # pragma: no cover
         ...
 
 

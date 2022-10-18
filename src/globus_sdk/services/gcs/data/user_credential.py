@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+import typing as t
 
 from globus_sdk import utils
 from globus_sdk._types import UUIDLike
@@ -33,13 +33,13 @@ class UserCredentialDocument(utils.PayloadWrapper):
     def __init__(
         self,
         DATA_TYPE: str = "user_credential#1.0.0",
-        identity_id: Optional[UUIDLike] = None,
-        connector_id: Optional[UUIDLike] = None,
-        username: Optional[str] = None,
-        display_name: Optional[str] = None,
-        storage_gateway_id: Optional[UUIDLike] = None,
-        policies: Optional[Dict[str, Any]] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        identity_id: t.Optional[UUIDLike] = None,
+        connector_id: t.Optional[UUIDLike] = None,
+        username: t.Optional[str] = None,
+        display_name: t.Optional[str] = None,
+        storage_gateway_id: t.Optional[UUIDLike] = None,
+        policies: t.Optional[t.Dict[str, t.Any]] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(

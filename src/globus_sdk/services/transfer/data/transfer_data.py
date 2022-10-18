@@ -1,22 +1,22 @@
 import datetime
 import logging
 import sys
-from typing import TYPE_CHECKING, Any, Dict, Iterator, Optional, Union
+import typing as t
 
 if sys.version_info >= (3, 8):
-    from typing import Literal
+    from typing import Literal  # noqa: TYT03
 else:
     from typing_extensions import Literal
 
 from globus_sdk import exc, utils
 from globus_sdk._types import UUIDLike
 
-if TYPE_CHECKING:
+if t.TYPE_CHECKING:
     import globus_sdk
 
 log = logging.getLogger(__name__)
 _StrSyncLevel = Literal["exists", "size", "mtime", "checksum"]
-_sync_level_dict: Dict[_StrSyncLevel, int] = {
+_sync_level_dict: t.Dict[_StrSyncLevel, int] = {
     "exists": 0,
     "size": 1,
     "mtime": 2,
@@ -24,7 +24,7 @@ _sync_level_dict: Dict[_StrSyncLevel, int] = {
 }
 
 
-def _parse_sync_level(sync_level: Union[_StrSyncLevel, int]) -> int:
+def _parse_sync_level(sync_level: t.Union[_StrSyncLevel, int]) -> int:
     """
     Map sync_level strings to known int values
 
@@ -179,26 +179,26 @@ class TransferData(utils.PayloadWrapper):
 
     def __init__(
         self,
-        transfer_client: Optional["globus_sdk.TransferClient"] = None,
-        source_endpoint: Optional[UUIDLike] = None,
-        destination_endpoint: Optional[UUIDLike] = None,
+        transfer_client: t.Optional["globus_sdk.TransferClient"] = None,
+        source_endpoint: t.Optional[UUIDLike] = None,
+        destination_endpoint: t.Optional[UUIDLike] = None,
         *,
-        label: Optional[str] = None,
-        submission_id: Optional[UUIDLike] = None,
-        sync_level: Union[_StrSyncLevel, int, None] = None,
+        label: t.Optional[str] = None,
+        submission_id: t.Optional[UUIDLike] = None,
+        sync_level: t.Union[_StrSyncLevel, int, None] = None,
         verify_checksum: bool = False,
         preserve_timestamp: bool = False,
         encrypt_data: bool = False,
-        deadline: Union[datetime.datetime, str, None] = None,
-        skip_activation_check: Optional[bool] = None,
+        deadline: t.Union[datetime.datetime, str, None] = None,
+        skip_activation_check: t.Optional[bool] = None,
         skip_source_errors: bool = False,
         fail_on_quota_errors: bool = False,
-        recursive_symlinks: Optional[str] = None,
+        recursive_symlinks: t.Optional[str] = None,
         delete_destination_extra: bool = False,
         notify_on_succeeded: bool = True,
         notify_on_failed: bool = True,
         notify_on_inactive: bool = True,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> None:
         super().__init__()
         # these must be checked explicitly to handle the fact that `transfer_client` is
@@ -255,9 +255,9 @@ class TransferData(utils.PayloadWrapper):
         destination_path: str,
         *,
         recursive: bool = False,
-        external_checksum: Optional[str] = None,
-        checksum_algorithm: Optional[str] = None,
-        additional_fields: Optional[Dict[str, Any]] = None,
+        external_checksum: t.Optional[str] = None,
+        checksum_algorithm: t.Optional[str] = None,
+        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> None:
         """
         Add a file or directory to be transferred. If the item is a symlink
@@ -350,7 +350,7 @@ class TransferData(utils.PayloadWrapper):
         name: str,
         *,
         method: Literal["exclude"] = "exclude",
-        type: Optional[  # pylint: disable=redefined-builtin
+        type: t.Optional[  # pylint: disable=redefined-builtin
             Literal["file", "dir"]
         ] = None,
     ) -> None:
@@ -395,7 +395,7 @@ class TransferData(utils.PayloadWrapper):
             rule["type"] = type
         self["filter_rules"].append(rule)
 
-    def iter_items(self) -> Iterator[Dict[str, Any]]:
+    def iter_items(self) -> t.Iterator[t.Dict[str, t.Any]]:
         """
         An iterator of items created by ``add_item``.
 

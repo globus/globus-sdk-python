@@ -1,7 +1,7 @@
 import datetime
+import typing as t
 import uuid
-from typing import Union
 
-IntLike = Union[int, str]
-UUIDLike = Union[uuid.UUID, str]
-DateLike = Union[str, datetime.datetime]
+IntLike = t.Union[int, str]
+UUIDLike = t.Union[uuid.UUID, str]
+DateLike = t.Union[str, datetime.datetime]

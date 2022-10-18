@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+import typing as t
 
 import requests
 
@@ -18,11 +18,11 @@ class TransferAPIError(exc.GlobusAPIError):
         self.request_id = None
         super().__init__(r)
 
-    def _get_args(self) -> List[Any]:
+    def _get_args(self) -> t.List[t.Any]:
         args = super()._get_args()
         args.append(self.request_id)
         return args
 
-    def _load_from_json(self, data: Dict[str, Any]) -> None:
+    def _load_from_json(self, data: t.Dict[str, t.Any]) -> None:
         super()._load_from_json(data)
         self.request_id = data.get("request_id")

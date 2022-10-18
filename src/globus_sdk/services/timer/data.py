@@ -1,6 +1,6 @@
 import datetime
 import logging
-from typing import Any, Dict, Optional, Union
+import typing as t
 
 from globus_sdk.config import get_service_url
 from globus_sdk.services.transfer import TransferData
@@ -52,14 +52,14 @@ class TimerJob(PayloadWrapper):
     def __init__(
         self,
         callback_url: str,
-        callback_body: Dict[str, Any],
-        start: Union[datetime.datetime, str],
-        interval: Union[datetime.timedelta, int, None],
+        callback_body: t.Dict[str, t.Any],
+        start: t.Union[datetime.datetime, str],
+        interval: t.Union[datetime.timedelta, int, None],
         *,
-        name: Optional[str] = None,
-        stop_after: Optional[datetime.datetime] = None,
-        stop_after_n: Optional[int] = None,
-        scope: Optional[str] = None,
+        name: t.Optional[str] = None,
+        stop_after: t.Optional[datetime.datetime] = None,
+        stop_after_n: t.Optional[int] = None,
+        scope: t.Optional[str] = None,
     ) -> None:
         super().__init__()
         self["callback_url"] = callback_url
@@ -84,15 +84,15 @@ class TimerJob(PayloadWrapper):
     @classmethod
     def from_transfer_data(
         cls,
-        transfer_data: Union[TransferData, Dict[str, Any]],
-        start: Union[datetime.datetime, str],
-        interval: Union[datetime.timedelta, int, None],
+        transfer_data: t.Union[TransferData, t.Dict[str, t.Any]],
+        start: t.Union[datetime.datetime, str],
+        interval: t.Union[datetime.timedelta, int, None],
         *,
-        name: Optional[str] = None,
-        stop_after: Optional[datetime.datetime] = None,
-        stop_after_n: Optional[int] = None,
-        scope: Optional[str] = None,
-        environment: Optional[str] = None,
+        name: t.Optional[str] = None,
+        stop_after: t.Optional[datetime.datetime] = None,
+        stop_after_n: t.Optional[int] = None,
+        scope: t.Optional[str] = None,
+        environment: t.Optional[str] = None,
     ) -> "TimerJob":
         r"""
         Specify data to create a Timer job using the parameters for a transfer. Timer

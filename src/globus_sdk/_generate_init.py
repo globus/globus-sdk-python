@@ -3,7 +3,7 @@
 import itertools
 import pathlib
 import textwrap
-from typing import Iterator, List, Tuple
+import typing as t
 
 HERE = pathlib.Path(__file__).parent
 
@@ -16,7 +16,7 @@ FIXED_PREAMBLE = f"""\
 import importlib
 import logging
 import sys
-import typing
+import typing as t
 
 from .version import __version__
 
@@ -36,7 +36,7 @@ logging.getLogger("globus_sdk").addHandler(logging.NullHandler())
 """
 
 
-_LAZY_IMPORT_TABLE: List[Tuple[str, Tuple[str, ...]]] = [
+_LAZY_IMPORT_TABLE: t.List[t.Tuple[str, t.Tuple[str, ...]]] = [
     (
         "authorizers",
         (
@@ -158,13 +158,13 @@ _LAZY_IMPORT_TABLE: List[Tuple[str, Tuple[str, ...]]] = [
 ]
 
 
-def _generate_imports() -> Iterator[str]:
+def _generate_imports() -> t.Iterator[str]:
     for modname, items in _LAZY_IMPORT_TABLE:
         for item in items:
             yield textwrap.indent(f"from .{modname} import {item}", "    ")
 
 
-def _generate_lazy_import_table() -> Iterator[str]:
+def _generate_lazy_import_table() -> t.Iterator[str]:
     yield "_LAZY_IMPORT_TABLE = {"
     for modname, items in _LAZY_IMPORT_TABLE:
         yield textwrap.indent(f'"{modname}": {{', " " * 4)
@@ -174,7 +174,7 @@ def _generate_lazy_import_table() -> Iterator[str]:
     yield "}"
 
 
-def _generate_all_tuple() -> Iterator[str]:
+def _generate_all_tuple() -> t.Iterator[str]:
     yield "__all__ = ("
     yield '    "__version__",'
     yield '    "_force_eager_imports",'
@@ -185,16 +185,16 @@ def _generate_all_tuple() -> Iterator[str]:
     yield ")"
 
 
-def _init_pieces() -> Iterator[str]:
+def _init_pieces() -> t.Iterator[str]:
     yield FIXED_PREAMBLE
     yield ""
     yield from _generate_lazy_import_table()
     yield ""
-    yield "if typing.TYPE_CHECKING or sys.version_info < (3, 7):"
+    yield "if t.TYPE_CHECKING or sys.version_info < (3, 7):"
     yield from _generate_imports()
     yield """
 else:
-    def __dir__() -> typing.List[str]:
+    def __dir__() -> t.List[str]:
         # dir(globus_sdk) should include everything exported in __all__
         # as well as some explicitly selected attributes from the default dir() output
         # on a module
@@ -209,7 +209,7 @@ else:
             "__path__",
         ]
 
-    def __getattr__(name: str) -> typing.Any:
+    def __getattr__(name: str) -> t.Any:
         for modname, items in _LAZY_IMPORT_TABLE.items():
             if name in items:
                 mod = importlib.import_module("." + modname, __name__)

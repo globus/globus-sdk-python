@@ -1,9 +1,9 @@
-import typing
+import typing as t
 
 import globus_sdk
 
 # type is (str | None)
-s: typing.Optional[str] = globus_sdk.BaseClient.resource_server
+s: t.Optional[str] = globus_sdk.BaseClient.resource_server
 i: int = globus_sdk.BaseClient.resource_server  # type: ignore [assignment]
 
 # holds on an instance as well
