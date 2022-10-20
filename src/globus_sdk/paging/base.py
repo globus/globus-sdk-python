@@ -7,7 +7,7 @@ import typing as t
 from globus_sdk.response import GlobusHTTPResponse
 
 if sys.version_info >= (3, 10):
-    from typing import ParamSpec  # noqa: TYT03
+    from typing import ParamSpec
 else:
     from typing_extensions import ParamSpec
 

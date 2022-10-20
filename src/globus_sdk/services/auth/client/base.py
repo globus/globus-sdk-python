@@ -10,7 +10,7 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 if sys.version_info >= (3, 8):
     # pylint can't handle quoted annotations yet:
     # https://github.com/PyCQA/pylint/issues/3299
-    from typing import Literal  # pylint: disable=unused-import  # noqa: TYT03
+    from typing import Literal  # pylint: disable=unused-import
 else:
     from typing_extensions import Literal
 
