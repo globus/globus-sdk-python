@@ -100,6 +100,12 @@ CREATE TABLE sdk_storage_adapter_internal (
             conn.commit()
         return conn
 
+    def close(self) -> None:
+        """
+        Close the underlying database connection.
+        """
+        self._connection.close()
+
     def store_config(
         self, config_name: str, config_dict: t.Mapping[str, t.Any]
     ) -> None:

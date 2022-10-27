@@ -1,0 +1,2 @@
+* Add a `close()` method to `SQLiteAdapter` which closes the underlying
+  connection (:pr:`NUMBER`)

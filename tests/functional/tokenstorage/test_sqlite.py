@@ -13,6 +13,24 @@ def db_filename(tempdir):
 MEMORY_DBNAME = ":memory:"
 
 
+@pytest.fixture
+def adapters_to_close():
+    data = set()
+    yield data
+    for x in data:
+        x.close()
+
+
+@pytest.fixture
+def make_adapter(adapters_to_close):
+    def func(*args, **kwargs):
+        ret = SQLiteAdapter(*args, **kwargs)
+        adapters_to_close.add(ret)
+        return ret
+
+    return func
+
+
 @pytest.mark.parametrize(
     "success, use_file, kwargs",
     [
@@ -26,22 +44,22 @@ MEMORY_DBNAME = ":memory:"
         (False, True, {"dbname": MEMORY_DBNAME, "namespace": "foo"}),
     ],
 )
-def test_constructor(success, use_file, kwargs, db_filename):
+def test_constructor(success, use_file, kwargs, db_filename, make_adapter):
     if success:
         if use_file:
-            assert SQLiteAdapter(db_filename, **kwargs)
+            make_adapter(db_filename, **kwargs)
         else:
-            assert SQLiteAdapter(**kwargs)
+            make_adapter(**kwargs)
     else:
         with pytest.raises(TypeError):
             if use_file:
-                SQLiteAdapter(db_filename, **kwargs)
+                make_adapter(db_filename, **kwargs)
             else:
-                SQLiteAdapter(**kwargs)
+                make_adapter(**kwargs)
 
 
-def test_store_and_retrieve_simple_config():
-    adapter = SQLiteAdapter(MEMORY_DBNAME)
+def test_store_and_retrieve_simple_config(make_adapter):
+    adapter = make_adapter(MEMORY_DBNAME)
     store_val = {"val1": True, "val2": None, "val3": 1.4}
     adapter.store_config("myconf", store_val)
     read_val = adapter.read_config("myconf")
@@ -49,26 +67,26 @@ def test_store_and_retrieve_simple_config():
     assert read_val is not store_val
 
 
-def test_store_and_retrieve(mock_response):
-    adapter = SQLiteAdapter(MEMORY_DBNAME)
+def test_store_and_retrieve(mock_response, make_adapter):
+    adapter = make_adapter(MEMORY_DBNAME)
     adapter.store(mock_response)
 
     data = adapter.get_by_resource_server()
     assert data == mock_response.by_resource_server
 
 
-def test_on_refresh_and_retrieve(mock_response):
+def test_on_refresh_and_retrieve(mock_response, make_adapter):
     """just confirm that the aliasing of these functions does not change anything"""
-    adapter = SQLiteAdapter(MEMORY_DBNAME)
+    adapter = make_adapter(MEMORY_DBNAME)
     adapter.on_refresh(mock_response)
 
     data = adapter.get_by_resource_server()
     assert data == mock_response.by_resource_server
 
 
-def test_multiple_adapters_store_and_retrieve(mock_response, db_filename):
-    adapter1 = SQLiteAdapter(db_filename)
-    adapter2 = SQLiteAdapter(db_filename)
+def test_multiple_adapters_store_and_retrieve(mock_response, db_filename, make_adapter):
+    adapter1 = make_adapter(db_filename)
+    adapter2 = make_adapter(db_filename)
     adapter1.store(mock_response)
 
     data = adapter2.get_by_resource_server()
@@ -76,29 +94,29 @@ def test_multiple_adapters_store_and_retrieve(mock_response, db_filename):
 
 
 def test_multiple_adapters_store_and_retrieve_different_namespaces(
-    mock_response, db_filename
+    mock_response, db_filename, make_adapter
 ):
-    adapter1 = SQLiteAdapter(db_filename, namespace="foo")
-    adapter2 = SQLiteAdapter(db_filename, namespace="bar")
+    adapter1 = make_adapter(db_filename, namespace="foo")
+    adapter2 = make_adapter(db_filename, namespace="bar")
     adapter1.store(mock_response)
 
     data = adapter2.get_by_resource_server()
     assert data == {}
 
 
-def test_load_missing_config_data():
-    adapter = SQLiteAdapter(MEMORY_DBNAME)
+def test_load_missing_config_data(make_adapter):
+    adapter = make_adapter(MEMORY_DBNAME)
     assert adapter.read_config("foo") is None
 
 
-def test_load_missing_token_data():
-    adapter = SQLiteAdapter(MEMORY_DBNAME)
+def test_load_missing_token_data(make_adapter):
+    adapter = make_adapter(MEMORY_DBNAME)
     assert adapter.get_by_resource_server() == {}
     assert adapter.get_token_data("resource_server_1") is None
 
 
-def test_remove_tokens(mock_response):
-    adapter = SQLiteAdapter(MEMORY_DBNAME)
+def test_remove_tokens(mock_response, make_adapter):
+    adapter = make_adapter(MEMORY_DBNAME)
     adapter.store(mock_response)
 
     removed = adapter.remove_tokens_for_resource_server("resource_server_1")
@@ -112,8 +130,8 @@ def test_remove_tokens(mock_response):
     assert not removed
 
 
-def test_remove_config():
-    adapter = SQLiteAdapter(MEMORY_DBNAME)
+def test_remove_config(make_adapter):
+    adapter = make_adapter(MEMORY_DBNAME)
     store_val = {"val1": True, "val2": None, "val3": 1.4}
     adapter.store_config("myconf", store_val)
     adapter.store_config("myconf2", store_val)
@@ -128,8 +146,8 @@ def test_remove_config():
     assert not removed
 
 
-def test_store_and_refresh(mock_response, mock_refresh_response):
-    adapter = SQLiteAdapter(MEMORY_DBNAME)
+def test_store_and_refresh(mock_response, mock_refresh_response, make_adapter):
+    adapter = make_adapter(MEMORY_DBNAME)
     adapter.store(mock_response)
 
     # rs1 and rs2 data was stored correctly
@@ -146,10 +164,10 @@ def test_store_and_refresh(mock_response, mock_refresh_response):
     assert data["access_token"] == "access_token_2_refreshed"
 
 
-def test_iter_namespaces(mock_response, db_filename):
-    foo_adapter = SQLiteAdapter(db_filename, namespace="foo")
-    bar_adapter = SQLiteAdapter(db_filename, namespace="bar")
-    baz_adapter = SQLiteAdapter(db_filename, namespace="baz")
+def test_iter_namespaces(mock_response, db_filename, make_adapter):
+    foo_adapter = make_adapter(db_filename, namespace="foo")
+    bar_adapter = make_adapter(db_filename, namespace="bar")
+    baz_adapter = make_adapter(db_filename, namespace="baz")
 
     for adapter in [foo_adapter, bar_adapter, baz_adapter]:
         assert list(adapter.iter_namespaces()) == []
