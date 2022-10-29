@@ -88,13 +88,13 @@ class ResponseList:
 
     def __init__(
         self,
-        *responses: RegisteredResponse,
+        *data: RegisteredResponse,
         metadata: t.Optional[t.Dict[str, t.Any]] = None,
     ):
-        self.responses = list(responses)
+        self.responses = list(data)
         self._metadata = metadata
         self.parent: t.Optional["ResponseSet"] = None
-        for r in responses:
+        for r in data:
             r.parent = self
 
     @property
@@ -162,20 +162,21 @@ class ResponseSet:
     @classmethod
     def from_dict(
         cls,
-        data: t.Dict[str, t.Union[t.Dict[str, t.Any], t.List[t.Dict[str, t.Any]]]],
+        data: t.Mapping[str, t.Union[t.Dict[str, t.Any], t.List[t.Dict[str, t.Any]]]],
         metadata: t.Optional[t.Dict[str, t.Any]] = None,
         **kwargs: t.Dict[str, t.Dict[str, t.Any]],
     ) -> "ResponseSet":
         # constructor which expects native dicts and converts them to RegisteredResponse
         # objects, then puts them into the ResponseSet
-        return cls(
-            metadata=metadata,
-            **{
-                k: (
-                    RegisteredResponse(**v)
-                    if isinstance(v, dict)
-                    else [RegisteredResponse(**subv) for subv in v]
-                )
-                for k, v in data.items()
-            },
-        )
+        def handle_value(
+            v: t.Union[t.Dict[str, t.Any], t.List[t.Dict[str, t.Any]]]
+        ) -> t.Union[RegisteredResponse, ResponseList]:
+            if isinstance(v, dict):
+                return RegisteredResponse(**v)
+            else:
+                return ResponseList(*(RegisteredResponse(**subv) for subv in v))
+
+        reassembled_data: t.Dict[str, t.Union[RegisteredResponse, ResponseList]] = {
+            k: handle_value(v) for k, v in data.items()
+        }
+        return cls(metadata=metadata, **reassembled_data)

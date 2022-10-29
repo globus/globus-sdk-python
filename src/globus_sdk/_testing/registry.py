@@ -5,7 +5,7 @@ import responses
 
 import globus_sdk
 
-from .models import RegisteredResponse, ResponseSet
+from .models import RegisteredResponse, ResponseList, ResponseSet
 
 _RESPONSE_SET_REGISTRY: t.Dict[t.Any, ResponseSet] = {}
 
@@ -88,7 +88,7 @@ def load_response(
     *,
     case: str = "default",
     requests_mock: t.Optional[responses.RequestsMock] = None,
-) -> RegisteredResponse:
+) -> t.Union[RegisteredResponse, ResponseList]:
     if isinstance(set_id, RegisteredResponse):
         return set_id.add(requests_mock=requests_mock)
     rset = get_response_set(set_id)
