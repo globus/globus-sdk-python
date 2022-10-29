@@ -12,6 +12,12 @@ def test_create_flow(flows_client):
     assert resp.data["title"] == "Multi Step Transfer"
 
 
+def test_get_flow(flows_client):
+    meta = load_response(flows_client.get_flow).metadata
+    resp = flows_client.get_flow(meta["flow_id"])
+    assert resp.data["title"] == meta["title"]
+
+
 def test_delete_flow(flows_client):
     metadata = load_response(flows_client.delete_flow).metadata
 

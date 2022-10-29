@@ -169,6 +169,27 @@ class FlowsClient(client.BaseClient):
 
         return self.post("/flows", data=data)
 
+    @_flowdoc("Get Flow", "Flows/paths/~1flows~1{flow_id}/get")
+    def get_flow(
+        self,
+        flow_id: UUIDLike,
+        *,
+        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+    ) -> GlobusHTTPResponse:
+        """Retrieve a Flow by ID
+
+        :param flow_id: The ID of the Flow to fetch
+        :type flow_id: str or UUID
+        :param query_params: Any additional parameters to be passed through
+            as query params.
+        :type query_params: dict, optional
+        """
+
+        if query_params is None:
+            query_params = {}
+
+        return self.get(f"/flows/{flow_id}", query_params=query_params)
+
     @_flowdoc("List Flows", "Flows/paths/~1flows/get")
     @paging.has_paginator(paging.MarkerPaginator, items_key="flows")
     def list_flows(
