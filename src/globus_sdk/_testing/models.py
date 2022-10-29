@@ -50,7 +50,7 @@ class RegisteredResponse:
         self._metadata = metadata
         self.kwargs = kwargs
 
-        self.parent: t.Optional["ResponseSet"] = None
+        self.parent: t.Union["ResponseSet", "ResponseList", None] = None
 
     @property
     def metadata(self) -> t.Dict[str, t.Any]:
@@ -80,6 +80,39 @@ class RegisteredResponse:
         return self
 
 
+class ResponseList:
+    """
+    A series of unnamed responses, meant to be used and referred to as a single case
+    within a ResponseSet.
+    """
+
+    def __init__(
+        self,
+        *responses: RegisteredResponse,
+        metadata: t.Optional[t.Dict[str, t.Any]] = None,
+    ):
+        self.responses = list(responses)
+        self._metadata = metadata
+        self.parent: t.Optional["ResponseSet"] = None
+        for r in responses:
+            r.parent = self
+
+    @property
+    def metadata(self) -> t.Dict[str, t.Any]:
+        if self._metadata is not None:
+            return self._metadata
+        if self.parent is not None:
+            return self.parent.metadata
+        return {}
+
+    def add(
+        self, *, requests_mock: t.Optional[responses.RequestsMock] = None
+    ) -> "ResponseList":
+        for r in self.responses:
+            r.add(requests_mock=requests_mock)
+        return self
+
+
 class ResponseSet:
     """
     A collection of responses. On init, this implicitly sets the parent of
@@ -90,17 +123,17 @@ class ResponseSet:
     def __init__(
         self,
         metadata: t.Optional[t.Dict[str, t.Any]] = None,
-        **kwargs: RegisteredResponse,
+        **kwargs: t.Union[RegisteredResponse, ResponseList],
     ) -> None:
         self.metadata = metadata or {}
-        self._data: t.Dict[str, RegisteredResponse] = {**kwargs}
+        self._data: t.Dict[str, t.Union[RegisteredResponse, ResponseList]] = {**kwargs}
         for res in self._data.values():
             res.parent = self
 
     def register(self, case: str, value: RegisteredResponse) -> None:
         self._data[case] = value
 
-    def lookup(self, case: str) -> RegisteredResponse:
+    def lookup(self, case: str) -> t.Union[RegisteredResponse, ResponseList]:
         try:
             return self._data[case]
         except KeyError as e:
@@ -109,12 +142,14 @@ class ResponseSet:
     def __bool__(self) -> bool:
         return bool(self._data)
 
-    def __iter__(self) -> t.Iterator[RegisteredResponse]:
+    def __iter__(
+        self,
+    ) -> t.Iterator[t.Union[RegisteredResponse, ResponseList]]:
         return iter(self._data.values())
 
     def activate(
         self, case: str, *, requests_mock: t.Optional[responses.RequestsMock] = None
-    ) -> RegisteredResponse:
+    ) -> t.Union[RegisteredResponse, ResponseList]:
         return self.lookup(case).add(requests_mock=requests_mock)
 
     def activate_all(
@@ -127,12 +162,20 @@ class ResponseSet:
     @classmethod
     def from_dict(
         cls,
-        data: t.Dict[str, t.Dict[str, t.Any]],
+        data: t.Dict[str, t.Union[t.Dict[str, t.Any], t.List[t.Dict[str, t.Any]]]],
         metadata: t.Optional[t.Dict[str, t.Any]] = None,
         **kwargs: t.Dict[str, t.Dict[str, t.Any]],
     ) -> "ResponseSet":
         # constructor which expects native dicts and converts them to RegisteredResponse
         # objects, then puts them into the ResponseSet
         return cls(
-            metadata=metadata, **{k: RegisteredResponse(**v) for k, v in data.items()}
+            metadata=metadata,
+            **{
+                k: (
+                    RegisteredResponse(**v)
+                    if isinstance(v, dict)
+                    else [RegisteredResponse(**subv) for subv in v]
+                )
+                for k, v in data.items()
+            },
         )

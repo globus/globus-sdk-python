@@ -53,6 +53,11 @@ available:
     forward" to the consuming test cases. (e.g. a ``GET Task`` fixture which
     shares the ``task_id`` it uses with consumers via ``.metadata["task_id"]``)
 
+``ResponseList``
+    A series of mock responses which *must* be activated together in a single
+    step. This can be stored in a ``ResponseSet`` as a case, describing a set
+    of responses registered to a specific name.
+
 ``load_response_set``
     Optionally lookup a response set and activate all of its responses. If
     passed a ``ResponseSet``, activate it, otherwise the first argument is an
