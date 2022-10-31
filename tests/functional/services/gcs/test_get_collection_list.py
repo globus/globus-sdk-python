@@ -1,0 +1,68 @@
+import pytest
+
+from globus_sdk import GCSAPIError
+from globus_sdk._testing import get_last_request, load_response
+
+
+def test_get_collection_list(client):
+    meta = load_response(client.get_collection_list).metadata
+    res = client.get_collection_list()
+
+    assert len(list(res)) == len(meta["collection_ids"])
+
+    # sanity check some fields
+    assert res["DATA_TYPE"] == "result#1.0.0"
+    for index, item in enumerate(res):
+        assert item["DATA_TYPE"] == "collection#1.0.0"
+        assert item["id"] == meta["collection_ids"][index]
+        assert item["storage_gateway_id"] == meta["gateway_ids"][index]
+        assert item["display_name"] == meta["display_names"][index]
+
+
+def test_get_collection_list_include_param(client):
+    load_response(client.get_collection_list)
+
+    client.get_collection_list()
+    req = get_last_request()
+    assert "include" not in req.params
+
+    client.get_collection_list(include="foo")
+    req = get_last_request()
+    assert "include" in req.params
+    assert req.params["include"] == "foo"
+
+    client.get_collection_list(include="foo,bar")
+    req = get_last_request()
+    assert "include" in req.params
+    assert req.params["include"] == "foo,bar"
+
+    client.get_collection_list(include=("foo", "bar"))
+    req = get_last_request()
+    assert "include" in req.params
+    assert req.params["include"] == "foo,bar"
+
+    client.get_collection_list(mapped_collection_id="MAPPED_COLLECTION")
+    assert get_last_request().params.get("mapped_collection_id") == "MAPPED_COLLECTION"
+
+    filters = ["mapped_collections", "created_by_me"]
+    client.get_collection_list(filter=filters)
+    assert get_last_request().params.get("filter") == ",".join(filters)
+
+    client.get_collection_list(filter="created_by_me")
+    assert get_last_request().params.get("filter") == "created_by_me"
+
+
+def test_error_parsing_forbidden(client):
+    """
+    This test is more focused on error parsing than it is on the actual collection list
+    call.
+    """
+    load_response(client.get_collection_list, case="forbidden")
+    with pytest.raises(GCSAPIError) as excinfo:
+        client.get_collection_list()
+
+    err = excinfo.value
+    assert err.detail is None
+    assert err.detail_data_type is None
+    assert err.message.startswith("Could not list collections")
+    assert err.code == "permission_denied"
