@@ -2,9 +2,9 @@ import uuid
 
 from globus_sdk._testing.models import RegisteredResponse, ResponseSet
 
-identity_id = str(uuid.uuid1())
-collection_ids = [str(uuid.uuid1()), str(uuid.uuid1())]
-gateway_ids = [str(uuid.uuid1()), str(uuid.uuid1())]
+identity_id = str(uuid.uuid4())
+collection_ids = [str(uuid.uuid4()), str(uuid.uuid4())]
+gateway_ids = [str(uuid.uuid4()), str(uuid.uuid4())]
 display_names = ["Happy Fun Collection Name 1", "Happy Fun Collection Name 2"]
 
 RESPONSES = ResponseSet(
