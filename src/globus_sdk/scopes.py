@@ -1,7 +1,5 @@
 import typing as t
 
-from globus_sdk import utils
-
 # this type alias is meant for internal use, which is why it's named with an underscore
 _ScopeCollectionType = t.Union[
     str,
@@ -116,29 +114,28 @@ class ScopeBuilder:
         self,
         resource_server: str,
         *,
-        known_scopes: t.Union[t.List[str], str, None] = None,
-        known_url_scopes: t.Union[t.List[str], str, None] = None,
+        known_scopes: t.Union[
+            t.List[t.Union[str, t.Tuple[str, str]]], str, None
+        ] = None,
+        known_url_scopes: t.Union[
+            t.List[t.Union[str, t.Tuple[str, str]]], str, None
+        ] = None,
     ) -> None:
         self.resource_server = resource_server
-        self._known_scopes = (
-            list(utils.safe_strseq_iter(known_scopes))
-            if known_scopes is not None
-            else []
-        )
-        self._known_url_scopes = (
-            list(utils.safe_strseq_iter(known_url_scopes))
-            if known_url_scopes is not None
-            else []
-        )
+
+        known_scopes_dict = self._consolidate_collections(known_scopes)
+        known_url_scopes_dict = self._consolidate_collections(known_url_scopes)
+
+        self._known_scopes = list(known_scopes_dict.values())
+        self._known_url_scopes = list(known_url_scopes_dict.values())
+
         self._known_scope_names: t.List[str] = []
-        if self._known_scopes:
-            for scope_name in self._known_scopes:
-                self._known_scope_names.append(scope_name)
-                setattr(self, scope_name, self.urn_scope_string(scope_name))
-        if self._known_url_scopes:
-            for scope_name in self._known_url_scopes:
-                self._known_scope_names.append(scope_name)
-                setattr(self, scope_name, self.url_scope_string(scope_name))
+        for scope_name, scope_val in known_scopes_dict.items():
+            self._known_scope_names.append(scope_name)
+            setattr(self, scope_name, self.urn_scope_string(scope_val))
+        for scope_name, scope_val in known_url_scopes_dict.items():
+            self._known_scope_names.append(scope_name)
+            setattr(self, scope_name, self.url_scope_string(scope_val))
 
     # custom __getattr__ instructs `mypy` that unknown attributes of a ScopeBuilder are
     # of type `str`, allowing for dynamic attribute names
@@ -229,6 +226,22 @@ class ScopeBuilder:
             f"  {k}:\n    {v}" for k, v in self._iter_scopes()
         )
 
+    def _consolidate_collections(
+        self, items: t.Union[t.List[t.Union[str, t.Tuple[str, str]]], str, None]
+    ) -> t.Dict[str, str]:
+        if items is None:
+            return {}
+        elif isinstance(items, str):
+            return {items: items}
+        else:
+            items_dict = {}
+            for item in items:
+                if isinstance(item, str):
+                    items_dict[item] = item
+                else:
+                    items_dict[item[0]] = item[1]
+            return items_dict
+
 
 class GCSEndpointScopeBuilder(ScopeBuilder):
     """
@@ -312,8 +325,12 @@ class _FlowsScopeBuilder(ScopeBuilder):
         self,
         domain_name: str,
         client_id: str,
-        known_scopes: t.Union[t.List[str], str, None] = None,
-        known_url_scopes: t.Union[t.List[str], str, None] = None,
+        known_scopes: t.Union[
+            t.List[t.Union[str, t.Tuple[str, str]]], str, None
+        ] = None,
+        known_url_scopes: t.Union[
+            t.List[t.Union[str, t.Tuple[str, str]]], str, None
+        ] = None,
     ) -> None:
         self._client_id = client_id
         super().__init__(

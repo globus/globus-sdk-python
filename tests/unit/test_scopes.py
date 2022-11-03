@@ -42,6 +42,22 @@ def test_scopebuilder_str():
     assert bar_scope in stringified
 
 
+def test_differently_named_scopes_in_scopebuilder():
+    rs = str(uuid.uuid4())
+    scope_1 = str(uuid.uuid4())
+    scope_2 = str(uuid.uuid4())
+    sb = ScopeBuilder(
+        rs,
+        known_scopes=[("my_urn_scope", scope_1), "foo"],
+        known_url_scopes=[("my_url_scope", scope_2), "bar"],
+    )
+
+    assert sb.my_urn_scope == f"urn:globus:auth:scope:{rs}:{scope_1}"
+    assert sb.foo == f"urn:globus:auth:scope:{rs}:foo"
+    assert sb.my_url_scope == f"https://auth.globus.org/scopes/{rs}/{scope_2}"
+    assert sb.bar == f"https://auth.globus.org/scopes/{rs}/bar"
+
+
 def test_mutable_scope_str_and_repr_simple():
     s = MutableScope("simple")
     assert str(s) == "simple"

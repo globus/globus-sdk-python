@@ -312,9 +312,10 @@ class SpecificFlowClient(client.BaseClient):
             transport_params=transport_params,
         )
         self._flow_id = flow_id
+        user_scope_value = f"flow_{str(flow_id).replace('-', '_')}_user"
         self.scopes = ScopeBuilder(
             resource_server=str(self._flow_id),
-            known_url_scopes=[f"flow_{flow_id}_user"],
+            known_url_scopes=[("user", user_scope_value)],
         )
 
     @_flowdoc("Run Flow", "~1flows~1{flow_id}~1run/post")
