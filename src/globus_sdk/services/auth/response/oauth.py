@@ -1,5 +1,6 @@
 import json
 import logging
+import textwrap
 import time
 import typing as t
 
@@ -225,9 +226,16 @@ class OAuthTokenResponse(GlobusHTTPResponse):
         return decoded
 
     def __str__(self) -> str:
-        # Make printing responses more convenient by only showing the
-        # (typically important) token info
-        return json.dumps(self.by_resource_server, indent=2)
+        by_rs = json.dumps(self.by_resource_server, indent=2, separators=(",", ": "))
+        id_token_to_print = t.cast(t.Optional[str], self.get("id_token"))
+        if id_token_to_print is not None:
+            id_token_to_print = id_token_to_print[:10] + "... (truncated)"
+        return (
+            f"{self.__class__.__name__}:\n"
+            + f"  id_token: {id_token_to_print}\n"
+            + "  by_resource_server:\n"
+            + textwrap.indent(by_rs, "    ")
+        )
 
 
 class OAuthDependentTokenResponse(OAuthTokenResponse):
