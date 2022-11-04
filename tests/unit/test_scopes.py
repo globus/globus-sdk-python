@@ -42,7 +42,7 @@ def test_scopebuilder_str():
     assert bar_scope in stringified
 
 
-def test_differently_named_scopes_in_scopebuilder():
+def test_uniquely_named_scopes():
     rs = str(uuid.uuid4())
     scope_1 = str(uuid.uuid4())
     scope_2 = str(uuid.uuid4())
@@ -56,6 +56,27 @@ def test_differently_named_scopes_in_scopebuilder():
     assert sb.foo == f"urn:globus:auth:scope:{rs}:foo"
     assert sb.my_url_scope == f"https://auth.globus.org/scopes/{rs}/{scope_2}"
     assert sb.bar == f"https://auth.globus.org/scopes/{rs}/bar"
+
+
+def test_sb_allowed_inputs_types():
+    rs = str(uuid.uuid4())
+    scope_1 = "do_a_thing"
+    scope_1_urn = f"urn:globus:auth:scope:{rs}:{scope_1}"
+
+    none_sb = ScopeBuilder(rs, known_scopes=None)
+    str_sb = ScopeBuilder(rs, known_scopes=scope_1)
+    tuple_sb = ScopeBuilder(rs, known_scopes=("scope_1", scope_1))
+    list_sb = ScopeBuilder(rs, known_scopes=[scope_1, ("scope_1", scope_1)])
+
+    assert none_sb.scope_names == []
+    assert scope_1 in str_sb.scope_names
+    assert str_sb.do_a_thing == scope_1_urn
+    assert "scope_1" in tuple_sb.scope_names
+    assert tuple_sb.scope_1 == scope_1_urn
+    assert scope_1 in list_sb.scope_names
+    assert "scope_1" in list_sb.scope_names
+    assert list_sb.scope_1 == scope_1_urn
+    assert list_sb.do_a_thing == scope_1_urn
 
 
 def test_mutable_scope_str_and_repr_simple():

@@ -1,3 +1,4 @@
 
-* Scope Names (used to set ``ScopeBuilder`` attributes) can be set explicitly
-* Fixed SpecificFlowClient scope string
+* Scope Names can be set explicitly in a ``ScopeBuilder`` (:pr:`NUMBER`)
+* Introduced ``ScopeBuilder.scope_names`` property (:pr:`NUMBER`)
+* Fixed SpecificFlowClient scope string (:pr:`NUMBER`)

@@ -201,7 +201,8 @@ class FlowsClient(client.BaseClient):
         marker: t.Optional[str] = None,
         query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableFlowsResponse:
-        """List deployed Flows
+        """
+        List deployed Flows
 
         :param filter_role: A role name specifying the minimum permissions required for
             a Flow to be included in the response.
@@ -232,7 +233,8 @@ class FlowsClient(client.BaseClient):
 
         Values for ``orderby`` consist of a field name, a space, and an
         ordering mode -- ``ASC`` for "ascending" and ``DESC`` for "descending".
-        Supported field names are
+
+        Supported field names are:
           - ``id``
           - ``scope_string``
           - ``flow_owners``

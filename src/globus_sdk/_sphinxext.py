@@ -13,7 +13,7 @@ from sphinx.util.nodes import nested_parse_with_titles
 
 def _extract_known_scopes(scope_builder_name):
     sb = locate(scope_builder_name)
-    return sb._known_scopes
+    return sb.scope_names
 
 
 def _classname2methods(classname, include_methods):
