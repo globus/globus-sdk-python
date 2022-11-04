@@ -219,6 +219,7 @@ class FlowsClient(client.BaseClient):
         **Role Values**
 
         The valid values for ``role`` are, in order of precedence for ``filter_role``:
+
           - ``flow_viewer``
           - ``flow_starter``
           - ``flow_administrator``
@@ -233,6 +234,7 @@ class FlowsClient(client.BaseClient):
         Values for ``orderby`` consist of a field name, a space, and an
         ordering mode -- ``ASC`` for "ascending" and ``DESC`` for "descending".
         Supported field names are
+
           - ``id``
           - ``scope_string``
           - ``flow_owners``
