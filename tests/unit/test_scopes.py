@@ -2,7 +2,7 @@ import uuid
 
 import pytest
 
-from globus_sdk.scopes import FlowsScopes, MutableScope, ScopeBuilder
+from globus_sdk.scopes import FlowsScopes, Scope, ScopeBuilder, ScopeParseError
 
 
 def test_url_scope_string():
@@ -79,67 +79,73 @@ def test_sb_allowed_inputs_types():
     assert list_sb.do_a_thing == scope_1_urn
 
 
-def test_mutable_scope_str_and_repr_simple():
-    s = MutableScope("simple")
+def test_scope_str_and_repr_simple():
+    s = Scope("simple")
     assert str(s) == "simple"
-    assert repr(s) == "MutableScope('simple')"
-
-    s2 = MutableScope("simple", optional=True)
-    assert str(s2) == "*simple"
-    assert repr(s2) == "MutableScope('simple', optional=True)"
+    assert repr(s) == "Scope('simple')"
 
 
-def test_mutable_scope_str_and_repr_with_dependencies():
-    s = MutableScope("top")
+def test_scope_str_and_repr_optional():
+    s = Scope("simple", optional=True)
+    assert str(s) == "*simple"
+    assert repr(s) == "Scope('simple', optional=True)"
+
+
+def test_scope_str_and_repr_with_dependencies():
+    s = Scope("top")
     s.add_dependency("foo")
     assert str(s) == "top[foo]"
-    s.add_dependency("bar", optional=True)
-    # NOTE: order is not guaranteed for dict() until python3.7
-    assert str(s) in ("top[foo *bar]", "top[*bar foo]")
-    assert repr(s) in (
-        "MutableScope('top', dependencies={'foo': False, 'bar': True})",
-        "MutableScope('top', dependencies={'bar': True, 'foo': False})",
-    )
-
-    s2 = MutableScope("top", optional=True)
-    s2.add_dependency("foo")
-    assert str(s2) == "*top[foo]"
-    s2.add_dependency("bar", optional=True)
-    # NOTE: order is not guaranteed for dict() until python3.7
-    assert str(s2) in ("*top[foo *bar]", "*top[*bar foo]")
-    assert repr(s2) in (
-        "MutableScope('top', optional=True, dependencies={'foo': False, 'bar': True})",
-        "MutableScope('top', optional=True, dependencies={'bar': True, 'foo': False})",
-    )
+    s.add_dependency("bar")
+    assert str(s) == "top[foo bar]"
+    assert repr(s) == "Scope('top', dependencies=[Scope('foo'), Scope('bar')])"
 
 
-def test_mutable_scope_str_nested():
-    top = MutableScope("top")
-    mid = MutableScope("mid")
-    bottom = MutableScope("bottom")
-    mid.add_dependency(str(bottom))
-    top.add_dependency(str(mid))
+def test_add_dependency_warns_on_optional_but_still_has_good_str_and_repr():
+    s = Scope("top")
+    # this should warn, the use of `optional=...` rather than adding a Scope object
+    # when optional dependencies are wanted is deprecated
+    with pytest.warns(DeprecationWarning):
+        s.add_dependency("foo", optional=True)
+
+    # confirm the str representation and repr for good measure
+    assert str(s) == "top[*foo]"
+    assert repr(s) == "Scope('top', dependencies=[Scope('foo', optional=True)])"
+
+
+@pytest.mark.parametrize("optional_arg", (True, False))
+def test_add_dependency_fails_if_optional_is_combined_with_scope(optional_arg):
+    s = Scope("top")
+    s2 = Scope("bottom")
+    with pytest.raises(ValueError):
+        s.add_dependency(s2, optional=optional_arg)
+
+
+def test_scope_str_nested():
+    top = Scope("top")
+    mid = Scope("mid")
+    bottom = Scope("bottom")
+    mid.add_dependency(bottom)
+    top.add_dependency(mid)
     assert str(bottom) == "bottom"
     assert str(mid) == "mid[bottom]"
     assert str(top) == "top[mid[bottom]]"
 
 
-def test_mutable_scope_collection_to_str():
-    foo = MutableScope("foo")
-    bar = MutableScope("bar")
+def test_scope_collection_to_str():
+    foo = Scope("foo")
+    bar = Scope("bar")
     baz = "baz"
-    assert MutableScope.scopes2str(foo) == "foo"
-    assert MutableScope.scopes2str([foo, bar]) == "foo bar"
-    assert MutableScope.scopes2str(baz) == "baz"
-    assert MutableScope.scopes2str([foo, baz]) == "foo baz"
+    assert Scope.scopes2str(foo) == "foo"
+    assert Scope.scopes2str([foo, bar]) == "foo bar"
+    assert Scope.scopes2str(baz) == "baz"
+    assert Scope.scopes2str([foo, baz]) == "foo baz"
 
 
-def test_mutable_scope_rejects_scope_with_optional_marker():
-    s = MutableScope("top")
-    with pytest.raises(ValueError) as excinfo:
-        s.add_dependency("*subscope")
-
-    assert "add_dependency cannot contain a leading '*'" in str(excinfo.value)
+def test_add_dependency_parses_scope_with_optional_marker():
+    s = Scope("top")
+    s.add_dependency("*subscope")
+    assert str(s) == "top[*subscope]"
+    assert repr(s) == "Scope('top', dependencies=[Scope('subscope', optional=True)])"
 
 
 def test_scopebuilder_make_mutable_produces_same_strings():
@@ -154,3 +160,79 @@ def test_flows_scopes_creation():
         FlowsScopes.run
         == "https://auth.globus.org/scopes/eec9b274-0c81-4334-bdc2-54e90e689b9a/run"
     )
+
+
+def test_scope_parsing_rejects_optional_marker_followed_by_space():
+    Scope.parse("*foo")  # okay
+    with pytest.raises(ScopeParseError):
+        Scope.parse("* foo")  # not okay
+
+
+def test_scope_parsing_rejects_ending_in_optional_marker():
+    with pytest.raises(ScopeParseError):
+        Scope.parse("foo*")
+
+
+def test_scope_parsing_allows_empty_string():
+    scopes = Scope.parse("")
+    assert scopes == []
+
+
+def test_scope_parsing_does_not_allow_optional_marker_before_brackets():
+    with pytest.raises(ScopeParseError):
+        Scope.parse("foo*[bar]")
+    with pytest.raises(ScopeParseError):
+        Scope.parse("foo *[bar]")
+    with pytest.raises(ScopeParseError):
+        Scope.parse("foo [bar*]")
+
+
+def test_scope_parsing_does_not_allow_ending_in_open_bracket():
+    with pytest.raises(ScopeParseError):
+        Scope.parse("foo[")
+
+
+def test_scope_parsing_does_not_allow_empty_brackets():
+    with pytest.raises(ScopeParseError):
+        Scope.parse("foo[]")
+
+
+def test_scope_parsing_does_not_allow_starting_with_open_bracket():
+    with pytest.raises(ScopeParseError):
+        Scope.parse("[foo]")
+
+
+def test_scope_parsing_does_not_allow_double_open_bracket():
+    with pytest.raises(ScopeParseError):
+        Scope.parse("foo[[bar]]")
+
+
+def test_scope_parsing_does_not_allow_unbalanced_brackets_closing():
+    with pytest.raises(ScopeParseError):
+        Scope.parse("foo[bar]]")
+
+
+def test_scope_parsing_does_not_allow_unbalanced_brackets_missing_close():
+    with pytest.raises(ScopeParseError):
+        Scope.parse("foo[bar")
+
+
+def test_scope_deserialize_simple():
+    scope = Scope.deserialize("foo")
+    assert str(scope) == "foo"
+
+
+def test_scope_deserialize_with_dependencies():
+    # oh, while we're here, let's also check that our whitespace insensitivity works
+    scope = Scope.deserialize("foo[ bar   *baz  ]")
+    assert str(scope) == "foo[bar *baz]"
+
+
+def test_scope_deserialize_fails_on_empty():
+    with pytest.raises(ValueError):
+        Scope.deserialize("  ")
+
+
+def test_scope_deserialize_fails_on_multiple_top_level_scopes():
+    with pytest.raises(ValueError):
+        Scope.deserialize("foo bar")

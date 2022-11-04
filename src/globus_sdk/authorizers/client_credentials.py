@@ -1,7 +1,8 @@
 import logging
 import typing as t
 
-from globus_sdk.scopes import MutableScope, _ScopeCollectionType
+from globus_sdk._types import ScopeCollectionType
+from globus_sdk.scopes import MutableScope
 
 if t.TYPE_CHECKING:
     from globus_sdk.services.auth import ConfidentialAppAuthClient, OAuthTokenResponse
@@ -61,7 +62,7 @@ class ClientCredentialsAuthorizer(RenewingAuthorizer):
     def __init__(
         self,
         confidential_client: "ConfidentialAppAuthClient",
-        scopes: _ScopeCollectionType,
+        scopes: ScopeCollectionType,
         *,
         access_token: t.Optional[str] = None,
         expires_at: t.Optional[int] = None,

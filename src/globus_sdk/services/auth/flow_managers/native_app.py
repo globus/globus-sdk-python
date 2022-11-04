@@ -7,6 +7,7 @@ import typing as t
 import urllib.parse
 
 from globus_sdk import scopes, utils
+from globus_sdk._types import ScopeCollectionType
 from globus_sdk.exc import GlobusSDKUsageError
 
 from ..oauth2_constants import DEFAULT_REQUESTED_SCOPES
@@ -106,7 +107,7 @@ class GlobusNativeAppFlowManager(GlobusOAuthFlowManager):
     def __init__(
         self,
         auth_client: "globus_sdk.AuthClient",
-        requested_scopes: t.Optional[scopes._ScopeCollectionType] = None,
+        requested_scopes: t.Optional[ScopeCollectionType] = None,
         redirect_uri: t.Optional[str] = None,
         state: str = "_default",
         verifier: t.Optional[str] = None,

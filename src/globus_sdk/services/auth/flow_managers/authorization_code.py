@@ -3,6 +3,7 @@ import typing as t
 import urllib.parse
 
 from globus_sdk import scopes, utils
+from globus_sdk._types import ScopeCollectionType
 
 from ..oauth2_constants import DEFAULT_REQUESTED_SCOPES
 from ..response import OAuthTokenResponse
@@ -56,7 +57,7 @@ class GlobusAuthorizationCodeFlowManager(GlobusOAuthFlowManager):
         self,
         auth_client: "globus_sdk.AuthClient",
         redirect_uri: str,
-        requested_scopes: t.Optional[scopes._ScopeCollectionType] = None,
+        requested_scopes: t.Optional[ScopeCollectionType] = None,
         state: str = "_default",
         refresh_tokens: bool = False,
     ):
