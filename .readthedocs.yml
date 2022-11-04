@@ -2,11 +2,14 @@ version: 2
 
 sphinx:
   configuration: docs/conf.py
+  fail_on_warning: true
 
 build:
   os: ubuntu-20.04
   tools:
-    python: "3.11"
+    # NOTE: make sure this matches the basepython in tox.ini for 'docs'
+    # TODO: update to py311 as soon as RTD stops using 3.11.0b3 instead of 3.11.0
+    python: "3.10"
 
 python:
   install:

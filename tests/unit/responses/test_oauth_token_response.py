@@ -69,3 +69,14 @@ def test_by_scopes_lookups_fancy(oauth_token_response):
     assert (
         by_scopes["scope2:1 scope2 scope2:0"]["resource_server"] == "resource_server_2"
     )
+
+
+def test_stringify(oauth_token_response):
+    data = str(oauth_token_response)
+    # it starts the right way
+    assert data.startswith("OAuthTokenResponse:\n")
+    # it contains the id_token, but heavily truncated and annotated as such
+    assert "  id_token: id_token_v... (truncated)\n" in data
+    # it contains the by_resource_server mapping (but we won't assert anything about
+    # that data other than that it starts with a '{')
+    assert "  by_resource_server:\n    {" in data
