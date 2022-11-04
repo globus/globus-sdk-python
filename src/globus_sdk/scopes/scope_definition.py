@@ -147,6 +147,11 @@ class Scope:
         optional: bool = False,
         dependencies: t.Optional[t.List["Scope"]] = None,
     ) -> None:
+        if any(c in scope_string for c in "[]* "):
+            raise ValueError(
+                "Scope instances may not contain the special characters '[]* '. "
+                "Use either Scope.deserialize or Scope.parse instead"
+            )
         self._scope_string = scope_string
         self.optional = optional
         self.dependencies: t.List[Scope] = [] if dependencies is None else dependencies

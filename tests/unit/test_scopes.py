@@ -236,3 +236,9 @@ def test_scope_deserialize_fails_on_empty():
 def test_scope_deserialize_fails_on_multiple_top_level_scopes():
     with pytest.raises(ValueError):
         Scope.deserialize("foo bar")
+
+
+@pytest.mark.parametrize("scope_str", ("*foo", "foo[bar]", "foo[", "foo]", "foo bar"))
+def test_scope_init_forbids_special_chars(scope_str):
+    with pytest.raises(ValueError):
+        Scope(scope_str)
