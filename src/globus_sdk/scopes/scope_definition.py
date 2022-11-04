@@ -236,6 +236,61 @@ class Scope:
     def __str__(self) -> str:
         return self.serialize()
 
+    def __contains__(self, other: t.Any) -> bool:
+        """
+        scope1 in scope2 is defined as subtree matching.
+
+        A scope contains another scope if
+        - the top level strings match
+        - the optional-ness matches OR only the contained scope is optional
+        - the dependencies of the contained scope are all contained in dependencies of
+          the containing scope
+
+        Therefore, the following are true:
+
+        .. code-block:: pycon
+
+            # self inclusion works
+            >>> Scope.deserialize("foo") in Scope.deserialize("foo")
+            # optional mismatches in either direction do not indicate containment
+            >>> Scope.deserialize("foo") not in Scope.deserialize("*foo")
+            >>> Scope.deserialize("*foo") not in Scope.deserialize("foo")
+            # dependencies have the expected meanings
+            >>> Scope.deserialize("foo") in Scope.deserialize("foo[bar]")
+            >>> Scope.deserialize("foo[bar]") not in Scope.deserialize("foo")
+            >>> Scope.deserialize("foo[bar]") in Scope.deserialize("foo[bar[baz]]")
+            # dependencies are not transitive and obey "optionalness" matching
+            >>> Scope.deserialize("foo[bar]") not in Scope.deserialize("foo[fizz[bar]]")
+            >>> Scope.deserialize("foo[bar]") not in Scope.deserialize("foo[*bar]")
+        """
+        # scopes can only contain other scopes
+        if not isinstance(other, Scope):
+            return False
+
+        # top-level scope must match
+        if self._scope_string != other._scope_string:
+            return False
+        # if both are optional, okay
+        # if neither is optional, okay
+        # but if only one is optional...
+        if self.optional != other.optional:
+            # ... then make sure it is 'other'
+            if self.optional:
+                return False
+
+        # dependencies must all be contained -- search for a contrary example
+        for other_dep in other.dependencies:
+            found_match = False
+            for dep in self.dependencies:
+                if other_dep in dep:
+                    found_match = True
+                    break
+            if not found_match:
+                return False
+
+        # all criteria were met -- True!
+        return True
+
     @staticmethod
     def scopes2str(obj: ScopeCollectionType) -> str:
         """

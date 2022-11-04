@@ -15,3 +15,9 @@
     ``Scope(...).add_dependency("*foo")`` can be used to add an optional
     dependency as a string, or equivalently
     ``Scope(...).add_dependency(Scope("foo", optional=True))``
+
+  * ``Scope``\s support containment checking (``Scope("foo") in Scope("bar")``),
+    which means that all of the consents for one scope are a strict subset of
+    the consents of another scope. Containment is therefore an indication that
+    the associated permissions of a token for a scope string are covered by
+    the set of permissions associated with another scope string.
