@@ -147,7 +147,7 @@ class ScopeBuilder:
         None => {}
         "my-str" => {"my-str": "my-str"}
         ["my-list"] => {"my-list": "my-list"}
-        {"my-dict-key": "my-dict-val"} => {"my-dict-key": "my-dict-val"}
+        ("my-tuple-key": "my-tuple-val") => {"my-tuple-key": "my-tuple-val"}
         """
         if items is None:
             return {}
