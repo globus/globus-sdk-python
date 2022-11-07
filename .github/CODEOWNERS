@@ -9,11 +9,9 @@
 * @aaschaer @ada-globus @derek-globus @kurtmckee @sirosen
 
 # Flows service
-/src/globus_sdk/services/flows/ @ada-globus @derek-globus @kurtmckee @sirosen
-/src/globus_sdk/_testing/data/flows/ @ada-globus @derek-globus @kurtmckee @sirosen
-/tests/functional/services/flows/ @ada-globus @derek-globus @kurtmckee @sirosen
+**/flows/ @ada-globus @derek-globus @kurtmckee @sirosen
+docs/services/flows.rst @ada-globus @derek-globus @kurtmckee @sirosen
 
 # Timer service
-/src/globus_sdk/services/timer/ @ada-globus @derek-globus @kurtmckee @sirosen
-/src/globus_sdk/_testing/data/timer/ @ada-globus @derek-globus @kurtmckee @sirosen
-/tests/functional/services/timer/ @ada-globus @derek-globus @kurtmckee @sirosen
+**/timer/ @ada-globus @derek-globus @kurtmckee @sirosen
+docs/services/timer.rst @ada-globus @derek-globus @kurtmckee @sirosen
