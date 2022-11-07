@@ -126,7 +126,7 @@ class ScopeBuilder:
         """
         return f"https://auth.globus.org/scopes/{self.resource_server}/{scope_name}"
 
-    def make_mutable(self, scope: str) -> Scope:
+    def make_mutable(self, scope: str, *, optional: bool = False) -> Scope:
         """
         For a given scope, create a Scope object.
 
@@ -150,8 +150,10 @@ class ScopeBuilder:
 
         :param scope: The name of the scope to convert to a Scope
         :type scope: str
+        :param optional: If true, the created Scope object will be marked optional
+        :type optional: bool
         """
-        return Scope(getattr(self, scope))
+        return Scope(getattr(self, scope), optional=optional)
 
     def __str__(self) -> str:
         return f"ScopeBuilder[{self.resource_server}]\n" + "\n".join(

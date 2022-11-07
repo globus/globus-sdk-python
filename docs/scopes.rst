@@ -165,10 +165,8 @@ scope builders:
     # create the scopes with make_mutable
     transfer_scope = TransferScopes.make_mutable("all")
     data_access_scope = GCSCollectionScopeBuilder(MAPPED_COLLECTION_ID).make_mutable(
-        "data_access"
+        "data_access", optional=True
     )
-    # set the data_access scope to be optional
-    data_access_scope.optional = True
     # add data_access as a dependency
     transfer_scope.add_dependency(data_access_scope)
 

@@ -21,3 +21,7 @@
     the consents of another scope. Containment is therefore an indication that
     the associated permissions of a token for a scope string are covered by
     the set of permissions associated with another scope string.
+
+  * ``ScopeBuilder.make_mutable`` now accepts a keyword argument ``optional``.
+    This allows, for example,
+    ``TransferScopes.make_mutable("all", optional=True)``
