@@ -16,11 +16,11 @@
     dependency as a string, or equivalently
     ``Scope(...).add_dependency(Scope("foo", optional=True))``
 
-  * ``Scope``\s support containment checking (``Scope("foo") in Scope("bar")``),
-    which means that all of the consents for one scope are a strict subset of
-    the consents of another scope. Containment is therefore an indication that
-    the associated permissions of a token for a scope string are covered by
-    the set of permissions associated with another scope string.
+  * ``Scope``\s support permission coverage checking with the ``in`` and
+    ``not in`` operators. ``scope1 in scope2`` means that a token issued for
+    ``scope2`` has all of the permissions of a token issued for ``scope1``. The
+    check therefore can be used to validate that an existing token has the
+    permissions associated with a prospective request.
 
   * ``ScopeBuilder.make_mutable`` now accepts a keyword argument ``optional``.
     This allows, for example,

@@ -198,6 +198,8 @@ Scope Reference
 
 .. autoclass:: Scope
     :members:
+    :special-members:
+    :exclude-members: __init__,__repr__,__weakref__,__str__
     :show-inheritance:
 
 ScopeBuilders

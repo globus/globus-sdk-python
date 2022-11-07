@@ -238,23 +238,28 @@ class Scope:
 
     def __contains__(self, other: t.Any) -> bool:
         """
-        scope1 in scope2 is defined as subtree matching.
+        ``in`` and ``not in`` are defined as permission coverage checks
 
-        A scope contains another scope if
+        ``scope1 in scope2`` means that a token scoped for
+        ``scope2`` has all of the permissions of a token scoped for ``scope1``.
+
+        A scope is covered by another scope if
+
         - the top level strings match
-        - the optional-ness matches OR only the contained scope is optional
-        - the dependencies of the contained scope are all contained in dependencies of
-          the containing scope
+        - the optional-ness matches OR only the covered scope is optional
+        - the dependencies of the covered scope are all covered by dependencies of
+          the covering scope
 
         Therefore, the following are true:
 
         .. code-block:: pycon
 
-            # self inclusion works
+            # self inclusion works, including when optional
             >>> Scope.deserialize("foo") in Scope.deserialize("foo")
-            # optional mismatches in either direction do not indicate containment
+            >>> Scope.deserialize("*foo") in Scope.deserialize("*foo")
+            # an optional scope is covered by a non-optional one, but not the reverse
             >>> Scope.deserialize("foo") not in Scope.deserialize("*foo")
-            >>> Scope.deserialize("*foo") not in Scope.deserialize("foo")
+            >>> Scope.deserialize("*foo") in Scope.deserialize("foo")
             # dependencies have the expected meanings
             >>> Scope.deserialize("foo") in Scope.deserialize("foo[bar]")
             >>> Scope.deserialize("foo[bar]") not in Scope.deserialize("foo")
@@ -270,22 +275,31 @@ class Scope:
         # top-level scope must match
         if self._scope_string != other._scope_string:
             return False
-        # if both are optional, okay
-        # if neither is optional, okay
-        # but if only one is optional...
-        if self.optional != other.optional:
-            # ... then make sure it is 'other'
-            if self.optional:
-                return False
+
+        # between self.optional and other.optional, there are four possibilities,
+        # of which three are acceptable and one is not
+        # both optional and neither optional are okay,
+        # 'self' being non-optional and 'other' being optional is okay
+        # the failing case is 'other in self' when 'self' is optional and 'other' is not
+        #
+        #    self.optional | other.optional | (other in self) is possible
+        #    --------------|----------------|----------------------------
+        #        true      |    true        |    true
+        #        false     |    false       |    true
+        #        false     |    true        |    true
+        #        true      |    false       |    false
+        #
+        # so only check for that one case
+        if self.optional and not other.optional:
+            return False
 
         # dependencies must all be contained -- search for a contrary example
         for other_dep in other.dependencies:
-            found_match = False
             for dep in self.dependencies:
                 if other_dep in dep:
-                    found_match = True
                     break
-            if not found_match:
+            # reminder: the else branch of a for-else means that the break was never hit
+            else:
                 return False
 
         # all criteria were met -- True!
