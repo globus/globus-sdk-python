@@ -147,7 +147,7 @@ class ScopeBuilder:
         None => {}
         "my-str" => {"my-str": "my-str"}
         ["my-list"] => {"my-list": "my-list"}
-        ("my-tuple-key": "my-tuple-val") => {"my-tuple-key": "my-tuple-val"}
+        ("my-tuple-key", "my-tuple-val") => {"my-tuple-key": "my-tuple-val"}
         """
         if items is None:
             return {}
@@ -316,7 +316,6 @@ AuthScopes = _AuthScopesBuilder(
 """Globus Auth scopes.
 
 .. listknownscopes:: globus_sdk.scopes.AuthScopes
-    add_scopes=openid,email,profile
     example_scope=view_identity_set
 """
 

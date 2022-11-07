@@ -117,14 +117,11 @@ class ListKnownScopes(AddContentDirective):
         sb_name = self.arguments[0]
         sb_basename = sb_name.split(".")[-1]
 
-        add_scopes = []
         example_scope = None
         for arg in self.arguments[1:]:
-            if arg.startswith("add_scopes="):
-                add_scopes = [x for x in arg.split("=")[1].split(",")]
             if arg.startswith("example_scope="):
                 example_scope = arg.split("=")[1]
-        known_scopes = add_scopes + _extract_known_scopes(sb_name)
+        known_scopes = _extract_known_scopes(sb_name)
         if example_scope is None:
             example_scope = known_scopes[0]
 
