@@ -173,53 +173,39 @@ def test_scope_parsing_rejects_optional_marker_followed_by_space():
         Scope.parse("* foo")  # not okay
 
 
-def test_scope_parsing_rejects_ending_in_optional_marker():
-    with pytest.raises(ScopeParseError):
-        Scope.parse("foo*")
-
-
 def test_scope_parsing_allows_empty_string():
     scopes = Scope.parse("")
     assert scopes == []
 
 
-def test_scope_parsing_does_not_allow_optional_marker_before_brackets():
+@pytest.mark.parametrize(
+    "scopestring",
+    [
+        # ending in '*'
+        "foo*",
+        # '*' followed by '[]'
+        "foo*[bar]",
+        "foo *[bar]",
+        "foo [bar*]",
+        # empty brackets
+        "foo[]",
+        # starting with open bracket
+        "[foo]",
+        # double brackets
+        "foo[[bar]]",
+        # unbalanced brackets
+        "foo[",
+        "foo[bar",
+        "foo[bar]]",
+        # space before brackets
+        "foo [bar]",
+        # missing space before next scope string after ']'
+        "foo[bar]baz",
+    ],
+)
+def test_scope_parsing_rejects_bad_inputs(scopestring):
     with pytest.raises(ScopeParseError):
-        Scope.parse("foo*[bar]")
-    with pytest.raises(ScopeParseError):
-        Scope.parse("foo *[bar]")
-    with pytest.raises(ScopeParseError):
-        Scope.parse("foo [bar*]")
-
-
-def test_scope_parsing_does_not_allow_ending_in_open_bracket():
-    with pytest.raises(ScopeParseError):
-        Scope.parse("foo[")
-
-
-def test_scope_parsing_does_not_allow_empty_brackets():
-    with pytest.raises(ScopeParseError):
-        Scope.parse("foo[]")
-
-
-def test_scope_parsing_does_not_allow_starting_with_open_bracket():
-    with pytest.raises(ScopeParseError):
-        Scope.parse("[foo]")
-
-
-def test_scope_parsing_does_not_allow_double_open_bracket():
-    with pytest.raises(ScopeParseError):
-        Scope.parse("foo[[bar]]")
-
-
-def test_scope_parsing_does_not_allow_unbalanced_brackets_closing():
-    with pytest.raises(ScopeParseError):
-        Scope.parse("foo[bar]]")
-
-
-def test_scope_parsing_does_not_allow_unbalanced_brackets_missing_close():
-    with pytest.raises(ScopeParseError):
-        Scope.parse("foo[bar")
+        Scope.parse(scopestring)
 
 
 def test_scope_deserialize_simple():

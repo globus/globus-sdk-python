@@ -43,24 +43,32 @@ class ParseToken:
 def _tokenize(scope_string: str) -> t.List[ParseToken]:
     tokens: t.List[ParseToken] = []
     current_token: t.List[str] = []
-    for c in scope_string:
+    for idx, c in enumerate(scope_string):
+        try:
+            peek: t.Optional[str] = scope_string[idx + 1]
+        except IndexError:
+            peek = None
+
         if c in "[]* ":
             if current_token:
                 tokens.append(
                     ParseToken("".join(current_token), ParseTokenType.scope_string)
                 )
                 current_token = []
+
             if c == "*":
+                if peek == " ":
+                    raise ScopeParseError("'*' must not be followed by a space")
                 tokens.append(ParseToken(c, ParseTokenType.opt_marker))
             elif c == "[":
                 tokens.append(ParseToken(c, ParseTokenType.lbracket))
             elif c == "]":
+                if peek is not None and peek not in (" ", "]"):
+                    raise ScopeParseError("']' may only be followed by a space or ']'")
                 tokens.append(ParseToken(c, ParseTokenType.rbracket))
             elif c == " ":
-                if tokens and tokens[-1].token_type == ParseTokenType.opt_marker:
-                    raise ScopeParseError(
-                        "optional marker must not be followed by a space"
-                    )
+                if peek == "[":
+                    raise ScopeParseError("'[' cannot have a preceding space")
             else:
                 raise NotImplementedError
         else:
