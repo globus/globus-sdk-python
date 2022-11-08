@@ -167,15 +167,31 @@ def test_flows_scopes_creation():
     )
 
 
-def test_scope_parsing_rejects_optional_marker_followed_by_space():
-    Scope.parse("*foo")  # okay
-    with pytest.raises(ScopeParseError):
-        Scope.parse("* foo")  # not okay
-
-
 def test_scope_parsing_allows_empty_string():
     scopes = Scope.parse("")
     assert scopes == []
+
+
+@pytest.mark.parametrize(
+    "scope_string1,scope_string2",
+    [
+        ("foo ", "foo"),
+        (" foo", "foo"),
+        ("foo[ bar]", "foo[bar]"),
+    ],
+)
+def test_scope_parsing_ignores_non_semantic_whitespace(scope_string1, scope_string2):
+    list1 = Scope.parse(scope_string1)
+    list2 = Scope.parse(scope_string2)
+    assert len(list1) == len(list2) == 1
+    s1, s2 = list1[0], list2[0]
+    # Scope.__eq__ is not defined, so equivalence checking is manual (and somewhat error
+    # prone) for now
+    assert s1._scope_string == s2._scope_string
+    assert s1.optional == s2.optional
+    for i in range(len(s1.dependencies)):
+        assert s1.dependencies[i]._scope_string == s2.dependencies[i]._scope_string
+        assert s1.dependencies[i].optional == s2.dependencies[i].optional
 
 
 @pytest.mark.parametrize(
@@ -183,20 +199,27 @@ def test_scope_parsing_allows_empty_string():
     [
         # ending in '*'
         "foo*",
-        # '*' followed by '[]'
+        "foo *",
+        # '*' followed by '[] '
         "foo*[bar]",
         "foo *[bar]",
         "foo [bar*]",
+        "foo * ",
+        "* foo",
         # empty brackets
         "foo[]",
         # starting with open bracket
         "[foo]",
         # double brackets
         "foo[[bar]]",
-        # unbalanced brackets
+        # unbalanced open brackets
         "foo[",
         "foo[bar",
+        # unbalanced close brackets
+        "foo]",
+        "foo bar]",
         "foo[bar]]",
+        "foo[bar] baz]",
         # space before brackets
         "foo [bar]",
         # missing space before next scope string after ']'
