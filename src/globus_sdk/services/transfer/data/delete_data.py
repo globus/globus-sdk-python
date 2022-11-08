@@ -41,6 +41,13 @@ class DeleteData(utils.PayloadWrapper):
     :param recursive: Recursively delete subdirectories on the target endpoint
       [default: ``False``]
     :type recursive: bool
+    :param ignore_missing: Ignore nonexistent files and directories instead of treating
+        them as errors. [default: ``False``]
+    :type ignore_missing: bool
+    :param interpret_globs: Enable expansion of ``\*?[]`` characters in the last
+        component of paths, unless they are escaped with a preceding backslash, ``\\``
+        [default: ``False``]
+    :type interpret_globs: bool
     :param deadline: An ISO-8601 timestamp (as a string) or a datetime object which
         defines a deadline for the deletion. At the deadline, even if the data deletion
         is not complete, the job will be canceled. We recommend ensuring that the
@@ -93,6 +100,8 @@ class DeleteData(utils.PayloadWrapper):
         label: t.Optional[str] = None,
         submission_id: t.Optional[UUIDLike] = None,
         recursive: bool = False,
+        ignore_missing: bool = False,
+        interpret_globs: bool = False,
         deadline: t.Optional[t.Union[str, datetime.datetime]] = None,
         skip_activation_check: t.Optional[bool] = None,
         notify_on_succeeded: bool = True,
@@ -121,6 +130,8 @@ class DeleteData(utils.PayloadWrapper):
         )
         self._set_optbools(
             recursive=recursive,
+            ignore_missing=ignore_missing,
+            interpret_globs=interpret_globs,
             skip_activation_check=skip_activation_check,
             notify_on_succeeded=notify_on_succeeded,
             notify_on_failed=notify_on_failed,

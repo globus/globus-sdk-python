@@ -149,7 +149,7 @@ def test_transfer_add_symlink_item():
     assert data["destination_path"] == dest_path
 
 
-def test_delete_init():
+def test_delete_init_with_client():
     """
     Verifies DeleteData field initialization
     """
@@ -163,31 +163,43 @@ def test_delete_init():
     assert len(ddata["DATA"]) == 0
 
 
-def test_delete_init_w_params():
-    tc = TransferClient()
-    load_response(tc.get_submission_id)
-    label = "label"
+@pytest.mark.parametrize(
+    "add_kwargs",
+    (
+        {"recursive": True},
+        {"ignore_missing": True},
+        {"interpret_globs": True},
+        {"label": "somelabel"},
+    ),
+)
+def test_delete_init_with_supported_parameters(add_kwargs):
+    ddata = DeleteData(endpoint=GO_EP1_ID, **add_kwargs)
+    for k, v in add_kwargs.items():
+        assert ddata[k] == v
+
+
+def test_delete_init_with_additional_fields():
     params = {"param1": "value1", "param2": "value2"}
-    ddata = DeleteData(
-        tc, GO_EP1_ID, label=label, recursive=True, additional_fields=params
-    )
-    assert ddata["label"] == label
-    assert ddata["recursive"]
-    for par in params:
-        assert ddata[par] == params[par]
+    ddata = DeleteData(endpoint=GO_EP1_ID, additional_fields=params)
+    assert ddata["param1"] == "value1"
+    assert ddata["param2"] == "value2"
 
 
-def test_delete_init_no_client():
-    ddata1 = DeleteData(None, GO_EP1_ID)
-    ddata2 = DeleteData(endpoint=GO_EP1_ID)
-    ddata3 = DeleteData(endpoint=GO_EP1_ID, transfer_client=None)
-
-    for ddata in (ddata1, ddata2, ddata3):
-        assert ddata["DATA_TYPE"] == "delete"
-        assert ddata["endpoint"] == GO_EP1_ID
-        assert "submission_id" not in ddata
-        assert "DATA" in ddata
-        assert len(ddata["DATA"]) == 0
+@pytest.mark.parametrize(
+    "args, kwargs",
+    (
+        ((None, GO_EP1_ID), {}),
+        ((), {"endpoint": GO_EP1_ID}),
+        ((), {"endpoint": GO_EP1_ID, "transfer_client": None}),
+    ),
+)
+def test_delete_init_no_client(args, kwargs):
+    ddata = DeleteData(*args, **kwargs)
+    assert ddata["DATA_TYPE"] == "delete"
+    assert ddata["endpoint"] == GO_EP1_ID
+    assert "submission_id" not in ddata
+    assert "DATA" in ddata
+    assert len(ddata["DATA"]) == 0
 
 
 @pytest.mark.parametrize(
