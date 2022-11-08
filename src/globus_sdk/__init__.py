@@ -42,6 +42,7 @@ _LAZY_IMPORT_TABLE = {
     "local_endpoint": {
         "GlobusConnectPersonalOwnerInfo",
         "LocalGlobusConnectPersonal",
+        "LocalGlobusConnectServer",
     },
     "response": {
         "GlobusHTTPResponse",
@@ -137,6 +138,7 @@ if t.TYPE_CHECKING or sys.version_info < (3, 7):
     from .exc import NetworkError
     from .local_endpoint import GlobusConnectPersonalOwnerInfo
     from .local_endpoint import LocalGlobusConnectPersonal
+    from .local_endpoint import LocalGlobusConnectServer
     from .response import GlobusHTTPResponse
     from .services.auth import AuthAPIError
     from .services.auth import AuthClient
@@ -276,6 +278,7 @@ __all__ = (
     "IterableFlowsResponse",
     "IterableTransferResponse",
     "LocalGlobusConnectPersonal",
+    "LocalGlobusConnectServer",
     "MappedCollectionDocument",
     "NativeAppAuthClient",
     "NetworkError",

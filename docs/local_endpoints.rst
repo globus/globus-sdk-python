@@ -14,8 +14,9 @@ users.
 Globus Connect Server
 ---------------------
 
-There are no SDK methods for accessing an installation of Globus Connect
-Server.
+.. autoclass:: LocalGlobusConnectServer
+   :members:
+   :member-order: bysource
 
 Globus Connect Personal
 -----------------------
