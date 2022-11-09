@@ -21,6 +21,13 @@ def test_info_dict_from_non_json_object_file_is_none(tmp_path):
     assert gcs.info_dict is None
 
 
+def test_info_dict_from_non_unicode_file_is_none(tmp_path):
+    info_path = tmp_path / "info.json"
+    info_path.write_bytes(b'{"foo":"{' + bytes.fromhex("1BAD DEC0DE") + b'}"}')
+    gcs = LocalGlobusConnectServer(info_path=info_path)
+    assert gcs.info_dict is None
+
+
 def test_info_dict_from_empty_json_file_is_okay_but_has_no_properties(tmp_path):
     info_path = tmp_path / "info.json"
     info_path.write_text("{}")

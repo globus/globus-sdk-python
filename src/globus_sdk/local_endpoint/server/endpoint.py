@@ -37,14 +37,14 @@ class LocalGlobusConnectServer:
         applications using the SDK may not be able to interact with Globus Connect
         Server on the container host.
 
-        :type: dict
+        :type: dict or None
         """
         if self._loaded_info is None:
             if self.info_path.is_file():
                 with open(self.info_path, encoding="utf-8") as fp:
                     try:
                         parsed_data = json.load(fp)
-                    except json.JSONDecodeError:
+                    except (UnicodeDecodeError, json.JSONDecodeError):
                         pass
                     else:
                         if isinstance(parsed_data, dict):
@@ -61,7 +61,7 @@ class LocalGlobusConnectServer:
         The endpoint ID of the local Globus Connect Server endpoint.
         None if the data cannot be loaded or is malformed.
 
-        :type: str
+        :type: str or None
         """
         if self.info_dict is not None:
             epid = self.info_dict.get("endpoint_id")
@@ -75,7 +75,7 @@ class LocalGlobusConnectServer:
         The domain name of the local Globus Connect Server endpoint.
         None if the data cannot be loaded or is malformed.
 
-        :type: str
+        :type: str or None
         """
         if self.info_dict is not None:
             domain = self.info_dict.get("domain_name")
