@@ -260,7 +260,7 @@ def test_scope_init_forbids_special_chars(scope_str):
 
 def test_scope_contains_requires_scope_objects():
     s = Scope("foo")
-    assert "foo" not in s
+    assert not s._contains("foo")
 
 
 @pytest.mark.parametrize(
@@ -292,10 +292,7 @@ def test_scope_contains_requires_scope_objects():
 def test_scope_contains_simple_cases(contained, containing, expect):
     outer_s = Scope.deserialize(containing)
     inner_s = Scope.deserialize(contained)
-    if expect:
-        assert inner_s in outer_s
-    else:
-        assert inner_s not in outer_s
+    assert outer_s._contains(inner_s) == expect
 
 
 @pytest.mark.parametrize(
@@ -357,7 +354,4 @@ def test_scope_contains_simple_cases(contained, containing, expect):
 def test_scope_contains_complex_usages(contained, containing, expect):
     outer_s = Scope.deserialize(containing)
     inner_s = Scope.deserialize(contained)
-    if expect:
-        assert inner_s in outer_s
-    else:
-        assert inner_s not in outer_s
+    assert outer_s._contains(inner_s) == expect

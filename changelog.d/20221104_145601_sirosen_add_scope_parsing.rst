@@ -16,12 +16,6 @@
     dependency as a string, or equivalently
     ``Scope(...).add_dependency(Scope("foo", optional=True))``
 
-  * ``Scope``\s support permission coverage checking with the ``in`` and
-    ``not in`` operators. ``scope1 in scope2`` means that a token issued for
-    ``scope2`` has all of the permissions of a token issued for ``scope1``. The
-    check therefore can be used to validate that an existing token has the
-    permissions associated with a prospective request.
-
   * ``ScopeBuilder.make_mutable`` now accepts a keyword argument ``optional``.
     This allows, for example,
     ``TransferScopes.make_mutable("all", optional=True)``

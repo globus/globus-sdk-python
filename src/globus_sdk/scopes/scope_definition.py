@@ -244,8 +244,16 @@ class Scope:
     def __str__(self) -> str:
         return self.serialize()
 
-    def __contains__(self, other: t.Any) -> bool:
+    def _contains(self, other: t.Any) -> bool:
         """
+        .. warning::
+
+            The ``_contains`` method is a non-authoritative convenience for comparing
+            parsed scopes. Although the essence and intent of the check is summarized
+            below, there is no guarantee that it correctly reflects the permissions of a
+            token or tokens. The structure of the data for a given consent in Globus
+            Auth is not perfectly reflected in the parse tree.
+
         ``in`` and ``not in`` are defined as permission coverage checks
 
         ``scope1 in scope2`` means that a token scoped for
@@ -262,19 +270,20 @@ class Scope:
 
         .. code-block:: pycon
 
+            >>> s = lambda x: Scope.deserialize(x)  # define this for brevity below
             # self inclusion works, including when optional
-            >>> Scope.deserialize("foo") in Scope.deserialize("foo")
-            >>> Scope.deserialize("*foo") in Scope.deserialize("*foo")
+            >>> s("foo")._contains(s("foo"))
+            >>> s("*foo")._contains(s("*foo"))
             # an optional scope is covered by a non-optional one, but not the reverse
-            >>> Scope.deserialize("foo") not in Scope.deserialize("*foo")
-            >>> Scope.deserialize("*foo") in Scope.deserialize("foo")
+            >>> not s("foo")._contains(s("*foo"))
+            >>> s("*foo")._contains(s("foo"))
             # dependencies have the expected meanings
-            >>> Scope.deserialize("foo") in Scope.deserialize("foo[bar]")
-            >>> Scope.deserialize("foo[bar]") not in Scope.deserialize("foo")
-            >>> Scope.deserialize("foo[bar]") in Scope.deserialize("foo[bar[baz]]")
+            >>> s("foo")._contains(s("foo[bar]"))
+            >>> not s("foo[bar]")._contains(s("foo"))
+            >>> s("foo[bar]")._contains(s("foo[bar[baz]]"))
             # dependencies are not transitive and obey "optionalness" matching
-            >>> Scope.deserialize("foo[bar]") not in Scope.deserialize("foo[fizz[bar]]")
-            >>> Scope.deserialize("foo[bar]") not in Scope.deserialize("foo[*bar]")
+            >>> not s("foo[bar]")._contains(s("foo[fizz[bar]]"))
+            >>> not s("foo[bar]")._contains(s("foo[*bar]"))
         """
         # scopes can only contain other scopes
         if not isinstance(other, Scope):
@@ -304,7 +313,7 @@ class Scope:
         # dependencies must all be contained -- search for a contrary example
         for other_dep in other.dependencies:
             for dep in self.dependencies:
-                if other_dep in dep:
+                if dep._contains(other_dep):
                     break
             # reminder: the else branch of a for-else means that the break was never hit
             else:

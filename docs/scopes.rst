@@ -186,20 +186,24 @@ method. Note that ``__str__`` for a ``Scope`` is just an alias for
 .. code-block:: pycon
 
     >>> from globus_sdk.scopes import Scope
-    >>> str(Scope("foo").add_dependency("bar").add_dependency("*baz"))
+    >>> foo = Scope("foo")
+    >>> bar = Scope("bar")
+    >>> bar.add_dependency("baz")
+    >>> foo.add_dependency(bar)
+    >>> print(str(Scope("foo")))
     foo[bar *baz]
-    >>> Scope("foo").add_dependency("bar").serialize()
-    foo[bar]
-    >>> repr(Scope("foo").add_dependency("*bar"))
-    Scope("foo", dependencies=[Scope("bar", optional=True)])
+    >>> print(bar.serialize())
+    bar[baz]
+    >>> alpha = Scope("alpha")
+    >>> alpha.add_dependency("*beta")
+    >>> print(repr(alpha))
+    Scope("alpha", dependencies=[Scope("beta", optional=True)])
 
 Scope Reference
 ~~~~~~~~~~~~~~~
 
 .. autoclass:: Scope
     :members:
-    :special-members:
-    :exclude-members: __init__,__repr__,__weakref__,__str__
     :show-inheritance:
 
 ScopeBuilders
