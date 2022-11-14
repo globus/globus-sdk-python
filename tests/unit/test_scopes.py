@@ -243,6 +243,23 @@ def test_scope_parsing_accepts_valid_inputs(scopestring):
     assert isinstance(scopes[0], Scope)
 
 
+@pytest.mark.parametrize("rs_name", (str(uuid.UUID(int=0)), "example.globus.org"))
+@pytest.mark.parametrize("scope_format", ("urn", "url"))
+def test_scope_parsing_can_consume_scopebuilder_results(rs_name, scope_format):
+    sb = ScopeBuilder(rs_name)
+    if scope_format == "urn":
+        scope_string = sb.urn_scope_string("foo")
+        expect_string = f"urn:globus:auth:scope:{rs_name}:foo"
+    elif scope_format == "url":
+        scope_string = sb.url_scope_string("foo")
+        expect_string = f"https://auth.globus.org/scopes/{rs_name}/foo"
+    else:
+        raise NotImplementedError
+
+    scope = Scope.deserialize(scope_string)
+    assert str(scope) == expect_string
+
+
 def test_scope_deserialize_simple():
     scope = Scope.deserialize("foo")
     assert str(scope) == "foo"

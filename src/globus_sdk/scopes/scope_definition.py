@@ -135,7 +135,7 @@ def _parse_tokens(tokens: t.List[ParseToken]) -> t.List["Scope"]:
 
 class Scope:
     """
-    A mutable scope is a representation of a scope which allows modifications to be
+    A scope object is a representation of a scope which allows modifications to be
     made. In particular, it supports handling scope dependencies via
     ``add_dependency``.
 
