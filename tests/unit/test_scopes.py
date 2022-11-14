@@ -231,6 +231,18 @@ def test_scope_parsing_rejects_bad_inputs(scopestring):
         Scope.parse(scopestring)
 
 
+@pytest.mark.parametrize(
+    "scopestring",
+    ("foo", "*foo", "foo[bar]", "foo[*bar]", "foo bar", "foo[bar[baz]]"),
+)
+def test_scope_parsing_accepts_valid_inputs(scopestring):
+    # test *only* that parsing does not error and returns a non-empty list of scopes
+    scopes = Scope.parse(scopestring)
+    assert isinstance(scopes, list)
+    assert len(scopes) > 0
+    assert isinstance(scopes[0], Scope)
+
+
 def test_scope_deserialize_simple():
     scope = Scope.deserialize("foo")
     assert str(scope) == "foo"
