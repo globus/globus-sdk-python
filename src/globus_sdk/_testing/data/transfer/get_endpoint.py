@@ -9,6 +9,7 @@ ENDPOINT_DOC = {
     "organization": "My Org",
     "username": "auser",
     "description": "Example gridftp endpoint.",
+    "entity_type": "GCSv4_host",
     "public": False,
     "french_english_bilingual": False,
     "is_globus_connect": False,
