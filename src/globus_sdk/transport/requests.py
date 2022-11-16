@@ -91,11 +91,11 @@ class RequestsTransport:
     DEFAULT_MAX_RETRIES = 5
 
     #: status codes for responses which may have a Retry-After header
-    RETRY_AFTER_STATUS_CODES = (429, 503)
+    RETRY_AFTER_STATUS_CODES: t.Tuple[int, ...] = (429, 503)
     #: status codes for error responses which should generally be retried
-    TRANSIENT_ERROR_STATUS_CODES = (429, 500, 502, 503, 504)
+    TRANSIENT_ERROR_STATUS_CODES: t.Tuple[int, ...] = (429, 500, 502, 503, 504)
     #: status codes indicating that authorization info was missing or expired
-    EXPIRED_AUTHORIZATION_STATUS_CODES = (401,)
+    EXPIRED_AUTHORIZATION_STATUS_CODES: t.Tuple[int, ...] = (401,)
 
     #: the encoders are a mapping of encoding names to encoder objects
     encoders: t.Dict[str, RequestEncoder] = {
