@@ -27,7 +27,7 @@ def _format_filter_value(x: t.Union[str, t.List[str]]) -> str:
     return ",".join(x)
 
 
-def _format_filter_item(x: t.Union[str, TransferFilterDict]):
+def _format_filter_item(x: t.Union[str, TransferFilterDict]) -> str:
     if isinstance(x, str):
         return x
     return "/".join(f"{k}:{_format_filter_value(v)}" for k, v in x.items())
