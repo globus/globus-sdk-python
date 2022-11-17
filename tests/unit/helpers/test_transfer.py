@@ -2,6 +2,7 @@ import pytest
 
 from globus_sdk import DeleteData, GlobusSDKUsageError, TransferClient, TransferData
 from globus_sdk._testing import load_response
+from globus_sdk.services.transfer.client import _format_filter
 from tests.common import GO_EP1_ID, GO_EP2_ID
 
 
@@ -369,3 +370,23 @@ def test_add_filter_rule():
     assert tdata["filter_rules"][1]["method"] == "exclude"
     assert tdata["filter_rules"][1]["name"] == "tmp"
     assert "type" not in tdata["filter_rules"][1]
+
+
+@pytest.mark.parametrize(
+    "filter,expected",
+    [
+        ("foo", "foo"),
+        ({"foo": "bar", "a": ["b", "c"]}, "foo:bar/a:b,c"),
+        (
+            [
+                "foo",
+                {
+                    "a": ["b", "c"],
+                },
+            ],
+            ["foo", "a:b,c"],
+        ),
+    ],
+)
+def test_ls_format_filter(filter, expected):
+    assert _format_filter(filter) == expected

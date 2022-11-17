@@ -27,10 +27,18 @@ def _format_filter_value(x: t.Union[str, t.List[str]]) -> str:
     return ",".join(x)
 
 
-def _format_filter(x: t.Union[str, TransferFilterDict]) -> str:
+def _format_filter_item(x: t.Union[str, TransferFilterDict]):
     if isinstance(x, str):
         return x
     return "/".join(f"{k}:{_format_filter_value(v)}" for k, v in x.items())
+
+
+def _format_filter(
+    x: t.Union[str, TransferFilterDict, t.List[t.Union[str, TransferFilterDict]]]
+) -> t.Union[str, t.List[str]]:
+    if isinstance(x, list):
+        return [_format_filter_item(y) for y in x]
+    return _format_filter_item(x)
 
 
 def _get_page_size(paged_result: IterableTransferResponse) -> int:
@@ -61,9 +69,12 @@ class TransferClient(client.BaseClient):
     **Filter Formatting**
 
     Several methods of ``TransferClient`` take a ``filter`` parameter which can be a
-    string or dict. When the filter given is a string, it is not modified. When it is a
-    dict, it is formatted according to the following rules.
+    string, dict, or list of strings/dicts. When the filter given is a string, it is
+    passed as a single unmodified param. When the filter given is a dict, it is
+    formatted according to the below rules into a single param. When the filter is a
+    list, each item of the list is parsed and passed as separate params.
 
+    dict parsing rules:
     - each (key, value) pair in the dict is a clause in the resulting filter string
     - clauses are each formatted to ``key:value``
     - when the value is a list, it is comma-separated, as in ``key:value1,value2``
@@ -1036,7 +1047,9 @@ class TransferClient(client.BaseClient):
         orderby: t.Optional[t.Union[str, t.List[str]]] = None,
         # note: filter is a soft keyword in python, so using this name is okay
         # pylint: disable=redefined-builtin
-        filter: t.Union[str, TransferFilterDict, None] = None,
+        filter: t.Union[
+            str, TransferFilterDict, t.List[t.Union[str, TransferFilterDict]], None
+        ] = None,
         query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         """
@@ -1056,6 +1069,7 @@ class TransferClient(client.BaseClient):
         :param filter: Only return file documents which match these filter clauses. For
             the filter syntax, see the **External Documentation** linked below. If a
             dict is supplied as the filter, it is formatted as a set of filter clauses.
+            If a list is supplied, it is passed as multiple params.
             See :ref:`filter formatting <transfer_filter_formatting>` for details.
         :type filter: str or dict, optional
         :param query_params: Additional passthrough query parameters
