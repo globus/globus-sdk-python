@@ -1425,7 +1425,7 @@ class TransferClient(client.BaseClient):
         if offset is not None:
             query_params["offset"] = offset
         if filter is not None:
-            query_params["filter"] = _format_filter(filter)
+            query_params["filter"] = _format_filter_item(filter)
         return IterableTransferResponse(
             self.get("task_list", query_params=query_params)
         )
