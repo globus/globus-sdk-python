@@ -1,6 +1,6 @@
 import typing as t
 
-from .scope_definition import Scope
+from .scope_definition import MutableScope
 
 ScopeBuilderScopes = t.Union[
     None, str, t.Tuple[str, str], t.List[t.Union[str, t.Tuple[str, str]]]
@@ -126,9 +126,9 @@ class ScopeBuilder:
         """
         return f"https://auth.globus.org/scopes/{self.resource_server}/{scope_name}"
 
-    def make_mutable(self, scope: str, *, optional: bool = False) -> Scope:
+    def make_mutable(self, scope: str, *, optional: bool = False) -> MutableScope:
         """
-        For a given scope, create a Scope object.
+        For a given scope, create a MutableScope object.
 
         The ``scope`` name given refers to the name of a scope attached to the
         ScopeBuilder. It is given by attribute name, not by the full scope string.
@@ -150,10 +150,11 @@ class ScopeBuilder:
 
         :param scope: The name of the scope to convert to a Scope
         :type scope: str
-        :param optional: If true, the created Scope object will be marked optional
+        :param optional: If true, the created MutableScope object will be marked
+            optional
         :type optional: bool
         """
-        return Scope(getattr(self, scope), optional=optional)
+        return MutableScope(getattr(self, scope), optional=optional)
 
     def __str__(self) -> str:
         return f"ScopeBuilder[{self.resource_server}]\n" + "\n".join(

@@ -2,7 +2,8 @@ import uuid
 
 import pytest
 
-from globus_sdk.scopes import FlowsScopes, Scope, ScopeBuilder, ScopeParseError
+from globus_sdk.scopes import FlowsScopes, MutableScope, ScopeBuilder
+from globus_sdk.scopes.scope_definition import Scope, ScopeParseError
 
 
 def test_url_scope_string():
@@ -79,29 +80,42 @@ def test_sb_allowed_inputs_types():
     assert list_sb.do_a_thing == scope_1_urn
 
 
-def test_scope_str_and_repr_simple():
-    s = Scope("simple")
+@pytest.mark.parametrize("scope_class", (Scope, MutableScope))
+def test_scope_str_and_repr_simple(scope_class):
+    classname = "Scope" if scope_class == Scope else "MutableScope"
+    s = scope_class("simple")
     assert str(s) == "simple"
-    assert repr(s) == "Scope('simple')"
+    assert repr(s) == f"{classname}('simple')"
 
 
-def test_scope_str_and_repr_optional():
-    s = Scope("simple", optional=True)
+@pytest.mark.parametrize("scope_class", (Scope, MutableScope))
+def test_scope_str_and_repr_optional(scope_class):
+    classname = "Scope" if scope_class == Scope else "MutableScope"
+    s = scope_class("simple", optional=True)
     assert str(s) == "*simple"
-    assert repr(s) == "Scope('simple', optional=True)"
+    assert repr(s) == f"{classname}('simple', optional=True)"
 
 
-def test_scope_str_and_repr_with_dependencies():
-    s = Scope("top")
+@pytest.mark.parametrize("scope_class", (Scope, MutableScope))
+def test_scope_str_and_repr_with_dependencies(scope_class):
+    classname = "Scope" if scope_class == Scope else "MutableScope"
+
+    s = scope_class("top")
     s.add_dependency("foo")
     assert str(s) == "top[foo]"
     s.add_dependency("bar")
     assert str(s) == "top[foo bar]"
-    assert repr(s) == "Scope('top', dependencies=[Scope('foo'), Scope('bar')])"
+    assert (
+        repr(s)
+        == f"{classname}('top', dependencies=[{classname}('foo'), {classname}('bar')])"
+    )
 
 
-def test_add_dependency_warns_on_optional_but_still_has_good_str_and_repr():
-    s = Scope("top")
+@pytest.mark.parametrize("scope_class", (Scope, MutableScope))
+def test_add_dependency_warns_on_optional_but_still_has_good_str_and_repr(scope_class):
+    classname = "Scope" if scope_class == Scope else "MutableScope"
+
+    s = scope_class("top")
     # this should warn, the use of `optional=...` rather than adding a Scope object
     # when optional dependencies are wanted is deprecated
     with pytest.warns(DeprecationWarning):
@@ -109,7 +123,10 @@ def test_add_dependency_warns_on_optional_but_still_has_good_str_and_repr():
 
     # confirm the str representation and repr for good measure
     assert str(s) == "top[*foo]"
-    assert repr(s) == "Scope('top', dependencies=[Scope('foo', optional=True)])"
+    assert (
+        repr(s)
+        == f"{classname}('top', dependencies=[{classname}('foo', optional=True)])"
+    )
 
 
 @pytest.mark.parametrize("optional_arg", (True, False))
@@ -282,9 +299,10 @@ def test_scope_deserialize_fails_on_multiple_top_level_scopes():
 
 
 @pytest.mark.parametrize("scope_str", ("*foo", "foo[bar]", "foo[", "foo]", "foo bar"))
-def test_scope_init_forbids_special_chars(scope_str):
+@pytest.mark.parametrize("scope_class", (Scope, MutableScope))
+def test_scope_init_forbids_special_chars(scope_str, scope_class):
     with pytest.raises(ValueError):
-        Scope(scope_str)
+        scope_class(scope_str)
 
 
 def test_scope_contains_requires_scope_objects():
