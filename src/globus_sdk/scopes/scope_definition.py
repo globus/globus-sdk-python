@@ -423,8 +423,8 @@ class MutableScope:
     @staticmethod
     def scopes2str(obj: ScopeCollectionType) -> str:
         """
-        Given a scope string, a collection of scope strings, a Scope object, a
-        collection of Scope objects, or a mixed collection of strings and
+        Given a scope string, a collection of scope strings, a MutableScope object, a
+        collection of MutableScope objects, or a mixed collection of strings and
         Scopes, convert to a string which can be used in a request.
         """
         return " ".join(_iter_scope_collection(obj))

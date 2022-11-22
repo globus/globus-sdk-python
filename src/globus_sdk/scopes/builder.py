@@ -148,7 +148,7 @@ class ScopeBuilder:
         >>> Scope(TransferScopes.all)
         Scope('urn:globus:auth:scope:transfer.api.globus.org:all')
 
-        :param scope: The name of the scope to convert to a Scope
+        :param scope: The name of the scope to convert to a MutableScope
         :type scope: str
         :param optional: If true, the created MutableScope object will be marked
             optional
