@@ -264,7 +264,7 @@ def test_iterable_response_using_iter_key():
 def test_can_iter_array_response(list_response):
     arr = ArrayResponse(list_response.r)
     # sorted/reversed are just example stdlib functions which use iter
-    assert list(sorted(arr)) == list(sorted(list_response.data))
+    assert sorted(arr) == sorted(list_response.data)
     assert list(reversed(arr)) == list(reversed(list_response.data))
 
 

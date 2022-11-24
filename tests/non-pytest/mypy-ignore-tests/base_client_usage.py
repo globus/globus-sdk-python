@@ -14,4 +14,4 @@ i = c.resource_server  # type: ignore [assignment]
 # check that data:list warns, but other types are okay
 r = c.request("POST", "/foo", data="bar")
 r = c.request("POST", "/foo", data={})
-r = c.request("POST", "/foo", data=list())  # type: ignore [arg-type]
+r = c.request("POST", "/foo", data=[])  # type: ignore [arg-type]

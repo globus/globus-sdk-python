@@ -91,7 +91,7 @@ class AutoMethodList(AddContentDirective):
         include_methods = []
         for arg in self.arguments[1:]:
             if arg.startswith("include_methods="):
-                include_methods = [x for x in arg.split("=")[1].split(",")]
+                include_methods = arg.split("=")[1].split(",")
 
         yield ""
         yield "**Methods**"
