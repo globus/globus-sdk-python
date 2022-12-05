@@ -1,2 +1,2 @@
 
-* AuthorizationParamaterInfo now exposes session_required_policy (:pr:`NUMBER`)
+* AuthorizationParamaterInfo now exposes session_required_policies (:pr:`NUMBER`)
