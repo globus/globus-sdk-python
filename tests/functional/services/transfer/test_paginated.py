@@ -84,7 +84,7 @@ def _mk_task_doc(idx):
     }
 
 
-MULTIPAGE_TASK_LIST_RESULTS = [
+MULTIPAGE_OFFSET_TASK_LIST_RESULTS = [
     {
         "DATA_TYPE": "task_list",
         "offset": 0,
@@ -97,6 +97,24 @@ MULTIPAGE_TASK_LIST_RESULTS = [
         "offset": 100,
         "limit": 200,
         "total": 200,
+        "DATA": [_mk_task_doc(x) for x in range(100, 200)],
+    },
+]
+
+
+MULTIPAGE_LASTKEY_TASK_LIST_RESULTS = [
+    {
+        "DATA_TYPE": "task_list",
+        "last_key": "abc",
+        "limit": 100,
+        "has_next_page": True,
+        "DATA": [_mk_task_doc(x) for x in range(100)],
+    },
+    {
+        "DATA_TYPE": "task_list",
+        "last_key": "def",
+        "limit": 100,
+        "has_next_page": False,
         "DATA": [_mk_task_doc(x) for x in range(100, 200)],
     },
 ]
@@ -125,7 +143,8 @@ def test_endpoint_search_one_page(client):
     "api_methodname,paged_data",
     [
         ("endpoint_search", MULTIPAGE_SEARCH_RESULTS),
-        ("task_list", MULTIPAGE_TASK_LIST_RESULTS),
+        ("task_list", MULTIPAGE_OFFSET_TASK_LIST_RESULTS),
+        ("endpoint_manager_task_list", MULTIPAGE_LASTKEY_TASK_LIST_RESULTS),
     ],
 )
 def test_paginated_method_multipage(client, method, api_methodname, paged_data):
@@ -140,6 +159,13 @@ def test_paginated_method_multipage(client, method, api_methodname, paged_data):
         route = "/task_list"
         client_method = client.task_list
         paginated_method = client.paginated.task_list
+        call_args = ()
+        wrapper_type = "task_list"
+        data_type = "task"
+    elif api_methodname == "endpoint_manager_task_list":
+        route = "/endpoint_manager/task_list"
+        client_method = client.endpoint_manager_task_list
+        paginated_method = client.paginated.endpoint_manager_task_list
         call_args = ()
         wrapper_type = "task_list"
         data_type = "task"

@@ -1873,6 +1873,7 @@ class TransferClient(client.BaseClient):
         filter_completion_time: t.Union[None, str, t.Tuple[DateLike, DateLike]] = None,
         filter_min_faults: t.Optional[int] = None,
         filter_local_user: t.Optional[str] = None,
+        last_key: t.Optional[str] = None,
         query_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> IterableTransferResponse:
         r"""
@@ -1940,6 +1941,8 @@ class TransferClient(client.BaseClient):
             from the endpoint, and match the values of ``filter_endpoint`` and
             ``filter_local_user`` on the source or on the destination.
         :type filter_local_user: str, optional
+        :param last_key: the last key, for paging
+        :type last_key: str, optional
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
@@ -1997,6 +2000,8 @@ class TransferClient(client.BaseClient):
             query_params["filter_min_faults"] = filter_min_faults
         if filter_local_user is not None:
             query_params["filter_local_user"] = filter_local_user
+        if last_key is not None:
+            query_params["last_key"] = last_key
         return IterableTransferResponse(
             self.get("endpoint_manager/task_list", query_params=query_params)
         )
