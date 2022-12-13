@@ -38,7 +38,8 @@ class GCSClient(client.BaseClient):
     <https://docs.globus.org/globus-connect-server/v5/api/>`_.
 
     Unlike other client types, this must be provided with an address for the GCS
-    Manager. All other arguments are the same as those for `~globus_sdk.BaseClient`.
+    Manager. All other arguments are the same as those for
+    :class:`~globus_sdk.BaseClient`.
 
     :param gcs_address: The FQDN (DNS name) or HTTPS URL for the GCS Manager API.
     :type gcs_address: str
