@@ -18,7 +18,7 @@ import globus_sdk
 
 PYTHON_BINARY = os.environ.get("GLOBUS_TEST_PY", sys.executable)
 
-MODULE_NAMES = frozenset(globus_sdk._LAZY_IMPORT_TABLE.keys())
+MODULE_NAMES = sorted(globus_sdk._LAZY_IMPORT_TABLE.keys())
 
 
 @pytest.mark.parametrize(
