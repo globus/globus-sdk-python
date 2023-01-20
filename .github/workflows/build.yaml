@@ -52,7 +52,7 @@ jobs:
       - name: install tox
         run: python -m pip install -U tox
       - name: run tests
-        run: python -m tox -e py,cov-combine,cov-report
+        run: python -m tox -e py,coverage_report
 
   test-lazy-imports:
     runs-on: ubuntu-latest
