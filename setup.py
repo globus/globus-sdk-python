@@ -17,7 +17,7 @@ TEST_REQUIREMENTS = [
     # on py3.6, use the last version to support 3.6
     'responses==0.17.0; python_version<"3.7"',
     # on py3.7+, use the latest version
-    'responses==0.21.0; python_version>="3.7"',
+    'responses==0.22.0; python_version>="3.7"',
 ]
 DOC_REQUIREMENTS = [
     "sphinx<5",
