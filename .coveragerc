@@ -9,11 +9,11 @@ omit =
     **/globus_sdk/_generate_init.py
 
 [paths]
-# path remapping specifies that any installation of
-# the SDK into a tox environment should be treated equivalently to src/
+# path remapping specifies that any installation of a package in a
+# site-packages directory (e.g. in tox) should be treated equivalently to src/
 source =
-    src/globus_sdk/
-    .tox/**/site-packages/globus_sdk/
+    src/
+    */site-packages/
 
 [report]
 show_missing = True
