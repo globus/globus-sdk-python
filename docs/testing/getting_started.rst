@@ -1,14 +1,12 @@
-Welcome to ``globus_sdk._testing``
-==================================
-
 .. warning::
 
-    Use at your own risk! This subpackage is highly experimental. It may
-    feature breaking changes to the data and the interfaces without prior
-    notice.
+    This component is an *alpha*. Interfaces may change outside of the
+    normal semver policy.
 
-This is an experimental internal module offered by the Globus SDK to share
-API fixtures for use with the ``responses`` library.
+Getting Started with _testing
+=============================
+
+:ref:`Back to _testing root <testing_root>`.
 
 Dependencies
 ------------
@@ -33,48 +31,6 @@ guaranteeing that requests are sent to the production hostnames:
         yield
         responses.stop()
         responses.reset()
-
-Methods and Classes
--------------------
-
-Users of ``globus_sdk._testing`` have the following methods and classes
-available:
-
-``get_last_request``
-    Get the last request which was received, or None if there were no requests.
-
-``ResponseSet``
-    A collection of mock responses, potentially all meant to be activated together
-    (``.activate_all()``), or to be individually selected as options/alternatives
-    (``.activate("case_foo")``).
-
-``RegisteredResponse``
-    A mock response along with descriptive metadata to let a fixture "pass data
-    forward" to the consuming test cases. (e.g. a ``GET Task`` fixture which
-    shares the ``task_id`` it uses with consumers via ``.metadata["task_id"]``)
-
-``ResponseList``
-    A series of mock responses which *must* be activated together in a single
-    step. This can be stored in a ``ResponseSet`` as a case, describing a set
-    of responses registered to a specific name.
-
-``load_response_set``
-    Optionally lookup a response set and activate all of its responses. If
-    passed a ``ResponseSet``, activate it, otherwise the first argument is an
-    ID used for lookup.
-
-``load_response``
-    Optionally lookup and activate an individual response. If given a
-    ``RegisteredResponse``, activate it, otherwise the first argument is an ID
-    of a ``ResponseSet`` used for lookup. By default, looks for the response
-    registered under ``case="default"``.
-
-``get_response_set``
-    Lookup a ``ResponseSet`` as in ``load_response_set``, but without
-    activating it.
-
-``register_response_set``
-    Register a new ``ResponseSet`` object.
 
 Usage
 -----

@@ -6,6 +6,12 @@ from ..utils import slash_join
 
 
 class RegisteredResponse:
+    """
+    A mock response along with descriptive metadata to let a fixture "pass data
+    forward" to the consuming test cases. (e.g. a ``GET Task`` fixture which
+    shares the ``task_id`` it uses with consumers via ``.metadata["task_id"]``)
+    """
+
     _url_map = {
         "auth": "https://auth.globus.org/",
         "nexus": "https://nexus.api.globusonline.org/",
@@ -84,6 +90,9 @@ class ResponseList:
     """
     A series of unnamed responses, meant to be used and referred to as a single case
     within a ResponseSet.
+
+    This can be stored in a ``ResponseSet`` as a case, describing a series
+    of responses registered to a specific name (e.g. to describe a paginated API).
     """
 
     def __init__(
@@ -115,9 +124,12 @@ class ResponseList:
 
 class ResponseSet:
     """
-    A collection of responses. On init, this implicitly sets the parent of
-    any response objects to this response set. On register() it does not do
-    so automatically.
+    A collection of mock responses, potentially all meant to be activated together
+    (``.activate_all()``), or to be individually selected as options/alternatives
+    (``.activate("case_foo")``).
+
+    On init, this implicitly sets the parent of any response objects to this response
+    set. On register() it does not do so automatically.
     """
 
     def __init__(

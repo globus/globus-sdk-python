@@ -15,6 +15,19 @@ def register_response_set(
     rset: t.Union[ResponseSet, t.Dict[str, t.Dict[str, t.Any]]],
     metadata: t.Optional[t.Dict[str, t.Any]] = None,
 ) -> ResponseSet:
+    """
+    Register a new ``ResponseSet`` object.
+
+    The response set may be specified as a dict or a ResponseSet object.
+
+    :param set_id: The ID used to retrieve the response set later
+    :type set_id: any
+    :param rset: The response set to register
+    :type rset: dict or ResponseSet
+    :param metadata: Metadata dict to assign to the response set when it is specified
+        as a dict. If the response set is an object, this argument is ignored.
+    :type metadata: dict, optional
+    """
     if isinstance(rset, dict):
         rset = ResponseSet.from_dict(rset, metadata=metadata)
     _RESPONSE_SET_REGISTRY[set_id] = rset
@@ -45,6 +58,10 @@ def _resolve_qualname(name: str) -> str:
 
 
 def get_response_set(set_id: t.Any) -> ResponseSet:
+    """
+    Lookup a ``ResponseSet`` as in ``load_response_set``, but without
+    activating it.
+    """
     # first priority: check the explicit registry
     if set_id in _RESPONSE_SET_REGISTRY:
         return _RESPONSE_SET_REGISTRY[set_id]
@@ -76,6 +93,11 @@ def get_response_set(set_id: t.Any) -> ResponseSet:
 def load_response_set(
     set_id: t.Any, *, requests_mock: t.Optional[responses.RequestsMock] = None
 ) -> ResponseSet:
+    """
+    Optionally lookup a response set and activate all of its responses. If
+    passed a ``ResponseSet``, activate it, otherwise the first argument is an
+    ID used for lookup.
+    """
     if isinstance(set_id, ResponseSet):
         return set_id.activate_all(requests_mock=requests_mock)
     ret = get_response_set(set_id)
@@ -89,6 +111,12 @@ def load_response(
     case: str = "default",
     requests_mock: t.Optional[responses.RequestsMock] = None,
 ) -> t.Union[RegisteredResponse, ResponseList]:
+    """
+    Optionally lookup and activate an individual response. If given a
+    ``RegisteredResponse``, activate it, otherwise the first argument is an ID
+    of a ``ResponseSet`` used for lookup. By default, looks for the response
+    registered under ``case="default"``.
+    """
     if isinstance(set_id, RegisteredResponse):
         return set_id.add(requests_mock=requests_mock)
     rset = get_response_set(set_id)
