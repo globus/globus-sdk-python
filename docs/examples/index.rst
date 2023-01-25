@@ -6,7 +6,7 @@ Globus SDK Examples
 Each of these pages contains an example of a piece of SDK functionality.
 
 .. toctree::
-   minimal_transfer_script
+   minimal_transfer_script/index
    group_listing
    authorization
    native_app
