@@ -4,7 +4,7 @@ import typing as t
 from globus_sdk import utils
 from globus_sdk._types import UUIDLike
 
-from ._common import ensure_datatype
+from ._common import DatatypeCallback, ensure_datatype
 
 
 class StorageGatewayDocument(utils.PayloadWrapper):
@@ -65,6 +65,7 @@ class StorageGatewayDocument(utils.PayloadWrapper):
     DATATYPE_VERSION_IMPLICATIONS: t.Dict[str, t.Tuple[int, int, int]] = {
         "require_mfa": (1, 1, 0),
     }
+    DATATYPE_VERSION_CALLBACKS: t.Tuple[DatatypeCallback, ...] = ()
 
     def __init__(
         self,

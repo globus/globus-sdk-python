@@ -7,14 +7,23 @@ else:
     from typing import Protocol
 
 
+VersionTuple = t.Tuple[int, int, int]
+
+DatatypeCallback = t.Callable[["DocumentWithInducedDatatype"], t.Optional[VersionTuple]]
+
+
 class DocumentWithInducedDatatype(Protocol):
     DATATYPE_BASE: str
-    DATATYPE_VERSION_IMPLICATIONS: t.Dict[str, t.Tuple[int, int, int]]
+    DATATYPE_VERSION_IMPLICATIONS: t.Dict[str, VersionTuple]
+    DATATYPE_VERSION_CALLBACKS: t.Tuple[DatatypeCallback, ...]
 
     def __contains__(self, key: str) -> bool:  # pragma: no cover
         ...
 
     def __setitem__(self, key: str, value: t.Any) -> None:  # pragma: no cover
+        ...
+
+    def __getitem__(self, key: str) -> t.Any:  # pragma: no cover
         ...
 
 
@@ -25,6 +34,10 @@ def deduce_datatype_version(obj: DocumentWithInducedDatatype) -> str:
             continue
         if version > max_deduced_version:
             max_deduced_version = version
+    for callback in obj.DATATYPE_VERSION_CALLBACKS:
+        opt_version = callback(obj)
+        if opt_version is not None and opt_version > max_deduced_version:
+            max_deduced_version = opt_version
     return ".".join(str(x) for x in max_deduced_version)
 
 

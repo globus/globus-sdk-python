@@ -43,6 +43,8 @@ def test_collection_type_field():
         ({"user_message": ""}, "1.1.0"),
         ({"enable_https": True}, "1.1.0"),
         ({"enable_https": False}, "1.1.0"),
+        # a string of length > 64
+        ({"user_message": "long message..." + "x" * 100}, "1.7.0"),
     ],
 )
 def test_datatype_version_deduction(use_kwargs, doc_version):
@@ -63,6 +65,7 @@ def test_datatype_version_deduction(use_kwargs, doc_version):
         ({"force_verify": False}, "1.4.0"),
         ({"disable_anonymous_writes": True}, "1.5.0"),
         ({"disable_anonymous_writes": False}, "1.5.0"),
+        ({"guest_auth_policy_id": str(uuid.uuid4())}, "1.6.0"),
     ],
 )
 def test_datatype_version_deduction_mapped_specific_fields(use_kwargs, doc_version):

@@ -4,7 +4,12 @@ import typing as t
 from globus_sdk import utils
 from globus_sdk._types import UUIDLike
 
-from ._common import ensure_datatype
+from ._common import (
+    DatatypeCallback,
+    DocumentWithInducedDatatype,
+    VersionTuple,
+    ensure_datatype,
+)
 
 #
 # NOTE -- on the organization of arguments in this module --
@@ -35,6 +40,18 @@ from ._common import ensure_datatype
 # definition lists for param docs and arguments against usage sites to ensure that all
 # arguments which are passed are actually used
 #
+
+
+def _user_message_length_callback(
+    obj: DocumentWithInducedDatatype,
+) -> t.Optional[VersionTuple]:
+    if (
+        "user_message" in obj
+        and isinstance(obj["user_message"], str)
+        and len(obj["user_message"]) > 64
+    ):
+        return (1, 7, 0)
+    return None
 
 
 class CollectionDocument(utils.PayloadWrapper, abc.ABC):
@@ -107,6 +124,7 @@ class CollectionDocument(utils.PayloadWrapper, abc.ABC):
 
     DATATYPE_BASE: str = "collection"
     DATATYPE_VERSION_IMPLICATIONS: t.Dict[str, t.Tuple[int, int, int]] = {
+        "guest_auth_policy_id": (1, 6, 0),
         "disable_anonymous_writes": (1, 5, 0),
         "force_verify": (1, 4, 0),
         "sharing_users_allow": (1, 2, 0),
@@ -115,6 +133,9 @@ class CollectionDocument(utils.PayloadWrapper, abc.ABC):
         "user_message": (1, 1, 0),
         "user_message_link": (1, 1, 0),
     }
+    DATATYPE_VERSION_CALLBACKS: t.Tuple[DatatypeCallback, ...] = (
+        _user_message_length_callback,
+    )
 
     def __init__(
         self,
@@ -202,6 +223,9 @@ class MappedCollectionDocument(CollectionDocument):
 
     :param domain_name: DNS name of the virtual host serving this collection
     :type domain_name: str, optional
+    :param guest_auth_policy_id: Globus Auth policy ID to set on a mapped collection
+        which is then inherited by its guest collections.
+    :type guest_auth_policy_id: UUID or str, optional
 
     :param sharing_users_allow: Connector-specific usernames allowed to create guest
         collections
@@ -257,9 +281,10 @@ class MappedCollectionDocument(CollectionDocument):
         public: t.Optional[bool] = None,
         # > common args end <
         # > specific args start <
-        storage_gateway_id: t.Optional[UUIDLike] = None,
         # strs
         domain_name: t.Optional[str] = None,
+        guest_auth_policy_id: t.Optional[UUIDLike] = None,
+        storage_gateway_id: t.Optional[UUIDLike] = None,
         # str lists
         sharing_users_allow: t.Optional[t.Iterable[str]] = None,
         sharing_users_deny: t.Optional[t.Iterable[str]] = None,
@@ -301,8 +326,9 @@ class MappedCollectionDocument(CollectionDocument):
             additional_fields=additional_fields,
         )
         self._set_optstrs(
-            storage_gateway_id=storage_gateway_id,
             domain_name=domain_name,
+            guest_auth_policy_id=guest_auth_policy_id,
+            storage_gateway_id=storage_gateway_id,
         )
         self._set_optstrlists(
             sharing_users_allow=sharing_users_allow,
