@@ -2,6 +2,7 @@ import logging
 import typing as t
 
 from globus_sdk import exc, utils
+from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import NullAuthorizer
 
 from ..flow_managers import GlobusNativeAppFlowManager
@@ -28,7 +29,7 @@ class NativeAppAuthClient(AuthClient):
     .. automethodlist:: globus_sdk.NativeAppAuthClient
     """
 
-    def __init__(self, client_id: str, **kwargs: t.Any) -> None:
+    def __init__(self, client_id: UUIDLike, **kwargs: t.Any) -> None:
         if "authorizer" in kwargs:
             log.error("ArgumentError(NativeAppClient.authorizer)")
             raise exc.GlobusSDKUsageError(

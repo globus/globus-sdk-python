@@ -2,6 +2,7 @@ import logging
 import typing as t
 
 from globus_sdk import exc, utils
+from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import BasicAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
 
@@ -33,7 +34,7 @@ class ConfidentialAppAuthClient(AuthClient):
     .. automethodlist:: globus_sdk.ConfidentialAppAuthClient
     """
 
-    def __init__(self, client_id: str, client_secret: str, **kwargs: t.Any):
+    def __init__(self, client_id: UUIDLike, client_secret: str, **kwargs: t.Any):
         if "authorizer" in kwargs:
             log.error("ArgumentError(ConfidentialAppClient.authorizer)")
             raise exc.GlobusSDKUsageError(
@@ -41,7 +42,7 @@ class ConfidentialAppAuthClient(AuthClient):
             )
         super().__init__(
             client_id=client_id,
-            authorizer=BasicAuthorizer(client_id, client_secret),
+            authorizer=BasicAuthorizer(str(client_id), client_secret),
             **kwargs,
         )
         log.info(f"Finished initializing client, client_id={client_id}")

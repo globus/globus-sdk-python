@@ -66,9 +66,11 @@ class AuthClient(client.BaseClient):
     error_class = AuthAPIError
     scopes = AuthScopes
 
-    def __init__(self, client_id: t.Optional[str] = None, **kwargs: t.Any) -> None:
+    def __init__(self, client_id: t.Optional[UUIDLike] = None, **kwargs: t.Any) -> None:
         super().__init__(**kwargs)
-        self.client_id = client_id
+        self.client_id: t.Optional[str] = (
+            str(client_id) if client_id is not None else None
+        )
         # an AuthClient may contain a GlobusOAuth2FlowManager in order to
         # encapsulate the functionality of various different types of flow
         # managers
