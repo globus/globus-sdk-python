@@ -149,7 +149,7 @@ class ResponseSet:
         try:
             return self._data[case]
         except KeyError as e:
-            raise Exception("did not find a matching registered response") from e
+            raise LookupError("did not find a matching registered response") from e
 
     def __bool__(self) -> bool:
         return bool(self._data)
