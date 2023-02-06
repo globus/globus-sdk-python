@@ -176,7 +176,6 @@ class OAuthTokenResponse(GlobusHTTPResponse):
         jwk: t.Optional[RSAPublicKey] = None,
         jwt_params: t.Optional[t.Dict[str, t.Any]] = None,
     ) -> t.Dict[str, t.Any]:
-
         """
         Parse the included ID Token (OIDC) as a dict and return it.
 

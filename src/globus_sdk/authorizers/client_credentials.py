@@ -68,7 +68,6 @@ class ClientCredentialsAuthorizer(RenewingAuthorizer):
         expires_at: t.Optional[int] = None,
         on_refresh: t.Optional[t.Callable[["OAuthTokenResponse"], t.Any]] = None,
     ):
-
         # values for _get_token_data
         self.confidential_client = confidential_client
         self.scopes = MutableScope.scopes2str(scopes)
