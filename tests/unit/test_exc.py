@@ -323,7 +323,7 @@ def test_consent_required_info():
     assert str(err.info.consent_required) == "ConsentRequiredInfo(:)"
 
 
-def test_authz_params_info():
+def test_authz_params_info_containing_session_message():
     res = _mk_json_response(
         {"authorization_parameters": {"session_message": "foo"}}, 401
     )
@@ -345,6 +345,8 @@ def test_authz_params_info():
         ")",
     )
 
+
+def test_authz_params_info_containing_session_required_identities():
     res = _mk_json_response(
         {"authorization_parameters": {"session_required_identities": ["foo", "bar"]}},
         401,
@@ -370,6 +372,8 @@ def test_authz_params_info():
         ")",
     )
 
+
+def test_authz_params_info_containing_session_required_single_domain():
     res = _mk_json_response(
         {
             "authorization_parameters": {
@@ -399,6 +403,8 @@ def test_authz_params_info():
         ")",
     )
 
+
+def test_authz_params_info_containing_session_required_policies():
     res = _mk_json_response(
         {"authorization_parameters": {"session_required_policies": "foo,bar"}}, 401
     )
@@ -407,7 +413,7 @@ def test_authz_params_info():
     assert err.info.authorization_parameters.session_message is None
     assert err.info.authorization_parameters.session_required_identities is None
     assert err.info.authorization_parameters.session_required_single_domain is None
-    assert err.info.authorization_parameters.session_required_policies == "foo,bar"
+    assert err.info.authorization_parameters.session_required_policies == ["foo", "bar"]
     _strmatch_any_order(
         str(err.info.authorization_parameters),
         "AuthorizationParameterInfo(",
@@ -415,7 +421,29 @@ def test_authz_params_info():
             "session_message=None",
             "session_required_identities=None",
             "session_required_single_domain=None",
-            "session_required_policies=foo,bar",
+            "session_required_policies=['foo', 'bar']",
+        ],
+        ")",
+    )
+
+
+def test_authz_params_info_containing_malformed_session_required_policies():
+    # confirm that if `session_required_policies` is not a string,
+    # it will parse as `None`
+    res = _mk_json_response(
+        {"authorization_parameters": {"session_required_policies": ["foo"]}}, 401
+    )
+    err = exc.GlobusAPIError(res.r)
+    assert bool(err.info.authorization_parameters) is True
+    assert err.info.authorization_parameters.session_required_policies is None
+    _strmatch_any_order(
+        str(err.info.authorization_parameters),
+        "AuthorizationParameterInfo(",
+        [
+            "session_message=None",
+            "session_required_identities=None",
+            "session_required_single_domain=None",
+            "session_required_policies=None",
         ],
         ")",
     )
