@@ -46,6 +46,8 @@ _LAZY_IMPORT_TABLE = {
     },
     "response": {
         "GlobusHTTPResponse",
+        "IterableResponse",
+        "ArrayResponse",
     },
     "services.auth": {
         "AuthAPIError",
@@ -140,6 +142,8 @@ if t.TYPE_CHECKING or sys.version_info < (3, 7):
     from .local_endpoint import LocalGlobusConnectPersonal
     from .local_endpoint import LocalGlobusConnectServer
     from .response import GlobusHTTPResponse
+    from .response import IterableResponse
+    from .response import ArrayResponse
     from .services.auth import AuthAPIError
     from .services.auth import AuthClient
     from .services.auth import ConfidentialAppAuthClient
@@ -233,6 +237,7 @@ __all__ = (
     "AccessTokenAuthorizer",
     "ActivationRequirementsResponse",
     "ActiveScaleStoragePolicies",
+    "ArrayResponse",
     "AuthAPIError",
     "AuthClient",
     "AzureBlobStoragePolicies",
@@ -276,6 +281,7 @@ __all__ = (
     "IdentityMap",
     "IrodsStoragePolicies",
     "IterableFlowsResponse",
+    "IterableResponse",
     "IterableTransferResponse",
     "LocalGlobusConnectPersonal",
     "LocalGlobusConnectServer",

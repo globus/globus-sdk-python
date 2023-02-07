@@ -201,7 +201,12 @@ class IterableResponse(GlobusHTTPResponse):
         super().__init__(response, client)
 
     def __iter__(self) -> t.Iterator[t.Mapping[t.Any, t.Any]]:
-        return iter(t.cast(t.Mapping[t.Any, t.Any], self)[self.iter_key])
+        if not isinstance(self.data, dict):
+            raise TypeError(
+                "Cannot iterate on IterableResponse data when "
+                f"type is '{type(self.data).__name__}'"
+            )
+        return iter(self.data[self.iter_key])
 
 
 class ArrayResponse(GlobusHTTPResponse):
@@ -209,7 +214,12 @@ class ArrayResponse(GlobusHTTPResponse):
     data of the response is a JSON array."""
 
     def __iter__(self) -> t.Iterator[t.Any]:
-        return iter(t.cast(t.List[t.Any], self.data))
+        if not isinstance(self.data, list):
+            raise TypeError(
+                "Cannot iterate on ArrayResponse data when "
+                f"type is '{type(self.data).__name__}'"
+            )
+        return iter(self.data)
 
     def __len__(self) -> int:
         """
@@ -217,6 +227,7 @@ class ArrayResponse(GlobusHTTPResponse):
         """
         if not isinstance(self.data, collections.abc.Sequence):
             raise TypeError(
-                f"Cannot take len() on data when type is '{type(self.data).__name__}'"
+                "Cannot take len() on ArrayResponse data when "
+                f"type is '{type(self.data).__name__}'"
             )
         return len(self.data)

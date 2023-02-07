@@ -164,7 +164,7 @@ def test_bool(dict_response, list_response):
     assert bool(null.r) is False
 
 
-def test_len(list_response):
+def test_len_array(list_response):
     array = ArrayResponse(list_response.r)
     assert len(array) == len(list_response.data)
 
@@ -174,18 +174,38 @@ def test_len(list_response):
     assert len(empty_array) == 0
 
 
-def test_len_bad_data(dict_response):
+def test_len_array_bad_data(dict_response):
     null_array = ArrayResponse(_mk_json_response(None).r)
     with pytest.raises(
-        TypeError, match=re.escape("Cannot take len() on data when type is 'NoneType'")
+        TypeError,
+        match=re.escape(
+            "Cannot take len() on ArrayResponse data when type is 'NoneType'"
+        ),
     ):
         len(null_array)
 
     dict_array = ArrayResponse(dict_response.r)
     with pytest.raises(
-        TypeError, match=re.escape("Cannot take len() on data when type is 'dict'")
+        TypeError,
+        match=re.escape("Cannot take len() on ArrayResponse data when type is 'dict'"),
     ):
         len(dict_array)
+
+
+def test_iter_array_bad_data(dict_response):
+    null_array = ArrayResponse(_mk_json_response(None).r)
+    with pytest.raises(
+        TypeError,
+        match=re.escape("Cannot iterate on ArrayResponse data when type is 'NoneType'"),
+    ):
+        list(null_array)
+
+    dict_array = ArrayResponse(dict_response.r)
+    with pytest.raises(
+        TypeError,
+        match=re.escape("Cannot iterate on ArrayResponse data when type is 'dict'"),
+    ):
+        list(dict_array)
 
 
 def test_get(dict_response, list_response, text_http_response):
@@ -259,6 +279,28 @@ def test_iterable_response_using_iter_key():
 
     withkey = MyIterableResponse(raw, client=mock.Mock(), iter_key="other_iter")
     assert list(withkey) == [3, 4]
+
+
+def test_iterable_response_errors_on_non_dict_data(list_response):
+    class MyIterableResponse(IterableResponse):
+        default_iter_key = "default_iter"
+
+    list_iterable = MyIterableResponse(list_response.r)
+    null_iterable = MyIterableResponse(_mk_json_response(None).r)
+
+    with pytest.raises(
+        TypeError,
+        match=re.escape("Cannot iterate on IterableResponse data when type is 'list'"),
+    ):
+        list(list_iterable)
+
+    with pytest.raises(
+        TypeError,
+        match=re.escape(
+            "Cannot iterate on IterableResponse data when type is 'NoneType'"
+        ),
+    ):
+        list(null_iterable)
 
 
 def test_can_iter_array_response(list_response):

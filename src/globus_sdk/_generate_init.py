@@ -68,7 +68,14 @@ _LAZY_IMPORT_TABLE: t.List[t.Tuple[str, t.Tuple[str, ...]]] = [
             "LocalGlobusConnectServer",
         ),
     ),
-    ("response", ("GlobusHTTPResponse",)),
+    (
+        "response",
+        (
+            "GlobusHTTPResponse",
+            "IterableResponse",
+            "ArrayResponse",
+        ),
+    ),
     (
         "services.auth",
         (
