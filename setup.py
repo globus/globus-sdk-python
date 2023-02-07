@@ -13,11 +13,8 @@ TEST_REQUIREMENTS = [
     "pytest<7",
     "coverage<7",
     "pytest-xdist<3",
-    # 'responses' requirement
-    # on py3.6, use the last version to support 3.6
-    'responses==0.17.0; python_version<"3.7"',
-    # on py3.7+, use the latest version
-    'responses==0.22.0; python_version>="3.7"',
+    # use the latest version, but pin it for build consistency
+    "responses==0.22.0",
 ]
 DOC_REQUIREMENTS = [
     "sphinx<5",
@@ -58,7 +55,7 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     package_data={"globus_sdk": ["py.typed"]},
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     install_requires=[
         "requests>=2.19.1,<3.0.0",
         "pyjwt[crypto]>=2.0.0,<3.0.0",
@@ -85,7 +82,6 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
