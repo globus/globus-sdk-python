@@ -75,9 +75,9 @@ class AuthorizationParameterInfo(ErrorInfo):
             self.session_required_policies = session_required_policies.split(",")
         elif session_required_policies is not None:
             log.warning(
-                "during ErrorInfo parsing, got unexpected type for "
+                "During ErrorInfo instantiation, got unexpected type for "
                 "'session_required_policies'. "
-                "Expected 'str', but got '{type(session_required_policies)}'"
+                f"Expected 'str', but got '{type(session_required_policies)}'"
             )
 
 
