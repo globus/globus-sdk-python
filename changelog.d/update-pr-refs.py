@@ -52,8 +52,7 @@ def update_file(fname: str, pr_num: t.Optional[str]) -> None:
 def get_commit(fname: str) -> str:
     return subprocess.run(
         ["git", "log", "-n", "1", "--pretty=format:%H", "--", fname],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         check=True,
     ).stdout.decode("utf-8")
 

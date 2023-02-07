@@ -1,5 +1,4 @@
 import datetime
-import sys
 import typing as t
 import uuid
 
@@ -14,13 +13,7 @@ OWNER_ID = "e061df5a-b7b9-4578-a73b-6d4a4edfd66e"
 
 def generate_hello_world_example_flow(n: int) -> t.Dict[str, t.Any]:
     flow_id = str(uuid.UUID(int=n))
-    if sys.version_info < (3, 7):
-        # old branch which pyupgrade will remove when we drop py3.6
-        base_time = datetime.datetime(
-            2021, 10, 18, 19, 19, 35, 967289, tzinfo=datetime.timezone.utc
-        )
-    else:
-        base_time = datetime.datetime.fromisoformat("2021-10-18T19:19:35.967289+00:00")
+    base_time = datetime.datetime.fromisoformat("2021-10-18T19:19:35.967289+00:00")
     updated_at = created_at = base_time + datetime.timedelta(days=n)
     flow_user_scope = (
         f"https://auth.globus.org/scopes/{flow_id}/"
