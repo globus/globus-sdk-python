@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import pathlib
 import typing as t
@@ -19,15 +21,13 @@ class LocalGlobusConnectServer:
     def __init__(
         self,
         *,
-        info_path: t.Union[
-            str, pathlib.Path
-        ] = "/var/lib/globus-connect-server/info.json"
+        info_path: (str | pathlib.Path) = "/var/lib/globus-connect-server/info.json",
     ) -> None:
         self.info_path = pathlib.Path(info_path)
-        self._loaded_info: t.Optional[t.Dict[str, t.Any]] = None
+        self._loaded_info: dict[str, t.Any] | None = None
 
     @property
-    def info_dict(self) -> t.Optional[t.Dict[str, t.Any]]:
+    def info_dict(self) -> dict[str, t.Any] | None:
         """
         The info.json data for the local Globus Connect Server, as a dict.
 
@@ -56,7 +56,7 @@ class LocalGlobusConnectServer:
         self._loaded_info = None
 
     @property
-    def endpoint_id(self) -> t.Optional[str]:
+    def endpoint_id(self) -> str | None:
         """
         The endpoint ID of the local Globus Connect Server endpoint.
         None if the data cannot be loaded or is malformed.
@@ -70,7 +70,7 @@ class LocalGlobusConnectServer:
         return None
 
     @property
-    def domain_name(self) -> t.Optional[str]:
+    def domain_name(self) -> str | None:
         """
         The domain name of the local Globus Connect Server endpoint.
         None if the data cannot be loaded or is malformed.

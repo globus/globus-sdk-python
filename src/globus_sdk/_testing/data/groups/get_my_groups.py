@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import typing as t
 
 from globus_sdk._testing.models import RegisteredResponse, ResponseSet
 
-raw_data: t.List[t.Dict[str, t.Any]] = [
+raw_data: list[dict[str, t.Any]] = [
     {
         "name": "Claptrap's Rough Riders",
         "parent_id": None,

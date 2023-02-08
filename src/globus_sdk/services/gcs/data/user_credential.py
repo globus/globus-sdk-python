@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as t
 
 from globus_sdk import utils
@@ -33,13 +35,13 @@ class UserCredentialDocument(utils.PayloadWrapper):
     def __init__(
         self,
         DATA_TYPE: str = "user_credential#1.0.0",
-        identity_id: t.Optional[UUIDLike] = None,
-        connector_id: t.Optional[UUIDLike] = None,
-        username: t.Optional[str] = None,
-        display_name: t.Optional[str] = None,
-        storage_gateway_id: t.Optional[UUIDLike] = None,
-        policies: t.Optional[t.Dict[str, t.Any]] = None,
-        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
+        identity_id: UUIDLike | None = None,
+        connector_id: UUIDLike | None = None,
+        username: str | None = None,
+        display_name: str | None = None,
+        storage_gateway_id: UUIDLike | None = None,
+        policies: dict[str, t.Any] | None = None,
+        additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(

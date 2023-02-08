@@ -3,6 +3,8 @@ This defines the Scope object and the scope parser.
 Because these components are mutually dependent, it's easiest if they're kept in a
 single module.
 """
+from __future__ import annotations
+
 import enum
 import typing as t
 import warnings
@@ -42,12 +44,12 @@ class ParseToken:
         self.token_type = token_type
 
 
-def _tokenize(scope_string: str) -> t.List[ParseToken]:
-    tokens: t.List[ParseToken] = []
-    current_token: t.List[str] = []
+def _tokenize(scope_string: str) -> list[ParseToken]:
+    tokens: list[ParseToken] = []
+    current_token: list[str] = []
     for idx, c in enumerate(scope_string):
         try:
-            peek: t.Optional[str] = scope_string[idx + 1]
+            peek: str | None = scope_string[idx + 1]
         except IndexError:
             peek = None
 
@@ -80,21 +82,21 @@ def _tokenize(scope_string: str) -> t.List[ParseToken]:
     return tokens
 
 
-def _parse_tokens(tokens: t.List[ParseToken]) -> t.List["Scope"]:
+def _parse_tokens(tokens: list[ParseToken]) -> list[Scope]:
     # value to return
-    ret: t.List[Scope] = []
+    ret: list[Scope] = []
     # track whether or not the current scope is optional (has a preceding *)
     current_optional = False
     # keep a stack of "parents", each time we enter a `[` context, push the last scope
     # and each time we exit via a `]`, pop from the stack
-    parents: t.List[Scope] = []
+    parents: list[Scope] = []
     # track the current (or, by similar terminology, "last") complete scope seen
-    current_scope: t.Optional[Scope] = None
+    current_scope: Scope | None = None
 
     for idx in range(len(tokens)):
         token = tokens[idx]
         try:
-            peek: t.Optional[ParseToken] = tokens[idx + 1]
+            peek: ParseToken | None = tokens[idx + 1]
         except IndexError:
             peek = None
 
@@ -155,7 +157,7 @@ class Scope:
         scope_string: str,
         *,
         optional: bool = False,
-        dependencies: t.Optional[t.List["Scope"]] = None,
+        dependencies: list[Scope] | None = None,
     ) -> None:
         if any(c in scope_string for c in "[]* "):
             raise ValueError(
@@ -164,10 +166,10 @@ class Scope:
             )
         self._scope_string = scope_string
         self.optional = optional
-        self.dependencies: t.List[Scope] = [] if dependencies is None else dependencies
+        self.dependencies: list[Scope] = [] if dependencies is None else dependencies
 
     @staticmethod
-    def parse(scope_string: str) -> t.List["Scope"]:
+    def parse(scope_string: str) -> list[Scope]:
         """
         Parse an arbitrary scope string to a list of scopes.
 
@@ -178,7 +180,7 @@ class Scope:
         return _parse_tokens(tokens)
 
     @classmethod
-    def deserialize(cls, scope_string: str) -> "Scope":
+    def deserialize(cls, scope_string: str) -> Scope:
         """
         Deserialize a scope string to a scope object.
 
@@ -202,8 +204,8 @@ class Scope:
         )
 
     def add_dependency(
-        self, scope: t.Union[str, "Scope"], *, optional: t.Optional[bool] = None
-    ) -> "Scope":
+        self, scope: str | Scope, *, optional: bool | None = None
+    ) -> Scope:
         """
         Add a scope dependency. The dependent scope relationship will be stored in the
         Scope and will be evident in its string representation.
@@ -236,7 +238,7 @@ class Scope:
         return self
 
     def __repr__(self) -> str:
-        parts: t.List[str] = [f"'{self._scope_string}'"]
+        parts: list[str] = [f"'{self._scope_string}'"]
         if self.optional:
             parts.append("optional=True")
         if self.dependencies:
@@ -355,7 +357,7 @@ class MutableScope:
         scope_string: str,
         *,
         optional: bool = False,
-        dependencies: t.Optional[t.List["MutableScope"]] = None,
+        dependencies: list[MutableScope] | None = None,
     ) -> None:
         if any(c in scope_string for c in "[]* "):
             raise ValueError(
@@ -363,7 +365,7 @@ class MutableScope:
             )
         self._scope_string = scope_string
         self.optional = optional
-        self.dependencies: t.List[MutableScope] = (
+        self.dependencies: list[MutableScope] = (
             [] if dependencies is None else dependencies
         )
 
@@ -376,8 +378,11 @@ class MutableScope:
         )
 
     def add_dependency(
-        self, scope: t.Union[str, "MutableScope"], *, optional: t.Optional[bool] = None
-    ) -> "MutableScope":
+        self,
+        scope: str | MutableScope,
+        *,
+        optional: bool | None = None,
+    ) -> MutableScope:
         """
         Add a scope dependency. The dependent scope relationship will be stored in the
         Scope and will be evident in its string representation.
@@ -410,7 +415,7 @@ class MutableScope:
         return self
 
     def __repr__(self) -> str:
-        parts: t.List[str] = [f"'{self._scope_string}'"]
+        parts: list[str] = [f"'{self._scope_string}'"]
         if self.optional:
             parts.append("optional=True")
         if self.dependencies:

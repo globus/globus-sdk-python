@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import base64
 import hashlib
 import logging
@@ -20,7 +22,9 @@ if t.TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def make_native_app_challenge(verifier: t.Optional[str] = None) -> t.Tuple[str, str]:
+def make_native_app_challenge(
+    verifier: str | None = None,
+) -> tuple[str, str]:
     """
     Produce a challenge and verifier for the Native App flow.
     The verifier is an unhashed secret, and the challenge is a hashed version
@@ -106,13 +110,13 @@ class GlobusNativeAppFlowManager(GlobusOAuthFlowManager):
 
     def __init__(
         self,
-        auth_client: "globus_sdk.AuthClient",
-        requested_scopes: t.Optional[ScopeCollectionType] = None,
-        redirect_uri: t.Optional[str] = None,
+        auth_client: globus_sdk.AuthClient,
+        requested_scopes: ScopeCollectionType | None = None,
+        redirect_uri: str | None = None,
         state: str = "_default",
-        verifier: t.Optional[str] = None,
+        verifier: str | None = None,
         refresh_tokens: bool = False,
-        prefill_named_grant: t.Optional[str] = None,
+        prefill_named_grant: str | None = None,
     ):
         self.auth_client = auth_client
 
@@ -161,9 +165,7 @@ class GlobusNativeAppFlowManager(GlobusOAuthFlowManager):
         if prefill_named_grant is not None:
             logger.debug(f"prefill_named_grant={self.prefill_named_grant}")
 
-    def get_authorize_url(
-        self, query_params: t.Optional[t.Dict[str, t.Any]] = None
-    ) -> str:
+    def get_authorize_url(self, query_params: dict[str, t.Any] | None = None) -> str:
         """
         Start a Native App flow by getting the authorization URL to which users
         should be sent.

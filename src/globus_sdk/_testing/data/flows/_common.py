@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as t
 
 TWO_HOP_TRANSFER_FLOW_ID = "24bc4997-b483-4c25-a19c-64b0afc00743"
@@ -116,7 +118,7 @@ TWO_HOP_TRANSFER_FLOW_DOC = {
 }
 
 TWO_HOP_TRANSFER_RUN_ID = "36ad9f9a-ad29-488f-beb4-c22ab729643a"
-TWO_HOP_TRANSFER_RUN: t.Dict[str, t.Any] = {
+TWO_HOP_TRANSFER_RUN: dict[str, t.Any] = {
     "run_id": TWO_HOP_TRANSFER_RUN_ID,
     "flow_id": TWO_HOP_TRANSFER_FLOW_ID,
     "flow_title": TWO_HOP_TRANSFER_FLOW_DOC["title"],

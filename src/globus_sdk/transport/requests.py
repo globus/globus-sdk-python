@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import contextlib
 import logging
 import random
@@ -27,7 +29,7 @@ from .retry import (
 log = logging.getLogger(__name__)
 
 
-def _parse_retry_after(response: requests.Response) -> t.Optional[int]:
+def _parse_retry_after(response: requests.Response) -> int | None:
     val = response.headers.get("Retry-After")
     if not val:
         return None
@@ -91,14 +93,14 @@ class RequestsTransport:
     DEFAULT_MAX_RETRIES = 5
 
     #: status codes for responses which may have a Retry-After header
-    RETRY_AFTER_STATUS_CODES: t.Tuple[int, ...] = (429, 503)
+    RETRY_AFTER_STATUS_CODES: tuple[int, ...] = (429, 503)
     #: status codes for error responses which should generally be retried
-    TRANSIENT_ERROR_STATUS_CODES: t.Tuple[int, ...] = (429, 500, 502, 503, 504)
+    TRANSIENT_ERROR_STATUS_CODES: tuple[int, ...] = (429, 500, 502, 503, 504)
     #: status codes indicating that authorization info was missing or expired
-    EXPIRED_AUTHORIZATION_STATUS_CODES: t.Tuple[int, ...] = (401,)
+    EXPIRED_AUTHORIZATION_STATUS_CODES: tuple[int, ...] = (401,)
 
     #: the encoders are a mapping of encoding names to encoder objects
-    encoders: t.Dict[str, RequestEncoder] = {
+    encoders: dict[str, RequestEncoder] = {
         "text": RequestEncoder(),
         "json": JSONRequestEncoder(),
         "form": FormRequestEncoder(),
@@ -108,12 +110,12 @@ class RequestsTransport:
 
     def __init__(
         self,
-        verify_ssl: t.Optional[bool] = None,
-        http_timeout: t.Optional[float] = None,
+        verify_ssl: bool | None = None,
+        http_timeout: float | None = None,
         retry_backoff: t.Callable[[RetryContext], float] = _exponential_backoff,
-        retry_checks: t.Optional[t.List[RetryCheck]] = None,
+        retry_checks: list[RetryCheck] | None = None,
         max_sleep: int = 10,
-        max_retries: t.Optional[int] = None,
+        max_retries: int | None = None,
     ):
         self.session = requests.Session()
         self.verify_ssl = config.get_ssl_verify(verify_ssl)
@@ -139,18 +141,18 @@ class RequestsTransport:
         self._user_agent = f"{self.BASE_USER_AGENT}/{value}"
 
     @property
-    def _headers(self) -> t.Dict[str, str]:
+    def _headers(self) -> dict[str, str]:
         return {"Accept": "application/json", "User-Agent": self.user_agent}
 
     @contextlib.contextmanager
     def tune(
         self,
         *,
-        verify_ssl: t.Optional[bool] = None,
-        http_timeout: t.Optional[float] = None,
-        retry_backoff: t.Optional[t.Callable[[RetryContext], float]] = None,
-        max_sleep: t.Optional[int] = None,
-        max_retries: t.Optional[int] = None,
+        verify_ssl: bool | None = None,
+        http_timeout: float | None = None,
+        retry_backoff: t.Callable[[RetryContext], float] | None = None,
+        max_sleep: int | None = None,
+        max_retries: int | None = None,
     ) -> t.Iterator[None]:
         """
         Temporarily adjust some of the request sending settings of the transport.
@@ -221,10 +223,10 @@ class RequestsTransport:
         self,
         method: str,
         url: str,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
-        data: t.Union[t.Dict[str, t.Any], t.List[t.Any], str, None] = None,
-        headers: t.Optional[t.Dict[str, str]] = None,
-        encoding: t.Optional[str] = None,
+        query_params: dict[str, t.Any] | None = None,
+        data: (dict[str, t.Any] | list[t.Any] | str | None) = None,
+        headers: dict[str, str] | None = None,
+        encoding: str | None = None,
     ) -> requests.Request:
         if not headers:
             headers = {}
@@ -244,7 +246,7 @@ class RequestsTransport:
         return self.encoders[encoding].encode(method, url, query_params, data, headers)
 
     def _set_authz_header(
-        self, authorizer: t.Optional[GlobusAuthorizer], req: requests.Request
+        self, authorizer: GlobusAuthorizer | None, req: requests.Request
     ) -> None:
         if authorizer:
             authz_header = authorizer.get_authorization_header()
@@ -267,11 +269,11 @@ class RequestsTransport:
         self,
         method: str,
         url: str,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
-        data: t.Union[t.Dict[str, t.Any], str, None] = None,
-        headers: t.Optional[t.Dict[str, str]] = None,
-        encoding: t.Optional[str] = None,
-        authorizer: t.Optional[GlobusAuthorizer] = None,
+        query_params: dict[str, t.Any] | None = None,
+        data: dict[str, t.Any] | str | None = None,
+        headers: dict[str, str] | None = None,
+        encoding: str | None = None,
+        authorizer: GlobusAuthorizer | None = None,
         allow_redirects: bool = True,
         stream: bool = False,
     ) -> requests.Response:
@@ -306,7 +308,7 @@ class RequestsTransport:
         :return: ``requests.Response`` object
         """
         log.debug("starting request for %s", url)
-        resp: t.Optional[requests.Response] = None
+        resp: requests.Response | None = None
         req = self._encode(method, url, query_params, data, headers, encoding)
         checker = RetryCheckRunner(self.retry_checks)
         log.debug("transport request state initialized")

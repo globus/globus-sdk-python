@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 import functools
 import inspect
@@ -20,9 +22,9 @@ C = t.TypeVar("C", bound=t.Callable[..., GlobusHTTPResponse])
 # stub for mypy
 class _PaginatedFunc(t.Generic[PageT]):
     _has_paginator: bool
-    _paginator_class: t.Type["Paginator[PageT]"]
-    _paginator_items_key: t.Optional[str]
-    _paginator_params: t.Dict[str, t.Any]
+    _paginator_class: type[Paginator[PageT]]
+    _paginator_items_key: str | None
+    _paginator_params: dict[str, t.Any]
 
 
 class Paginator(t.Iterable[PageT], metaclass=abc.ABCMeta):
@@ -51,9 +53,9 @@ class Paginator(t.Iterable[PageT], metaclass=abc.ABCMeta):
         self,
         method: t.Callable[..., t.Any],
         *,
-        items_key: t.Optional[str] = None,
-        client_args: t.List[t.Any],
-        client_kwargs: t.Dict[str, t.Any],
+        items_key: str | None = None,
+        client_args: list[t.Any],
+        client_kwargs: dict[str, t.Any],
         # the Base paginator must accept arbitrary additional kwargs to indicate that
         # its child classes could define and use additional kwargs
         **kwargs: t.Any,
@@ -89,7 +91,7 @@ class Paginator(t.Iterable[PageT], metaclass=abc.ABCMeta):
             yield from page[self.items_key]
 
     @classmethod
-    def wrap(cls, method: t.Callable[P, R]) -> t.Callable[P, "Paginator[R]"]:
+    def wrap(cls, method: t.Callable[P, R]) -> t.Callable[P, Paginator[R]]:
         """
         This is an alternate method for getting a paginator for a paginated method which
         correctly preserves the type signature of the paginated method.
@@ -133,8 +135,8 @@ class Paginator(t.Iterable[PageT], metaclass=abc.ABCMeta):
 
 
 def has_paginator(
-    paginator_class: t.Type[Paginator[PageT]],
-    items_key: t.Optional[str] = None,
+    paginator_class: type[Paginator[PageT]],
+    items_key: str | None = None,
     **paginator_params: t.Any,
 ) -> t.Callable[[C], C]:
     """

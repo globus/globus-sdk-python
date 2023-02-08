@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import base64
 import shlex
-import typing as t
 import uuid
 
 
@@ -28,7 +29,7 @@ def _b32decode(v: str) -> str:
         raise _B32DecodeError("decode and load as UUID failed") from err
 
 
-def _parse_dn_username(s: str) -> t.Tuple[str, bool]:
+def _parse_dn_username(s: str) -> tuple[str, bool]:
     try:
         user, is_id = _b32decode(s), True
     except _B32DecodeError:
@@ -59,8 +60,8 @@ class GlobusConnectPersonalOwnerInfo:
 
     _GRIDMAP_DN_START = '"/C=US/O=Globus Consortium/OU=Globus Connect User/CN='
 
-    username: t.Optional[str]
-    id: t.Optional[str]
+    username: str | None
+    id: str | None
 
     def __init__(self, *, config_dn: str) -> None:
         lineinfo = shlex.split(config_dn)
@@ -91,7 +92,7 @@ class GlobusConnectPersonalOwnerInfo:
 
     # private methods for SDK usage only
     @classmethod
-    def _from_file(cls, filename: str) -> "GlobusConnectPersonalOwnerInfo":
+    def _from_file(cls, filename: str) -> GlobusConnectPersonalOwnerInfo:
         with open(filename, encoding="utf-8") as fp:
             for line in fp:
                 if line.startswith(cls._GRIDMAP_DN_START):

@@ -2,6 +2,8 @@
 """
 A Globus SDK Sphinx Extension for Autodoc of Class Methods
 """
+from __future__ import annotations
+
 import inspect
 from pydoc import locate
 

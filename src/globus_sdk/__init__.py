@@ -124,7 +124,7 @@ _LAZY_IMPORT_TABLE = {
     },
 }
 
-if t.TYPE_CHECKING or sys.version_info < (3, 7):
+if t.TYPE_CHECKING:
     from .authorizers import AccessTokenAuthorizer
     from .authorizers import BasicAuthorizer
     from .authorizers import ClientCredentialsAuthorizer
@@ -204,31 +204,32 @@ if t.TYPE_CHECKING or sys.version_info < (3, 7):
     from .services.transfer import TransferClient
     from .services.transfer import TransferData
 
-else:
-    def __dir__() -> t.List[str]:
-        # dir(globus_sdk) should include everything exported in __all__
-        # as well as some explicitly selected attributes from the default dir() output
-        # on a module
-        #
-        # see also:
-        # https://discuss.python.org/t/how-to-properly-extend-standard-dir-search-with-module-level-dir/4202
-        return list(__all__) + [
-            # __all__ itself can be inspected
-            "__all__",
-            # useful to figure out where a package is installed
-            "__file__",
-            "__path__",
-        ]
 
-    def __getattr__(name: str) -> t.Any:
-        for modname, items in _LAZY_IMPORT_TABLE.items():
-            if name in items:
-                mod = importlib.import_module("." + modname, __name__)
-                value = getattr(mod, name)
-                setattr(sys.modules[__name__], name, value)
-                return value
+def __dir__() -> t.List[str]:
+    # dir(globus_sdk) should include everything exported in __all__
+    # as well as some explicitly selected attributes from the default dir() output
+    # on a module
+    #
+    # see also:
+    # https://discuss.python.org/t/how-to-properly-extend-standard-dir-search-with-module-level-dir/4202
+    return list(__all__) + [
+        # __all__ itself can be inspected
+        "__all__",
+        # useful to figure out where a package is installed
+        "__file__",
+        "__path__",
+    ]
 
-        raise AttributeError(f"module {__name__} has no attribute {name}")
+
+def __getattr__(name: str) -> t.Any:
+    for modname, items in _LAZY_IMPORT_TABLE.items():
+        if name in items:
+            mod = importlib.import_module("." + modname, __name__)
+            value = getattr(mod, name)
+            setattr(sys.modules[__name__], name, value)
+            return value
+
+    raise AttributeError(f"module {__name__} has no attribute {name}")
 
 
 __all__ = (

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import collections.abc
 import json
 import logging
@@ -33,17 +35,17 @@ class GlobusHTTPResponse:
 
     def __init__(
         self,
-        response: t.Union[Response, "GlobusHTTPResponse"],
-        client: t.Optional["globus_sdk.BaseClient"] = None,
+        response: Response | GlobusHTTPResponse,
+        client: globus_sdk.BaseClient | None = None,
     ):
         # init on a GlobusHTTPResponse: we are wrapping this data
         # the _response is None
         if isinstance(response, GlobusHTTPResponse):
             if client is not None:
                 raise ValueError("Redundant client with wrapped response")
-            self._wrapped: t.Optional[GlobusHTTPResponse] = response
-            self._response: t.Optional[Response] = None
-            self.client: "globus_sdk.BaseClient" = self._wrapped.client
+            self._wrapped: GlobusHTTPResponse | None = response
+            self._response: Response | None = None
+            self.client: globus_sdk.BaseClient = self._wrapped.client
 
             # copy parsed JSON data off of '_wrapped'
             self._parsed_json: t.Any = self._wrapped._parsed_json
@@ -108,7 +110,7 @@ class GlobusHTTPResponse:
         return self._raw_response.headers
 
     @property
-    def content_type(self) -> t.Optional[str]:
+    def content_type(self) -> str | None:
         return self.headers.get("Content-Type")
 
     @property
@@ -141,7 +143,7 @@ class GlobusHTTPResponse:
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.text})"
 
-    def __getitem__(self, key: t.Union[str, int, slice]) -> t.Any:
+    def __getitem__(self, key: str | int | slice) -> t.Any:
         # force evaluation of the data property outside of the upcoming
         # try-catch so that we don't accidentally catch TypeErrors thrown
         # during the getter function itself
@@ -186,10 +188,10 @@ class IterableResponse(GlobusHTTPResponse):
 
     def __init__(
         self,
-        response: t.Union[Response, "GlobusHTTPResponse"],
-        client: t.Optional["globus_sdk.BaseClient"] = None,
+        response: Response | GlobusHTTPResponse,
+        client: globus_sdk.BaseClient | None = None,
         *,
-        iter_key: t.Optional[str] = None,
+        iter_key: str | None = None,
     ) -> None:
         if not hasattr(self, "default_iter_key"):
             raise TypeError(

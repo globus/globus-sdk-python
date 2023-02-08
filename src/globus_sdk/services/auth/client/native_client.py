@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import typing as t
 
@@ -49,13 +51,13 @@ class NativeAppAuthClient(AuthClient):
     )
     def oauth2_start_flow(
         self,
-        requested_scopes: t.Optional[t.Union[str, t.Iterable[str]]] = None,
+        requested_scopes: None | (str | t.Iterable[str]) = None,
         *,
-        redirect_uri: t.Optional[str] = None,
+        redirect_uri: str | None = None,
         state: str = "_default",
-        verifier: t.Optional[str] = None,
+        verifier: str | None = None,
         refresh_tokens: bool = False,
-        prefill_named_grant: t.Optional[str] = None,
+        prefill_named_grant: str | None = None,
     ) -> GlobusNativeAppFlowManager:
         """
         Starts a Native App OAuth2 flow.
@@ -107,7 +109,10 @@ class NativeAppAuthClient(AuthClient):
         return self.current_oauth2_flow_manager
 
     def oauth2_refresh_token(
-        self, refresh_token: str, *, body_params: t.Optional[t.Dict[str, t.Any]] = None
+        self,
+        refresh_token: str,
+        *,
+        body_params: dict[str, t.Any] | None = None,
     ) -> OAuthTokenResponse:
         """
         ``NativeAppAuthClient`` specializes the refresh token grant to include

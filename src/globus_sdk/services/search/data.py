@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as t
 
 from globus_sdk import utils
@@ -57,11 +59,11 @@ class SearchQueryBase(utils.PayloadWrapper):
     def add_filter(
         self: SearchQueryT,
         field_name: str,
-        values: t.List[str],
+        values: list[str],
         *,
         # pylint: disable=redefined-builtin
         type: str = "match_all",
-        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
+        additional_fields: dict[str, t.Any] | None = None,
     ) -> SearchQueryT:
         """
         Add a filter subdocument to the query.
@@ -117,12 +119,12 @@ class SearchQuery(SearchQueryBase):
 
     def __init__(
         self,
-        q: t.Optional[str] = None,
+        q: str | None = None,
         *,
-        limit: t.Optional[int] = None,
-        offset: t.Optional[int] = None,
-        advanced: t.Optional[bool] = None,
-        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
+        limit: int | None = None,
+        offset: int | None = None,
+        advanced: bool | None = None,
+        additional_fields: dict[str, t.Any] | None = None,
     ):
         super().__init__()
         if q is not None:
@@ -136,7 +138,7 @@ class SearchQuery(SearchQueryBase):
         if additional_fields is not None:
             self.update(additional_fields)
 
-    def set_offset(self, offset: int) -> "SearchQuery":
+    def set_offset(self, offset: int) -> SearchQuery:
         """
         Set the offset for the query document.
 
@@ -153,11 +155,11 @@ class SearchQuery(SearchQueryBase):
         *,
         # pylint: disable=redefined-builtin
         type: str = "terms",
-        size: t.Optional[int] = None,
-        date_interval: t.Optional[str] = None,
-        histogram_range: t.Optional[t.Tuple[t.Any, t.Any]] = None,
-        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
-    ) -> "SearchQuery":
+        size: int | None = None,
+        date_interval: str | None = None,
+        histogram_range: tuple[t.Any, t.Any] | None = None,
+        additional_fields: dict[str, t.Any] | None = None,
+    ) -> SearchQuery:
         """
         Add a facet subdocument to the query.
 
@@ -177,7 +179,7 @@ class SearchQuery(SearchQueryBase):
         :type additional_fields: dict, optional
         """
         self["facets"] = self.get("facets", [])
-        facet: t.Dict[str, t.Any] = {
+        facet: dict[str, t.Any] = {
             "name": name,
             "field_name": field_name,
             "type": type,
@@ -196,10 +198,10 @@ class SearchQuery(SearchQueryBase):
     def add_boost(
         self,
         field_name: str,
-        factor: t.Union[str, int, float],
+        factor: str | int | float,
         *,
-        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
-    ) -> "SearchQuery":
+        additional_fields: dict[str, t.Any] | None = None,
+    ) -> SearchQuery:
         """
         Add a boost subdocument to the query.
 
@@ -224,9 +226,9 @@ class SearchQuery(SearchQueryBase):
         self,
         field_name: str,
         *,
-        order: t.Optional[str] = None,
-        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
-    ) -> "SearchQuery":
+        order: str | None = None,
+        additional_fields: dict[str, t.Any] | None = None,
+    ) -> SearchQuery:
         """
         Add a sort subdocument to the query.
 
@@ -272,12 +274,12 @@ class SearchScrollQuery(SearchQueryBase):
 
     def __init__(
         self,
-        q: t.Optional[str] = None,
+        q: str | None = None,
         *,
-        limit: t.Optional[int] = None,
-        advanced: t.Optional[bool] = None,
-        marker: t.Optional[str] = None,
-        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
+        limit: int | None = None,
+        advanced: bool | None = None,
+        marker: str | None = None,
+        additional_fields: dict[str, t.Any] | None = None,
     ):
         super().__init__()
         if q is not None:
@@ -291,7 +293,7 @@ class SearchScrollQuery(SearchQueryBase):
         if additional_fields is not None:
             self.update(additional_fields)
 
-    def set_marker(self, marker: str) -> "SearchScrollQuery":
+    def set_marker(self, marker: str) -> SearchScrollQuery:
         """
         Set the marker on a scroll query.
 

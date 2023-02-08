@@ -1,9 +1,9 @@
-import typing as t
+from __future__ import annotations
 
 import globus_sdk
 
 # type is (str | None)
-s: t.Optional[str] = globus_sdk.BaseClient.resource_server
+s: str | None = globus_sdk.BaseClient.resource_server
 i: int = globus_sdk.BaseClient.resource_server  # type: ignore [assignment]
 
 # holds on an instance as well

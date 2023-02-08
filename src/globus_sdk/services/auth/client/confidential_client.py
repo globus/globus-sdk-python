@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import typing as t
 
@@ -48,7 +50,8 @@ class ConfidentialAppAuthClient(AuthClient):
         log.info(f"Finished initializing client, client_id={client_id}")
 
     def oauth2_client_credentials_tokens(
-        self, requested_scopes: t.Optional[t.Union[str, t.Iterable[str]]] = None
+        self,
+        requested_scopes: None | (str | t.Iterable[str]) = None,
     ) -> OAuthTokenResponse:
         r"""
         Perform an OAuth2 Client Credentials Grant to get access tokens which
@@ -92,7 +95,7 @@ class ConfidentialAppAuthClient(AuthClient):
     def oauth2_start_flow(
         self,
         redirect_uri: str,
-        requested_scopes: t.Optional[t.Union[str, t.Iterable[str]]] = None,
+        requested_scopes: None | (str | t.Iterable[str]) = None,
         *,
         state: str = "_default",
         refresh_tokens: bool = False,
@@ -137,7 +140,10 @@ class ConfidentialAppAuthClient(AuthClient):
         return self.current_oauth2_flow_manager
 
     def oauth2_get_dependent_tokens(
-        self, token: str, *, additional_params: t.Optional[t.Dict[str, t.Any]] = None
+        self,
+        token: str,
+        *,
+        additional_params: dict[str, t.Any] | None = None,
     ) -> OAuthDependentTokenResponse:
         """
         Does a `Dependent Token Grant
@@ -182,7 +188,7 @@ class ConfidentialAppAuthClient(AuthClient):
         "auth/reference/#token_introspection_post_v2_oauth2_token_introspect",
     )
     def oauth2_token_introspect(
-        self, token: str, *, include: t.Optional[str] = None
+        self, token: str, *, include: str | None = None
     ) -> GlobusHTTPResponse:
         """
         POST /v2/oauth2/token/introspect

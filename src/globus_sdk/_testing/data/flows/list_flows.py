@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import typing as t
 import uuid
@@ -11,7 +13,7 @@ from ._common import TWO_HOP_TRANSFER_FLOW_DOC, TWO_HOP_TRANSFER_FLOW_ID
 OWNER_ID = "e061df5a-b7b9-4578-a73b-6d4a4edfd66e"
 
 
-def generate_hello_world_example_flow(n: int) -> t.Dict[str, t.Any]:
+def generate_hello_world_example_flow(n: int) -> dict[str, t.Any]:
     flow_id = str(uuid.UUID(int=n))
     base_time = datetime.datetime.fromisoformat("2021-10-18T19:19:35.967289+00:00")
     updated_at = created_at = base_time + datetime.timedelta(days=n)

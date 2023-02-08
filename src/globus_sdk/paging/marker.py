@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as t
 
 from .base import PageT, Paginator
@@ -15,10 +17,10 @@ class MarkerPaginator(Paginator[PageT]):
         self,
         method: t.Callable[..., t.Any],
         *,
-        items_key: t.Optional[str] = None,
+        items_key: str | None = None,
         marker_key: str = "marker",
-        client_args: t.List[t.Any],
-        client_kwargs: t.Dict[str, t.Any]
+        client_args: list[t.Any],
+        client_kwargs: dict[str, t.Any],
     ):
         super().__init__(
             method,
@@ -26,10 +28,10 @@ class MarkerPaginator(Paginator[PageT]):
             client_args=client_args,
             client_kwargs=client_kwargs,
         )
-        self.marker: t.Optional[str] = None
+        self.marker: str | None = None
         self.marker_key = marker_key
 
-    def _check_has_next_page(self, page: t.Dict[str, t.Any]) -> bool:
+    def _check_has_next_page(self, page: dict[str, t.Any]) -> bool:
         return bool(page.get("has_next_page", False))
 
     def pages(self) -> t.Iterator[PageT]:
@@ -52,5 +54,5 @@ class NullableMarkerPaginator(MarkerPaginator[PageT]):
     pagination. (vs an explicit has_next_page key)
     """
 
-    def _check_has_next_page(self, page: t.Dict[str, t.Any]) -> bool:
+    def _check_has_next_page(self, page: dict[str, t.Any]) -> bool:
         return page.get(self.marker_key) is not None

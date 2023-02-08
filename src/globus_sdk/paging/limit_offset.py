@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as t
 
 from .base import PageT, Paginator
@@ -8,12 +10,12 @@ class _LimitOffsetBasedPaginator(Paginator[PageT]):  # pylint: disable=abstract-
         self,
         method: t.Callable[..., t.Any],
         *,
-        items_key: t.Optional[str] = None,
-        get_page_size: t.Callable[[t.Dict[str, t.Any]], int],
+        items_key: str | None = None,
+        get_page_size: t.Callable[[dict[str, t.Any]], int],
         max_total_results: int,
         page_size: int,
-        client_args: t.List[t.Any],
-        client_kwargs: t.Dict[str, t.Any],
+        client_args: list[t.Any],
+        client_kwargs: dict[str, t.Any],
     ):
         super().__init__(
             method,
@@ -34,7 +36,7 @@ class _LimitOffsetBasedPaginator(Paginator[PageT]):  # pylint: disable=abstract-
             self.limit = self.max_total_results - self.offset
         self.client_kwargs["limit"] = self.limit
 
-    def _update_and_check_offset(self, current_page: t.Dict[str, t.Any]) -> bool:
+    def _update_and_check_offset(self, current_page: dict[str, t.Any]) -> bool:
         self.offset += self.get_page_size(current_page)
         self.client_kwargs["offset"] = self.offset
         return (

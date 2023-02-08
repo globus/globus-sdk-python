@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 import logging
 import time
@@ -50,9 +52,9 @@ class RenewingAuthorizer(GlobusAuthorizer, metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        access_token: t.Optional[str] = None,
-        expires_at: t.Optional[int] = None,
-        on_refresh: t.Optional[t.Callable[["OAuthTokenResponse"], t.Any]] = None,
+        access_token: str | None = None,
+        expires_at: int | None = None,
+        on_refresh: None | (t.Callable[[OAuthTokenResponse], t.Any]) = None,
     ):
         self._access_token = None
         self._access_token_hash = None
@@ -88,24 +90,24 @@ class RenewingAuthorizer(GlobusAuthorizer, metaclass=abc.ABCMeta):
             self._get_new_access_token()
 
     @property
-    def access_token(self) -> t.Optional[str]:
+    def access_token(self) -> str | None:
         return self._access_token
 
     @access_token.setter
-    def access_token(self, value: t.Optional[str]) -> None:
+    def access_token(self, value: str | None) -> None:
         self._access_token = value
         if value:
             self._access_token_hash = utils.sha256_string(value)
 
     @abc.abstractmethod
-    def _get_token_response(self) -> "OAuthTokenResponse":
+    def _get_token_response(self) -> OAuthTokenResponse:
         """
         Using whatever method the specific authorizer implementing this class
         does, get a new token response.
         """
 
     @abc.abstractmethod
-    def _extract_token_data(self, res: "OAuthTokenResponse") -> t.Dict[str, t.Any]:
+    def _extract_token_data(self, res: OAuthTokenResponse) -> dict[str, t.Any]:
         """
         Given a token response object, get the first element of
         token_response.by_resource_server

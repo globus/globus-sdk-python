@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import typing as t
 
@@ -41,15 +43,15 @@ class FlowsClient(client.BaseClient):
     def create_flow(
         self,
         title: str,
-        definition: t.Dict[str, t.Any],
-        input_schema: t.Dict[str, t.Any],
-        subtitle: t.Optional[str] = None,
-        description: t.Optional[str] = None,
-        flow_viewers: t.Optional[t.List[str]] = None,
-        flow_starters: t.Optional[t.List[str]] = None,
-        flow_administrators: t.Optional[t.List[str]] = None,
-        keywords: t.Optional[t.List[str]] = None,
-        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
+        definition: dict[str, t.Any],
+        input_schema: dict[str, t.Any],
+        subtitle: str | None = None,
+        description: str | None = None,
+        flow_viewers: list[str] | None = None,
+        flow_starters: list[str] | None = None,
+        flow_administrators: list[str] | None = None,
+        keywords: list[str] | None = None,
+        additional_fields: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
         """
         Create a Flow
@@ -174,7 +176,7 @@ class FlowsClient(client.BaseClient):
         self,
         flow_id: UUIDLike,
         *,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
         """Retrieve a Flow by ID
 
@@ -195,11 +197,11 @@ class FlowsClient(client.BaseClient):
     def list_flows(
         self,
         *,
-        filter_role: t.Optional[str] = None,
-        filter_fulltext: t.Optional[str] = None,
-        orderby: t.Optional[str] = None,
-        marker: t.Optional[str] = None,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        filter_role: str | None = None,
+        filter_fulltext: str | None = None,
+        orderby: str | None = None,
+        marker: str | None = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> IterableFlowsResponse:
         """
         List deployed Flows
@@ -267,7 +269,7 @@ class FlowsClient(client.BaseClient):
         self,
         flow_id: UUIDLike,
         *,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
         """Delete a Flow
 
@@ -304,10 +306,10 @@ class SpecificFlowClient(client.BaseClient):
         self,
         flow_id: UUIDLike,
         *,
-        environment: t.Optional[str] = None,
-        authorizer: t.Optional[GlobusAuthorizer] = None,
-        app_name: t.Optional[str] = None,
-        transport_params: t.Optional[t.Dict[str, t.Any]] = None,
+        environment: str | None = None,
+        authorizer: GlobusAuthorizer | None = None,
+        app_name: str | None = None,
+        transport_params: dict[str, t.Any] | None = None,
     ):
         super().__init__(
             environment=environment,
@@ -325,13 +327,13 @@ class SpecificFlowClient(client.BaseClient):
     @_flowdoc("Run Flow", "~1flows~1{flow_id}~1run/post")
     def run_flow(
         self,
-        body: t.Dict[str, t.Any],
+        body: dict[str, t.Any],
         *,
-        label: t.Optional[str] = None,
-        tags: t.Optional[t.List[str]] = None,
-        run_monitors: t.Optional[t.List[str]] = None,
-        run_managers: t.Optional[t.List[str]] = None,
-        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
+        label: str | None = None,
+        tags: list[str] | None = None,
+        run_monitors: list[str] | None = None,
+        run_managers: list[str] | None = None,
+        additional_fields: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
         """
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import os
 import typing as t
@@ -14,11 +16,11 @@ _SERVICE_URL_VAR_FORMAT = "GLOBUS_SDK_SERVICE_URL_{}"
 class EnvConfig:
     envname: str
     domain: str
-    no_dotapi: t.List[str] = ["app", "auth"]
-    automate_services: t.List[str] = ["actions", "flows", "timer"]
+    no_dotapi: list[str] = ["app", "auth"]
+    automate_services: list[str] = ["actions", "flows", "timer"]
 
     # this same dict is inherited (and therefore shared!) by all subclasses
-    _registry: t.Dict[str, t.Type["EnvConfig"]] = {}
+    _registry: dict[str, type[EnvConfig]] = {}
 
     # this is an easier hook to use than metaclass definition -- register every subclass
     # in this dict automatically
@@ -51,11 +53,11 @@ class EnvConfig:
         return f"https://{service}.api.{cls.domain}/"
 
     @classmethod
-    def get_by_name(cls, env: str) -> t.Optional[t.Type["EnvConfig"]]:
+    def get_by_name(cls, env: str) -> type[EnvConfig] | None:
         return cls._registry.get(env)
 
 
-def get_service_url(service: str, environment: t.Optional[str] = None) -> str:
+def get_service_url(service: str, environment: str | None = None) -> str:
     """
     Return the base URL for the given service in this environment. For example:
 
@@ -86,7 +88,7 @@ def get_service_url(service: str, environment: t.Optional[str] = None) -> str:
     return url
 
 
-def get_webapp_url(environment: t.Optional[str] = None) -> str:
+def get_webapp_url(environment: str | None = None) -> str:
     """
     Return the URL to access the Globus web app in the given environment. For example:
 

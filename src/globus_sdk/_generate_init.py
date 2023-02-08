@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import annotations
 
 import itertools
 import pathlib
@@ -35,8 +36,36 @@ FIXED_EPILOG = """
 logging.getLogger("globus_sdk").addHandler(logging.NullHandler())
 """
 
+FIXED_MODULE_METHODS = """
+def __dir__() -> t.List[str]:
+    # dir(globus_sdk) should include everything exported in __all__
+    # as well as some explicitly selected attributes from the default dir() output
+    # on a module
+    #
+    # see also:
+    # https://discuss.python.org/t/how-to-properly-extend-standard-dir-search-with-module-level-dir/4202
+    return list(__all__) + [
+        # __all__ itself can be inspected
+        "__all__",
+        # useful to figure out where a package is installed
+        "__file__",
+        "__path__",
+    ]
 
-_LAZY_IMPORT_TABLE: t.List[t.Tuple[str, t.Tuple[str, ...]]] = [
+
+def __getattr__(name: str) -> t.Any:
+    for modname, items in _LAZY_IMPORT_TABLE.items():
+        if name in items:
+            mod = importlib.import_module("." + modname, __name__)
+            value = getattr(mod, name)
+            setattr(sys.modules[__name__], name, value)
+            return value
+
+    raise AttributeError(f"module {__name__} has no attribute {name}")
+"""
+
+
+_LAZY_IMPORT_TABLE: list[tuple[str, tuple[str, ...]]] = [
     (
         "authorizers",
         (
@@ -198,35 +227,10 @@ def _init_pieces() -> t.Iterator[str]:
     yield ""
     yield from _generate_lazy_import_table()
     yield ""
-    yield "if t.TYPE_CHECKING or sys.version_info < (3, 7):"
+    yield "if t.TYPE_CHECKING:"
     yield from _generate_imports()
-    yield """
-else:
-    def __dir__() -> t.List[str]:
-        # dir(globus_sdk) should include everything exported in __all__
-        # as well as some explicitly selected attributes from the default dir() output
-        # on a module
-        #
-        # see also:
-        # https://discuss.python.org/t/how-to-properly-extend-standard-dir-search-with-module-level-dir/4202
-        return list(__all__) + [
-            # __all__ itself can be inspected
-            "__all__",
-            # useful to figure out where a package is installed
-            "__file__",
-            "__path__",
-        ]
-
-    def __getattr__(name: str) -> t.Any:
-        for modname, items in _LAZY_IMPORT_TABLE.items():
-            if name in items:
-                mod = importlib.import_module("." + modname, __name__)
-                value = getattr(mod, name)
-                setattr(sys.modules[__name__], name, value)
-                return value
-
-        raise AttributeError(f"module {__name__} has no attribute {name}")
-"""
+    yield ""
+    yield FIXED_MODULE_METHODS
     yield ""
     yield from _generate_all_tuple()
     yield ""

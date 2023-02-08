@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as t
 
 from globus_sdk import utils
@@ -26,10 +28,10 @@ class GCSRoleDocument(utils.PayloadWrapper):
     def __init__(
         self,
         DATA_TYPE: str = "role#1.0.0",
-        collection: t.Optional[UUIDLike] = None,
-        principal: t.Optional[str] = None,
-        role: t.Optional[str] = None,
-        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
+        collection: UUIDLike | None = None,
+        principal: str | None = None,
+        role: str | None = None,
+        additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(

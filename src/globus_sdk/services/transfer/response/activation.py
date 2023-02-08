@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import time
 import typing as t
 
@@ -28,7 +30,7 @@ class ActivationRequirementsResponse(GlobusHTTPResponse):
         # querying its status will start to matter
         if self["expires_in"] == -1:
             # expires_in=-1 is the "infinite lifetime" case
-            self.expires_at: t.Optional[int] = None
+            self.expires_at: int | None = None
         else:
             self.expires_at = int(time.time() + self["expires_in"])
 

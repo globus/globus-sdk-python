@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as t
 
 import requests
@@ -18,11 +20,11 @@ class TransferAPIError(exc.GlobusAPIError):
         self.request_id = None
         super().__init__(r)
 
-    def _get_args(self) -> t.List[t.Any]:
+    def _get_args(self) -> list[t.Any]:
         args = super()._get_args()
         args.append(self.request_id)
         return args
 
-    def _load_from_json(self, data: t.Dict[str, t.Any]) -> None:
+    def _load_from_json(self, data: dict[str, t.Any]) -> None:
         super()._load_from_json(data)
         self.request_id = data.get("request_id")

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import typing as t
 
@@ -24,7 +26,7 @@ class SimpleJSONFileAdapter(FileAdapter):
     def __init__(self, filename: str):
         self.filename = filename
 
-    def _raw_load(self) -> t.Dict[str, t.Any]:
+    def _raw_load(self) -> dict[str, t.Any]:
         """
         Load the file contents as JSON and return the resulting dict
         object. If a dict is not found, raises an error.
@@ -35,7 +37,7 @@ class SimpleJSONFileAdapter(FileAdapter):
             raise ValueError("reading from json file got non-dict data")
         return val
 
-    def _handle_formats(self, read_data: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
+    def _handle_formats(self, read_data: dict[str, t.Any]) -> dict[str, t.Any]:
         """Handle older data formats supported by globus_sdk.tokenstorage
 
         if the data is not in a known/recognized format, this will error
@@ -55,7 +57,7 @@ class SimpleJSONFileAdapter(FileAdapter):
             )
         return read_data
 
-    def _load(self) -> t.Dict[str, t.Any]:
+    def _load(self) -> dict[str, t.Any]:
         """
         Load data from the file and ensure that the data is in a modern format which can
         be handled by the rest of the adapter.
@@ -101,7 +103,7 @@ class SimpleJSONFileAdapter(FileAdapter):
             with open(self.filename, "w", encoding="utf-8") as f:
                 json.dump(to_write, f)
 
-    def get_by_resource_server(self) -> t.Dict[str, t.Any]:
+    def get_by_resource_server(self) -> dict[str, t.Any]:
         """
         Read only the by_resource_server formatted data from the file, discarding any
         other keys.
@@ -114,5 +116,5 @@ class SimpleJSONFileAdapter(FileAdapter):
         # see: https://www.python.org/dev/peps/pep-0589/
         return t.cast(t.Dict[str, t.Any], self._load()["by_rs"])
 
-    def get_token_data(self, resource_server: str) -> t.Optional[t.Dict[str, t.Any]]:
+    def get_token_data(self, resource_server: str) -> dict[str, t.Any] | None:
         return self.get_by_resource_server().get(resource_server)

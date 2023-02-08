@@ -1,13 +1,15 @@
+from __future__ import annotations
+
 import logging
 import typing as t
 
 from globus_sdk._types import ScopeCollectionType
 from globus_sdk.scopes import MutableScope
 
+from .renewing import RenewingAuthorizer
+
 if t.TYPE_CHECKING:
     from globus_sdk.services.auth import ConfidentialAppAuthClient, OAuthTokenResponse
-
-from .renewing import RenewingAuthorizer
 
 log = logging.getLogger(__name__)
 
@@ -61,12 +63,12 @@ class ClientCredentialsAuthorizer(RenewingAuthorizer):
 
     def __init__(
         self,
-        confidential_client: "ConfidentialAppAuthClient",
+        confidential_client: ConfidentialAppAuthClient,
         scopes: ScopeCollectionType,
         *,
-        access_token: t.Optional[str] = None,
-        expires_at: t.Optional[int] = None,
-        on_refresh: t.Optional[t.Callable[["OAuthTokenResponse"], t.Any]] = None,
+        access_token: str | None = None,
+        expires_at: int | None = None,
+        on_refresh: None | (t.Callable[[OAuthTokenResponse], t.Any]) = None,
     ):
         # values for _get_token_data
         self.confidential_client = confidential_client
@@ -79,7 +81,7 @@ class ClientCredentialsAuthorizer(RenewingAuthorizer):
 
         super().__init__(access_token, expires_at, on_refresh)
 
-    def _get_token_response(self) -> "OAuthTokenResponse":
+    def _get_token_response(self) -> OAuthTokenResponse:
         """
         Make a client credentials grant
         """
@@ -87,7 +89,7 @@ class ClientCredentialsAuthorizer(RenewingAuthorizer):
             requested_scopes=self.scopes
         )
 
-    def _extract_token_data(self, res: "OAuthTokenResponse") -> t.Dict[str, t.Any]:
+    def _extract_token_data(self, res: OAuthTokenResponse) -> dict[str, t.Any]:
         """
         Get the tokens .by_resource_server,
         Ensure that only one token was gotten, and return that token.

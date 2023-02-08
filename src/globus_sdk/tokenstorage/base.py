@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 import contextlib
 import os
@@ -14,7 +16,7 @@ class StorageAdapter(metaclass=abc.ABCMeta):
         """
 
     @abc.abstractmethod
-    def get_token_data(self, resource_server: str) -> t.Optional[t.Dict[str, t.Any]]:
+    def get_token_data(self, resource_server: str) -> dict[str, t.Any] | None:
         """
         Lookup token data for a resource server
 

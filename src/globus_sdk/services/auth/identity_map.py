@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as t
 import uuid
 
@@ -18,7 +20,7 @@ def is_username(val: str) -> bool:
 
 def split_ids_and_usernames(
     identity_ids: t.Iterable[str],
-) -> t.Tuple[t.Set[str], t.Set[str]]:
+) -> tuple[set[str], set[str]]:
     ids = set()
     usernames = set()
 
@@ -136,10 +138,10 @@ class IdentityMap:
     def __init__(
         self,
         auth_client: AuthClient,
-        identity_ids: t.Optional[t.Iterable[str]] = None,
+        identity_ids: t.Iterable[str] | None = None,
         *,
-        id_batch_size: t.Optional[int] = None,
-        cache: t.Optional[t.MutableMapping[str, t.Dict[str, t.Any]]] = None,
+        id_batch_size: int | None = None,
+        cache: None | (t.MutableMapping[str, dict[str, t.Any]]) = None,
     ):
         self.auth_client = auth_client
         self.id_batch_size = id_batch_size or self._default_id_batch_size
@@ -153,7 +155,7 @@ class IdentityMap:
         # IdentityMap objects share a cache
         self._cache = cache if cache is not None else {}
 
-    def _create_batch(self, key: str) -> t.Set[str]:
+    def _create_batch(self, key: str) -> set[str]:
         """
         Create a batch to do a lookup.
 
@@ -227,7 +229,7 @@ class IdentityMap:
         self.unresolved_ids.add(identity_id)
         return True
 
-    def get(self, key: str, default: t.Optional[t.Any] = None) -> t.Any:
+    def get(self, key: str, default: t.Any | None = None) -> t.Any:
         """
         A dict-like get() method which accepts a default value.
         """

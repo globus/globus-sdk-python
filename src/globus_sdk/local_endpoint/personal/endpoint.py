@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import typing as t
 
@@ -32,9 +34,9 @@ class LocalGlobusConnectPersonal:
     :type config_dir: str, optional
     """
 
-    def __init__(self, *, config_dir: t.Optional[str] = None) -> None:
+    def __init__(self, *, config_dir: str | None = None) -> None:
         self._config_dir = config_dir
-        self._endpoint_id: t.Optional[str] = None
+        self._endpoint_id: str | None = None
 
     def _detect_config_dir(self) -> str:
         if _on_windows():
@@ -67,24 +69,26 @@ class LocalGlobusConnectPersonal:
         )
 
     @t.overload
-    def get_owner_info(self) -> t.Optional["globus_sdk.GlobusConnectPersonalOwnerInfo"]:
+    def get_owner_info(
+        self,
+    ) -> globus_sdk.GlobusConnectPersonalOwnerInfo | None:
         ...
 
     @t.overload
     def get_owner_info(
         self, auth_client: None
-    ) -> t.Optional["globus_sdk.GlobusConnectPersonalOwnerInfo"]:
+    ) -> globus_sdk.GlobusConnectPersonalOwnerInfo | None:
         ...
 
     @t.overload
     def get_owner_info(
-        self, auth_client: "globus_sdk.AuthClient"
-    ) -> t.Optional[t.Dict[str, t.Any]]:
+        self, auth_client: globus_sdk.AuthClient
+    ) -> dict[str, t.Any] | None:
         ...
 
     def get_owner_info(
-        self, auth_client: t.Optional["globus_sdk.AuthClient"] = None
-    ) -> t.Union[None, "globus_sdk.GlobusConnectPersonalOwnerInfo", t.Dict[str, t.Any]]:
+        self, auth_client: globus_sdk.AuthClient | None = None
+    ) -> None | globus_sdk.GlobusConnectPersonalOwnerInfo | dict[str, t.Any]:
         """
         Look up the local GCP information, returning a
         :class:`GlobusConnectPersonalOwnerInfo` object. The result may have an ``id`` or
@@ -158,7 +162,7 @@ class LocalGlobusConnectPersonal:
             return None
 
     @property
-    def endpoint_id(self) -> t.Optional[str]:
+    def endpoint_id(self) -> str | None:
         """
         :type: str
 

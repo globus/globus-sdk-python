@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import typing as t
 
@@ -38,7 +40,10 @@ class SearchClient(client.BaseClient):
 
     @utils.doc_api_method("Get Index Metadata", "search/reference/index_show/")
     def get_index(
-        self, index_id: UUIDLike, *, query_params: t.Optional[t.Dict[str, t.Any]] = None
+        self,
+        index_id: UUIDLike,
+        *,
+        query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /v1/index/<index_id>``
@@ -75,7 +80,7 @@ class SearchClient(client.BaseClient):
         offset: int = 0,
         limit: int = 10,
         advanced: bool = False,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /v1/index/<index_id>/search``
@@ -112,10 +117,10 @@ class SearchClient(client.BaseClient):
     def post_search(
         self,
         index_id: UUIDLike,
-        data: t.Union[t.Dict[str, t.Any], SearchQuery],
+        data: dict[str, t.Any] | SearchQuery,
         *,
-        offset: t.Optional[int] = None,
-        limit: t.Optional[int] = None,
+        offset: int | None = None,
+        limit: int | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /v1/index/<index_id>/search``
@@ -173,9 +178,9 @@ class SearchClient(client.BaseClient):
     def scroll(
         self,
         index_id: UUIDLike,
-        data: t.Union[t.Dict[str, t.Any], SearchScrollQuery],
+        data: dict[str, t.Any] | SearchScrollQuery,
         *,
-        marker: t.Optional[str] = None,
+        marker: str | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /v1/index/<index_id>/scroll``
@@ -206,7 +211,7 @@ class SearchClient(client.BaseClient):
 
     @utils.doc_api_method("Ingest", "search/reference/ingest")
     def ingest(
-        self, index_id: UUIDLike, data: t.Dict[str, t.Any]
+        self, index_id: UUIDLike, data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /v1/index/<index_id>/ingest``
@@ -262,7 +267,7 @@ class SearchClient(client.BaseClient):
 
     @utils.doc_api_method("Delete By Query", "search/reference/delete_by_query")
     def delete_by_query(
-        self, index_id: UUIDLike, data: t.Dict[str, t.Any]
+        self, index_id: UUIDLike, data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /v1/index/<index_id>/delete_by_query``
@@ -298,7 +303,7 @@ class SearchClient(client.BaseClient):
         index_id: UUIDLike,
         subject: str,
         *,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /v1/index/<index_id>/subject``
@@ -323,7 +328,7 @@ class SearchClient(client.BaseClient):
         index_id: UUIDLike,
         subject: str,
         *,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``DELETE /v1/index/<index_id>/subject``
@@ -353,8 +358,8 @@ class SearchClient(client.BaseClient):
         index_id: UUIDLike,
         subject: str,
         *,
-        entry_id: t.Optional[str] = None,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        entry_id: str | None = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /v1/index/<index_id>/entry``
@@ -389,7 +394,7 @@ class SearchClient(client.BaseClient):
 
     @utils.doc_api_method("Create Entry", "search/reference/create_or_update_entry")
     def create_entry(
-        self, index_id: UUIDLike, data: t.Dict[str, t.Any]
+        self, index_id: UUIDLike, data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /v1/index/<index_id>/entry``
@@ -426,7 +431,7 @@ class SearchClient(client.BaseClient):
 
     @utils.doc_api_method("Update Entry", "search/reference/create_or_update_entry")
     def update_entry(
-        self, index_id: UUIDLike, data: t.Dict[str, t.Any]
+        self, index_id: UUIDLike, data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
         ``PUT /v1/index/<index_id>/entry``
@@ -454,8 +459,8 @@ class SearchClient(client.BaseClient):
         index_id: UUIDLike,
         subject: str,
         *,
-        entry_id: t.Optional[str] = None,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        entry_id: str | None = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``DELETE  /v1/index/<index_id>/entry``
@@ -493,7 +498,10 @@ class SearchClient(client.BaseClient):
 
     @utils.doc_api_method("Get Task", "search/reference/get_task")
     def get_task(
-        self, task_id: UUIDLike, *, query_params: t.Optional[t.Dict[str, t.Any]] = None
+        self,
+        task_id: UUIDLike,
+        *,
+        query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /v1/task/<task_id>``
@@ -510,7 +518,10 @@ class SearchClient(client.BaseClient):
 
     @utils.doc_api_method("Task List", "search/reference/task_list")
     def get_task_list(
-        self, index_id: UUIDLike, *, query_params: t.Optional[t.Dict[str, t.Any]] = None
+        self,
+        index_id: UUIDLike,
+        *,
+        query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /v1/task_list/<index_id>``
@@ -533,9 +544,9 @@ class SearchClient(client.BaseClient):
     def create_role(
         self,
         index_id: UUIDLike,
-        data: t.Dict[str, t.Any],
+        data: dict[str, t.Any],
         *,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /v1/index/<index_id>/role``
@@ -573,7 +584,10 @@ class SearchClient(client.BaseClient):
 
     @utils.doc_api_method("Get Role List", "search/reference/role_list/")
     def get_role_list(
-        self, index_id: UUIDLike, *, query_params: t.Optional[t.Dict[str, t.Any]] = None
+        self,
+        index_id: UUIDLike,
+        *,
+        query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /v1/index/<index_id>/role_list``
@@ -595,7 +609,7 @@ class SearchClient(client.BaseClient):
         index_id: UUIDLike,
         role_id: str,
         *,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``DELETE /v1/index/<index_id>/role/<role_id>``

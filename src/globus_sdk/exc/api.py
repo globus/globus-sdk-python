@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import typing as t
 
@@ -30,7 +32,7 @@ class GlobusAPIError(GlobusError):
         self.code = "Error"
         self.message = r.text
 
-        self._info: t.Optional[ErrorInfoContainer] = None
+        self._info: ErrorInfoContainer | None = None
         self._underlying_response = r
         self._parse_response()
         super().__init__(*self._get_args())
@@ -63,7 +65,7 @@ class GlobusAPIError(GlobusError):
         )
 
     @property
-    def raw_json(self) -> t.Optional[t.Dict[str, t.Any]]:
+    def raw_json(self) -> dict[str, t.Any] | None:
         """
         Get the verbatim error message received from a Globus API, interpreted
         as JSON data
@@ -106,7 +108,7 @@ class GlobusAPIError(GlobusError):
             self._info = ErrorInfoContainer(json_data)
         return self._info
 
-    def _get_request_authorization_scheme(self) -> t.Union[str, None]:
+    def _get_request_authorization_scheme(self) -> str | None:
         try:
             authz_h = self._underlying_response.request.headers["Authorization"]
             authz_scheme = authz_h.split()[0]
@@ -116,7 +118,7 @@ class GlobusAPIError(GlobusError):
             pass
         return None
 
-    def _get_args(self) -> t.List[t.Any]:
+    def _get_args(self) -> list[t.Any]:
         """
         Get arguments to pass to the Exception base class. These args are
         displayed in stack traces.
@@ -184,7 +186,7 @@ class GlobusAPIError(GlobusError):
             json_data = json_data["errors"][0]
         self._load_from_json(json_data)
 
-    def _load_from_json(self, data: t.Dict[str, t.Any]) -> None:
+    def _load_from_json(self, data: dict[str, t.Any]) -> None:
         # rewrite 'code' if present and correct type
         if isinstance(data.get("code"), str):
             self.code = data["code"]

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import typing as t
 
@@ -53,7 +55,7 @@ class AuthorizationParameterInfo(ErrorInfo):
     >>>     print("got authz params:", authz_params)
     """
 
-    def __init__(self, error_data: t.Dict[str, t.Any]):
+    def __init__(self, error_data: dict[str, t.Any]):
         # data is there if this key is present and it is a dict
         self._has_data = isinstance(error_data.get("authorization_parameters"), dict)
         data = t.cast(
@@ -65,11 +67,12 @@ class AuthorizationParameterInfo(ErrorInfo):
             t.Optional[t.List[str]], data.get("session_required_identities")
         )
         self.session_required_single_domain = t.cast(
-            t.Optional[t.List[str]], data.get("session_required_single_domain")
+            t.Optional[t.List[str]],
+            data.get("session_required_single_domain"),
         )
 
         # get str|None and parse as appropriate
-        self.session_required_policies: t.Optional[t.List[str]] = None
+        self.session_required_policies: list[str] | None = None
         session_required_policies = data.get("session_required_policies")
         if isinstance(session_required_policies, str):
             self.session_required_policies = session_required_policies.split(",")
@@ -90,7 +93,7 @@ class ConsentRequiredInfo(ErrorInfo):
     :vartype required_scopes: list of str, optional
     """
 
-    def __init__(self, error_data: t.Dict[str, t.Any]):
+    def __init__(self, error_data: dict[str, t.Any]):
         # data is only considered parseable if this error has the code 'ConsentRequired'
         has_code = error_data.get("code") == "ConsentRequired"
         data = error_data if has_code else {}
@@ -111,7 +114,7 @@ class ErrorInfoContainer:
     :ivar consent_required: A parsed ConsentRequiredInfo object
     """
 
-    def __init__(self, error_data: t.Optional[t.Dict[str, t.Any]]) -> None:
+    def __init__(self, error_data: dict[str, t.Any] | None) -> None:
         self.authorization_parameters = AuthorizationParameterInfo(error_data or {})
         self.consent_required = ConsentRequiredInfo(error_data or {})
 

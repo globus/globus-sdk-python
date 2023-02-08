@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 import typing as t
 
@@ -24,9 +26,7 @@ class GlobusOAuthFlowManager(abc.ABC):
     """
 
     @abc.abstractmethod
-    def get_authorize_url(
-        self, query_params: t.Optional[t.Dict[str, t.Any]] = None
-    ) -> str:
+    def get_authorize_url(self, query_params: dict[str, t.Any] | None = None) -> str:
         """
         This method consumes no arguments or keyword arguments, and produces a
         string URL for the Authorize Step of a 3-legged OAuth2 flow.

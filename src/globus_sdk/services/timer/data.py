@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import logging
 import typing as t
@@ -52,14 +54,14 @@ class TimerJob(PayloadWrapper):
     def __init__(
         self,
         callback_url: str,
-        callback_body: t.Dict[str, t.Any],
-        start: t.Union[datetime.datetime, str],
-        interval: t.Union[datetime.timedelta, int, None],
+        callback_body: dict[str, t.Any],
+        start: datetime.datetime | str,
+        interval: datetime.timedelta | int | None,
         *,
-        name: t.Optional[str] = None,
-        stop_after: t.Optional[datetime.datetime] = None,
-        stop_after_n: t.Optional[int] = None,
-        scope: t.Optional[str] = None,
+        name: str | None = None,
+        stop_after: datetime.datetime | None = None,
+        stop_after_n: int | None = None,
+        scope: str | None = None,
     ) -> None:
         super().__init__()
         self["callback_url"] = callback_url
@@ -84,16 +86,16 @@ class TimerJob(PayloadWrapper):
     @classmethod
     def from_transfer_data(
         cls,
-        transfer_data: t.Union[TransferData, t.Dict[str, t.Any]],
-        start: t.Union[datetime.datetime, str],
-        interval: t.Union[datetime.timedelta, int, None],
+        transfer_data: TransferData | dict[str, t.Any],
+        start: datetime.datetime | str,
+        interval: datetime.timedelta | int | None,
         *,
-        name: t.Optional[str] = None,
-        stop_after: t.Optional[datetime.datetime] = None,
-        stop_after_n: t.Optional[int] = None,
-        scope: t.Optional[str] = None,
-        environment: t.Optional[str] = None,
-    ) -> "TimerJob":
+        name: str | None = None,
+        stop_after: datetime.datetime | None = None,
+        stop_after_n: int | None = None,
+        scope: str | None = None,
+        environment: str | None = None,
+    ) -> TimerJob:
         r"""
         Specify data to create a Timer job using the parameters for a transfer. Timer
         will use those parameters to run the defined transfer operation, recurring at

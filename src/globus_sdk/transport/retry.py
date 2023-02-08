@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import enum
 import logging
 import typing as t
@@ -36,9 +38,9 @@ class RetryContext:
         self,
         attempt: int,
         *,
-        authorizer: t.Optional[GlobusAuthorizer] = None,
-        response: t.Optional[requests.Response] = None,
-        exception: t.Optional[Exception] = None,
+        authorizer: GlobusAuthorizer | None = None,
+        response: requests.Response | None = None,
+        exception: Exception | None = None,
     ):
         # retry attempt number
         self.attempt = attempt
@@ -49,7 +51,7 @@ class RetryContext:
         self.response = response
         self.exception = exception
         # the retry delay or "backoff" before retrying
-        self.backoff: t.Optional[float] = None
+        self.backoff: float | None = None
 
 
 class RetryCheckResult(enum.Enum):
@@ -117,9 +119,9 @@ class RetryCheckRunner:
 
     # check configs: a list of pairs, (check, flags)
     # a check without flags is assumed to have flags=NONE
-    def __init__(self, checks: t.List[RetryCheck]):
-        self._checks: t.List[RetryCheck] = []
-        self._check_data: t.Dict[RetryCheck, t.Dict[str, t.Any]] = {}
+    def __init__(self, checks: list[RetryCheck]):
+        self._checks: list[RetryCheck] = []
+        self._check_data: dict[RetryCheck, dict[str, t.Any]] = {}
         for check in checks:
             self._checks.append(check)
             self._check_data[check] = {}

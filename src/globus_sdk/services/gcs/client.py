@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as t
 import uuid
 
@@ -54,10 +56,10 @@ class GCSClient(client.BaseClient):
         self,
         gcs_address: str,
         *,
-        environment: t.Optional[str] = None,
-        authorizer: t.Optional[GlobusAuthorizer] = None,
-        app_name: t.Optional[str] = None,
-        transport_params: t.Optional[t.Dict[str, t.Any]] = None,
+        environment: str | None = None,
+        authorizer: GlobusAuthorizer | None = None,
+        app_name: str | None = None,
+        transport_params: dict[str, t.Any] | None = None,
     ):
         # check if the provided address was a DNS name or an HTTPS URL
         # if it was a URL, do not modify, but if it's a DNS name format it accordingly
@@ -75,7 +77,7 @@ class GCSClient(client.BaseClient):
 
     @staticmethod
     def get_gcs_endpoint_scopes(
-        endpoint_id: t.Union[uuid.UUID, str]
+        endpoint_id: uuid.UUID | str,
     ) -> scopes.GCSEndpointScopeBuilder:
         """Given a GCS Endpoint ID, this helper constructs an object containing the
         scopes for that Endpoint.
@@ -90,7 +92,7 @@ class GCSClient(client.BaseClient):
 
     @staticmethod
     def get_gcs_collection_scopes(
-        collection_id: t.Union[uuid.UUID, str]
+        collection_id: uuid.UUID | str,
     ) -> scopes.GCSCollectionScopeBuilder:
         """Given a GCS Collection ID, this helper constructs an object containing the
         scopes for that Collection.
@@ -104,7 +106,7 @@ class GCSClient(client.BaseClient):
         return scopes.GCSCollectionScopeBuilder(str(collection_id))
 
     @staticmethod
-    def connector_id_to_name(connector_id: UUIDLike) -> t.Optional[str]:
+    def connector_id_to_name(connector_id: UUIDLike) -> str | None:
         """
         Helper that converts a given connector_id into a human readable
         connector name string. Will return None if the id is not recognized.
@@ -131,12 +133,12 @@ class GCSClient(client.BaseClient):
     def get_collection_list(
         self,
         *,
-        mapped_collection_id: t.Optional[UUIDLike] = None,
-        filter: t.Union[  # pylint: disable=redefined-builtin
-            str, t.Iterable[str], None
-        ] = None,
-        include: t.Union[str, t.Iterable[str], None] = None,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        mapped_collection_id: UUIDLike | None = None,
+        filter: (  # pylint: disable=redefined-builtin
+            str | t.Iterable[str] | None
+        ) = None,
+        include: str | t.Iterable[str] | None = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> IterableGCSResponse:
         """
         ``GET /collections``
@@ -172,7 +174,7 @@ class GCSClient(client.BaseClient):
         self,
         collection_id: UUIDLike,
         *,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
         ``GET /collections/{collection_id}``
@@ -192,7 +194,7 @@ class GCSClient(client.BaseClient):
     @_gcsdoc("Create Collection", "openapi_Collections/#createCollection")
     def create_collection(
         self,
-        collection_data: t.Union[t.Dict[str, t.Any], CollectionDocument],
+        collection_data: dict[str, t.Any] | CollectionDocument,
     ) -> UnpackingGCSResponse:
         """
         ``POST /collections``
@@ -218,9 +220,9 @@ class GCSClient(client.BaseClient):
     def update_collection(
         self,
         collection_id: UUIDLike,
-        collection_data: t.Union[t.Dict[str, t.Any], CollectionDocument],
+        collection_data: dict[str, t.Any] | CollectionDocument,
         *,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
         ``PATCH /collections/{collection_id}``
@@ -246,7 +248,7 @@ class GCSClient(client.BaseClient):
         self,
         collection_id: UUIDLike,
         *,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``DELETE /collections/{collection_id}``
@@ -270,8 +272,8 @@ class GCSClient(client.BaseClient):
     def get_storage_gateway_list(
         self,
         *,
-        include: t.Union[None, str, t.Iterable[str]] = None,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        include: None | str | t.Iterable[str] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> IterableGCSResponse:
         """
         ``GET /storage_gateways``
@@ -295,9 +297,9 @@ class GCSClient(client.BaseClient):
     @_gcsdoc("Create a Storage Gateway", "openapi_Storage_Gateways/#postStorageGateway")
     def create_storage_gateway(
         self,
-        data: t.Union[t.Dict[str, t.Any], StorageGatewayDocument],
+        data: dict[str, t.Any] | StorageGatewayDocument,
         *,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
         ``POST /storage_gateways``
@@ -318,8 +320,8 @@ class GCSClient(client.BaseClient):
         self,
         storage_gateway_id: UUIDLike,
         *,
-        include: t.Union[None, str, t.Iterable[str]] = None,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        include: None | str | t.Iterable[str] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
         ``GET /storage_gateways/<storage_gateway_id>``
@@ -353,9 +355,9 @@ class GCSClient(client.BaseClient):
     def update_storage_gateway(
         self,
         storage_gateway_id: UUIDLike,
-        data: t.Union[t.Dict[str, t.Any], StorageGatewayDocument],
+        data: dict[str, t.Any] | StorageGatewayDocument,
         *,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``PATCH /storage_gateways/<storage_gateway_id>``
@@ -379,9 +381,9 @@ class GCSClient(client.BaseClient):
     )
     def delete_storage_gateway(
         self,
-        storage_gateway_id: t.Union[str, uuid.UUID],
+        storage_gateway_id: str | uuid.UUID,
         *,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         ``DELETE /storage_gateways/<storage_gateway_id>``
@@ -406,9 +408,9 @@ class GCSClient(client.BaseClient):
     )
     def get_role_list(
         self,
-        collection_id: t.Optional[UUIDLike] = None,
-        include: t.Optional[str] = None,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        collection_id: UUIDLike | None = None,
+        include: str | None = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> IterableGCSResponse:
         """
         ``GET /roles``
@@ -437,8 +439,8 @@ class GCSClient(client.BaseClient):
     @_gcsdoc("Create Role", "openapi_Roles/#postRole")
     def create_role(
         self,
-        data: t.Union[t.Dict[str, t.Any], GCSRoleDocument],
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        data: dict[str, t.Any] | GCSRoleDocument,
+        query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
         POST /roles
@@ -459,7 +461,7 @@ class GCSClient(client.BaseClient):
     def get_role(
         self,
         role_id: UUIDLike,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
         GET /roles/{role_id}
@@ -476,7 +478,7 @@ class GCSClient(client.BaseClient):
     def delete_role(
         self,
         role_id: UUIDLike,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         DELETE /roles/{role_id}
@@ -492,8 +494,8 @@ class GCSClient(client.BaseClient):
     @_gcsdoc("Get User Credential list", "openapi_User_Credentials/#getUserCredentials")
     def get_user_credential_list(
         self,
-        storage_gateway: t.Optional[UUIDLike] = None,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        storage_gateway: UUIDLike | None = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> IterableGCSResponse:
         """
         GET /user_credentials
@@ -514,8 +516,8 @@ class GCSClient(client.BaseClient):
     @_gcsdoc("Create a User Credential", "openapi_User_Credentials/#postUserCredential")
     def create_user_credential(
         self,
-        data: t.Union[t.Dict[str, t.Any], UserCredentialDocument],
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        data: dict[str, t.Any] | UserCredentialDocument,
+        query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
         POST /user_credentials
@@ -536,7 +538,7 @@ class GCSClient(client.BaseClient):
     def get_user_credential(
         self,
         user_credential_id: UUIDLike,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
         GET /user_credentials/{user_credential_id}
@@ -557,8 +559,8 @@ class GCSClient(client.BaseClient):
     def update_user_credential(
         self,
         user_credential_id: UUIDLike,
-        data: t.Union[t.Dict[str, t.Any], UserCredentialDocument],
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        data: dict[str, t.Any] | UserCredentialDocument,
+        query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
         PATCH /user_credentials/{user_credential_id}
@@ -582,7 +584,7 @@ class GCSClient(client.BaseClient):
     def delete_user_credential(
         self,
         user_credential_id: UUIDLike,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         DELETE /user_credentials/{user_credential_id}

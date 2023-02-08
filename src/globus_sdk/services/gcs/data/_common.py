@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 import typing as t
 
@@ -14,8 +16,8 @@ DatatypeCallback = t.Callable[["DocumentWithInducedDatatype"], t.Optional[Versio
 
 class DocumentWithInducedDatatype(Protocol):
     DATATYPE_BASE: str
-    DATATYPE_VERSION_IMPLICATIONS: t.Dict[str, VersionTuple]
-    DATATYPE_VERSION_CALLBACKS: t.Tuple[DatatypeCallback, ...]
+    DATATYPE_VERSION_IMPLICATIONS: dict[str, VersionTuple]
+    DATATYPE_VERSION_CALLBACKS: tuple[DatatypeCallback, ...]
 
     def __contains__(self, key: str) -> bool:  # pragma: no cover
         ...

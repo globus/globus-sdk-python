@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import collections.abc
 import json
 import logging
@@ -66,15 +68,13 @@ class AuthClient(client.BaseClient):
     error_class = AuthAPIError
     scopes = AuthScopes
 
-    def __init__(self, client_id: t.Optional[UUIDLike] = None, **kwargs: t.Any) -> None:
+    def __init__(self, client_id: UUIDLike | None = None, **kwargs: t.Any) -> None:
         super().__init__(**kwargs)
-        self.client_id: t.Optional[str] = (
-            str(client_id) if client_id is not None else None
-        )
+        self.client_id: str | None = str(client_id) if client_id is not None else None
         # an AuthClient may contain a GlobusOAuth2FlowManager in order to
         # encapsulate the functionality of various different types of flow
         # managers
-        self.current_oauth2_flow_manager: t.Optional[GlobusOAuthFlowManager] = None
+        self.current_oauth2_flow_manager: GlobusOAuthFlowManager | None = None
 
     @utils.doc_api_method(
         "Identities Resources", "auth/reference/#v2_api_identities_resources"
@@ -82,10 +82,10 @@ class AuthClient(client.BaseClient):
     def get_identities(
         self,
         *,
-        usernames: t.Union[t.Iterable[str], str, None] = None,
-        ids: t.Union[t.Iterable[UUIDLike], UUIDLike, None] = None,
+        usernames: t.Iterable[str] | str | None = None,
+        ids: t.Iterable[UUIDLike] | UUIDLike | None = None,
         provision: bool = False,
-        query_params: t.Optional[t.Dict[str, t.Any]] = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
         r"""
         GET /v2/api/identities
@@ -159,9 +159,7 @@ class AuthClient(client.BaseClient):
         """
 
         def _convert_listarg(
-            val: t.Union[
-                t.Iterable[t.Union[IntLike, UUIDLike]], t.Union[IntLike, UUIDLike]
-            ]
+            val: (t.Iterable[IntLike | UUIDLike] | IntLike | UUIDLike),
         ) -> str:
             if isinstance(val, collections.abc.Iterable):
                 return ",".join(utils.safe_strseq_iter(val))
@@ -197,7 +195,7 @@ class AuthClient(client.BaseClient):
         )
 
     def oauth2_get_authorize_url(
-        self, *, query_params: t.Optional[t.Dict[str, t.Any]] = None
+        self, *, query_params: dict[str, t.Any] | None = None
     ) -> str:
         """
         Get the authorization URL to which users should be sent.
@@ -249,7 +247,10 @@ class AuthClient(client.BaseClient):
         return self.current_oauth2_flow_manager.exchange_code_for_tokens(auth_code)
 
     def oauth2_refresh_token(
-        self, refresh_token: str, *, body_params: t.Optional[t.Dict[str, t.Any]] = None
+        self,
+        refresh_token: str,
+        *,
+        body_params: dict[str, t.Any] | None = None,
     ) -> OAuthTokenResponse:
         r"""
         Exchange a refresh token for a
@@ -276,7 +277,10 @@ class AuthClient(client.BaseClient):
         return self.oauth2_token(form_data, body_params=body_params)
 
     def oauth2_validate_token(
-        self, token: str, *, body_params: t.Optional[t.Dict[str, t.Any]] = None
+        self,
+        token: str,
+        *,
+        body_params: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
         """
         Validate a token. It can be an Access Token or a Refresh token.
@@ -341,7 +345,10 @@ class AuthClient(client.BaseClient):
         return self.post("/v2/oauth2/token/validate", data=body, encoding="form")
 
     def oauth2_revoke_token(
-        self, token: str, *, body_params: t.Optional[t.Dict[str, t.Any]] = None
+        self,
+        token: str,
+        *,
+        body_params: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
         """
         Revoke a token. It can be an Access Token or a Refresh token.
@@ -386,47 +393,46 @@ class AuthClient(client.BaseClient):
 
     @t.overload
     def oauth2_token(
-        self, form_data: t.Union[t.Dict[str, t.Any], utils.PayloadWrapper]
+        self,
+        form_data: dict[str, t.Any] | utils.PayloadWrapper,
     ) -> OAuthTokenResponse:
         ...
 
     @t.overload
     def oauth2_token(
         self,
-        form_data: t.Union[t.Dict[str, t.Any], utils.PayloadWrapper],
+        form_data: dict[str, t.Any] | utils.PayloadWrapper,
         *,
-        body_params: t.Optional[t.Dict[str, t.Any]],
+        body_params: dict[str, t.Any] | None,
     ) -> OAuthTokenResponse:
         ...
 
     @t.overload
     def oauth2_token(
         self,
-        form_data: t.Union[t.Dict[str, t.Any], utils.PayloadWrapper],
+        form_data: dict[str, t.Any] | utils.PayloadWrapper,
         *,
-        response_class: t.Type[RT],
+        response_class: type[RT],
     ) -> RT:
         ...
 
     @t.overload
     def oauth2_token(
         self,
-        form_data: t.Union[t.Dict[str, t.Any], utils.PayloadWrapper],
+        form_data: dict[str, t.Any] | utils.PayloadWrapper,
         *,
-        body_params: t.Optional[t.Dict[str, t.Any]],
-        response_class: t.Type[RT],
+        body_params: dict[str, t.Any] | None,
+        response_class: type[RT],
     ) -> RT:
         ...
 
     def oauth2_token(
         self,
-        form_data: t.Union[t.Dict[str, t.Any], utils.PayloadWrapper],
+        form_data: dict[str, t.Any] | utils.PayloadWrapper,
         *,
-        body_params: t.Optional[t.Dict[str, t.Any]] = None,
-        response_class: t.Union[
-            t.Type[OAuthTokenResponse], t.Type[RT]
-        ] = OAuthTokenResponse,
-    ) -> t.Union[OAuthTokenResponse, RT]:
+        body_params: dict[str, t.Any] | None = None,
+        response_class: (type[OAuthTokenResponse] | type[RT]) = OAuthTokenResponse,
+    ) -> OAuthTokenResponse | RT:
         """
         This is the generic form of calling the OAuth2 Token endpoint.
         It takes ``form_data``, a dict which will be encoded in a form POST
@@ -497,33 +503,27 @@ class AuthClient(client.BaseClient):
     @t.overload
     def get_jwk(
         self,
-        openid_configuration: t.Optional[
-            t.Union[GlobusHTTPResponse, t.Dict[str, t.Any]]
-        ],
+        openid_configuration: None | (GlobusHTTPResponse | dict[str, t.Any]),
         *,
-        as_pem: "Literal[True]",
+        as_pem: Literal[True],
     ) -> RSAPublicKey:
         ...
 
     @t.overload
     def get_jwk(
         self,
-        openid_configuration: t.Optional[
-            t.Union[GlobusHTTPResponse, t.Dict[str, t.Any]]
-        ],
+        openid_configuration: None | (GlobusHTTPResponse | dict[str, t.Any]),
         *,
-        as_pem: "Literal[False]",
-    ) -> t.Dict[str, t.Any]:
+        as_pem: Literal[False],
+    ) -> dict[str, t.Any]:
         ...
 
     def get_jwk(
         self,
-        openid_configuration: t.Optional[
-            t.Union[GlobusHTTPResponse, t.Dict[str, t.Any]]
-        ] = None,
+        openid_configuration: None | (GlobusHTTPResponse | dict[str, t.Any]) = None,
         *,
         as_pem: bool = False,
-    ) -> t.Union[RSAPublicKey, t.Dict[str, t.Any]]:
+    ) -> RSAPublicKey | dict[str, t.Any]:
         """
         Fetch the Globus Auth JWK.
 

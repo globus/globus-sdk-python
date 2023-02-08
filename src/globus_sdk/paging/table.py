@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import typing as t
 
 from globus_sdk.response import GlobusHTTPResponse
@@ -38,7 +40,7 @@ class PaginatorTable:
         self._client = client
         # _bindings is a lazily loaded table of names -> callables which
         # return paginators
-        self._bindings: t.Dict[str, t.Callable[..., Paginator[PageT]]] = {}
+        self._bindings: dict[str, t.Callable[..., Paginator[PageT]]] = {}
 
     def _add_binding(
         self, methodname: str, bound_method: t.Callable[..., PageT]
@@ -59,7 +61,7 @@ class PaginatorTable:
 
     # customize pickling methods to ensure that the object is pickle-safe
 
-    def __getstate__(self) -> t.Dict[str, t.Any]:
+    def __getstate__(self) -> dict[str, t.Any]:
         # when pickling, drop any bound methods
         d = dict(self.__dict__)  # copy
         d["_bindings"] = {}
@@ -68,5 +70,5 @@ class PaginatorTable:
     # custom __setstate__ to avoid an infinite loop on `getattr` before `_bindings` is
     # populated
     # see: https://docs.python.org/3/library/pickle.html#object.__setstate__
-    def __setstate__(self, d: t.Dict[str, t.Any]) -> None:
+    def __setstate__(self, d: dict[str, t.Any]) -> None:
         self.__dict__.update(d)

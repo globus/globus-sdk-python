@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 import typing as t
 
@@ -38,11 +40,11 @@ class UnpackingGCSResponse(GlobusHTTPResponse):
 
     def _default_unpacking_match(
         self, spec: str
-    ) -> t.Callable[[t.Dict[str, t.Any]], bool]:
+    ) -> t.Callable[[dict[str, t.Any]], bool]:
         if not re.fullmatch(r"\w+", spec):
             raise ValueError("Invalid UnpackingGCSResponse specification.")
 
-        def match_func(data: t.Dict[str, t.Any]) -> bool:
+        def match_func(data: dict[str, t.Any]) -> bool:
             if not ("DATA_TYPE" in data and isinstance(data["DATA_TYPE"], str)):
                 return False
             if "#" not in data["DATA_TYPE"]:
@@ -55,7 +57,7 @@ class UnpackingGCSResponse(GlobusHTTPResponse):
     def __init__(
         self,
         response: GlobusHTTPResponse,
-        match: t.Union[str, t.Callable[[t.Dict[str, t.Any]], bool]],
+        match: str | t.Callable[[dict[str, t.Any]], bool],
     ):
         super().__init__(response)
 
@@ -64,7 +66,7 @@ class UnpackingGCSResponse(GlobusHTTPResponse):
         else:
             self._match_func = self._default_unpacking_match(match)
 
-        self._unpacked_data: t.Optional[t.Dict[str, t.Any]] = None
+        self._unpacked_data: dict[str, t.Any] | None = None
         self._did_unpack = False
 
     @property
@@ -75,7 +77,7 @@ class UnpackingGCSResponse(GlobusHTTPResponse):
         """
         return self._parsed_json
 
-    def _unpack(self) -> t.Optional[t.Dict[str, t.Any]]:
+    def _unpack(self) -> dict[str, t.Any] | None:
         """
         Unpack the response from the `"data"` array, returning the first match found.
         If no matches are founds, or the data is the wrong shape, return None.

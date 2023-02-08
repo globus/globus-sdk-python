@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import importlib
 import typing as t
 
@@ -7,13 +9,13 @@ import globus_sdk
 
 from .models import RegisteredResponse, ResponseList, ResponseSet
 
-_RESPONSE_SET_REGISTRY: t.Dict[t.Any, ResponseSet] = {}
+_RESPONSE_SET_REGISTRY: dict[t.Any, ResponseSet] = {}
 
 
 def register_response_set(
     set_id: t.Any,
-    rset: t.Union[ResponseSet, t.Dict[str, t.Dict[str, t.Any]]],
-    metadata: t.Optional[t.Dict[str, t.Any]] = None,
+    rset: ResponseSet | dict[str, dict[str, t.Any]],
+    metadata: dict[str, t.Any] | None = None,
 ) -> ResponseSet:
     """
     Register a new ``ResponseSet`` object.
@@ -91,7 +93,7 @@ def get_response_set(set_id: t.Any) -> ResponseSet:
 
 
 def load_response_set(
-    set_id: t.Any, *, requests_mock: t.Optional[responses.RequestsMock] = None
+    set_id: t.Any, *, requests_mock: responses.RequestsMock | None = None
 ) -> ResponseSet:
     """
     Optionally lookup a response set and activate all of its responses. If
@@ -109,8 +111,8 @@ def load_response(
     set_id: t.Any,
     *,
     case: str = "default",
-    requests_mock: t.Optional[responses.RequestsMock] = None,
-) -> t.Union[RegisteredResponse, ResponseList]:
+    requests_mock: responses.RequestsMock | None = None,
+) -> RegisteredResponse | ResponseList:
     """
     Optionally lookup and activate an individual response. If given a
     ``RegisteredResponse``, activate it, otherwise the first argument is an ID

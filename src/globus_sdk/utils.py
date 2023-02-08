@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import collections
 import collections.abc
 import hashlib
@@ -26,7 +28,7 @@ def b64str(s: str) -> str:
     return b64encode(s.encode("utf-8")).decode("utf-8")
 
 
-def slash_join(a: str, b: t.Optional[str]) -> str:
+def slash_join(a: str, b: str | None) -> str:
     """
     Join a and b with a single slash, regardless of whether they already
     contain a trailing/leading slash or neither.
@@ -65,7 +67,9 @@ def doc_api_method(
     return decorate
 
 
-def safe_strseq_iter(value: t.Iterable[t.Any]) -> t.Generator[str, None, None]:
+def safe_strseq_iter(
+    value: t.Iterable[t.Any],
+) -> t.Generator[str, None, None]:
     """
     Given an Iterable (typically of strings), produce an iterator over it of strings.
     This is a passthrough with two caveats:
@@ -127,7 +131,7 @@ class PayloadWrapper(PayloadWrapperBase):
         self,
         key: str,
         val: t.Any,
-        callback: t.Optional[t.Callable[[t.Any], t.Any]] = None,
+        callback: t.Callable[[t.Any], t.Any] | None = None,
     ) -> None:
         if val is not None:
             self[key] = callback(val) if callback else val
@@ -136,11 +140,11 @@ class PayloadWrapper(PayloadWrapperBase):
         for k, v in kwargs.items():
             self._set_value(k, v, callback=str)
 
-    def _set_optstrlists(self, **kwargs: t.Optional[t.Iterable[t.Any]]) -> None:
+    def _set_optstrlists(self, **kwargs: t.Iterable[t.Any] | None) -> None:
         for k, v in kwargs.items():
             self._set_value(k, v, callback=lambda x: list(safe_strseq_iter(x)))
 
-    def _set_optbools(self, **kwargs: t.Optional[bool]) -> None:
+    def _set_optbools(self, **kwargs: bool | None) -> None:
         for k, v in kwargs.items():
             self._set_value(k, v, callback=bool)
 
@@ -179,10 +183,10 @@ class _classproperty(t.Generic[T, R]):
       https://docs.python.org/3/howto/descriptor.html#properties
     """
 
-    def __init__(self, func: t.Callable[[t.Type[T]], R]) -> None:
+    def __init__(self, func: t.Callable[[type[T]], R]) -> None:
         self.func = func
 
-    def __get__(self, obj: t.Any, cls: t.Type[T]) -> R:
+    def __get__(self, obj: t.Any, cls: type[T]) -> R:
         return self.func(cls)
 
 

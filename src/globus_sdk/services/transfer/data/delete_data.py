@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import logging
 import typing as t
@@ -94,20 +96,20 @@ class DeleteData(utils.PayloadWrapper):
 
     def __init__(
         self,
-        transfer_client: t.Optional["globus_sdk.TransferClient"] = None,
-        endpoint: t.Optional[UUIDLike] = None,
+        transfer_client: globus_sdk.TransferClient | None = None,
+        endpoint: UUIDLike | None = None,
         *,
-        label: t.Optional[str] = None,
-        submission_id: t.Optional[UUIDLike] = None,
+        label: str | None = None,
+        submission_id: UUIDLike | None = None,
         recursive: bool = False,
         ignore_missing: bool = False,
         interpret_globs: bool = False,
-        deadline: t.Optional[t.Union[str, datetime.datetime]] = None,
-        skip_activation_check: t.Optional[bool] = None,
+        deadline: str | datetime.datetime | None = None,
+        skip_activation_check: bool | None = None,
         notify_on_succeeded: bool = True,
         notify_on_failed: bool = True,
         notify_on_inactive: bool = True,
-        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
+        additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
         # this must be checked explicitly to handle the fact that `transfer_client` is
@@ -150,7 +152,10 @@ class DeleteData(utils.PayloadWrapper):
                 )
 
     def add_item(
-        self, path: str, *, additional_fields: t.Optional[t.Dict[str, t.Any]] = None
+        self,
+        path: str,
+        *,
+        additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         """
         Add a file or directory or symlink to be deleted. If any of the paths
@@ -166,7 +171,7 @@ class DeleteData(utils.PayloadWrapper):
         log.debug('DeleteData[{}].add_item: "{}"'.format(self["endpoint"], path))
         self["DATA"].append(item_data)
 
-    def iter_items(self) -> t.Iterator[t.Dict[str, t.Any]]:
+    def iter_items(self) -> t.Iterator[dict[str, t.Any]]:
         """
         An iterator of items created by ``add_item``.
 

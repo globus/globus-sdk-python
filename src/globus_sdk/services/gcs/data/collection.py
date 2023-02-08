@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 import typing as t
 
@@ -44,7 +46,7 @@ from ._common import (
 
 def _user_message_length_callback(
     obj: DocumentWithInducedDatatype,
-) -> t.Optional[VersionTuple]:
+) -> VersionTuple | None:
     if (
         "user_message" in obj
         and isinstance(obj["user_message"], str)
@@ -123,7 +125,7 @@ class CollectionDocument(utils.PayloadWrapper, abc.ABC):
     """
 
     DATATYPE_BASE: str = "collection"
-    DATATYPE_VERSION_IMPLICATIONS: t.Dict[str, t.Tuple[int, int, int]] = {
+    DATATYPE_VERSION_IMPLICATIONS: dict[str, tuple[int, int, int]] = {
         "guest_auth_policy_id": (1, 6, 0),
         "disable_anonymous_writes": (1, 5, 0),
         "force_verify": (1, 4, 0),
@@ -133,7 +135,7 @@ class CollectionDocument(utils.PayloadWrapper, abc.ABC):
         "user_message": (1, 1, 0),
         "user_message_link": (1, 1, 0),
     }
-    DATATYPE_VERSION_CALLBACKS: t.Tuple[DatatypeCallback, ...] = (
+    DATATYPE_VERSION_CALLBACKS: tuple[DatatypeCallback, ...] = (
         _user_message_length_callback,
     )
 
@@ -141,30 +143,30 @@ class CollectionDocument(utils.PayloadWrapper, abc.ABC):
         self,
         *,
         # data_type
-        data_type: t.Optional[str] = None,
+        data_type: str | None = None,
         # strs
-        collection_base_path: t.Optional[str] = None,
-        contact_email: t.Optional[str] = None,
-        contact_info: t.Optional[str] = None,
-        default_directory: t.Optional[str] = None,
-        department: t.Optional[str] = None,
-        description: t.Optional[str] = None,
-        display_name: t.Optional[str] = None,
-        identity_id: t.Optional[UUIDLike] = None,
-        info_link: t.Optional[str] = None,
-        organization: t.Optional[str] = None,
-        user_message: t.Optional[str] = None,
-        user_message_link: t.Optional[str] = None,
+        collection_base_path: str | None = None,
+        contact_email: str | None = None,
+        contact_info: str | None = None,
+        default_directory: str | None = None,
+        department: str | None = None,
+        description: str | None = None,
+        display_name: str | None = None,
+        identity_id: UUIDLike | None = None,
+        info_link: str | None = None,
+        organization: str | None = None,
+        user_message: str | None = None,
+        user_message_link: str | None = None,
         # str lists
-        keywords: t.Optional[t.Iterable[str]] = None,
+        keywords: t.Iterable[str] | None = None,
         # bools
-        disable_verify: t.Optional[bool] = None,
-        enable_https: t.Optional[bool] = None,
-        force_encryption: t.Optional[bool] = None,
-        force_verify: t.Optional[bool] = None,
-        public: t.Optional[bool] = None,
+        disable_verify: bool | None = None,
+        enable_https: bool | None = None,
+        force_encryption: bool | None = None,
+        force_verify: bool | None = None,
+        public: bool | None = None,
         # additional fields
-        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
+        additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
         self["collection_type"] = self.collection_type
@@ -256,47 +258,47 @@ class MappedCollectionDocument(CollectionDocument):
         self,
         *,
         # data type
-        data_type: t.Optional[str] = None,
+        data_type: str | None = None,
         # > common args start <
         # strs
-        collection_base_path: t.Optional[str] = None,
-        contact_email: t.Optional[str] = None,
-        contact_info: t.Optional[str] = None,
-        default_directory: t.Optional[str] = None,
-        department: t.Optional[str] = None,
-        description: t.Optional[str] = None,
-        display_name: t.Optional[str] = None,
-        identity_id: t.Optional[UUIDLike] = None,
-        info_link: t.Optional[str] = None,
-        organization: t.Optional[str] = None,
-        user_message: t.Optional[str] = None,
-        user_message_link: t.Optional[str] = None,
+        collection_base_path: str | None = None,
+        contact_email: str | None = None,
+        contact_info: str | None = None,
+        default_directory: str | None = None,
+        department: str | None = None,
+        description: str | None = None,
+        display_name: str | None = None,
+        identity_id: UUIDLike | None = None,
+        info_link: str | None = None,
+        organization: str | None = None,
+        user_message: str | None = None,
+        user_message_link: str | None = None,
         # str lists
-        keywords: t.Optional[t.Iterable[str]] = None,
+        keywords: t.Iterable[str] | None = None,
         # bools
-        disable_verify: t.Optional[bool] = None,
-        enable_https: t.Optional[bool] = None,
-        force_encryption: t.Optional[bool] = None,
-        force_verify: t.Optional[bool] = None,
-        public: t.Optional[bool] = None,
+        disable_verify: bool | None = None,
+        enable_https: bool | None = None,
+        force_encryption: bool | None = None,
+        force_verify: bool | None = None,
+        public: bool | None = None,
         # > common args end <
         # > specific args start <
         # strs
-        domain_name: t.Optional[str] = None,
-        guest_auth_policy_id: t.Optional[UUIDLike] = None,
-        storage_gateway_id: t.Optional[UUIDLike] = None,
+        domain_name: str | None = None,
+        guest_auth_policy_id: UUIDLike | None = None,
+        storage_gateway_id: UUIDLike | None = None,
         # str lists
-        sharing_users_allow: t.Optional[t.Iterable[str]] = None,
-        sharing_users_deny: t.Optional[t.Iterable[str]] = None,
-        sharing_restrict_paths: t.Optional[t.Dict[str, t.Any]] = None,
+        sharing_users_allow: t.Iterable[str] | None = None,
+        sharing_users_deny: t.Iterable[str] | None = None,
+        sharing_restrict_paths: dict[str, t.Any] | None = None,
         # bools
-        allow_guest_collections: t.Optional[bool] = None,
-        disable_anonymous_writes: t.Optional[bool] = None,
+        allow_guest_collections: bool | None = None,
+        disable_anonymous_writes: bool | None = None,
         # dicts
-        policies: t.Union["CollectionPolicies", t.Dict[str, t.Any], None] = None,
+        policies: (CollectionPolicies | dict[str, t.Any] | None) = None,
         # > specific args end <
         # additional fields
-        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
+        additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__(
             # data type
@@ -376,36 +378,36 @@ class GuestCollectionDocument(CollectionDocument):
         self,
         *,
         # data type
-        data_type: t.Optional[str] = None,
+        data_type: str | None = None,
         # > common args start <
         # strs
-        collection_base_path: t.Optional[str] = None,
-        contact_email: t.Optional[str] = None,
-        contact_info: t.Optional[str] = None,
-        default_directory: t.Optional[str] = None,
-        department: t.Optional[str] = None,
-        description: t.Optional[str] = None,
-        display_name: t.Optional[str] = None,
-        identity_id: t.Optional[UUIDLike] = None,
-        info_link: t.Optional[str] = None,
-        organization: t.Optional[str] = None,
-        user_message: t.Optional[str] = None,
-        user_message_link: t.Optional[str] = None,
+        collection_base_path: str | None = None,
+        contact_email: str | None = None,
+        contact_info: str | None = None,
+        default_directory: str | None = None,
+        department: str | None = None,
+        description: str | None = None,
+        display_name: str | None = None,
+        identity_id: UUIDLike | None = None,
+        info_link: str | None = None,
+        organization: str | None = None,
+        user_message: str | None = None,
+        user_message_link: str | None = None,
         # str lists
-        keywords: t.Optional[t.Iterable[str]] = None,
+        keywords: t.Iterable[str] | None = None,
         # bools
-        disable_verify: t.Optional[bool] = None,
-        enable_https: t.Optional[bool] = None,
-        force_encryption: t.Optional[bool] = None,
-        force_verify: t.Optional[bool] = None,
-        public: t.Optional[bool] = None,
+        disable_verify: bool | None = None,
+        enable_https: bool | None = None,
+        force_encryption: bool | None = None,
+        force_verify: bool | None = None,
+        public: bool | None = None,
         # > common args end <
         # > specific args start <
-        mapped_collection_id: t.Optional[UUIDLike] = None,
-        user_credential_id: t.Optional[UUIDLike] = None,
+        mapped_collection_id: UUIDLike | None = None,
+        user_credential_id: UUIDLike | None = None,
         # > specific args end <
         # additional fields
-        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
+        additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__(
             # data type
@@ -470,9 +472,9 @@ class POSIXCollectionPolicies(CollectionPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "posix_collection_policies#1.0.0",
-        sharing_groups_allow: t.Union[None, str, t.Iterable[str]] = None,
-        sharing_groups_deny: t.Union[None, str, t.Iterable[str]] = None,
-        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
+        sharing_groups_allow: None | str | t.Iterable[str] = None,
+        sharing_groups_deny: None | str | t.Iterable[str] = None,
+        additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(DATA_TYPE=DATA_TYPE)
@@ -506,9 +508,9 @@ class POSIXStagingCollectionPolicies(CollectionPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "posix_staging_collection_policies#1.0.0",
-        sharing_groups_allow: t.Union[None, str, t.Iterable[str]] = None,
-        sharing_groups_deny: t.Union[None, str, t.Iterable[str]] = None,
-        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
+        sharing_groups_allow: None | str | t.Iterable[str] = None,
+        sharing_groups_deny: None | str | t.Iterable[str] = None,
+        additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(DATA_TYPE=DATA_TYPE)
@@ -537,8 +539,8 @@ class GoogleCloudStorageCollectionPolicies(CollectionPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "google_cloud_storage_collection_policies#1.0.0",
-        project: t.Optional[str] = None,
-        additional_fields: t.Optional[t.Dict[str, t.Any]] = None,
+        project: str | None = None,
+        additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
         self._set_optstrs(DATA_TYPE=DATA_TYPE, project=project)

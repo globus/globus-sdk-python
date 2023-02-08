@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import typing as t
 
@@ -54,11 +56,11 @@ class RefreshTokenAuthorizer(RenewingAuthorizer):
     def __init__(
         self,
         refresh_token: str,
-        auth_client: "AuthClient",
+        auth_client: AuthClient,
         *,
-        access_token: t.Optional[str] = None,
-        expires_at: t.Optional[int] = None,
-        on_refresh: t.Optional[t.Callable[["OAuthTokenResponse"], t.Any]] = None,
+        access_token: str | None = None,
+        expires_at: int | None = None,
+        on_refresh: None | (t.Callable[[OAuthTokenResponse], t.Any]) = None,
     ):
         log.info(
             "Setting up RefreshTokenAuthorizer with auth_client="
@@ -71,13 +73,13 @@ class RefreshTokenAuthorizer(RenewingAuthorizer):
 
         super().__init__(access_token, expires_at, on_refresh)
 
-    def _get_token_response(self) -> "OAuthTokenResponse":
+    def _get_token_response(self) -> OAuthTokenResponse:
         """
         Make a refresh token grant
         """
         return self.auth_client.oauth2_refresh_token(self.refresh_token)
 
-    def _extract_token_data(self, res: "OAuthTokenResponse") -> t.Dict[str, t.Any]:
+    def _extract_token_data(self, res: OAuthTokenResponse) -> dict[str, t.Any]:
         """
         Get the tokens .by_resource_server,
         Ensure that only one token was gotten, and return that token.

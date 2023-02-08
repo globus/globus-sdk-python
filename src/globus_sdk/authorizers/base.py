@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import abc
-import typing as t
 
 
 class GlobusAuthorizer(metaclass=abc.ABCMeta):
@@ -11,7 +12,7 @@ class GlobusAuthorizer(metaclass=abc.ABCMeta):
     """
 
     @abc.abstractmethod
-    def get_authorization_header(self) -> t.Optional[str]:
+    def get_authorization_header(self) -> str | None:
         """
         Get the value for the ``Authorization`` header from this authorizer.
         If this method returns ``None``, then no ``Authorization`` header should be

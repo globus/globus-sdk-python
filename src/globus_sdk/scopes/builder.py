@@ -1,9 +1,14 @@
+from __future__ import annotations
+
 import typing as t
 
 from .scope_definition import MutableScope
 
 ScopeBuilderScopes = t.Union[
-    None, str, t.Tuple[str, str], t.List[t.Union[str, t.Tuple[str, str]]]
+    None,
+    str,
+    t.Tuple[str, str],
+    t.List[t.Union[str, t.Tuple[str, str]]],
 ]
 
 
@@ -22,7 +27,7 @@ class ScopeBuilder:
     :type known_url_scopes: list of str, optional
     """
 
-    _classattr_scope_names: t.List[str] = []
+    _classattr_scope_names: list[str] = []
 
     def __init__(
         self,
@@ -33,7 +38,7 @@ class ScopeBuilder:
     ) -> None:
         self.resource_server = resource_server
 
-        self._registered_scope_names: t.List[str] = []
+        self._registered_scope_names: list[str] = []
         self._register_scopes(known_scopes, self.urn_scope_string)
         self._register_scopes(known_url_scopes, self.url_scope_string)
 
@@ -45,7 +50,7 @@ class ScopeBuilder:
             self._registered_scope_names.append(scope_name)
             setattr(self, scope_name, transform_func(scope_val))
 
-    def _scopes_input_to_dict(self, items: ScopeBuilderScopes) -> t.Dict[str, str]:
+    def _scopes_input_to_dict(self, items: ScopeBuilderScopes) -> dict[str, str]:
         """
         ScopeBuilders accepts many collection-style types of scopes. This function
           normalizes all of those types into a standard {scope_name: scope_val} dict
@@ -72,7 +77,7 @@ class ScopeBuilder:
             return items_dict
 
     @property
-    def scope_names(self) -> t.List[str]:
+    def scope_names(self) -> list[str]:
         return self._classattr_scope_names + self._registered_scope_names
 
     # custom __getattr__ instructs `mypy` that unknown attributes of a ScopeBuilder are
