@@ -9,7 +9,7 @@ test:
 docs:
 	tox -e docs
 all-checks:
-	tox -e lint,pylint,mypy,mypy-test,test-lazy-imports,py36,py310,poetry-check,twine-check,docs
+	tox -e lint,pylint,mypy,mypy-test,test-lazy-imports,py37,py310,poetry-check,twine-check,docs
 
 .PHONY: showvars release prepare-release
 showvars:

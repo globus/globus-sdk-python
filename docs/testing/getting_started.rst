@@ -13,8 +13,8 @@ Dependencies
 
 This toolchain requires the ``responses`` library.
 
-``globus_sdk._testing`` is tested to operate with ``responses==0.17.0`` on
-python3.6, and the latest version of ``responses`` on python3.7+ .
+``globus_sdk._testing`` is tested to operate with the latest version of
+``responses``.
 
 Recommended Fixtures
 --------------------
