@@ -352,8 +352,8 @@ class TransferData(utils.PayloadWrapper):
         name: str,
         *,
         method: Literal["exclude"] = "exclude",
-        type: None
-        | (Literal["file", "dir"]) = None,  # pylint: disable=redefined-builtin
+        type: None  # pylint: disable=redefined-builtin
+        | (Literal["file", "dir"]) = None,
     ) -> None:
         """
         Add a filter rule to the transfer document.
