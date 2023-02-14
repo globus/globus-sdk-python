@@ -2159,7 +2159,7 @@ class TransferClient(client.BaseClient):
             query_params["marker"] = marker
         return IterableTransferResponse(
             self.get(
-                "endpoint_manager/task/{task_id}/successful_transfers",
+                f"endpoint_manager/task/{task_id}/successful_transfers",
                 query_params=query_params,
             )
         )
