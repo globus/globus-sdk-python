@@ -27,10 +27,14 @@ intersphinx_mapping = {
 # sphinx extensions (minimally, we want autodoc and viewcode to build the site)
 # plus, we have our own custom extension in the SDK to include
 extensions = [
+    # sphinx-included extensions
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
+    # other packages
+    "sphinx_copybutton",
     "sphinx_issues",
+    # our custom one
     "globus_sdk._sphinxext",
 ]
 

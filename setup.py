@@ -18,6 +18,7 @@ TEST_REQUIREMENTS = [
 ]
 DOC_REQUIREMENTS = [
     "sphinx<5",
+    "sphinx-copybutton==0.5.1",
     "sphinx-issues<3",
     "furo==2022.1.2",
 ]
