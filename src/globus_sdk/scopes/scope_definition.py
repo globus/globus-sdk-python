@@ -164,7 +164,7 @@ class Scope:
                 "Scope instances may not contain the special characters '[]* '. "
                 "Use either Scope.deserialize or Scope.parse instead"
             )
-        self._scope_string = scope_string
+        self.scope_string = scope_string
         self.optional = optional
         self.dependencies: list[Scope] = [] if dependencies is None else dependencies
 
@@ -196,7 +196,7 @@ class Scope:
         return data[0]
 
     def serialize(self) -> str:
-        base_scope = ("*" if self.optional else "") + self._scope_string
+        base_scope = ("*" if self.optional else "") + self.scope_string
         if not self.dependencies:
             return base_scope
         return (
@@ -238,7 +238,7 @@ class Scope:
         return self
 
     def __repr__(self) -> str:
-        parts: list[str] = [f"'{self._scope_string}'"]
+        parts: list[str] = [f"'{self.scope_string}'"]
         if self.optional:
             parts.append("optional=True")
         if self.dependencies:
@@ -294,7 +294,7 @@ class Scope:
             return False
 
         # top-level scope must match
-        if self._scope_string != other._scope_string:
+        if self.scope_string != other.scope_string:
             return False
 
         # between self.optional and other.optional, there are four possibilities,
@@ -363,14 +363,14 @@ class MutableScope:
             raise ValueError(
                 "MutableScope instances may not contain the special characters '[]* '."
             )
-        self._scope_string = scope_string
+        self.scope_string = scope_string
         self.optional = optional
         self.dependencies: list[MutableScope] = (
             [] if dependencies is None else dependencies
         )
 
     def serialize(self) -> str:
-        base_scope = ("*" if self.optional else "") + self._scope_string
+        base_scope = ("*" if self.optional else "") + self.scope_string
         if not self.dependencies:
             return base_scope
         return (
@@ -415,7 +415,7 @@ class MutableScope:
         return self
 
     def __repr__(self) -> str:
-        parts: list[str] = [f"'{self._scope_string}'"]
+        parts: list[str] = [f"'{self.scope_string}'"]
         if self.optional:
             parts.append("optional=True")
         if self.dependencies:

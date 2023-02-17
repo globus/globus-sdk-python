@@ -1,0 +1,2 @@
+* Make ``MutableScope.scope_string`` a public instance attribute (was
+  ``_scope_string``) (:pr:`NUMBER`)

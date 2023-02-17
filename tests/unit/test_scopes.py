@@ -204,10 +204,10 @@ def test_scope_parsing_ignores_non_semantic_whitespace(scope_string1, scope_stri
     s1, s2 = list1[0], list2[0]
     # Scope.__eq__ is not defined, so equivalence checking is manual (and somewhat error
     # prone) for now
-    assert s1._scope_string == s2._scope_string
+    assert s1.scope_string == s2.scope_string
     assert s1.optional == s2.optional
     for i in range(len(s1.dependencies)):
-        assert s1.dependencies[i]._scope_string == s2.dependencies[i]._scope_string
+        assert s1.dependencies[i].scope_string == s2.dependencies[i].scope_string
         assert s1.dependencies[i].optional == s2.dependencies[i].optional
 
 
