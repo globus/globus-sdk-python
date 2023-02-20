@@ -1,3 +1,4 @@
+import http.client
 import json
 from collections import namedtuple
 
@@ -8,7 +9,13 @@ _TestResponse = namedtuple("_TestResponse", ("data", "r", "method", "url"))
 
 
 def _mk_response(
-    data, status, method=None, url=None, headers=None, data_transform=None
+    data,
+    status,
+    method=None,
+    url=None,
+    headers=None,
+    request_headers=None,
+    data_transform=None,
 ):
     resp = requests.Response()
 
@@ -22,18 +29,11 @@ def _mk_response(
         resp.headers.update(headers)
 
     resp.status_code = str(status)
-    resp.reason = {
-        200: "OK",
-        400: "Bad Request",
-        401: "Unauthorized",
-        403: "Forbidden",
-        404: "Not Found",
-        500: "Server Error",
-    }.get(status, "Unknown")
+    resp.reason = http.client.responses.get(status, "Unknown")
     method = method or "GET"
     url = url or "default-example-url.bogus"
     resp.url = url
-    resp.request = requests.Request(method=method, url=url, headers=headers)
+    resp.request = requests.Request(method=method, url=url, headers=request_headers)
     return _TestResponse(data, resp, method, url)
 
 

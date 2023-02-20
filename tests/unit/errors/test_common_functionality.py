@@ -288,7 +288,7 @@ def test_convert_requests_exception(orig, conv_class):
     "status, expect_reason",
     [
         (400, "Bad Request"),
-        (500, "Server Error"),
+        (500, "Internal Server Error"),
     ],
 )
 def test_http_reason_exposure(make_response, status, expect_reason):
@@ -352,8 +352,9 @@ def test_error_repr_has_expected_info(
         body["message"] = error_message
 
     headers = {"Content-Type": "application/json", "Spam": "Eggs"}
+    request_headers = {}
     if authz_scheme is not None:
-        headers["Authorization"] = f"{authz_scheme} TOKENINFO"
+        request_headers["Authorization"] = f"{authz_scheme} TOKENINFO"
 
     # build the response -> error -> error repr
     res = make_response(
@@ -363,6 +364,7 @@ def test_error_repr_has_expected_info(
         data_transform=json.dumps,
         url=request_url,
         headers=headers,
+        request_headers=request_headers,
     )
     err = GlobusAPIError(res.r)
     stringified = repr(err)
