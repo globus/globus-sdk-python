@@ -82,8 +82,7 @@ class GlobusNativeAppFlowManager(GlobusOAuthFlowManager):
         It is used to extract default values for the flow, and also to make calls to the
         Auth service.
     :type auth_client: :class:`NativeAppAuthClient <globus_sdk.NativeAppAuthClient>`
-    :param requested_scopes: The scopes on the token(s) being requested, as a
-        space-separated string or iterable of strings. Defaults to
+    :param requested_scopes: The scopes on the token(s) being requested. Defaults to
         ``openid profile email urn:globus:auth:scope:transfer.api.globus.org:all``
     :type requested_scopes: str, MutableScope, or iterable of str or MutableScope,
         optional

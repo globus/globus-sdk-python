@@ -4,7 +4,7 @@ import logging
 import typing as t
 
 from globus_sdk import exc, utils
-from globus_sdk._types import UUIDLike
+from globus_sdk._types import ScopeCollectionType, UUIDLike
 from globus_sdk.authorizers import NullAuthorizer
 
 from ..flow_managers import GlobusNativeAppFlowManager
@@ -51,7 +51,7 @@ class NativeAppAuthClient(AuthClient):
     )
     def oauth2_start_flow(
         self,
-        requested_scopes: None | (str | t.Iterable[str]) = None,
+        requested_scopes: ScopeCollectionType | None = None,
         *,
         redirect_uri: str | None = None,
         state: str = "_default",
@@ -68,10 +68,10 @@ class NativeAppAuthClient(AuthClient):
         While the flow is in progress, the ``NativeAppAuthClient`` becomes
         non thread-safe as temporary state is stored during the flow.
 
-        :param requested_scopes: The scopes on the token(s) being requested, as a
-            space-separated string or iterable of strings. Defaults to
+        :param requested_scopes: The scopes on the token(s) being requested. Defaults to
             ``openid profile email urn:globus:auth:scope:transfer.api.globus.org:all``
-        :type requested_scopes: str or iterable of str, optional
+        :type requested_scopes: str, MutableScope, or iterable of str or MutableScope,
+            optional
         :param redirect_uri: The page that users should be directed to after
             authenticating at the authorize URL. Defaults to
             'https://auth.globus.org/v2/web/auth-code', which displays the resulting
