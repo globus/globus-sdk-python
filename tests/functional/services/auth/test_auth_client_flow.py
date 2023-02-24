@@ -3,8 +3,8 @@ import urllib.parse
 import pytest
 
 import globus_sdk
+from globus_sdk.services.auth._common import _DEFAULT_REQUESTED_SCOPES
 from globus_sdk.services.auth.flow_managers.native_app import make_native_app_challenge
-from globus_sdk.services.auth.oauth2_constants import DEFAULT_REQUESTED_SCOPES
 from tests.common import register_api_route
 
 CLIENT_ID = "d0f1d9b0-bd81-4108-be74-ea981664453a"
@@ -34,7 +34,7 @@ def test_oauth2_get_authorize_url_native(client):
         client.base_url + "v2/oauth2/authorize?",
         "client_id=" + client.client_id,
         "redirect_uri=" + urllib.parse.quote_plus(client.base_url + "v2/web/auth-code"),
-        "scope=" + urllib.parse.quote_plus(" ".join(DEFAULT_REQUESTED_SCOPES)),
+        "scope=" + urllib.parse.quote_plus(" ".join(_DEFAULT_REQUESTED_SCOPES)),
         "state=" + "_default",
         "response_type=" + "code",
         "code_challenge=" + urllib.parse.quote_plus(flow_manager.challenge),
@@ -91,7 +91,7 @@ def test_oauth2_get_authorize_url_confidential(client):
         client.base_url + "v2/oauth2/authorize?",
         "client_id=" + client.client_id,
         "redirect_uri=" + "uri",
-        "scope=" + urllib.parse.quote_plus(" ".join(DEFAULT_REQUESTED_SCOPES)),
+        "scope=" + urllib.parse.quote_plus(" ".join(_DEFAULT_REQUESTED_SCOPES)),
         "state=" + "_default",
         "response_type=" + "code",
         "access_type=" + "online",

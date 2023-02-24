@@ -4,10 +4,10 @@ import logging
 import typing as t
 import urllib.parse
 
-from globus_sdk import scopes, utils
+from globus_sdk import utils
 from globus_sdk._types import ScopeCollectionType
 
-from ..oauth2_constants import DEFAULT_REQUESTED_SCOPES
+from .._common import stringify_requested_scopes
 from ..response import OAuthTokenResponse
 from .base import GlobusOAuthFlowManager
 
@@ -63,9 +63,7 @@ class GlobusAuthorizationCodeFlowManager(GlobusOAuthFlowManager):
     ):
         # convert a scope object or iterable to string immediately on load
         # and default to the default requested scopes
-        self.requested_scopes: str = scopes.MutableScope.scopes2str(
-            requested_scopes or DEFAULT_REQUESTED_SCOPES
-        )
+        self.requested_scopes: str = stringify_requested_scopes(requested_scopes)
 
         # store the remaining parameters directly, with no transformation
         self.client_id = auth_client.client_id

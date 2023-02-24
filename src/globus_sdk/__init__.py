@@ -35,6 +35,7 @@ _LAZY_IMPORT_TABLE = {
         "GlobusConnectionError",
         "GlobusConnectionTimeoutError",
         "GlobusError",
+        "GlobusSDKLegacyBehaviorWarning",
         "GlobusSDKUsageError",
         "GlobusTimeoutError",
         "NetworkError",
@@ -135,6 +136,7 @@ if t.TYPE_CHECKING:
     from .exc import GlobusConnectionError
     from .exc import GlobusConnectionTimeoutError
     from .exc import GlobusError
+    from .exc import GlobusSDKLegacyBehaviorWarning
     from .exc import GlobusSDKUsageError
     from .exc import GlobusTimeoutError
     from .exc import NetworkError
@@ -264,6 +266,7 @@ __all__ = (
     "GlobusConnectionTimeoutError",
     "GlobusError",
     "GlobusHTTPResponse",
+    "GlobusSDKLegacyBehaviorWarning",
     "GlobusSDKUsageError",
     "GlobusTimeoutError",
     "GoogleCloudStorageCollectionPolicies",

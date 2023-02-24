@@ -8,11 +8,11 @@ import re
 import typing as t
 import urllib.parse
 
-from globus_sdk import scopes, utils
+from globus_sdk import utils
 from globus_sdk._types import ScopeCollectionType
 from globus_sdk.exc import GlobusSDKUsageError
 
-from ..oauth2_constants import DEFAULT_REQUESTED_SCOPES
+from .._common import stringify_requested_scopes
 from ..response import OAuthTokenResponse
 from .base import GlobusOAuthFlowManager
 
@@ -133,9 +133,7 @@ class GlobusNativeAppFlowManager(GlobusOAuthFlowManager):
 
         # convert scopes iterable to string immediately on load
         # and default to the default requested scopes
-        self.requested_scopes = scopes.MutableScope.scopes2str(
-            requested_scopes or DEFAULT_REQUESTED_SCOPES
-        )
+        self.requested_scopes = stringify_requested_scopes(requested_scopes)
 
         # default to `/v2/web/auth-code` on whatever environment we're looking
         # at -- most typically it will be `https://auth.globus.org/`

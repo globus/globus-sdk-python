@@ -3,13 +3,13 @@ from __future__ import annotations
 import logging
 import typing as t
 
-from globus_sdk import exc, scopes, utils
+from globus_sdk import exc, utils
 from globus_sdk._types import ScopeCollectionType, UUIDLike
 from globus_sdk.authorizers import BasicAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
 
+from .._common import stringify_requested_scopes
 from ..flow_managers import GlobusAuthorizationCodeFlowManager
-from ..oauth2_constants import DEFAULT_REQUESTED_SCOPES
 from ..response import OAuthDependentTokenResponse, OAuthTokenResponse
 from .base import AuthClient
 
@@ -76,9 +76,7 @@ class ConfidentialAppAuthClient(AuthClient):
         >>> transfer_token = transfer_token_info["access_token"]
         """
         log.info("Fetching token(s) using client credentials")
-        requested_scopes_string: str = scopes.MutableScope.scopes2str(
-            requested_scopes or DEFAULT_REQUESTED_SCOPES
-        )
+        requested_scopes_string = stringify_requested_scopes(requested_scopes)
         return self.oauth2_token(
             {"grant_type": "client_credentials", "scope": requested_scopes_string}
         )

@@ -43,6 +43,14 @@ verification turned on.
     ``GLOBUS_SDK_SERVICE_URL_TRANSFER="https://proxy-device.example.org/"`` to direct
     the SDK to use a custom URL when contacting the Globus Transfer service.
 
+
+Deprecation Warning Config
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``GLOBUS_SDK_V4_WARNINGS``
+    This sets deprecation warning behavior. It is documented in the
+    :ref:`versioning policy <deprecation_warnings>` docs.
+
 Config-Related Functions
 ------------------------
 

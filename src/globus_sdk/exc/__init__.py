@@ -13,6 +13,7 @@ from .err_info import (
     ErrorInfo,
     ErrorInfoContainer,
 )
+from .warnings import GlobusSDKLegacyBehaviorWarning, warn_deprecated
 
 __all__ = (
     "GlobusError",
@@ -27,4 +28,6 @@ __all__ = (
     "ErrorInfoContainer",
     "AuthorizationParameterInfo",
     "ConsentRequiredInfo",
+    "GlobusSDKLegacyBehaviorWarning",
+    "warn_deprecated",
 )

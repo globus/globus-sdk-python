@@ -22,7 +22,7 @@ Recommended Pinning
 -------------------
 
 We recommend that users of the SDK pin only to the major version which they
-require. e.g. specify ``globus-sdk>=1.7,<2.0`` in your package requirements.
+require. e.g. specify ``globus-sdk>=3.7,<4.0`` in your package requirements.
 
 Upgrade Caveat
 --------------
@@ -32,3 +32,18 @@ It is always possible for new features or bugfixes to cause issues.
 If you are installing the SDK into mission-critical production systems, we
 strongly encourage you to establish a method of pinning the exact version used
 and testing upgrades.
+
+.. _deprecation_warnings:
+
+Deprecation Warnings
+--------------------
+
+``globus-sdk`` allows users to opt-in or opt-out of deprecation warnings.
+In the current version of ``globus-sdk`` this is controlled with the
+``GLOBUS_SDK_V4_WARNINGS`` environment variable.
+
+To opt in, set ``GLOBUS_SDK_V4_WARNINGS=true``.
+To opt out, set ``GLOBUS_SDK_V4_WARNINGS=false``.
+
+The default for this variable may change over time to grade-in deprecation
+warnings for users who are not setting the value.
