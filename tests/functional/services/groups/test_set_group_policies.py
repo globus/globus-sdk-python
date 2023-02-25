@@ -8,8 +8,7 @@ from globus_sdk import (
     GroupRequiredSignupFields,
     GroupVisibility,
 )
-from globus_sdk._testing import get_last_request
-from tests.common import register_api_route_fixture_file
+from globus_sdk._testing import get_last_request, load_response
 
 
 @pytest.mark.parametrize(
@@ -37,7 +36,12 @@ from tests.common import register_api_route_fixture_file
     ),
 )
 def test_set_group_policies(
-    groups_manager, group_vis, group_member_vis, signup_fields, signup_fields_str
+    groups_manager,
+    groups_client,
+    group_vis,
+    group_member_vis,
+    signup_fields,
+    signup_fields_str,
 ):
     group_vis_str = group_vis if isinstance(group_vis, str) else group_vis.value
     group_member_vis_str = (
@@ -46,14 +50,10 @@ def test_set_group_policies(
         else group_member_vis.value
     )
 
-    register_api_route_fixture_file(
-        "groups",
-        "/v2/groups/d3974728-6458-11e4-b72d-123139141556/policies",
-        "set_group_policies.json",
-        method="PUT",
-    )
+    meta = load_response(groups_client.set_group_policies).metadata
+
     resp = groups_manager.set_group_policies(
-        "d3974728-6458-11e4-b72d-123139141556",
+        meta["group_id"],
         is_high_assurance=False,
         group_visibility=group_vis,
         group_members_visibility=group_member_vis,
@@ -111,12 +111,8 @@ def test_set_group_policies_explicit_payload(
         else group_member_vis.value
     )
 
-    register_api_route_fixture_file(
-        "groups",
-        "/v2/groups/d3974728-6458-11e4-b72d-123139141556/policies",
-        "set_group_policies.json",
-        method="PUT",
-    )
+    meta = load_response(groups_client.set_group_policies).metadata
+
     # same payload as the above test, but formulated without GroupsManager
     payload = GroupPolicies(
         is_high_assurance=False,
@@ -136,7 +132,7 @@ def test_set_group_policies_explicit_payload(
         else:
             raise NotImplementedError
     # now send it... (but ignore the response)
-    groups_client.set_group_policies("d3974728-6458-11e4-b72d-123139141556", payload)
+    groups_client.set_group_policies(meta["group_id"], payload)
     # ensure enums were stringified correctly, but also that the raw string came through
     req = get_last_request()
     req_body = json.loads(req.body)

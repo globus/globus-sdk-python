@@ -1,8 +1,0 @@
-{
-  "is_high_assurance": false,
-  "authentication_assurance_timeout": 28800,
-  "group_visibility": "private",
-  "group_members_visibility": "managers",
-  "join_requests": false,
-  "signup_fields": ["address1"]
-}
