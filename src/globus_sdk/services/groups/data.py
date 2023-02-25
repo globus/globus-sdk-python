@@ -1,29 +1,46 @@
 from __future__ import annotations
 
+import enum
+import sys
 import typing as t
-from enum import Enum
 
 from globus_sdk import utils
 from globus_sdk._types import UUIDLike
 
+if sys.version_info < (3, 8):
+    from typing_extensions import Literal
+else:
+    from typing import Literal
 
-class GroupRole(Enum):
+
+class GroupRole(enum.Enum):
     member = "member"
     manager = "manager"
     admin = "admin"
 
 
-class GroupMemberVisibility(Enum):
+_GROUP_ROLE_T = t.Union[GroupRole, Literal["member", "manager", "admin"]]
+
+
+class GroupMemberVisibility(enum.Enum):
     members = "members"
     managers = "managers"
 
 
-class GroupVisibility(Enum):
+_GROUP_MEMBER_VISIBILITY_T = t.Union[
+    GroupMemberVisibility, Literal["members", "managers"]
+]
+
+
+class GroupVisibility(enum.Enum):
     authenticated = "authenticated"
     private = "private"
 
 
-class GroupRequiredSignupFields(Enum):
+_GROUP_VISIBILITY_T = t.Union[GroupVisibility, Literal["authenticated", "private"]]
+
+
+class GroupRequiredSignupFields(enum.Enum):
     institution = "institution"
     current_project_name = "current_project_name"
     address = "address"
@@ -36,6 +53,25 @@ class GroupRequiredSignupFields(Enum):
     phone = "phone"
     department = "department"
     field_of_science = "field_of_science"
+
+
+_GROUP_REQUIRED_SIGNUP_FIELDS_T = t.Union[
+    GroupRequiredSignupFields,
+    Literal[
+        "institution",
+        "current_project_name",
+        "address",
+        "city",
+        "state",
+        "country",
+        "address1",
+        "address2",
+        "zip",
+        "phone",
+        "department",
+        "field_of_science",
+    ],
+]
 
 
 class BatchMembershipActions(utils.PayloadWrapper):
@@ -62,13 +98,13 @@ class BatchMembershipActions(utils.PayloadWrapper):
         self,
         identity_ids: t.Iterable[UUIDLike],
         *,
-        role: GroupRole = GroupRole.member,
+        role: _GROUP_ROLE_T = "member",
     ) -> BatchMembershipActions:
         """
         Add a list of identities to a group with the given role.
         """
         self.setdefault("add", []).extend(
-            {"identity_id": identity_id, "role": role.value}
+            {"identity_id": identity_id, "role": utils.render_enums_for_api(role)}
             for identity_id in utils.safe_strseq_iter(identity_ids)
         )
         return self
@@ -101,13 +137,13 @@ class BatchMembershipActions(utils.PayloadWrapper):
         self,
         identity_ids: t.Iterable[UUIDLike],
         *,
-        role: GroupRole = GroupRole.member,
+        role: _GROUP_ROLE_T = "member",
     ) -> BatchMembershipActions:
         """
         Invite a list of identities to a group with the given role.
         """
         self.setdefault("invite", []).extend(
-            {"identity_id": identity_id, "role": role.value}
+            {"identity_id": identity_id, "role": utils.render_enums_for_api(role)}
             for identity_id in utils.safe_strseq_iter(identity_ids)
         )
         return self
@@ -189,17 +225,19 @@ class GroupPolicies(utils.PayloadWrapper):
         self,
         *,
         is_high_assurance: bool,
-        group_visibility: GroupVisibility,
-        group_members_visibility: GroupMemberVisibility,
+        group_visibility: _GROUP_VISIBILITY_T,
+        group_members_visibility: _GROUP_MEMBER_VISIBILITY_T,
         join_requests: bool,
-        signup_fields: t.Iterable[GroupRequiredSignupFields],
+        signup_fields: t.Iterable[_GROUP_REQUIRED_SIGNUP_FIELDS_T],
         authentication_assurance_timeout: int | None = None,
     ):
         super().__init__()
         self["is_high_assurance"] = is_high_assurance
-        self["group_visibility"] = group_visibility
-        self["group_members_visibility"] = group_members_visibility
+        self["group_visibility"] = utils.render_enums_for_api(group_visibility)
+        self["group_members_visibility"] = utils.render_enums_for_api(
+            group_members_visibility
+        )
         self["join_requests"] = join_requests
-        self["signup_fields"] = signup_fields
+        self["signup_fields"] = utils.render_enums_for_api(signup_fields)
         if authentication_assurance_timeout is not None:
             self["authentication_assurance_timeout"] = authentication_assurance_timeout

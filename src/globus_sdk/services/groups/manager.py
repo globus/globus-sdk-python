@@ -7,12 +7,12 @@ from globus_sdk._types import UUIDLike
 
 from .client import GroupsClient
 from .data import (
+    _GROUP_MEMBER_VISIBILITY_T,
+    _GROUP_REQUIRED_SIGNUP_FIELDS_T,
+    _GROUP_ROLE_T,
+    _GROUP_VISIBILITY_T,
     BatchMembershipActions,
-    GroupMemberVisibility,
     GroupPolicies,
-    GroupRequiredSignupFields,
-    GroupRole,
-    GroupVisibility,
 )
 
 
@@ -50,10 +50,10 @@ class GroupsManager:
         group_id: UUIDLike,
         *,
         is_high_assurance: bool,
-        group_visibility: GroupVisibility,
-        group_members_visibility: GroupMemberVisibility,
+        group_visibility: _GROUP_VISIBILITY_T,
+        group_members_visibility: _GROUP_MEMBER_VISIBILITY_T,
         join_requests: bool,
-        signup_fields: t.Iterable[GroupRequiredSignupFields],
+        signup_fields: t.Iterable[_GROUP_REQUIRED_SIGNUP_FIELDS_T],
         authentication_assurance_timeout: int | None = None,
     ) -> response.GlobusHTTPResponse:
         """
@@ -84,7 +84,7 @@ class GroupsManager:
         group_id: UUIDLike,
         identity_id: UUIDLike,
         *,
-        role: GroupRole = GroupRole.member,
+        role: _GROUP_ROLE_T = "member",
     ) -> response.GlobusHTTPResponse:
         """
         Add a list of identities to a group with the given role.
@@ -115,7 +115,7 @@ class GroupsManager:
         group_id: UUIDLike,
         identity_id: UUIDLike,
         *,
-        role: GroupRole = GroupRole.member,
+        role: _GROUP_ROLE_T = "member",
     ) -> response.GlobusHTTPResponse:
         """
         Invite an identity to a group with the given role.
