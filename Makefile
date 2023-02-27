@@ -11,16 +11,15 @@ docs:
 all-checks:
 	tox -e lint,pylint,mypy,mypy-test,test-lazy-imports,py37,py310,poetry-check,twine-check,docs
 
-.PHONY: showvars release prepare-release
+.PHONY: showvars tag-release prepare-release
 showvars:
 	@echo "SDK_VERSION=$(SDK_VERSION)"
 prepare-release:
 	tox -e prepare-release
 	$(EDITOR) changelog.rst
-release:
+tag-release:
 	git tag -s "$(SDK_VERSION)" -m "v$(SDK_VERSION)"
 	-git push $(shell git rev-parse --abbrev-ref @{push} | cut -d '/' -f1) refs/tags/$(SDK_VERSION)
-	tox -e publish-release
 
 .PHONY: clean
 clean:

@@ -18,5 +18,7 @@
     `git add changelog.d/ docs/changelog.rst src/globus_sdk/version.py`
 - Commit; `git commit -m 'Bump version and changelog for release'`
 - Push to main; `git push origin main`
-- Publish and tag the release; `make release`
+- Tag the release; `make tag-release`
+    _This will run a workflow to publish to test-pypi_
 - Create a GitHub release with a copy of the changelog
+    _This will run a workflow to publish to pypi_
