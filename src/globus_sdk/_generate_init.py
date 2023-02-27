@@ -84,10 +84,10 @@ _LAZY_IMPORT_TABLE: list[tuple[str, tuple[str, ...]]] = [
             "GlobusConnectionError",
             "GlobusConnectionTimeoutError",
             "GlobusError",
-            "GlobusSDKLegacyBehaviorWarning",
             "GlobusSDKUsageError",
             "GlobusTimeoutError",
             "NetworkError",
+            "RemovedInV4Warning",
         ),
     ),
     (

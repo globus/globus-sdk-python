@@ -5,7 +5,8 @@ from unittest import mock
 
 import pytest
 
-from globus_sdk import GlobusSDKUsageError
+import globus_sdk
+from globus_sdk.scopes import TransferScopes
 from globus_sdk.services.auth.flow_managers.authorization_code import (
     GlobusAuthorizationCodeFlowManager,
 )
@@ -21,7 +22,7 @@ from globus_sdk.services.auth.flow_managers.native_app import make_native_app_ch
     ],
 )
 def test_invalid_native_app_challenge(verifier):
-    with pytest.raises(GlobusSDKUsageError):
+    with pytest.raises(globus_sdk.GlobusSDKUsageError):
         make_native_app_challenge(verifier)
 
 
@@ -63,7 +64,9 @@ def test_get_authorize_url_for_authorization_code():
     mock_client.client_id = "MOCK_CLIENT_ID"
     mock_client.base_url = "https://auth.globus.org/"
     flow_manager = GlobusAuthorizationCodeFlowManager(
-        mock_client, redirect_uri="https://foo.example.org/authenticate"
+        mock_client,
+        redirect_uri="https://foo.example.org/authenticate",
+        requested_scopes=TransferScopes.all,
     )
 
     silly_string = "ANANAS_IS_PINEAPPLE_BUT_BANANE_IS_BANANA"

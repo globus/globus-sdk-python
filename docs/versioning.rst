@@ -33,17 +33,18 @@ If you are installing the SDK into mission-critical production systems, we
 strongly encourage you to establish a method of pinning the exact version used
 and testing upgrades.
 
-.. _deprecation_warnings:
-
 Deprecation Warnings
 --------------------
 
-``globus-sdk`` allows users to opt-in or opt-out of deprecation warnings.
-In the current version of ``globus-sdk`` this is controlled with the
-``GLOBUS_SDK_V4_WARNINGS`` environment variable.
+``globus-sdk`` will emit deprecation warnings for features which are removed in
+the next release. The Python interpreter applies a filter by default which
+ignores all deprecation warnings.
 
-To opt in, set ``GLOBUS_SDK_V4_WARNINGS=true``.
-To opt out, set ``GLOBUS_SDK_V4_WARNINGS=false``.
+Users are can enable deprecation warnings by normal Python mechanisms. e.g. By
+applying a filter:
 
-The default for this variable may change over time to grade-in deprecation
-warnings for users who are not setting the value.
+.. code-block:: python
+
+    import warnings
+
+    warnings.simplefilter("default")  # this enables DeprecationWarnings
