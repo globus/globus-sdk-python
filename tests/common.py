@@ -10,17 +10,12 @@ from unittest import mock
 import requests
 import responses
 
-import globus_sdk
 from globus_sdk import utils
 
 # constants
 
 GO_EP1_ID = "ddb59aef-6d04-11e5-ba46-22000b92c6ec"
 GO_EP2_ID = "ddb59af0-6d04-11e5-ba46-22000b92c6ec"
-# TODO: stop using EP3 once EP1 and EP2 support symlinks
-GO_EP3_ID = "4be6107f-634d-11e7-a979-22000bf2d287"
-GO_S3_ID = "cf9bcaa5-6d04-11e5-ba46-22000b92c6ec"
-GO_EP1_SERVER_ID = 207976
 
 # end constants
 
@@ -152,26 +147,3 @@ class PickleableMockResponse(mock.NonCallableMock):
             _unpickle_pickleable_mock_response,
             (self.status_code, self.__getstate__()),
         )
-
-
-def make_response(
-    response_class=None,
-    status=200,
-    headers=None,
-    json_body=None,
-    text=None,
-    client=None,
-):
-    """
-    Construct and return an SDK response object with a mocked requests.Response
-
-    Unlike mocking of an API route, this is meant for unit testing in which we
-    want to directly create the response.
-    """
-    r = PickleableMockResponse(status, headers=headers, json_body=json_body, text=text)
-    http_res = globus_sdk.GlobusHTTPResponse(
-        r, client=client if client is not None else mock.Mock()
-    )
-    if response_class is not None:
-        return response_class(http_res)
-    return http_res

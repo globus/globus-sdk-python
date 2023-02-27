@@ -1,10 +1,9 @@
 import pytest
 
 from globus_sdk.services.gcs import UnpackingGCSResponse
-from tests.common import make_response
 
 
-def test_unpacking_response_with_callback():
+def test_unpacking_response_with_callback(make_response):
     def identify_desired_data(d):
         return "foo" in d
 
@@ -24,7 +23,7 @@ def test_unpacking_response_with_callback():
 
 
 @pytest.mark.parametrize("datatype", ["foo#1.0.1", "foo#1", "foo#0.0.1", "foo#2.0.0.1"])
-def test_unpacking_response_matches_datatype(datatype):
+def test_unpacking_response_matches_datatype(make_response, datatype):
     base_resp = make_response(json_body={"data": [{"x": 1, "DATA_TYPE": datatype}]})
     resp = UnpackingGCSResponse(base_resp, "foo")
     assert "x" in resp
@@ -33,13 +32,13 @@ def test_unpacking_response_matches_datatype(datatype):
     assert "x" not in resp_bar
 
 
-def test_unpacking_response_invalid_spec():
+def test_unpacking_response_invalid_spec(make_response):
     base_resp = make_response(json_body={"data": [{"x": 1, "DATA_TYPE": "foo#1.0.0"}]})
     with pytest.raises(ValueError):
         UnpackingGCSResponse(base_resp, "foo 1.0")
 
 
-def test_unpacking_response_invalid_datatype():
+def test_unpacking_response_invalid_datatype(make_response):
     # we'll never return a match if the DATA_TYPE doesn't appear to be valid
     base_resp = make_response(json_body={"data": [{"x": 1, "DATA_TYPE": "foo"}]})
     resp = UnpackingGCSResponse(base_resp, "foo")

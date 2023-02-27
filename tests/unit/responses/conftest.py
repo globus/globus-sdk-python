@@ -1,11 +1,10 @@
 import pytest
 
 import globus_sdk
-from tests.common import make_response
 
 
 @pytest.fixture
-def make_oauth_token_response():
+def make_oauth_token_response(make_response):
     """
     response with conveniently formatted names to help with iteration in tests
     """
@@ -48,7 +47,7 @@ def make_oauth_token_response():
 
 
 @pytest.fixture
-def make_oauth_dependent_token_response():
+def make_oauth_dependent_token_response(make_response):
     """
     response with conveniently formatted names to help with iteration in tests
     """
