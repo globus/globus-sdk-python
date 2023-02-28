@@ -1,3 +1,5 @@
+import uuid
+
 from globus_sdk._testing.models import RegisteredResponse, ResponseSet
 
 from ._common import ERROR_ID, UNAUTHORIZED_AUTH_RESPONSE_JSON
@@ -20,6 +22,16 @@ _sirosen_at_globus_data = {
     "status": "used",
     "username": "sirosen@globus.org",
 }
+_globus_at_globusid_data = {
+    "email": "support@globus.org",
+    "id": str(uuid.UUID(int=1)),
+    "identity_provider": "41143743-f3c8-4d60-bbdb-eeecaba85bd9",
+    "identity_type": "login",
+    "name": "Globus Team",
+    "organization": "University of Chicago",
+    "status": "used",
+    "username": "globus@globusid.org",
+}
 
 RESPONSES = ResponseSet(
     default=RegisteredResponse(
@@ -31,6 +43,11 @@ RESPONSES = ResponseSet(
             "username": _globus_at_globus_data["username"],
         },
     ),
+    empty=RegisteredResponse(
+        service="auth",
+        path="/v2/api/identities",
+        json={"identities": []},
+    ),
     multiple=RegisteredResponse(
         service="auth",
         path="/v2/api/identities",
@@ -41,6 +58,17 @@ RESPONSES = ResponseSet(
                 _globus_at_globus_data["username"],
                 _sirosen_at_globus_data["username"],
             ],
+        },
+    ),
+    globusid=RegisteredResponse(
+        service="auth",
+        path="/v2/api/identities",
+        json={"identities": [_globus_at_globusid_data]},
+        metadata={
+            "id": _globus_at_globusid_data["id"],
+            "username": _globus_at_globusid_data["username"],
+            "short_username": _globus_at_globusid_data["username"].partition("@")[0],
+            "org": _globus_at_globusid_data["organization"],
         },
     ),
     sirosen=RegisteredResponse(

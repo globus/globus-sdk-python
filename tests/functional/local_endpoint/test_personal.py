@@ -1,15 +1,31 @@
+import base64
 import os
 import shutil
 import tempfile
+import uuid
 
 import pytest
 
 import globus_sdk
-from tests.common import register_api_route
+from globus_sdk._testing import load_response
 
 _IS_WINDOWS = os.name == "nt"
 
-BASE32_ID = "u_vy2bvggsoqi6loei3oxdvc5fiu"
+ID_ZERO = uuid.UUID(int=0)
+
+
+def _compute_base32_id(value):
+    """
+    Create a base32-encoded UUID in the format used by legacy Globus systems to
+    represent Identity IDs as unix-friendly usernames.
+    GCP CN values still match this format.
+    """
+    if isinstance(value, str):
+        value = uuid.UUID(value)
+    encoded_bytes = base64.b32encode(value.bytes)
+    result = encoded_bytes.decode()
+    result = result.rstrip("=").lower()
+    return f"u_{result}"
 
 
 def _compute_confdir(homedir, alt=False):
@@ -134,68 +150,40 @@ def test_load_id_no_confdir(local_gcp, mocked_confdir, mocked_alternate_confdir)
 
 
 def test_get_owner_info(local_gcp, write_gridmap, auth_client):
+    meta = load_response(auth_client.get_identities, case="globusid").metadata
+    local_username = meta["short_username"]
     write_gridmap(
-        '"/C=US/O=Globus Consortium/OU=Globus Connect User/CN=sirosen" sirosen\n'
+        '"/C=US/O=Globus Consortium/OU=Globus Connect User/'
+        f'CN={local_username}" {local_username}\n'
     )
     info = local_gcp.get_owner_info()
     assert isinstance(info, globus_sdk.GlobusConnectPersonalOwnerInfo)
-    assert info.username == "sirosen@globusid.org"
+    assert info.username == meta["username"]
     assert info.id is None
-    assert str(info) == "GlobusConnectPersonalOwnerInfo(username=sirosen@globusid.org)"
+    assert str(info) == f"GlobusConnectPersonalOwnerInfo(username={info.username})"
 
-    register_api_route(
-        "auth",
-        "/v2/api/identities",
-        json={
-            "identities": [
-                {
-                    "email": "sirosen@globus.org",
-                    "id": "ae332d86-d274-11e5-b885-b31714a110e9",
-                    "identity_provider": "41143743-f3c8-4d60-bbdb-eeecaba85bd9",
-                    "identity_type": "login",
-                    "name": "Stephen Rosen",
-                    "organization": "Globus Team",
-                    "status": "used",
-                    "username": "sirosen@globusid.org",
-                }
-            ]
-        },
-    )
     data = local_gcp.get_owner_info(auth_client)
     assert isinstance(data, dict)
-    assert data["id"] == "ae332d86-d274-11e5-b885-b31714a110e9"
+    assert data["id"] == meta["id"]
 
 
 def test_get_owner_info_b32_mode(local_gcp, write_gridmap, auth_client):
+    meta = load_response(auth_client.get_identities).metadata
+    base32_id = _compute_base32_id(meta["id"])
+    local_username = meta["username"].partition("@")[0]
     write_gridmap(
-        f'"/C=US/O=Globus Consortium/OU=Globus Connect User/CN={BASE32_ID}" sirosen\n'
+        '"/C=US/O=Globus Consortium/OU=Globus Connect User/'
+        f'CN={base32_id}" {local_username}\n'
     )
     info = local_gcp.get_owner_info()
     assert isinstance(info, globus_sdk.GlobusConnectPersonalOwnerInfo)
     assert info.username is None
-    assert info.id == "ae341a98-d274-11e5-b888-dbae3a8ba545"
+    assert info.id == meta["id"]
 
-    register_api_route(
-        "auth",
-        "/v2/api/identities",
-        json={
-            "identities": [
-                {
-                    "email": "sirosen@globus.org",
-                    "id": "ae341a98-d274-11e5-b888-dbae3a8ba545",
-                    "identity_provider": "927d7238-f917-4eb2-9ace-c523fa9ba34e",
-                    "identity_type": "login",
-                    "name": "Stephen Rosen",
-                    "organization": "Globus Team",
-                    "status": "used",
-                    "username": "sirosen@globus.org",
-                }
-            ]
-        },
-    )
     data = local_gcp.get_owner_info(auth_client)
     assert isinstance(data, dict)
-    assert data["id"] == "ae341a98-d274-11e5-b888-dbae3a8ba545"
+    assert data["id"] == meta["id"]
+    assert data["username"] == meta["username"]
 
 
 # these things are close to the right thing, but each is somehow wrong
@@ -203,18 +191,18 @@ def test_get_owner_info_b32_mode(local_gcp, write_gridmap, auth_client):
     "cn",
     [
         # no 'u_'
-        BASE32_ID[2:],
+        _compute_base32_id(ID_ZERO)[2:],
         # short one char
-        BASE32_ID[:-1],
+        _compute_base32_id(ID_ZERO)[:-1],
         # invalid b32 char included
-        BASE32_ID[:-1] + "/",
+        _compute_base32_id(ID_ZERO)[:-1] + "/",
     ],
 )
 def test_get_owner_info_b32_mode_invalid_data(
     local_gcp, write_gridmap, cn, auth_client
 ):
     write_gridmap(
-        f'"/C=US/O=Globus Consortium/OU=Globus Connect User/CN={cn}" sirosen\n'
+        f'"/C=US/O=Globus Consortium/OU=Globus Connect User/CN={cn}" javert\n'
     )
     info = local_gcp.get_owner_info()
     assert isinstance(info, globus_sdk.GlobusConnectPersonalOwnerInfo)
@@ -224,10 +212,10 @@ def test_get_owner_info_b32_mode_invalid_data(
 @pytest.mark.parametrize(
     "bad_cn_line",
     [
-        '"/C=US/O=Globus Consortium/OU=Globus Connect User/CN=sirosen"',
-        '"/C=US/O=Globus Consortium/OU=Globus Connect User/CN=sirosen" sirosen sirosen',
+        '"/C=US/O=Globus Consortium/OU=Globus Connect User/CN=koala"',
+        '"/C=US/O=Globus Consortium/OU=Globus Connect User/CN=koala" panda fossa',
         "",
-        '"" sirosen',
+        '"" koala',
     ],
 )
 def test_get_owner_info_malformed_entry(local_gcp, write_gridmap, bad_cn_line):
@@ -247,10 +235,15 @@ def test_get_owner_info_no_confdir(local_gcp, mocked_confdir, auth_client):
 
 
 def test_get_owner_info_multiline_data(local_gcp, write_gridmap, auth_client):
+    meta = load_response(auth_client.get_identities, case="globusid").metadata
+    local_username = meta["short_username"]
     write_gridmap(
         "\n".join(
             [
-                f'"/C=US/O=Globus Consortium/OU=Globus Connect User/CN=sirosen{x}" sirosen{x}'  # noqa: E501
+                (
+                    '"/C=US/O=Globus Consortium/OU=Globus Connect User/'
+                    f'CN={local_username}{x}" {local_username}{x}'
+                )
                 for x in ["", "2", "3"]
             ]
         )
@@ -258,40 +251,22 @@ def test_get_owner_info_multiline_data(local_gcp, write_gridmap, auth_client):
     )
     info = local_gcp.get_owner_info()
     assert isinstance(info, globus_sdk.GlobusConnectPersonalOwnerInfo)
-    assert info.username == "sirosen@globusid.org"
+    assert info.username == meta["username"]
 
-    register_api_route(
-        "auth",
-        "/v2/api/identities",
-        json={
-            "identities": [
-                {
-                    "email": "sirosen@globus.org",
-                    "id": "ae332d86-d274-11e5-b885-b31714a110e9",
-                    "identity_provider": "41143743-f3c8-4d60-bbdb-eeecaba85bd9",
-                    "identity_type": "login",
-                    "name": "Stephen Rosen",
-                    "organization": "Globus Team",
-                    "status": "used",
-                    "username": "sirosen@globusid.org",
-                }
-            ]
-        },
-    )
     data = local_gcp.get_owner_info(auth_client)
     assert isinstance(data, dict)
-    assert data["id"] == "ae332d86-d274-11e5-b885-b31714a110e9"
+    assert data["id"] == meta["id"]
 
 
 def test_get_owner_info_no_auth_data(local_gcp, write_gridmap, auth_client):
+    load_response(auth_client.get_identities, case="empty")
     write_gridmap(
-        '"/C=US/O=Globus Consortium/OU=Globus Connect User/CN=sirosen" sirosen\n'
+        '"/C=US/O=Globus Consortium/OU=Globus Connect User/CN=azathoth" azathoth\n'
     )
     info = local_gcp.get_owner_info()
     assert isinstance(info, globus_sdk.GlobusConnectPersonalOwnerInfo)
-    assert info.username == "sirosen@globusid.org"
+    assert info.username == "azathoth@globusid.org"
 
-    register_api_route("auth", "/v2/api/identities", json={"identities": []})
     data = local_gcp.get_owner_info(auth_client)
     assert data is None
 
