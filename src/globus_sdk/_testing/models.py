@@ -1,10 +1,17 @@
 from __future__ import annotations
 
+import sys
+import types
 import typing as t
 
 import responses
 
 from ..utils import slash_join
+
+if sys.version_info < (3, 8):
+    from typing_extensions import Literal
+else:
+    from typing import Literal
 
 
 class RegisteredResponse:
@@ -68,8 +75,11 @@ class RegisteredResponse:
             return self.parent.metadata
         return {}
 
-    def add(
-        self, *, requests_mock: responses.RequestsMock | None = None
+    def _add_or_replace(
+        self,
+        method: Literal["add", "replace"],
+        *,
+        requests_mock: responses.RequestsMock | None = None,
     ) -> RegisteredResponse:
         kwargs: dict[str, t.Any] = {
             "headers": self.headers,
@@ -82,10 +92,40 @@ class RegisteredResponse:
             kwargs["body"] = self.body
 
         if requests_mock is None:
-            responses.add(self.method, self.full_url, **kwargs)
+            use_requests_mock: responses.RequestsMock | types.ModuleType = responses
         else:
-            requests_mock.add(self.method, self.full_url, **kwargs)
+            use_requests_mock = requests_mock
+
+        if method == "add":
+            use_requests_mock.add(self.method, self.full_url, **kwargs)
+        else:
+            use_requests_mock.replace(self.method, self.full_url, **kwargs)
         return self
+
+    def add(
+        self, *, requests_mock: responses.RequestsMock | None = None
+    ) -> RegisteredResponse:
+        """
+        Activate the response, adding it to a mocked requests object.
+
+        :param requests_mock: The mocked requests object to use. Defaults to the default
+            provided by the ``responses`` library
+        :type requests_mock: responses.RequestsMock, optional
+        """
+        return self._add_or_replace("add", requests_mock=requests_mock)
+
+    def replace(
+        self, *, requests_mock: responses.RequestsMock | None = None
+    ) -> RegisteredResponse:
+        """
+        Activate the response, adding it to a mocked requests object and replacing any
+        existing response for the particular path and method.
+
+        :param requests_mock: The mocked requests object to use. Defaults to the default
+            provided by the ``responses`` library
+        :type requests_mock: responses.RequestsMock, optional
+        """
+        return self._add_or_replace("replace", requests_mock=requests_mock)
 
 
 class ResponseList:

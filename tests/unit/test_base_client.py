@@ -7,8 +7,7 @@ import pytest
 
 import globus_sdk
 import globus_sdk.scopes
-from globus_sdk._testing import get_last_request
-from tests.common import register_api_route
+from globus_sdk._testing import RegisteredResponse, get_last_request
 
 
 @pytest.fixture
@@ -104,7 +103,9 @@ def test_http_methods(method, allows_body, base_client):
     methodname = method.upper()
     resolved_method = getattr(base_client, method)
     path = "/madeuppath/objectname"
-    register_api_route("transfer", path, method=methodname, json={"x": "y"})
+    RegisteredResponse(
+        service="transfer", path=path, method=methodname, json={"x": "y"}
+    ).add()
 
     # request with no body
     res = resolved_method(path)
@@ -135,17 +136,16 @@ def test_http_methods(method, allows_body, base_client):
 
     # send "bad" request
     for status in ERROR_STATUS_CODES:
-        register_api_route(
-            "transfer",
-            "/madeuppath/objectname",
+        RegisteredResponse(
+            service="transfer",
+            path=path,
             method=methodname,
-            status=status,
             json={"x": "y", "code": "ErrorCode", "message": "foo"},
-            replace=True,
-        )
+            status=status,
+        ).replace()
 
         with pytest.raises(globus_sdk.GlobusAPIError) as excinfo:
-            resolved_method("/madeuppath/objectname")
+            resolved_method(path)
 
         assert excinfo.value.http_status == status
         assert excinfo.value.raw_json["x"] == "y"
@@ -155,7 +155,7 @@ def test_http_methods(method, allows_body, base_client):
 
 def test_handle_url_unsafe_chars(base_client):
     # make sure this path (escaped) and the request path (unescaped) match
-    register_api_route("transfer", "/foo/foo%20bar", json={"x": "y"})
+    RegisteredResponse(service="transfer", path="/foo/foo%20bar", json={"x": "y"}).add()
     res = base_client.get("foo/foo bar")
     assert "x" in res
     assert res["x"] == "y"
