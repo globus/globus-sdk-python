@@ -256,7 +256,7 @@ class TransferData(utils.PayloadWrapper):
         source_path: str,
         destination_path: str,
         *,
-        recursive: bool = False,
+        recursive: bool | None = None,
         external_checksum: str | None = None,
         checksum_algorithm: str | None = None,
         additional_fields: dict[str, t.Any] | None = None,
@@ -283,7 +283,7 @@ class TransferData(utils.PayloadWrapper):
             transferred to
         :type destination_path: str
         :param recursive: Set to True if the target at source path is a directory
-        :type recursive: bool
+        :type recursive: bool, optional
         :param external_checksum: A checksum to verify both source file and destination
             file integrity. The checksum will be verified after the data transfer and a
             failure will cause the entire task to fail. Cannot be used with directories.
@@ -300,8 +300,9 @@ class TransferData(utils.PayloadWrapper):
             "DATA_TYPE": "transfer_item",
             "source_path": source_path,
             "destination_path": destination_path,
-            "recursive": recursive,
         }
+        if recursive is not None:
+            item_data["recursive"] = recursive
         if external_checksum is not None:
             item_data["external_checksum"] = external_checksum
         if checksum_algorithm is not None:

@@ -90,7 +90,7 @@ def test_transfer_add_item():
     assert data["DATA_TYPE"] == "transfer_item"
     assert data["source_path"] == source_path
     assert data["destination_path"] == dest_path
-    assert not data["recursive"]
+    assert "recursive" not in data
     assert "external_checksum" not in data
     assert "checksum_algorithm" not in data
 
@@ -117,7 +117,7 @@ def test_transfer_add_item():
     assert c_data["DATA_TYPE"] == "transfer_item"
     assert c_data["source_path"] == source_path
     assert c_data["destination_path"] == dest_path
-    assert not c_data["recursive"]
+    assert "recursive" not in c_data
     assert c_data["external_checksum"] == checksum
     assert c_data["checksum_algorithm"] == algorithm
 
@@ -129,7 +129,7 @@ def test_transfer_add_item():
     assert fields_data["DATA_TYPE"] == "transfer_item"
     assert fields_data["source_path"] == source_path
     assert fields_data["destination_path"] == dest_path
-    assert not fields_data["recursive"]
+    assert "recursive" not in fields_data
     assert all(fields_data[k] == v for k, v in addfields.items())
 
 
