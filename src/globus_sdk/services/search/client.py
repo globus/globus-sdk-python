@@ -5,6 +5,7 @@ import typing as t
 
 from globus_sdk import client, paging, response, utils
 from globus_sdk._types import UUIDLike
+from globus_sdk.exc.warnings import warn_deprecated
 from globus_sdk.scopes import SearchScopes
 
 from .data import SearchQuery, SearchScrollQuery
@@ -48,6 +49,14 @@ class SearchClient(client.BaseClient):
         """
         ``GET /v1/index/<index_id>``
 
+        Get descriptive data about a Search index, including its title and description
+        and how much data it contains.
+
+        :param index_id: the ID of the index
+        :type index_id: str or UUID
+        :param query_params: additional parameters to pass as query params
+        :type query_params: dict, optional
+
         **Examples**
 
         >>> sc = globus_sdk.SearchClient(...)
@@ -84,6 +93,22 @@ class SearchClient(client.BaseClient):
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /v1/index/<index_id>/search``
+
+        Execute a simple Search Query, described by the query string ``q``.
+
+        :param index_id: the ID of the index
+        :type index_id: str or UUID
+        :param q: the query string
+        :type q: str
+        :param offset: an offset for pagination
+        :type offset: int
+        :param limit: the size of a page of results
+        :type limit: int
+        :param advanced: enable 'advanced' query mode, which has sophisticated syntax
+            but may result in BadRequest errors when used if the query is invalid
+        :type advanced: bool
+        :param query_params: additional parameters to pass as query params
+        :type query_params: dict, optional
 
         **Examples**
 
@@ -125,6 +150,9 @@ class SearchClient(client.BaseClient):
         """
         ``POST /v1/index/<index_id>/search``
 
+        Execute a complex Search Query, using a query document to express filters,
+        facets, sorting, field boostring, and other behaviors.
+
         :param index_id: The index on which to search
         :type index_id: str or UUID
         :param data: A Search Query document containing the query and any other fields
@@ -138,7 +166,6 @@ class SearchClient(client.BaseClient):
 
         >>> sc = globus_sdk.SearchClient(...)
         >>> query_data = {
-        >>>   "@datatype": "GSearchRequest",
         >>>   "q": "user query",
         >>>   "filters": [
         >>>     {
@@ -185,6 +212,12 @@ class SearchClient(client.BaseClient):
         """
         ``POST /v1/index/<index_id>/scroll``
 
+        Scroll all data in a Search index. The paginated version of this API should
+        typically be preferred, as it is the intended mode of usage.
+
+        Note that if data is written or deleted during scrolling, it is possible for
+        scrolling to not include results or show other unexpected behaviors.
+
         :param index_id: The index on which to search
         :type index_id: str or UUID
         :param data: A Search Scroll Query document
@@ -215,6 +248,15 @@ class SearchClient(client.BaseClient):
     ) -> response.GlobusHTTPResponse:
         """
         ``POST /v1/index/<index_id>/ingest``
+
+        Write data to a Search index as an asynchronous task.
+        The data can be provided as a single document or list of documents, but only one
+        ``task_id`` value will be included in the response.
+
+        :param index_id: The index into which to write data
+        :type index_id: str or UUID
+        :param data: an ingest document
+        :type data: dict
 
         **Examples**
 
@@ -272,6 +314,18 @@ class SearchClient(client.BaseClient):
         """
         ``POST /v1/index/<index_id>/delete_by_query``
 
+        Delete data in a Search index as an asynchronous task, deleting all documents
+        which match a given query.
+        The query uses a restricted subset of the syntax available for complex queries,
+        as it is not meaningful to boost, sort, or otherwise rank data in this case.
+
+        A ``task_id`` value will be included in the response.
+
+        :param index_id: The index in which to delete data
+        :type index_id: str or UUID
+        :param data: a query document for documents to delete
+        :type data: dict
+
         **Examples**
 
         >>> sc = globus_sdk.SearchClient(...)
@@ -308,6 +362,15 @@ class SearchClient(client.BaseClient):
         """
         ``GET /v1/index/<index_id>/subject``
 
+        Fetch exactly one Subject document from Search, containing one or more Entries.
+
+        :param index_id: the index containing this Subject
+        :type index_id: str or UUID
+        :param subject: the subject string to fetch
+        :type subject: str
+        :param query_params: additional parameters to pass as query params
+        :type query_params: dict, optional
+
         **Examples**
 
         Fetch the data for subject ``http://example.com/abc`` from index
@@ -332,6 +395,18 @@ class SearchClient(client.BaseClient):
     ) -> response.GlobusHTTPResponse:
         """
         ``DELETE /v1/index/<index_id>/subject``
+
+        Delete exactly one Subject document from Search, containing one or more Entries,
+        as an asynchronous task.
+
+        A ``task_id`` value will be included in the response.
+
+        :param index_id: the index in which data will be deleted
+        :type index_id: str or UUID
+        :param subject: the subject string for the Subject document to delete
+        :type subject: str
+        :param query_params: additional parameters to pass as query params
+        :type query_params: dict, optional
 
         **Examples**
 
@@ -363,6 +438,19 @@ class SearchClient(client.BaseClient):
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /v1/index/<index_id>/entry``
+
+        Fetch exactly one Entry document from Search, identified by the combination of
+        ``subject`` string and ``entry_id``, which defaults to ``null``.
+
+        :param index_id: the index containing this Entry
+        :type index_id: str or UUID
+        :param subject: the subject string for the Subject document containing this
+            Entry
+        :type subject: str
+        :param entry_id: the entry_id for this Entry, which defaults to ``null``
+        :type entry_id: str, optional
+        :param query_params: additional parameters to pass as query params
+        :type query_params: dict, optional
 
         **Examples**
 
@@ -397,7 +485,20 @@ class SearchClient(client.BaseClient):
         self, index_id: UUIDLike, data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
+        This API method is in effect an alias of ingest and is deprecated.
+        Users are recommended to use :meth:`~.ingest` instead.
+
         ``POST /v1/index/<index_id>/entry``
+
+        Create or update one Entry document in Search.
+
+        The API does not enforce that the document does not exist, and will overwrite
+        any existing data.
+
+        :param index_id: the index containing this Entry
+        :type index_id: str or UUID
+        :param data: the entry document to write
+        :type data: dict
 
         **Examples**
 
@@ -426,6 +527,10 @@ class SearchClient(client.BaseClient):
         >>>     }
         >>> })
         """
+        warn_deprecated(
+            "SearchClient.create_entry is deprecated. "
+            "Users should prefer using `SearchClient.ingest`"
+        )
         log.info(f"SearchClient.create_entry({index_id}, ...)")
         return self.post(f"/v1/index/{index_id}/entry", data=data)
 
@@ -434,7 +539,19 @@ class SearchClient(client.BaseClient):
         self, index_id: UUIDLike, data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
+        This API method is in effect an alias of ingest and is deprecated.
+        Users are recommended to use :meth:`~.ingest` instead.
+
         ``PUT /v1/index/<index_id>/entry``
+
+        Create or update one Entry document in Search.
+
+        This does not do a partial update, but replaces the existing document.
+
+        :param index_id: the index containing this Entry
+        :type index_id: str or UUID
+        :param data: the entry document to write
+        :type data: dict
 
         **Examples**
 
@@ -450,6 +567,10 @@ class SearchClient(client.BaseClient):
         >>>     }
         >>> })
         """
+        warn_deprecated(
+            "SearchClient.update_entry is deprecated. "
+            "Users should prefer using `SearchClient.ingest`"
+        )
         log.info(f"SearchClient.update_entry({index_id}, ...)")
         return self.put(f"/v1/index/{index_id}/entry", data=data)
 
@@ -464,6 +585,19 @@ class SearchClient(client.BaseClient):
     ) -> response.GlobusHTTPResponse:
         """
         ``DELETE  /v1/index/<index_id>/entry``
+
+        Delete exactly one Entry document in Search as an asynchronous task.
+
+        A ``task_id`` value will be included in the response.
+
+        :param index_id: the index in which data will be deleted
+        :type index_id: str or UUID
+        :param subject: the subject string for the Subject of the document to delete
+        :type subject: str
+        :param entry_id: the ID string for the Entry to delete
+        :type entry_id: str
+        :param query_params: additional parameters to pass as query params
+        :type query_params: dict, optional
 
         **Examples**
 
@@ -506,6 +640,13 @@ class SearchClient(client.BaseClient):
         """
         ``GET /v1/task/<task_id>``
 
+        Fetch a Task document by ID, getting task details and status.
+
+        :param task_id: the task ID from the original task submission
+        :type task_id: str or UUID
+        :param query_params: additional parameters to pass as query params
+        :type query_params: dict, optional
+
         **Examples**
 
         >>> sc = globus_sdk.SearchClient(...)
@@ -525,6 +666,14 @@ class SearchClient(client.BaseClient):
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /v1/task_list/<index_id>``
+
+        Fetch a list of recent Task documents for an index, getting task details and
+        status.
+
+        :param index_id: the index to query
+        :type index_id: str or UUID
+        :param query_params: additional parameters to pass as query params
+        :type query_params: dict, optional
 
         **Examples**
 
