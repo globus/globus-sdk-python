@@ -296,7 +296,7 @@ class TransferData(utils.PayloadWrapper):
         :param additional_fields: additional fields to be added to the transfer item
         :type additional_fields: dict, optional
         """
-        item_data = {
+        item_data: dict[str, t.Any] = {
             "DATA_TYPE": "transfer_item",
             "source_path": source_path,
             "destination_path": destination_path,
