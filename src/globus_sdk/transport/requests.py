@@ -84,7 +84,7 @@ class RequestsTransport:
     :param max_sleep: The maximum sleep time between retries (in seconds). If the
         computed sleep time or the backoff requested by a retry check exceeds this
         value, this amount of time will be used instead
-    :type max_sleep: int, optional
+    :type max_sleep: float or int, optional
     :param max_retries: The maximum number of retries allowed by this transport
     :type max_retries: int, optional
     """
@@ -114,7 +114,7 @@ class RequestsTransport:
         http_timeout: float | None = None,
         retry_backoff: t.Callable[[RetryContext], float] = _exponential_backoff,
         retry_checks: list[RetryCheck] | None = None,
-        max_sleep: int = 10,
+        max_sleep: float | int = 10,
         max_retries: int | None = None,
     ):
         self.session = requests.Session()
@@ -151,7 +151,7 @@ class RequestsTransport:
         verify_ssl: bool | None = None,
         http_timeout: float | None = None,
         retry_backoff: t.Callable[[RetryContext], float] | None = None,
-        max_sleep: int | None = None,
+        max_sleep: float | int | None = None,
         max_retries: int | None = None,
     ) -> t.Iterator[None]:
         """
@@ -172,7 +172,7 @@ class RequestsTransport:
         :param max_sleep: The maximum sleep time between retries (in seconds). If the
             computed sleep time or the backoff requested by a retry check exceeds this
             value, this amount of time will be used instead
-        :type max_sleep: int, optional
+        :type max_sleep: float or int, optional
         :param max_retries: The maximum number of retries allowed by this transport
         :type max_retries: int, optional
 
