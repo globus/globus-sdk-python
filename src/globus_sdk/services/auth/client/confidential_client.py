@@ -140,6 +140,7 @@ class ConfidentialAppAuthClient(AuthClient):
         self,
         token: str,
         *,
+        refresh_tokens: bool = False,
         additional_params: dict[str, t.Any] | None = None,
     ) -> OAuthDependentTokenResponse:
         """
@@ -160,11 +161,13 @@ class ConfidentialAppAuthClient(AuthClient):
         In order to do this exchange, the tokens for Service A must have scopes
         which depend on scopes for Service B (the services' scopes must encode
         their relationship). As long as that is the case, Service A can use
-        this Grant to get those "Dependent" or "Downstream" tokens for Service
-        B.
+        this Grant to get those "Dependent" or "Downstream" tokens for Service B.
 
         :param token: A Globus Access Token as a string
         :type token: str
+        :param refresh_tokens: When True, request dependent refresh tokens in addition
+            to access tokens. [Default: ``False``]
+        :type refresh_tokens: bool, optional
         :param additional_params: Additional parameters to include in the request body
         :type additional_params: dict, optional
         :rtype: :class:`OAuthDependentTokenResponse <.OAuthDependentTokenResponse>`
@@ -175,6 +178,11 @@ class ConfidentialAppAuthClient(AuthClient):
             "grant_type": "urn:globus:auth:grant_type:dependent_token",
             "token": token,
         }
+        # the internal parameter is 'access_type', but using the name 'refresh_tokens'
+        # is consistent with the rest of the SDK and better communicates expectations
+        # back to the user than the OAuth2 spec wording
+        if refresh_tokens:
+            form_data["access_type"] = "offline"
         if additional_params:
             form_data.update(additional_params)
 
