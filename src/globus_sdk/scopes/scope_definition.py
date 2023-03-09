@@ -227,6 +227,7 @@ class Scope:
                 "Passing 'optional' to add_dependency is deprecated. "
                 "Construct an optional Scope object instead.",
                 DeprecationWarning,
+                stacklevel=2,
             )
             scopeobj = Scope(scope, optional=optional)
         else:
@@ -404,6 +405,7 @@ class MutableScope:
                 "Passing 'optional' to add_dependency is deprecated. "
                 "Construct an optional MutableScope object instead.",
                 DeprecationWarning,
+                stacklevel=2,
             )
             scopeobj = MutableScope(scope, optional=optional)
         else:
