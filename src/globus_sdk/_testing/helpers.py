@@ -17,7 +17,7 @@ def get_last_request(
     """
     calls = requests_mock.calls if requests_mock is not None else responses.calls
     try:
-        last_call = t.cast(responses.Call, calls[-1])
+        last_call = calls[-1]
     except IndexError:
         return None
     return t.cast(requests.PreparedRequest, last_call.request)

@@ -165,8 +165,9 @@ def has_paginator(
 
         **Paginated Usage**
 
-        This method supports paginated access. To use the paginated variant, give the
-        same arguments as normal, but prefix the method name with ``paginated``, as in
+        This method supports paginated access.
+        To use the paginated variant, give the same arguments as normal, but
+        prefix the method name with ``paginated``, as in
 
         >>> client.paginated.{func.__name__}(...)
 

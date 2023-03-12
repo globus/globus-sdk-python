@@ -3,27 +3,6 @@ import re
 
 from setuptools import find_packages, setup
 
-LINT_REQUIREMENTS = [
-    "flake8<5",
-    "isort<6",
-    "black==21.12b0",
-    "flake8-bugbear==21.11.29",
-]
-TEST_REQUIREMENTS = [
-    "pytest<7",
-    "coverage<7",
-    "pytest-xdist<3",
-    # use the latest version, but pin it for build consistency
-    "responses==0.22.0",
-]
-DOC_REQUIREMENTS = [
-    "sphinx<5",
-    "sphinx-copybutton==0.5.1",
-    "sphinx-issues<3",
-    "furo==2022.1.2",
-]
-DEV_REQUIREMENTS = TEST_REQUIREMENTS + LINT_REQUIREMENTS + DOC_REQUIREMENTS
-
 
 def parse_version():
     # single source of truth for package version
@@ -76,7 +55,8 @@ setup(
         # not have all of the typing features we use
         'typing_extensions>=4.0;python_version<"3.10"',
     ],
-    extras_require={"dev": DEV_REQUIREMENTS},
+    # vestigial extras, remove in a future version
+    extras_require={"dev": []},
     keywords=["globus"],
     classifiers=[
         "Development Status :: 5 - Production/Stable",

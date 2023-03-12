@@ -1,0 +1,6 @@
+sphinx
+sphinx-copybutton
+sphinx-issues
+furo
+# required for testing modules to load
+responses

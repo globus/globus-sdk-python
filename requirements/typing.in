@@ -1,0 +1,10 @@
+# TODO: update to remove mypy pin
+mypy==0.991
+types-docutils
+types-jwt
+types-requests
+typing-extensions>=4.0
+
+# although 'responses' is provided by the test requirements, it also
+# must be installed for proper type-checking on globus_sdk._testing
+responses
