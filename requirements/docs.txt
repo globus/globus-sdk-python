@@ -50,10 +50,13 @@ sphinx==6.1.3
     #   furo
     #   sphinx-basic-ng
     #   sphinx-copybutton
+    #   sphinx-inline-tabs
     #   sphinx-issues
 sphinx-basic-ng==1.0.0b1
     # via furo
 sphinx-copybutton==0.5.1
+    # via -r requirements/docs.in
+sphinx-inline-tabs==2022.1.2b11
     # via -r requirements/docs.in
 sphinx-issues==3.0.1
     # via -r requirements/docs.in

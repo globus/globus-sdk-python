@@ -1252,9 +1252,6 @@ class TransferClient(client.BaseClient):
     # Task Submission
     #
 
-    @utils.doc_api_method(
-        "Get a submission ID", "transfer/task_submit/#get_submission_id"
-    )
     def get_submission_id(
         self, *, query_params: dict[str, t.Any] | None = None
     ) -> response.GlobusHTTPResponse:
@@ -1271,6 +1268,15 @@ class TransferClient(client.BaseClient):
         Most users will not need to call this method directly, as the
         methods :meth:`~submit_transfer` and :meth:`~submit_delete` will call it
         automatically if the data does not contain a ``submission_id``.
+
+        .. tab:: External Documentation
+
+            .. extdoclink:: Get a submission ID
+                :ref: transfer/task_submit/#get_submission_id
+
+        .. tab:: Example Response Data
+
+            .. expandtestfixture:: transfer.get_submission_id
         """
         log.info(f"TransferClient.get_submission_id({query_params})")
         return self.get("submission_id", query_params=query_params)

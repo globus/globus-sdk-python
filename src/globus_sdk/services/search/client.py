@@ -73,7 +73,6 @@ class SearchClient(client.BaseClient):
     # Search queries
     #
 
-    @utils.doc_api_method("GET Search Query", "search/reference/get_query/")
     @paging.has_paginator(
         paging.HasNextPaginator,
         items_key="gmeta",
@@ -110,12 +109,25 @@ class SearchClient(client.BaseClient):
         :param query_params: additional parameters to pass as query params
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab:: Example Usage
 
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> result = sc.search(index_id, 'query string')
-        >>> advanced_result = sc.search(index_id, 'author: "Ada Lovelace"',
-        >>>                             advanced=True)
+            >>> sc = globus_sdk.SearchClient(...)
+            >>> result = sc.search(index_id, 'query string')
+            >>> advanced_result = sc.search(index_id, 'author: "Ada Lovelace"',
+            >>>                             advanced=True)
+
+        .. tab:: Paginated Usage
+
+            .. paginatedusage:: search
+
+        .. tab:: External Documentation
+
+            .. extdoclink:: GET Search Query
+                :ref: search/reference/get_query/
+
+        .. tab:: Example Response Data
+
+            .. expandtestfixture:: search.search
         """
         if query_params is None:
             query_params = {}

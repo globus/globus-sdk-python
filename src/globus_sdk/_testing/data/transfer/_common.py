@@ -1,5 +1,10 @@
 import uuid
 
-SUBMISSION_ID = str(uuid.UUID(int=2020))
-ENDPOINT_ID = str(uuid.UUID(int=1234))
-TASK_ID = str(uuid.UUID(int=1001))
+
+def _as_uuid(s: str) -> str:
+    return str(uuid.UUID(int=int(s, 36)))
+
+
+SUBMISSION_ID = _as_uuid("submission_id")
+ENDPOINT_ID = _as_uuid("endpoint_id")
+TASK_ID = _as_uuid("task_id")

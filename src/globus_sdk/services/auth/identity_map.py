@@ -130,7 +130,7 @@ class IdentityMap:
     :type cache: MutableMapping, optional
 
     .. automethodlist:: globus_sdk.IdentityMap
-        include_methods=__getitem__,__delitem__
+        :include_methods: __getitem__,__delitem__
     """  # noqa
 
     _default_id_batch_size = 100

@@ -5,10 +5,11 @@ A Globus SDK Sphinx Extension for Autodoc of Class Methods
 from __future__ import annotations
 
 import inspect
+import json
 from pydoc import locate
 
 from docutils import nodes
-from docutils.parsers.rst import Directive
+from docutils.parsers.rst import Directive, directives
 from docutils.statemachine import ViewList
 from sphinx.util.nodes import nested_parse_with_titles
 
@@ -18,19 +19,22 @@ def _extract_known_scopes(scope_builder_name):
     return sb.scope_names
 
 
+def _locate_class(classname):
+    cls = locate(classname)
+    if not inspect.isclass(cls):
+        raise RuntimeError(
+            f"uh-oh, {classname} is not a class name? type(classname)={type(cls)}"
+        )
+    return cls
+
+
 def _classname2methods(classname, include_methods):
     """resolve a class name to a list of (public) method names
     takes a classname and a list of method names to avoid filtering out"""
-    klass = locate(classname)
-    if not inspect.isclass(klass):
-        raise RuntimeError(
-            "uh-oh, {} is not a class name? type(classname)={}".format(
-                classname, type(klass)
-            )
-        )
+    cls = _locate_class(classname)
 
     # get methods of the object as [(name, <unbound method>), ...]
-    methods = inspect.getmembers(klass, predicate=inspect.isfunction)
+    methods = inspect.getmembers(cls, predicate=inspect.isfunction)
 
     def _methodname_is_good(m):
         if m in include_methods:
@@ -39,7 +43,7 @@ def _classname2methods(classname, include_methods):
         if m.startswith("_"):
             return False
         # filter out any inherited methods which are not overloaded
-        if m not in klass.__dict__:
+        if m not in cls.__dict__:
             return False
         return True
 
@@ -85,15 +89,15 @@ class AddContentDirective(Directive):
 class AutoMethodList(AddContentDirective):
     has_content = False
     required_arguments = 1
-    optional_arguments = 1
+    optional_arguments = 0
+    option_spec = {"include_methods": directives.unchanged}
 
     def gen_rst(self):
         classname = self.arguments[0]
 
         include_methods = []
-        for arg in self.arguments[1:]:
-            if arg.startswith("include_methods="):
-                include_methods = arg.split("=")[1].split(",")
+        if "include_methods" in self.options:
+            include_methods = self.options["include_methods"].strip().split(",")
 
         yield ""
         yield "**Methods**"
@@ -113,16 +117,16 @@ class AutoMethodList(AddContentDirective):
 class ListKnownScopes(AddContentDirective):
     has_content = False
     required_arguments = 1
-    optional_arguments = 2
+    optional_arguments = 0
+    option_spec = {"example_scope": directives.unchanged}
 
     def gen_rst(self):
         sb_name = self.arguments[0]
         sb_basename = sb_name.split(".")[-1]
 
         example_scope = None
-        for arg in self.arguments[1:]:
-            if arg.startswith("example_scope="):
-                example_scope = arg.split("=")[1]
+        if "example_scope" in self.options:
+            example_scope = self.options["example_scope"].strip()
         known_scopes = _extract_known_scopes(sb_name)
         if example_scope is None:
             example_scope = known_scopes[0]
@@ -170,7 +174,96 @@ class EnumerateTestingFixtures(AddContentDirective):
         yield ""
 
 
+class ExternalDocLink(AddContentDirective):
+    has_content = False
+    required_arguments = 1
+    optional_arguments = 0
+    # allow for spaces in the argument string
+    final_argument_whitespace = True
+    option_spec = {"mode": directives.unchanged, "ref": directives.unchanged_required}
+
+    def gen_rst(self):
+        message = self.arguments[0].strip()
+
+        mode = "default"
+        if "mode" in self.options:
+            mode = self.options["mode"]
+
+        if mode == "default":
+            base_url = "https://docs.globus.org/api"
+            relative_link = self.options["ref"]
+
+            yield (
+                f"See `{message} <{base_url}/{relative_link}>`_ in the "
+                "API documentation for details."
+            )
+        elif mode in (
+            "groups",
+            "gcs",
+        ):
+            raise ValueError(f"Unsupported extdoclink mode {mode}. TODO: add support")
+        else:
+            raise ValueError(f"Unsupported extdoclink mode {mode}")
+
+
+class ExpandTestingFixture(AddContentDirective):
+    has_content = False
+    required_arguments = 1
+    optional_arguments = 0
+    option_spec = {
+        "case": directives.unchanged,
+    }
+
+    def gen_rst(self):
+        from globus_sdk._testing import get_response_set
+
+        response_set_name = self.arguments[0]
+        casename = "default"
+        if "case" in self.options:
+            casename = self.options["case"].strip()
+        response_set = get_response_set(response_set_name)
+        response = response_set.lookup(casename)
+        if response.json is not None:
+            yield ".. code-block:: json"
+            yield ""
+            output_lines = json.dumps(
+                response.json, indent=2, separators=(",", ": ")
+            ).split("\n")
+            for line in output_lines:
+                yield f"    {line}"
+        elif response.body is not None:
+            yield ".. code-block::"
+            yield ""
+            output_lines = response.body.split("\n")
+            for line in output_lines:
+                yield f"    {line}"
+        else:
+            raise RuntimeError(
+                "Error loading example content for response "
+                f"{response_set_name}:{casename}. Neither JSON nor text body was found."
+            )
+
+
+class PaginatedUsage(AddContentDirective):
+    has_content = False
+    required_arguments = 1
+    optional_arguments = 0
+
+    def gen_rst(self):
+        yield "This method supports paginated access. "
+        yield "To use the paginated variant, give the same arguments as normal, "
+        yield "but prefix the method name with ``paginated``, as in"
+        yield ""
+        yield f">>> client.paginated.{self.arguments[0]}(...)"
+        yield ""
+        yield "For more information, see"
+        yield ":ref:`how to make paginated calls <making_paginated_calls>`."
+
+
 def setup(app):
     app.add_directive("automethodlist", AutoMethodList)
     app.add_directive("listknownscopes", ListKnownScopes)
     app.add_directive("enumeratetestingfixtures", EnumerateTestingFixtures)
+    app.add_directive("expandtestfixture", ExpandTestingFixture)
+    app.add_directive("extdoclink", ExternalDocLink)
+    app.add_directive("paginatedusage", PaginatedUsage)

@@ -40,7 +40,7 @@ class RegisteredResponse:
         method: str = responses.GET,
         headers: dict[str, str] | None = None,
         metadata: dict[str, t.Any] | None = None,
-        json: (None | list[t.Any] | dict[str, t.Any]) = None,
+        json: None | list[t.Any] | dict[str, t.Any] = None,
         body: str | None = None,
         **kwargs: t.Any,
     ) -> None:
