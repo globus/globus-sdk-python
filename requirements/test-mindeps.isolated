@@ -8,16 +8,4 @@ pyjwt==2.0.0
 cryptography==3.3.1
 typing_extensions==4.0
 
-## replicate the test dependencies here, rather than including the test.in file
-## if included, pip-compile-multi fails
-##
-##   Package idna was resolved to different versions in different environments: 2.7 and 3.4
-##   Traceback (most recent call last):
-##     ...
-##   RuntimeError: Please add constraints for the package version listed above
-##
-#pytest
-#coverage
-#pytest-xdist
-#responses
 -r test.in
