@@ -232,7 +232,7 @@ class ExpandTestingFixture(AddContentDirective):
             for line in output_lines:
                 yield f"    {line}"
         elif response.body is not None:
-            yield ".. code-block::"
+            yield ".. code-block:: text"
             yield ""
             output_lines = response.body.split("\n")
             for line in output_lines:
@@ -254,7 +254,9 @@ class PaginatedUsage(AddContentDirective):
         yield "To use the paginated variant, give the same arguments as normal, "
         yield "but prefix the method name with ``paginated``, as in"
         yield ""
-        yield f">>> client.paginated.{self.arguments[0]}(...)"
+        yield ".. code-block:: pycon"
+        yield ""
+        yield f"    >>> client.paginated.{self.arguments[0]}(...)"
         yield ""
         yield "For more information, see"
         yield ":ref:`how to make paginated calls <making_paginated_calls>`."
