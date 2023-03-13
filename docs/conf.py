@@ -71,6 +71,10 @@ html_theme_options = {
     },
 }
 html_logo = "_static/logo.png"
+html_static_path = ["_static"]
+html_css_files = [
+    "css/globus_sdk_tab_borders.css"
+]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "friendly"

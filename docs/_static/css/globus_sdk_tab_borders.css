@@ -1,0 +1,21 @@
+/* custom CSS to add a border to tab groups
+ * see also:
+ * https://github.com/pradyunsg/furo/discussions/633 */
+:root {
+  /* default to '#aaa', which looks okay in both light and dark */
+  --tabset-border-color: #aaa;
+}
+/* set the border color to decrease contrast a little on dark theme
+ * this detection logic is taken from furo, which sets data-theme on the body
+ * element when the user toggles the color scheme */
+@media (prefers-color-scheme: dark) {
+  body:not([data-theme="light"]) {
+    --tabset-border-color: #777;
+  }
+}
+.tab-set.container {
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 3px;
+  border-color: var(--tabset-border-color);
+}
