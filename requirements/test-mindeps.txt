@@ -13,9 +13,9 @@ cffi==1.15.1
 chardet==3.0.4
     # via requests
 coverage==7.2.1
-    # via -r test.in
+    # via -r requirements/test.in
 cryptography==3.3.1
-    # via -r test-mindeps.in
+    # via -r requirements/test-mindeps.in
 execnet==1.9.0
     # via pytest-xdist
 idna==2.8
@@ -29,27 +29,27 @@ pluggy==1.0.0
 pycparser==2.21
     # via cffi
 pyjwt==2.0.0
-    # via -r test-mindeps.in
+    # via -r requirements/test-mindeps.in
 pytest==7.2.2
     # via
-    #   -r test.in
+    #   -r requirements/test.in
     #   pytest-xdist
 pytest-xdist==3.2.0
-    # via -r test.in
+    # via -r requirements/test.in
 pyyaml==6.0
     # via responses
 requests==2.22.0
     # via
-    #   -r test-mindeps.in
+    #   -r requirements/test-mindeps.in
     #   responses
 responses==0.23.1
-    # via -r test.in
+    # via -r requirements/test.in
 six==1.16.0
     # via cryptography
 types-pyyaml==6.0.12.8
     # via responses
 typing-extensions==4.0.0
-    # via -r test-mindeps.in
+    # via -r requirements/test-mindeps.in
 urllib3==1.25.11
     # via
     #   requests
