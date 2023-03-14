@@ -1256,8 +1256,6 @@ class TransferClient(client.BaseClient):
         self, *, query_params: dict[str, t.Any] | None = None
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /submission_id``
-
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
@@ -1269,7 +1267,9 @@ class TransferClient(client.BaseClient):
         methods :meth:`~submit_transfer` and :meth:`~submit_delete` will call it
         automatically if the data does not contain a ``submission_id``.
 
-        .. tab:: External Documentation
+        .. tab:: API Info
+
+            ``GET /submission_id``
 
             .. extdoclink:: Get a submission ID
                 :ref: transfer/task_submit/#get_submission_id

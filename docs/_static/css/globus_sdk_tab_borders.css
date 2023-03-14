@@ -19,3 +19,6 @@
   border-radius: 3px;
   border-color: var(--tabset-border-color);
 }
+.tab-set.container .tab-content.container {
+  padding: 4px;
+}

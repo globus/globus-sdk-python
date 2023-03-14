@@ -91,8 +91,6 @@ class SearchClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /v1/index/<index_id>/search``
-
         Execute a simple Search Query, described by the query string ``q``.
 
         :param index_id: the ID of the index
@@ -120,7 +118,9 @@ class SearchClient(client.BaseClient):
 
             .. paginatedusage:: search
 
-        .. tab:: External Documentation
+        .. tab:: API Info
+
+            ``GET /v1/index/<index_id>/search``
 
             .. extdoclink:: GET Search Query
                 :ref: search/reference/get_query/
