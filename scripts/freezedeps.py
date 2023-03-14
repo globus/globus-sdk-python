@@ -22,7 +22,8 @@ REQS_DIR = REPO_ROOT / "requirements"
 def main():
     reqs_in_files = REQS_DIR.glob("*.in")
     print(f'running pip-compile on "{REQS_DIR}/*.in"')
-    for source in reqs_in_files:
+    for absolute_source in reqs_in_files:
+        source = absolute_source.relative_to(REQS_DIR)
         dest = source.with_suffix(".txt")
         print(f"{source} -> {dest}")
         subprocess.run(
