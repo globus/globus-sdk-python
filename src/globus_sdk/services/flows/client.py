@@ -249,6 +249,12 @@ class FlowsClient(client.BaseClient):
 
         For example, ``orderby="updated_at DESC"`` requests a descending sort on update
         times, getting the most recently updated flow first.
+
+        .. tab-set::
+
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: list_flows
         """
 
         if query_params is None:

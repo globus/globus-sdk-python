@@ -2,6 +2,7 @@ sphinx
 sphinx-copybutton
 sphinx-issues
 furo
-sphinx-inline-tabs
+sphinx-design
+
 # required for testing modules to load
 responses

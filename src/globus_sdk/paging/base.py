@@ -160,27 +160,6 @@ def has_paginator(
         as_paginated._paginator_class = paginator_class
         as_paginated._paginator_items_key = items_key
         as_paginated._paginator_params = paginator_params
-
-        # do not append doc if the paginatedusage sphinx directive is in use
-        if not func.__doc__ or ".. paginatedusage::" in func.__doc__:
-            return func
-
-        # but if not, append the desired text
-        func.__doc__ = f"""{func.__doc__}
-
-        **Paginated Usage**
-
-        This method supports paginated access.
-        To use the paginated variant, give the same arguments as normal, but
-        prefix the method name with ``paginated``, as in
-
-        .. code-block:: pycon
-
-            >>> client.paginated.{func.__name__}(...)
-
-        For more information, see
-        :ref:`how to make paginated calls <making_paginated_calls>`.
-        """
         return func
 
     return decorate

@@ -243,7 +243,6 @@ class TransferClient(client.BaseClient):
         log.info(f"TransferClient.delete_endpoint({endpoint_id})")
         return self.delete(f"endpoint/{endpoint_id}")
 
-    @utils.doc_api_method("Endpoint Search", "transfer/endpoint_search")
     @paging.has_paginator(
         paging.HasNextPaginator,
         items_key="DATA",
@@ -264,11 +263,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         r"""
-        .. parsed-literal::
-
-            GET /endpoint_search\
-            ?filter_fulltext=<filter_fulltext>&filter_scope=<filter_scope>
-
         :param filter_fulltext: The string to use in a full text search on endpoints.
             Effectively, the "search query" which is being requested. May be omitted
             with specific ``filter_scope`` values.
@@ -297,22 +291,44 @@ class TransferClient(client.BaseClient):
             as query params.
         :type query_params: dict, optional
 
-        **Examples**
-
-        Search for a given string as a fulltext search:
-
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> for ep in tc.endpoint_search('String to search for!'):
-        >>>     print(ep['display_name'])
-
-        Search for a given string, but only on endpoints that you own:
-
-        >>> for ep in tc.endpoint_search('foo', filter_scope='my-endpoints'):
-        >>>     print('{0} has ID {1}'.format(ep['display_name'], ep['id']))
-
         It is important to be aware that the Endpoint Search API limits
         you to 1000 results for any search query.
-        """
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                Search for a given string as a fulltext search:
+
+                .. code-block:: pycon
+
+                    >>> tc = globus_sdk.TransferClient(...)
+                    >>> for ep in tc.endpoint_search("String to search for!"):
+                    ...     print(ep["display_name"])
+                    ...
+
+                Search for a given string, but only on endpoints that you own:
+
+                .. code-block:: pycon
+
+                    >>> for ep in tc.endpoint_search("foo", filter_scope="my-endpoints"):
+                    ...     print("{0} has ID {1}".format(ep["display_name"], ep["id"]))
+                    ...
+
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: endpoint_search
+
+            .. tab-item:: API Info
+
+                .. parsed-literal::
+
+                    GET /endpoint_search\
+                    ?filter_fulltext=<filter_fulltext>&filter_scope=<filter_scope>
+
+                .. extdoclink:: Endpoint Search
+                    :ref: transfer/endpoint_search
+        """  # noqa: E501
         if query_params is None:
             query_params = {}
         if filter_scope is not None:
@@ -554,9 +570,6 @@ class TransferClient(client.BaseClient):
             )
         )
 
-    @utils.doc_api_method(
-        "Get shared endpoint list (2)", "transfer/endpoint/#get_shared_endpoint_list2"
-    )
     @paging.has_paginator(paging.NextTokenPaginator, items_key="shared_endpoints")
     def get_shared_endpoint_list(
         self,
@@ -567,8 +580,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
-        ``GET /endpoint/<endpoint_id>/shared_endpoint_list``
-
         :param endpoint_id: the host endpoint whose shares are listed
         :type endpoint_id: str or UUID
         :param max_results: cap to the number of results
@@ -580,6 +591,19 @@ class TransferClient(client.BaseClient):
         :type query_params: dict, optional
 
         Get a list of all shared endpoints on a given host endpoint.
+
+        .. tab-set::
+
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: get_shared_endpoint_list
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint/<endpoint_id>/shared_endpoint_list``
+
+                .. extdoclink:: Get shared endpoint list (2)
+                    :ref: transfer/endpoint/#get_shared_endpoint_list2
         """
         log.info(f"TransferClient.get_shared_endpoint_list({endpoint_id}, ...)")
         if query_params is None:
@@ -1267,16 +1291,18 @@ class TransferClient(client.BaseClient):
         methods :meth:`~submit_transfer` and :meth:`~submit_delete` will call it
         automatically if the data does not contain a ``submission_id``.
 
-        .. tab:: API Info
+        .. tab-set::
 
-            ``GET /submission_id``
+            .. tab-item:: API Info
 
-            .. extdoclink:: Get a submission ID
-                :ref: transfer/task_submit/#get_submission_id
+                ``GET /submission_id``
 
-        .. tab:: Example Response Data
+                .. extdoclink:: Get a submission ID
+                    :ref: transfer/task_submit/#get_submission_id
 
-            .. expandtestfixture:: transfer.get_submission_id
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: transfer.get_submission_id
         """
         log.info(f"TransferClient.get_submission_id({query_params})")
         return self.get("submission_id", query_params=query_params)
@@ -1366,7 +1392,6 @@ class TransferClient(client.BaseClient):
     # Task inspection and management
     #
 
-    @utils.doc_api_method("Task list", "transfer/task/#get_task_list")
     @paging.has_paginator(
         paging.LimitOffsetTotalPaginator,
         items_key="DATA",
@@ -1384,8 +1409,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
-        ``GET /task_list``
-
         Get an iterable of task documents owned by the current user.
 
         :param limit: limit the number of results
@@ -1400,37 +1423,52 @@ class TransferClient(client.BaseClient):
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        Fetch 10 tasks and print some basic info:
+            .. tab-item:: Example Usage
 
-        >>> tc = TransferClient(...)
-        >>> for task in tc.task_list(limit=10):
-        >>>     print(
-        >>>         "Task({}): {} -> {}".format(
-        >>>             task["task_id"],
-        >>>             task["source_endpoint"],
-        >>>             task["destination_endpoint"]
-        >>>         )
-        >>>     )
+                Fetch 10 tasks and print some basic info:
 
-        Fetch 3 *specific* tasks using a ``task_id`` filter:
+                .. code-block:: pycon
 
-        >>> tc = TransferClient(...)
-        >>> task_ids = [
-        >>>     "acb4b581-b3f3-403a-a42a-9da97aaa9961",
-        >>>     "39447a3c-e002-401a-b95c-f48b69b4c60a",
-        >>>     "02330d3a-987b-4abb-97ed-6a22f8fa365e",
-        >>> ]
-        >>> for task in tc.task_list(filter={"task_id": task_ids}):
-        >>>     print(
-        >>>         "Task({}): {} -> {}".format(
-        >>>             task["task_id"],
-        >>>             task["source_endpoint"],
-        >>>             task["destination_endpoint"]
-        >>>         )
-        >>>     )
-        """
+                    >>> tc = TransferClient(...)
+                    >>> for task in tc.task_list(limit=10):
+                    ...     print(
+                    ...         "Task({}): {} -> {}".format(
+                    ...             task["task_id"], task["source_endpoint"], task["destination_endpoint"]
+                    ...         )
+                    ...     )
+                    ...
+
+                Fetch 3 *specific* tasks using a ``task_id`` filter:
+
+                .. code-block:: pycon
+
+                    >>> tc = TransferClient(...)
+                    >>> task_ids = [
+                    ...     "acb4b581-b3f3-403a-a42a-9da97aaa9961",
+                    ...     "39447a3c-e002-401a-b95c-f48b69b4c60a",
+                    ...     "02330d3a-987b-4abb-97ed-6a22f8fa365e",
+                    ... ]
+                    >>> for task in tc.task_list(filter={"task_id": task_ids}):
+                    ...     print(
+                    ...         "Task({}): {} -> {}".format(
+                    ...             task["task_id"], task["source_endpoint"], task["destination_endpoint"]
+                    ...         )
+                    ...     )
+                    ...
+
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: task_list
+
+            .. tab-item:: API Info
+
+                ``GET /task_list``
+
+                .. extdoclink:: Task List
+                    :ref: transfer/task/#get_task_list
+        """  # noqa: E501
         log.info("TransferClient.task_list(...)")
         if query_params is None:
             query_params = {}
@@ -1444,7 +1482,6 @@ class TransferClient(client.BaseClient):
             self.get("task_list", query_params=query_params)
         )
 
-    @utils.doc_api_method("Get event list", "transfer/task/#get_event_list")
     @paging.has_paginator(
         paging.LimitOffsetTotalPaginator,
         items_key="DATA",
@@ -1461,8 +1498,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         r"""
-        ``GET /task/<task_id>/event_list``
-
         List events (for example, faults and errors) for a given Task.
 
         :param task_id: The ID of the task to inspect
@@ -1474,15 +1509,34 @@ class TransferClient(client.BaseClient):
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        Fetch 10 events and print some basic info:
+            .. tab-item:: Example Usage
 
-        >>> tc = TransferClient(...)
-        >>> task_id = ...
-        >>> for event in tc.task_event_list(task_id, limit=10):
-        >>>     print("Event on Task({}) at {}:\n{}".format(
-        >>>         task_id, event["time"], event["description"])
+                Fetch 10 events and print some basic info:
+
+                .. code-block:: pycon
+
+                    >>> tc = TransferClient(...)
+                    >>> task_id = ...
+                    >>> for event in tc.task_event_list(task_id, limit=10):
+                    ...     print(
+                    ...         "Event on Task({}) at {}:\n{}".format(
+                    ...             task_id, event["time"], event["description"]
+                    ...         )
+                    ...     )
+                    ...
+
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: task_event_list
+
+            .. tab-item:: API Info
+
+                ``GET /task/<task_id>/event_list``
+
+                .. extdoclink:: Get Event List
+                    :ref: transfer/task/#get_event_list
         """
         log.info(f"TransferClient.task_event_list({task_id}, ...)")
         if query_params is None:
@@ -1670,9 +1724,6 @@ class TransferClient(client.BaseClient):
         log.info(f"TransferClient.task_pause_info({task_id}, ...)")
         return self.get(f"task/{task_id}/pause_info", query_params=query_params)
 
-    @utils.doc_api_method(
-        "Get Task Successful Transfer", "transfer/task/#get_task_successful_transfers"
-    )
     @paging.has_paginator(
         paging.NullableMarkerPaginator, items_key="DATA", marker_key="next_marker"
     )
@@ -1684,8 +1735,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
-        ``GET /task/<task_id>/successful_transfers``
-
         Get the successful file transfers for a completed Task.
 
         .. note::
@@ -1702,16 +1751,31 @@ class TransferClient(client.BaseClient):
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        Fetch all transferred files for a task and print some basic info:
+            .. tab-item:: Example Usage
 
-        >>> tc = TransferClient(...)
-        >>> task_id = ...
-        >>> for info in tc.task_successful_transfers(task_id):
-        >>>     print("{} -> {}".format(
-        >>>         info["source_path"], info["destination_path"]))
-        """
+                Fetch all transferred files for a task and print some basic info:
+
+                .. code-block:: pycon
+
+                    >>> tc = TransferClient(...)
+                    >>> task_id = ...
+                    >>> for info in tc.task_successful_transfers(task_id):
+                    ...     print("{} -> {}".format(info["source_path"], info["destination_path"]))
+                    ...
+
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: task_successful_transfers
+
+            .. tab-item:: API Info
+
+                ``GET /task/<task_id>/successful_transfers``
+
+                .. extdoclink:: Get Task Successful Transfers
+                    :ref: transfer/task/#get_task_successful_transfers
+        """  # noqa: E501
         log.info(f"TransferClient.task_successful_transfers({task_id}, ...)")
         if query_params is None:
             query_params = {}
@@ -1721,9 +1785,6 @@ class TransferClient(client.BaseClient):
             self.get(f"task/{task_id}/successful_transfers", query_params=query_params)
         )
 
-    @utils.doc_api_method(
-        "Get Task Skipped Errors", "transfer/task/#get_task_skipped_errors"
-    )
     @paging.has_paginator(
         paging.NullableMarkerPaginator, items_key="DATA", marker_key="next_marker"
     )
@@ -1735,8 +1796,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
-        ``GET /task/<task_id>/skipped_errors``
-
         Get path and error information for all paths that were skipped due
         to skip_source_errors being set on a completed transfer Task.
 
@@ -1747,16 +1806,31 @@ class TransferClient(client.BaseClient):
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        Fetch all skipped errors for a task and print some basic info:
+            .. tab-item:: Example Usage
 
-        >>> tc = TransferClient(...)
-        >>> task_id = ...
-        >>> for info in tc.task_skipped_errors(task_id):
-        >>>     print("{} -> {}".format(
-        >>>         info["error_code"], info["source_path"]))
-        """
+                Fetch all skipped errors for a task and print some basic info:
+
+                .. code-block:: pycon
+
+                    >>> tc = TransferClient(...)
+                    >>> task_id = ...
+                    >>> for info in tc.task_skipped_errors(task_id):
+                    ...     print("{} -> {}".format(info["error_code"], info["source_path"]))
+                    ...
+
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: task_skipped_errors
+
+            .. tab-item:: API Info
+
+                ``GET /task/<task_id>/skipped_errors``
+
+                .. extdoclink:: Get Task Skipped Errors
+                    :ref: transfer/task/#get_task_skipped_errors
+        """  # noqa: E501
         log.info("TransferClient.task_skipped_errors(%s, ...)", task_id)
         if query_params is None:
             query_params = {}
@@ -1877,10 +1951,6 @@ class TransferClient(client.BaseClient):
     # endpoint manager task methods
     #
 
-    @utils.doc_api_method(
-        "Advanced Endpoint Management: Get tasks",
-        "transfer/advanced_endpoint_management/#get_tasks",
-    )
     @paging.has_paginator(paging.LastKeyPaginator, items_key="DATA")
     def endpoint_manager_task_list(
         self,
@@ -1897,8 +1967,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         r"""
-        ``GET endpoint_manager/task_list``
-
         Get a list of tasks visible via ``activity_monitor`` role, as opposed
         to tasks owned by the current user.
 
@@ -1966,28 +2034,55 @@ class TransferClient(client.BaseClient):
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        Fetch some tasks and print some basic info:
+            .. tab-item:: Example Usage
 
-        >>> tc = TransferClient(...)
-        >>> for task in tc.endpoint_manager_task_list(filter_status="ACTIVE"):
-        >>>     print("Task({}): {} -> {}\n  was submitted by\n  {}".format(
-        >>>         task["task_id"], task["source_endpoint"],
-        >>>         task["destination_endpoint"], task["owner_string"]))
+                Fetch some tasks and print some basic info:
 
-        Do that same operation on *all* tasks visible via ``activity_monitor``
-        status:
+                .. code-block:: pycon
 
-        >>> tc = TransferClient(...)
-        >>> for page in tc.paginated.endpoint_manager_task_list(
-        >>>     filter_status="ACTIVE"
-        >>> ):
-        >>>     for task in page:
-        >>>         print("Task({}): {} -> {}\n  was submitted by\n  {}".format(
-        >>>             task["task_id"], task["source_endpoint"],
-        >>>             task["destination_endpoint"), task["owner_string"])
-        """
+                    >>> tc = TransferClient(...)
+                    >>> for task in tc.endpoint_manager_task_list(filter_status="ACTIVE"):
+                    ...     print(
+                    ...         "Task({}): {} -> {}\n  was submitted by\n  {}".format(
+                    ...             task["task_id"],
+                    ...             task["source_endpoint"],
+                    ...             task["destination_endpoint"],
+                    ...             task["owner_string"],
+                    ...         )
+                    ...     )
+                    ...
+
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: endpoint_manager_task_list
+
+                For example, fetch and print all active tasks visible via
+                ``activity_monitor`` permissions:
+
+                .. code-block:: pycon
+
+                    >>> tc = TransferClient(...)
+                    >>> for page in tc.paginated.endpoint_manager_task_list(filter_status="ACTIVE"):
+                    ...     for task in page:
+                    ...         print(
+                    ...             "Task({}): {} -> {}\n  was submitted by\n  {}".format(
+                    ...                 task["task_id"],
+                    ...                 task["source_endpoint"],
+                    ...                 task["destination_endpoint"],
+                    ...                 task["owner_string"],
+                    ...             )
+                    ...         )
+                    ...
+
+            .. tab-item:: API Info
+
+                ``GET endpoint_manager/task_list``
+
+                .. extdoclink:: Advanced Endpoint Management: Get tasks
+                    :ref: transfer/advanced_endpoint_management/#get_tasks
+        """  # noqa: E501
         log.info("TransferClient.endpoint_manager_task_list(...)")
         if query_params is None:
             query_params = {}
@@ -2049,10 +2144,6 @@ class TransferClient(client.BaseClient):
         log.info(f"TransferClient.endpoint_manager_get_task({task_id}, ...)")
         return self.get(f"endpoint_manager/task/{task_id}", query_params=query_params)
 
-    @utils.doc_api_method(
-        "Get task events as admin",
-        "transfer/advanced_endpoint_management/#get_task_events",
-    )
     @paging.has_paginator(
         paging.LimitOffsetTotalPaginator,
         items_key="DATA",
@@ -2070,8 +2161,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
-        ``GET /task/<task_id>/event_list``
-
         List events (for example, faults and errors) for a given task as an
         admin. Requires activity monitor effective role on the destination
         endpoint of the task.
@@ -2087,6 +2176,19 @@ class TransferClient(client.BaseClient):
         :type filter_is_error: bool, optional
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: endpoint_manager_task_event_list
+
+            .. tab-item:: API Info
+
+                ``GET /task/<task_id>/event_list``
+
+                .. extdoclink:: Get task events as admin
+                    :ref: transfer/advanced_endpoint_management/#get_task_events
         """
         log.info(f"TransferClient.endpoint_manager_task_event_list({task_id}, ...)")
         if query_params is None:
@@ -2129,10 +2231,6 @@ class TransferClient(client.BaseClient):
             f"endpoint_manager/task/{task_id}/pause_info", query_params=query_params
         )
 
-    @utils.doc_api_method(
-        "Get task successful transfers as admin",
-        "transfer/advanced_endpoint_management/#get_task_successful_transfers_as_admin",
-    )
     @paging.has_paginator(
         paging.NullableMarkerPaginator, items_key="DATA", marker_key="next_marker"
     )
@@ -2143,9 +2241,7 @@ class TransferClient(client.BaseClient):
         marker: str | None = None,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
-        """
-        ``GET /endpoint_manager/task/<task_id>/successful_transfers``
-
+        r"""
         Get the successful file transfers for a completed Task as an admin.
 
         :param task_id: The ID of the task to inspect
@@ -2154,6 +2250,20 @@ class TransferClient(client.BaseClient):
         :type marker: str
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: endpoint_manager_task_successful_transfers
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint_manager/task/<task_id>/successful_transfers``
+
+                .. extdoclink:: Get task successful transfers as admin
+                    :ref: transfer/advanced_endpoint_management/\
+                            #get_task_successful_transfers_as_admin
         """
         log.info(
             "TransferClient.endpoint_manager_task_successful_transfers(%s, ...)",
@@ -2170,10 +2280,6 @@ class TransferClient(client.BaseClient):
             )
         )
 
-    @utils.doc_api_method(
-        "Get task skipped errors as admin",
-        "transfer/advanced_endpoint_management/#get_task_skipped_errors_as_admin",
-    )
     @paging.has_paginator(
         paging.NullableMarkerPaginator, items_key="DATA", marker_key="next_marker"
     )
@@ -2184,9 +2290,7 @@ class TransferClient(client.BaseClient):
         marker: str | None = None,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
-        """
-        ``GET /endpoint_manager/task/<task_id>/skipped_errors``
-
+        r"""
         Get skipped errors for a completed Task as an admin.
 
         :param task_id: The ID of the task to inspect
@@ -2195,6 +2299,20 @@ class TransferClient(client.BaseClient):
         :type marker: str
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: endpoint_manager_task_skipped_errors
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint_manager/task/<task_id>/skipped_errors``
+
+                .. extdoclink:: Get task skipped errors as admin
+                    :ref: transfer/advanced_endpoint_management/\
+                            #get_task_skipped_errors_as_admin
         """
         log.info(f"TransferClient.endpoint_manager_task_skipped_errors({task_id}, ...)")
         if query_params is None:

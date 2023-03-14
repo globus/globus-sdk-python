@@ -33,8 +33,8 @@ extensions = [
     "sphinx.ext.viewcode",
     # other packages
     "sphinx_copybutton",
+    "sphinx_design",
     "sphinx_issues",
-    "sphinx_inline_tabs",
     # our custom one
     "globus_sdk._sphinxext",
 ]

@@ -13,12 +13,12 @@
     --tabset-border-color: #777;
   }
 }
-.tab-set.container {
+.sd-tab-set {
   border-style: solid;
   border-width: 1px;
   border-radius: 3px;
   border-color: var(--tabset-border-color);
 }
-.tab-set.container .tab-content.container {
+.sd-tab-set .sd-tab-content {
   padding: 4px;
 }

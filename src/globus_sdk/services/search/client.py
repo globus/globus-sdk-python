@@ -107,28 +107,31 @@ class SearchClient(client.BaseClient):
         :param query_params: additional parameters to pass as query params
         :type query_params: dict, optional
 
-        .. tab:: Example Usage
+        .. tab-set::
 
-            >>> sc = globus_sdk.SearchClient(...)
-            >>> result = sc.search(index_id, 'query string')
-            >>> advanced_result = sc.search(index_id, 'author: "Ada Lovelace"',
-            >>>                             advanced=True)
+            .. tab-item:: Example Usage
 
-        .. tab:: Paginated Usage
+                .. code-block:: pycon
 
-            .. paginatedusage:: search
+                    >>> sc = globus_sdk.SearchClient(...)
+                    >>> result = sc.search(index_id, "query string")
+                    >>> advanced_result = sc.search(index_id, 'author: "Ada Lovelace"', advanced=True)
 
-        .. tab:: API Info
+            .. tab-item:: Paginated Usage
 
-            ``GET /v1/index/<index_id>/search``
+                .. paginatedusage:: search
 
-            .. extdoclink:: GET Search Query
-                :ref: search/reference/get_query/
+            .. tab-item:: API Info
 
-        .. tab:: Example Response Data
+                ``GET /v1/index/<index_id>/search``
 
-            .. expandtestfixture:: search.search
-        """
+                .. extdoclink:: GET Search Query
+                    :ref: search/reference/get_query/
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: search.search
+        """  # noqa: E501
         if query_params is None:
             query_params = {}
         query_params.update(
@@ -143,7 +146,6 @@ class SearchClient(client.BaseClient):
         log.info(f"SearchClient.search({index_id}, ...)")
         return self.get(f"/v1/index/{index_id}/search", query_params=query_params)
 
-    @utils.doc_api_method("POST Search Query", "search/reference/post_query")
     @paging.has_paginator(
         paging.HasNextPaginator,
         items_key="gmeta",
@@ -160,8 +162,6 @@ class SearchClient(client.BaseClient):
         limit: int | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /v1/index/<index_id>/search``
-
         Execute a complex Search Query, using a query document to express filters,
         facets, sorting, field boostring, and other behaviors.
 
@@ -174,33 +174,44 @@ class SearchClient(client.BaseClient):
         :param limit: limit the number of results (overwrites any limit in ``data``)
         :type limit: int, optional
 
-        **Examples**
+        .. tab-set::
 
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> query_data = {
-        >>>   "q": "user query",
-        >>>   "filters": [
-        >>>     {
-        >>>       "type": "range",
-        >>>       "field_name": "path.to.date",
-        >>>       "values": [
-        >>>         {"from": "*",
-        >>>          "to": "2014-11-07"}
-        >>>       ]
-        >>>     }
-        >>>   ],
-        >>>   "facets": [
-        >>>     {"name": "Publication Date",
-        >>>      "field_name": "path.to.date",
-        >>>      "type": "date_histogram",
-        >>>      "date_interval": "year"}
-        >>>   ],
-        >>>   "sort": [
-        >>>     {"field_name": "path.to.date",
-        >>>      "order": "asc"}
-        >>>   ]
-        >>> }
-        >>> search_result = sc.post_search(index_id, query_data)
+            .. tab-item:: Example Usage
+
+                .. code-block:: pycon
+
+                    >>> sc = globus_sdk.SearchClient(...)
+                    ... query_data = {
+                    ...     "q": "user query",
+                    ...     "filters": [
+                    ...         {
+                    ...             "type": "range",
+                    ...             "field_name": "path.to.date",
+                    ...             "values": [{"from": "*", "to": "2014-11-07"}],
+                    ...         }
+                    ...     ],
+                    ...     "facets": [
+                    ...         {
+                    ...             "name": "Publication Date",
+                    ...             "field_name": "path.to.date",
+                    ...             "type": "date_histogram",
+                    ...             "date_interval": "year",
+                    ...         }
+                    ...     ],
+                    ...     "sort": [{"field_name": "path.to.date", "order": "asc"}],
+                    ... }
+                    ... search_result = sc.post_search(index_id, query_data)
+
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: post_search
+
+            .. tab-item:: API Info
+
+                ``POST /v1/index/<index_id>/search``
+
+                .. extdoclink:: POST Search Query
+                    :ref: search/reference/post_query/
         """
         log.info(f"SearchClient.post_search({index_id}, ...)")
         add_kwargs = {}
@@ -212,7 +223,6 @@ class SearchClient(client.BaseClient):
             data = {**data, **add_kwargs}
         return self.post(f"v1/index/{index_id}/search", data=data)
 
-    @utils.doc_api_method("Scroll Query", "search/reference/scroll_query")
     @paging.has_paginator(paging.MarkerPaginator, items_key="gmeta")
     def scroll(
         self,
@@ -222,8 +232,6 @@ class SearchClient(client.BaseClient):
         marker: str | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /v1/index/<index_id>/scroll``
-
         Scroll all data in a Search index. The paginated version of this API should
         typically be preferred, as it is the intended mode of usage.
 
@@ -237,10 +245,25 @@ class SearchClient(client.BaseClient):
         :param marker: marker used in paging (overwrites any marker in ``data``)
         :type marker: str, optional
 
-        **Examples**
+        .. tab-set::
 
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> scroll_result = sc.scroll(index_id, {"q": "*"})
+            .. tab-item:: Example Usage
+
+                .. code-block:: pycon
+
+                    >>> sc = globus_sdk.SearchClient(...)
+                    ... scroll_result = sc.scroll(index_id, {"q": "*"})
+
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: scroll
+
+            .. tab-item:: API Info
+
+                ``POST /v1/index/<index_id>/scroll``
+
+                .. extdoclink:: Scroll Query
+                    :ref: search/reference/scroll_query/
         """
         log.info(f"SearchClient.scroll({index_id}, ...)")
         add_kwargs = {}

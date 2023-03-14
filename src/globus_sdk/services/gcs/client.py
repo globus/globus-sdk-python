@@ -285,6 +285,12 @@ class GCSClient(client.BaseClient):
         :type include: str or iterable of str, optional
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: get_storage_gateway_list
         """
         if query_params is None:
             query_params = {}
