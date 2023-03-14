@@ -162,9 +162,11 @@ def has_paginator(
         as_paginated._paginator_params = paginator_params
 
         # do not append doc if the paginatedusage sphinx directive is in use
-        if ".. paginatedusage::" not in func.__doc__:
-            # but if not, append the desired text
-            func.__doc__ = f"""{func.__doc__}
+        if not func.__doc__ or ".. paginatedusage::" in func.__doc__:
+            return func
+
+        # but if not, append the desired text
+        func.__doc__ = f"""{func.__doc__}
 
         **Paginated Usage**
 
