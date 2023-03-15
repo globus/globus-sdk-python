@@ -4,7 +4,7 @@
 # testsuite
 requests==2.22.0
 
-pyjwt==2.0.0
+pyjwt==2.4.0
 cryptography==3.3.1
 typing_extensions==4.0
 
