@@ -181,7 +181,7 @@ class SearchClient(client.BaseClient):
                 .. code-block:: pycon
 
                     >>> sc = globus_sdk.SearchClient(...)
-                    ... query_data = {
+                    >>> query_data = {
                     ...     "q": "user query",
                     ...     "filters": [
                     ...         {
@@ -200,7 +200,7 @@ class SearchClient(client.BaseClient):
                     ...     ],
                     ...     "sort": [{"field_name": "path.to.date", "order": "asc"}],
                     ... }
-                    ... search_result = sc.post_search(index_id, query_data)
+                    >>> search_result = sc.post_search(index_id, query_data)
 
             .. tab-item:: Paginated Usage
 
@@ -252,7 +252,7 @@ class SearchClient(client.BaseClient):
                 .. code-block:: pycon
 
                     >>> sc = globus_sdk.SearchClient(...)
-                    ... scroll_result = sc.scroll(index_id, {"q": "*"})
+                    >>> scroll_result = sc.scroll(index_id, {"q": "*"})
 
             .. tab-item:: Paginated Usage
 
