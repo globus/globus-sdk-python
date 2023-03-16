@@ -300,20 +300,18 @@ class TransferClient(client.BaseClient):
 
                 Search for a given string as a fulltext search:
 
-                .. code-block:: pycon
+                .. code-block::
 
-                    >>> tc = globus_sdk.TransferClient(...)
-                    >>> for ep in tc.endpoint_search("String to search for!"):
-                    ...     print(ep["display_name"])
-                    ...
+                    tc = globus_sdk.TransferClient(...)
+                    for ep in tc.endpoint_search("String to search for!"):
+                        print(ep["display_name"])
 
                 Search for a given string, but only on endpoints that you own:
 
-                .. code-block:: pycon
+                .. code-block::
 
-                    >>> for ep in tc.endpoint_search("foo", filter_scope="my-endpoints"):
-                    ...     print("{0} has ID {1}".format(ep["display_name"], ep["id"]))
-                    ...
+                    for ep in tc.endpoint_search("foo", filter_scope="my-endpoints"):
+                        print("{0} has ID {1}".format(ep["display_name"], ep["id"]))
 
             .. tab-item:: Paginated Usage
 
@@ -1429,34 +1427,32 @@ class TransferClient(client.BaseClient):
 
                 Fetch 10 tasks and print some basic info:
 
-                .. code-block:: pycon
+                .. code-block::
 
-                    >>> tc = TransferClient(...)
-                    >>> for task in tc.task_list(limit=10):
-                    ...     print(
-                    ...         "Task({}): {} -> {}".format(
-                    ...             task["task_id"], task["source_endpoint"], task["destination_endpoint"]
-                    ...         )
-                    ...     )
-                    ...
+                    tc = TransferClient(...)
+                    for task in tc.task_list(limit=10):
+                        print(
+                            "Task({}): {} -> {}".format(
+                                task["task_id"], task["source_endpoint"], task["destination_endpoint"]
+                            )
+                        )
 
                 Fetch 3 *specific* tasks using a ``task_id`` filter:
 
-                .. code-block:: pycon
+                .. code-block::
 
-                    >>> tc = TransferClient(...)
-                    >>> task_ids = [
-                    ...     "acb4b581-b3f3-403a-a42a-9da97aaa9961",
-                    ...     "39447a3c-e002-401a-b95c-f48b69b4c60a",
-                    ...     "02330d3a-987b-4abb-97ed-6a22f8fa365e",
-                    ... ]
-                    >>> for task in tc.task_list(filter={"task_id": task_ids}):
-                    ...     print(
-                    ...         "Task({}): {} -> {}".format(
-                    ...             task["task_id"], task["source_endpoint"], task["destination_endpoint"]
-                    ...         )
-                    ...     )
-                    ...
+                    tc = TransferClient(...)
+                    task_ids = [
+                        "acb4b581-b3f3-403a-a42a-9da97aaa9961",
+                        "39447a3c-e002-401a-b95c-f48b69b4c60a",
+                        "02330d3a-987b-4abb-97ed-6a22f8fa365e",
+                    ]
+                    for task in tc.task_list(filter={"task_id": task_ids}):
+                        print(
+                            "Task({}): {} -> {}".format(
+                                task["task_id"], task["source_endpoint"], task["destination_endpoint"]
+                            )
+                        )
 
             .. tab-item:: Paginated Usage
 
@@ -1515,17 +1511,16 @@ class TransferClient(client.BaseClient):
 
                 Fetch 10 events and print some basic info:
 
-                .. code-block:: pycon
+                .. code-block::
 
-                    >>> tc = TransferClient(...)
-                    >>> task_id = ...
-                    >>> for event in tc.task_event_list(task_id, limit=10):
-                    ...     print(
-                    ...         "Event on Task({}) at {}:\n{}".format(
-                    ...             task_id, event["time"], event["description"]
-                    ...         )
-                    ...     )
-                    ...
+                    tc = TransferClient(...)
+                    task_id = ...
+                    for event in tc.task_event_list(task_id, limit=10):
+                        print(
+                            "Event on Task({}) at {}:\n{}".format(
+                                task_id, event["time"], event["description"]
+                            )
+                        )
 
             .. tab-item:: Paginated Usage
 
@@ -1757,13 +1752,12 @@ class TransferClient(client.BaseClient):
 
                 Fetch all transferred files for a task and print some basic info:
 
-                .. code-block:: pycon
+                .. code-block::
 
-                    >>> tc = TransferClient(...)
-                    >>> task_id = ...
-                    >>> for info in tc.task_successful_transfers(task_id):
-                    ...     print("{} -> {}".format(info["source_path"], info["destination_path"]))
-                    ...
+                    tc = TransferClient(...)
+                    task_id = ...
+                    for info in tc.task_successful_transfers(task_id):
+                        print("{} -> {}".format(info["source_path"], info["destination_path"]))
 
             .. tab-item:: Paginated Usage
 
@@ -1812,13 +1806,12 @@ class TransferClient(client.BaseClient):
 
                 Fetch all skipped errors for a task and print some basic info:
 
-                .. code-block:: pycon
+                .. code-block::
 
-                    >>> tc = TransferClient(...)
-                    >>> task_id = ...
-                    >>> for info in tc.task_skipped_errors(task_id):
-                    ...     print("{} -> {}".format(info["error_code"], info["source_path"]))
-                    ...
+                    tc = TransferClient(...)
+                    task_id = ...
+                    for info in tc.task_skipped_errors(task_id):
+                        print("{} -> {}".format(info["error_code"], info["source_path"]))
 
             .. tab-item:: Paginated Usage
 
@@ -2040,19 +2033,18 @@ class TransferClient(client.BaseClient):
 
                 Fetch some tasks and print some basic info:
 
-                .. code-block:: pycon
+                .. code-block::
 
-                    >>> tc = TransferClient(...)
-                    >>> for task in tc.endpoint_manager_task_list(filter_status="ACTIVE"):
-                    ...     print(
-                    ...         "Task({}): {} -> {}\n  was submitted by\n  {}".format(
-                    ...             task["task_id"],
-                    ...             task["source_endpoint"],
-                    ...             task["destination_endpoint"],
-                    ...             task["owner_string"],
-                    ...         )
-                    ...     )
-                    ...
+                    tc = TransferClient(...)
+                    for task in tc.endpoint_manager_task_list(filter_status="ACTIVE"):
+                        print(
+                            "Task({}): {} -> {}\n  was submitted by\n  {}".format(
+                                task["task_id"],
+                                task["source_endpoint"],
+                                task["destination_endpoint"],
+                                task["owner_string"],
+                            )
+                        )
 
             .. tab-item:: Paginated Usage
 
@@ -2061,20 +2053,19 @@ class TransferClient(client.BaseClient):
                 For example, fetch and print all active tasks visible via
                 ``activity_monitor`` permissions:
 
-                .. code-block:: pycon
+                .. code-block::
 
-                    >>> tc = TransferClient(...)
-                    >>> for page in tc.paginated.endpoint_manager_task_list(filter_status="ACTIVE"):
-                    ...     for task in page:
-                    ...         print(
-                    ...             "Task({}): {} -> {}\n  was submitted by\n  {}".format(
-                    ...                 task["task_id"],
-                    ...                 task["source_endpoint"],
-                    ...                 task["destination_endpoint"],
-                    ...                 task["owner_string"],
-                    ...             )
-                    ...         )
-                    ...
+                    tc = TransferClient(...)
+                    for page in tc.paginated.endpoint_manager_task_list(filter_status="ACTIVE"):
+                        for task in page:
+                            print(
+                                "Task({}): {} -> {}\n  was submitted by\n  {}".format(
+                                    task["task_id"],
+                                    task["source_endpoint"],
+                                    task["destination_endpoint"],
+                                    task["owner_string"],
+                                )
+                            )
 
             .. tab-item:: API Info
 

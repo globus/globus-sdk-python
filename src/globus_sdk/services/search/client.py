@@ -111,11 +111,11 @@ class SearchClient(client.BaseClient):
 
             .. tab-item:: Example Usage
 
-                .. code-block:: pycon
+                .. code-block::
 
-                    >>> sc = globus_sdk.SearchClient(...)
-                    >>> result = sc.search(index_id, "query string")
-                    >>> advanced_result = sc.search(index_id, 'author: "Ada Lovelace"', advanced=True)
+                    sc = globus_sdk.SearchClient(...)
+                    result = sc.search(index_id, "query string")
+                    advanced_result = sc.search(index_id, 'author: "Ada Lovelace"', advanced=True)
 
             .. tab-item:: Paginated Usage
 
@@ -178,29 +178,29 @@ class SearchClient(client.BaseClient):
 
             .. tab-item:: Example Usage
 
-                .. code-block:: pycon
+                .. code-block::
 
-                    >>> sc = globus_sdk.SearchClient(...)
-                    >>> query_data = {
-                    ...     "q": "user query",
-                    ...     "filters": [
-                    ...         {
-                    ...             "type": "range",
-                    ...             "field_name": "path.to.date",
-                    ...             "values": [{"from": "*", "to": "2014-11-07"}],
-                    ...         }
-                    ...     ],
-                    ...     "facets": [
-                    ...         {
-                    ...             "name": "Publication Date",
-                    ...             "field_name": "path.to.date",
-                    ...             "type": "date_histogram",
-                    ...             "date_interval": "year",
-                    ...         }
-                    ...     ],
-                    ...     "sort": [{"field_name": "path.to.date", "order": "asc"}],
-                    ... }
-                    >>> search_result = sc.post_search(index_id, query_data)
+                    sc = globus_sdk.SearchClient(...)
+                    query_data = {
+                        "q": "user query",
+                        "filters": [
+                            {
+                                "type": "range",
+                                "field_name": "path.to.date",
+                                "values": [{"from": "*", "to": "2014-11-07"}],
+                            }
+                        ],
+                        "facets": [
+                            {
+                                "name": "Publication Date",
+                                "field_name": "path.to.date",
+                                "type": "date_histogram",
+                                "date_interval": "year",
+                            }
+                        ],
+                        "sort": [{"field_name": "path.to.date", "order": "asc"}],
+                    }
+                    search_result = sc.post_search(index_id, query_data)
 
             .. tab-item:: Paginated Usage
 
@@ -249,10 +249,10 @@ class SearchClient(client.BaseClient):
 
             .. tab-item:: Example Usage
 
-                .. code-block:: pycon
+                .. code-block::
 
-                    >>> sc = globus_sdk.SearchClient(...)
-                    >>> scroll_result = sc.scroll(index_id, {"q": "*"})
+                    sc = globus_sdk.SearchClient(...)
+                    scroll_result = sc.scroll(index_id, {"q": "*"})
 
             .. tab-item:: Paginated Usage
 
