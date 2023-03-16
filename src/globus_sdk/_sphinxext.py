@@ -57,6 +57,9 @@ def _is_paginated(func):
 class AddContentDirective(Directive):
     # Directive source:
     #   https://sourceforge.net/p/docutils/code/HEAD/tree/trunk/docutils/docutils/parsers/rst/__init__.py
+    #
+    # for information on how to write directives, see also:
+    #   https://docutils.sourceforge.io/docs/howto/rst-directives.html#the-directive-class
     def gen_rst(self):
         return []
 
@@ -180,30 +183,34 @@ class ExternalDocLink(AddContentDirective):
     optional_arguments = 0
     # allow for spaces in the argument string
     final_argument_whitespace = True
-    option_spec = {"mode": directives.unchanged, "ref": directives.unchanged_required}
+    option_spec = {
+        "base_url": directives.unchanged,
+        "service": directives.unchanged,
+        "ref": directives.unchanged_required,
+    }
 
     def gen_rst(self):
         message = self.arguments[0].strip()
 
-        mode = "default"
-        if "mode" in self.options:
-            mode = self.options["mode"]
+        service: str | None = self.options.get("service")
 
-        if mode == "default":
-            base_url = "https://docs.globus.org/api"
-            relative_link = self.options["ref"]
-
-            yield (
-                f"See `{message} <{base_url}/{relative_link}>`_ in the "
-                "API documentation for details."
-            )
-        elif mode in (
-            "groups",
-            "gcs",
-        ):
-            raise ValueError(f"Unsupported extdoclink mode {mode}. TODO: add support")
+        if service is None:
+            default_base_url = "https://docs.globus.org/api"
+        elif service == "groups":
+            default_base_url = "https://groups.api.globus.org/redoc#operation"
+        elif service == "gcs":
+            default_base_url = "https://docs.globus.org/globus-connect-server/v5/api"
+        elif service == "flows":
+            default_base_url = "https://globusonline.github.io/flows#tag"
         else:
-            raise ValueError(f"Unsupported extdoclink mode {mode}")
+            raise ValueError(f"Unsupported extdoclink service '{service}'")
+
+        base_url = self.options.get("base_url", default_base_url)
+        relative_link = self.options["ref"]
+        yield (
+            f"See `{message} <{base_url}/{relative_link}>`_ in the "
+            "API documentation for details."
+        )
 
 
 class ExpandTestingFixture(AddContentDirective):

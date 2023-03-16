@@ -9,21 +9,6 @@ from globus_sdk.scopes import GroupsScopes
 from .data import BatchMembershipActions, GroupPolicies
 from .errors import GroupsAPIError
 
-C = t.TypeVar("C", bound=t.Callable[..., t.Any])
-
-
-def _groupdoc(message: str, link: str) -> t.Callable[[C], C]:
-    # do not use functools.partial because it doesn't preserve type information
-    # see: https://github.com/python/mypy/issues/1484
-    def partial(func: C) -> C:
-        return utils.doc_api_method(
-            message,
-            link,
-            external_base_url="https://groups.api.globus.org/redoc#operation",
-        )(func)
-
-    return partial
-
 
 class GroupsClient(client.BaseClient):
     """
@@ -42,10 +27,6 @@ class GroupsClient(client.BaseClient):
     service_name = "groups"
     scopes = GroupsScopes
 
-    @_groupdoc(
-        "Retrieve your groups and membership",
-        "get_my_groups_and_memberships_v2_groups_my_groups_get",
-    )
     def get_my_groups(
         self, *, query_params: dict[str, t.Any] | None = None
     ) -> response.ArrayResponse:
@@ -54,12 +35,21 @@ class GroupsClient(client.BaseClient):
 
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /v2/groups/my_groups``
+
+                .. extdoclink:: Retrieve your groups and membership
+                    :service: groups
+                    :ref: get_my_groups_and_memberships_v2_groups_my_groups_get
         """
         return response.ArrayResponse(
             self.get("/groups/my_groups", query_params=query_params)
         )
 
-    @_groupdoc("Get Group", "get_group_v2_groups__group_id__get")
     def get_group(
         self,
         group_id: UUIDLike,
@@ -78,6 +68,16 @@ class GroupsClient(client.BaseClient):
         :type include: str or iterable of str, optional
         :param query_params: additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /v2/groups/<group_id>``
+
+                .. extdoclink:: Get Group
+                    :service: groups
+                    :ref: get_group_v2_groups__group_id__get
         """
         if query_params is None:
             query_params = {}
@@ -85,7 +85,6 @@ class GroupsClient(client.BaseClient):
             query_params["include"] = ",".join(utils.safe_strseq_iter(include))
         return self.get(f"/groups/{group_id}", query_params=query_params)
 
-    @_groupdoc("Delete a group", "delete_group_v2_groups__group_id__delete")
     def delete_group(
         self,
         group_id: UUIDLike,
@@ -99,10 +98,19 @@ class GroupsClient(client.BaseClient):
         :type group_id: str or UUID
         :param query_params: additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``DELETE /v2/groups/<group_id>``
+
+                .. extdoclink:: Delete a Group
+                    :service: groups
+                    :ref: delete_group_v2_groups__group_id__delete
         """
         return self.delete(f"/groups/{group_id}", query_params=query_params)
 
-    @_groupdoc("Create a group", "create_group_v2_groups_post")
     def create_group(
         self,
         data: dict[str, t.Any],
@@ -116,10 +124,19 @@ class GroupsClient(client.BaseClient):
         :type data: dict
         :param query_params: additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``POST /v2/groups``
+
+                .. extdoclink:: Create a Group
+                    :service: groups
+                    :ref: create_group_v2_groups_post
         """
         return self.post("/groups", data=data, query_params=query_params)
 
-    @_groupdoc("Update a group", "update_group_v2_groups__group_id__put")
     def update_group(
         self,
         group_id: UUIDLike,
@@ -136,13 +153,19 @@ class GroupsClient(client.BaseClient):
         :type data: dict
         :param query_params: additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``PUT /v2/groups/<group_id>``
+
+                .. extdoclink:: Update a Group
+                    :service: groups
+                    :ref: update_group_v2_groups__group_id__put
         """
         return self.put(f"/groups/{group_id}", data=data, query_params=query_params)
 
-    @_groupdoc(
-        "Get the policies for the group",
-        "get_policies_v2_groups__group_id__policies_get",
-    )
     def get_group_policies(
         self,
         group_id: UUIDLike,
@@ -156,13 +179,19 @@ class GroupsClient(client.BaseClient):
         :type group_id: str or UUID
         :param query_params: additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /v2/groups/<group_id>/policies``
+
+                .. extdoclink:: Get the policies for a group
+                    :service: groups
+                    :ref: get_policies_v2_groups__group_id__policies_get
         """
         return self.get(f"/groups/{group_id}/policies", query_params=query_params)
 
-    @_groupdoc(
-        "Set the policies for the group",
-        "update_policies_v2_groups__group_id__policies_put",
-    )
     def set_group_policies(
         self,
         group_id: UUIDLike,
@@ -179,15 +208,21 @@ class GroupsClient(client.BaseClient):
         :type data: dict or ``GroupPolicies``
         :param query_params: additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``PUT /v2/groups/<group_id>/policies``
+
+                .. extdoclink:: Set the policies for a group
+                    :service: groups
+                    :ref: update_policies_v2_groups__group_id__policies_put
         """
         return self.put(
             f"/groups/{group_id}/policies", data=data, query_params=query_params
         )
 
-    @_groupdoc(
-        "Get the preferences for your identity set",
-        "get_identity_set_preferences_v2_preferences_get",
-    )
     def get_identity_preferences(
         self, *, query_params: dict[str, t.Any] | None = None
     ) -> response.GlobusHTTPResponse:
@@ -197,13 +232,19 @@ class GroupsClient(client.BaseClient):
 
         :param query_params: additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /v2/preferences``
+
+                .. extdoclink:: Get the preferences for your identity set
+                    :service: groups
+                    :ref: get_identity_set_preferences_v2_preferences_get
         """
         return self.get("/preferences", query_params=query_params)
 
-    @_groupdoc(
-        "Set the preferences for your identity set",
-        "put_identity_set_preferences_v2_preferences_put",
-    )
     def set_identity_preferences(
         self,
         data: dict[str, t.Any],
@@ -219,17 +260,25 @@ class GroupsClient(client.BaseClient):
         :param query_params: additional passthrough query parameters
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        >>> gc = globus_sdk.GroupsClient(...)
-        >>> gc.set_identity_preferences({"allow_add": False})
+            .. tab-item:: Example Usage
+
+                .. code-block::
+
+                    gc = globus_sdk.GroupsClient(...)
+                    gc.set_identity_preferences({"allow_add": False})
+
+            .. tab-item:: API Info
+
+                ``PUT /v2/preferences``
+
+                .. extdoclink:: Set the preferences for your identity set
+                    :service: groups
+                    :ref: put_identity_set_preferences_v2_preferences_put
         """
         return self.put("/preferences", data=data, query_params=query_params)
 
-    @_groupdoc(
-        "Get the membership fields for your identity set",
-        "get_membership_fields_v2_groups__group_id__membership_fields_get",
-    )
     def get_membership_fields(
         self,
         group_id: UUIDLike,
@@ -243,15 +292,21 @@ class GroupsClient(client.BaseClient):
         :type group_id: str or UUID
         :param query_params: additional passthrough query parameters
         :type query_params: dict, optional
-        """
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /v2/groups/<group_id>/membership_fields``
+
+                .. extdoclink:: Get the membership fields for your identity set
+                    :service: groups
+                    :ref: get_membership_fields_v2_groups__group_id__membership_fields_get
+        """  # noqa: E501
         return self.get(
             f"/groups/{group_id}/membership_fields", query_params=query_params
         )
 
-    @_groupdoc(
-        "Set the membership fields for your identity set",
-        "put_membership_fields_v2_groups__group_id__membership_fields_put",
-    )
     def set_membership_fields(
         self,
         group_id: UUIDLike,
@@ -268,17 +323,23 @@ class GroupsClient(client.BaseClient):
         :type data: dict
         :param query_params: additional passthrough query parameters
         :type query_params: dict, optional
-        """
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``PUT /v2/groups/<group_id>/membership_fields``
+
+                .. extdoclink:: Set the membership fields for your identity set
+                    :service: groups
+                    :ref: put_membership_fields_v2_groups__group_id__membership_fields_put
+        """  # noqa: E501
         return self.put(
             f"/groups/{group_id}/membership_fields",
             data=data,
             query_params=query_params,
         )
 
-    @_groupdoc(
-        "Perform actions on members of the group",
-        "group_membership_post_actions_v2_groups__group_id__post",
-    )
     def batch_membership_action(
         self,
         group_id: UUIDLike,
@@ -297,13 +358,25 @@ class GroupsClient(client.BaseClient):
         :param query_params: additional passthrough query parameters
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        >>> gc = globus_sdk.GroupsClient(...)
-        >>> group_id = ...
-        >>> batch = globus_sdk.BatchMembershipActions()
-        >>> batch.add_members("ae332d86-d274-11e5-b885-b31714a110e9")
-        >>> batch.invite_members("c699d42e-d274-11e5-bf75-1fc5bf53bb24")
-        >>> gc.batch_membership_action(group_id, batch)
+            .. tab-item:: Example Usage
+
+                .. code-block::
+
+                    gc = globus_sdk.GroupsClient(...)
+                    group_id = ...
+                    batch = globus_sdk.BatchMembershipActions()
+                    batch.add_members("ae332d86-d274-11e5-b885-b31714a110e9")
+                    batch.invite_members("c699d42e-d274-11e5-bf75-1fc5bf53bb24")
+                    gc.batch_membership_action(group_id, batch)
+
+            .. tab-item:: API Info
+
+                ``PUT /v2/groups/<group_id>/membership_fields``
+
+                .. extdoclink:: Perform actions on members of the group
+                    :service: groups
+                    :ref: group_membership_post_actions_v2_groups__group_id__post
         """
         return self.post(f"/groups/{group_id}", data=actions, query_params=query_params)
