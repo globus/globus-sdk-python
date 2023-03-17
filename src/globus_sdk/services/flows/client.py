@@ -56,30 +56,6 @@ class FlowsClient(client.BaseClient):
         """
         Create a Flow
 
-        Example Usage:
-
-        .. code-block:: python
-
-            from globus_sdk import FlowsClient
-
-            ...
-            flows = FlowsClient(...)
-            flows.create_flow(
-                title="my-cool-flow",
-                definition={
-                    "StartAt": "the-one-true-state",
-                    "States": {"the-one-true-state": {"Type": "Pass", "End": True}},
-                },
-                input_schema={
-                    "type": "object",
-                    "properties": {
-                        "input-a": {"type": "string"},
-                        "input-b": {"type": "number"},
-                        "input-c": {"type": "boolean"},
-                    },
-                },
-            )
-
         :param title: A non-unique, human-friendly name used for displaying the
             flow to end users.
         :type title: str (1 - 128 characters)
@@ -97,18 +73,18 @@ class FlowsClient(client.BaseClient):
         :param flow_viewers: A set of Principal URN values, or the value "public"
             indicating entities who can view the flow
 
-            Examples:
+            .. dropdown:: Example Values
 
-            .. code-block:: json
+                .. code-block:: json
 
-                [ "public" ]
+                    [ "public" ]
 
-            .. code-block:: json
+                .. code-block:: json
 
-                [
-                    "urn:globus:auth:identity:b44bddda-d274-11e5-978a-9f15789a8150",
-                    "urn:globus:groups:id:c1dcd951-3f35-4ea3-9f28-a7cdeaf8b68f"
-                ]
+                    [
+                        "urn:globus:auth:identity:b44bddda-d274-11e5-978a-9f15789a8150",
+                        "urn:globus:groups:id:c1dcd951-3f35-4ea3-9f28-a7cdeaf8b68f"
+                    ]
 
 
         :type flow_viewers: list[str], optional
@@ -116,33 +92,33 @@ class FlowsClient(client.BaseClient):
             "all_authenticated_users" indicating entities who can initiate a *Run* of
             the flow
 
-            Examples:
+            .. dropdown:: Example Values
 
-            .. code-block:: json
+                .. code-block:: json
 
-                [ "all_authenticated_users" ]
+                    [ "all_authenticated_users" ]
 
 
-            .. code-block:: json
+                .. code-block:: json
 
-                [
-                    "urn:globus:auth:identity:b44bddda-d274-11e5-978a-9f15789a8150",
-                    "urn:globus:groups:id:c1dcd951-3f35-4ea3-9f28-a7cdeaf8b68f"
-                ]
+                    [
+                        "urn:globus:auth:identity:b44bddda-d274-11e5-978a-9f15789a8150",
+                        "urn:globus:groups:id:c1dcd951-3f35-4ea3-9f28-a7cdeaf8b68f"
+                    ]
 
         :type flow_starters: list[str], optional
         :param flow_administrators: A set of Principal URN values indicating entities
             who can perform administrative operations on the flow (create, delete,
             update)
 
-            Example:
+            .. dropdown:: Example Values
 
-            .. code-block:: json
+                .. code-block:: json
 
-                [
-                    "urn:globus:auth:identity:b44bddda-d274-11e5-978a-9f15789a8150",
-                    "urn:globus:groups:id:c1dcd951-3f35-4ea3-9f28-a7cdeaf8b68f"
-                ]
+                    [
+                        "urn:globus:auth:identity:b44bddda-d274-11e5-978a-9f15789a8150",
+                        "urn:globus:groups:id:c1dcd951-3f35-4ea3-9f28-a7cdeaf8b68f"
+                    ]
 
         :type flow_administrators: list[str], optional
         :param keywords: A set of terms used to categorize the flow used in query and
@@ -150,6 +126,36 @@ class FlowsClient(client.BaseClient):
         :type keywords: list[str] (0 - 1024 items), optional
         :param additional_fields: Additional Key/Value pairs sent to the create API
         :type additional_fields: dict or str -> any, optional
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    from globus_sdk import FlowsClient
+
+                    ...
+                    flows = FlowsClient(...)
+                    flows.create_flow(
+                        title="my-cool-flow",
+                        definition={
+                            "StartAt": "the-one-true-state",
+                            "States": {"the-one-true-state": {"Type": "Pass", "End": True}},
+                        },
+                        input_schema={
+                            "type": "object",
+                            "properties": {
+                                "input-a": {"type": "string"},
+                                "input-b": {"type": "number"},
+                                "input-c": {"type": "boolean"},
+                            },
+                        },
+                    )
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: flows.create_flow
         """  # noqa E501
 
         data = {
@@ -269,6 +275,143 @@ class FlowsClient(client.BaseClient):
             query_params["marker"] = marker
 
         return IterableFlowsResponse(self.get("/flows", query_params=query_params))
+
+    @_flowdoc("Update Flow", "Flows/paths/~1flows~1{flow_id}/put")
+    def update_flow(
+        self,
+        flow_id: UUIDLike,
+        title: str | None = None,
+        definition: dict[str, t.Any] | None = None,
+        input_schema: dict[str, t.Any] | None = None,
+        subtitle: str | None = None,
+        description: str | None = None,
+        flow_owner: str | None = None,
+        flow_viewers: list[str] | None = None,
+        flow_starters: list[str] | None = None,
+        flow_administrators: list[str] | None = None,
+        keywords: list[str] | None = None,
+        additional_fields: dict[str, t.Any] | None = None,
+    ) -> GlobusHTTPResponse:
+        """
+        Update a Flow
+
+        Only the parameter `flow_id` is required.
+        Any fields omitted from the request will be unchanged
+
+        :param flow_id: The ID of the Flow to fetch
+        :type flow_id: str or UUID
+        :param title: A non-unique, human-friendly name used for displaying the
+            flow to end users.
+        :type title: str (1 - 128 characters), optional
+        :param definition: JSON object specifying flows states and execution order. For
+            a more detailed explanation of the flow definition, see
+            `Authoring Flows <https://globus-automate-client.readthedocs.io/en/latest/authoring_flows.html>`_
+        :type definition: dict, optional
+        :param input_schema: A JSON Schema to which Flow Invocation input must conform
+        :type input_schema: dict, optional
+        :param subtitle: A concise summary of the flow’s purpose.
+        :type subtitle: str (0 - 128 characters), optional
+        :param description: A detailed description of the flow's purpose for end user
+            display.
+        :type description: str (0 - 4096 characters), optional
+        :param flow_owner: An Auth Identity URN to set as flow owner; this must match
+            the Identity URN of the entity calling `update_flow`
+        :type flow_owner: str, optional
+        :param flow_viewers: A set of Principal URN values, or the value "public"
+            indicating entities who can view the flow
+
+            .. dropdown:: Example Values
+
+                .. code-block:: json
+
+                    [ "public" ]
+
+                .. code-block:: json
+
+                    [
+                        "urn:globus:auth:identity:b44bddda-d274-11e5-978a-9f15789a8150",
+                        "urn:globus:groups:id:c1dcd951-3f35-4ea3-9f28-a7cdeaf8b68f"
+                    ]
+
+        :type flow_viewers: list[str], optional
+        :param flow_starters: A set of Principal URN values, or the value
+            "all_authenticated_users" indicating entities who can initiate a *Run* of
+            the flow
+
+            .. dropdown:: Example Values
+
+                .. code-block:: json
+
+                    [ "all_authenticated_users" ]
+
+
+                .. code-block:: json
+
+                    [
+                        "urn:globus:auth:identity:b44bddda-d274-11e5-978a-9f15789a8150",
+                        "urn:globus:groups:id:c1dcd951-3f35-4ea3-9f28-a7cdeaf8b68f"
+                    ]
+
+        :type flow_starters: list[str], optional
+        :param flow_administrators: A set of Principal URN values indicating entities
+            who can perform administrative operations on the flow (create, delete,
+            update)
+
+            .. dropdown:: Example Value
+
+                .. code-block:: json
+
+                    [
+                        "urn:globus:auth:identity:b44bddda-d274-11e5-978a-9f15789a8150",
+                        "urn:globus:groups:id:c1dcd951-3f35-4ea3-9f28-a7cdeaf8b68f"
+                    ]
+
+        :type flow_administrators: list[str], optional
+        :param keywords: A set of terms used to categorize the flow used in query and
+            discovery operations
+        :type keywords: list[str] (0 - 1024 items), optional
+        :param additional_fields: Additional Key/Value pairs sent to the create API
+        :type additional_fields: dict or str -> any, optional
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block::
+
+                    from globus_sdk import FlowsClient
+
+                    ...
+                    flows = FlowsClient(...)
+                    flows.update_flow(
+                        flow_id="581753c7-45da-43d3-ad73-246b46e7cb6b",
+                        keywords=["new", "overriding", "keywords"]
+                    )
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: flows.update_flow
+        """  # noqa E501
+
+        data = {
+            k: v
+            for k, v in {
+                "title": title,
+                "definition": definition,
+                "input_schema": input_schema,
+                "subtitle": subtitle,
+                "description": description,
+                "flow_owner": flow_owner,
+                "flow_viewers": flow_viewers,
+                "flow_starters": flow_starters,
+                "flow_administrators": flow_administrators,
+                "keywords": keywords,
+            }.items()
+            if v is not None
+        }
+        data.update(additional_fields or {})
+
+        return self.put(f"/flows/{flow_id}", data=data)
 
     @_flowdoc("Delete Flow", "Flows/paths/~1flows~1{flow_id}/delete")
     def delete_flow(

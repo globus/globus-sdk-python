@@ -18,6 +18,14 @@ def test_get_flow(flows_client):
     assert resp.data["title"] == meta["title"]
 
 
+def test_update_flow(flows_client):
+    meta = load_response(flows_client.update_flow).metadata
+    resp = flows_client.update_flow(meta["flow_id"], **meta["params"])
+    for k, v in meta["params"].items():
+        assert k in resp
+        assert resp[k] == v
+
+
 def test_delete_flow(flows_client):
     metadata = load_response(flows_client.delete_flow).metadata
 
