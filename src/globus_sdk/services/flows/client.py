@@ -61,7 +61,7 @@ class FlowsClient(client.BaseClient):
         :type title: str (1 - 128 characters)
         :param definition: JSON object specifying flows states and execution order. For
             a more detailed explanation of the flow definition, see
-            `Authoring Flows <https://globus-automate-client.readthedocs.io/en/latest/authoring_flows.html>`_
+            `Authoring Flows <https://docs.globus.org/api/flows/authoring-flows>`_
         :type definition: dict
         :param input_schema: A JSON Schema to which Flow Invocation input must conform
         :type input_schema: dict
@@ -70,7 +70,7 @@ class FlowsClient(client.BaseClient):
         :param description: A detailed description of the flow's purpose for end user
             display.
         :type description: str (0 - 4096 characters), optional
-        :param flow_viewers: A set of Principal URN values, or the value "public"
+        :param flow_viewers: A set of Principal URN values, or the value "public",
             indicating entities who can view the flow
 
             .. dropdown:: Example Values
@@ -89,7 +89,7 @@ class FlowsClient(client.BaseClient):
 
         :type flow_viewers: list[str], optional
         :param flow_starters: A set of Principal URN values, or the value
-            "all_authenticated_users" indicating entities who can initiate a *Run* of
+            "all_authenticated_users", indicating entities who can initiate a *Run* of
             the flow
 
             .. dropdown:: Example Values
@@ -125,7 +125,7 @@ class FlowsClient(client.BaseClient):
             discovery operations
         :type keywords: list[str] (0 - 1024 items), optional
         :param additional_fields: Additional Key/Value pairs sent to the create API
-        :type additional_fields: dict or str -> any, optional
+        :type additional_fields: dict of str -> any, optional
 
         .. tab-set::
 
@@ -280,6 +280,7 @@ class FlowsClient(client.BaseClient):
     def update_flow(
         self,
         flow_id: UUIDLike,
+        *,
         title: str | None = None,
         definition: dict[str, t.Any] | None = None,
         input_schema: dict[str, t.Any] | None = None,
@@ -305,7 +306,7 @@ class FlowsClient(client.BaseClient):
         :type title: str (1 - 128 characters), optional
         :param definition: JSON object specifying flows states and execution order. For
             a more detailed explanation of the flow definition, see
-            `Authoring Flows <https://globus-automate-client.readthedocs.io/en/latest/authoring_flows.html>`_
+            `Authoring Flows <https://docs.globus.org/api/flows/authoring-flows>`_
         :type definition: dict, optional
         :param input_schema: A JSON Schema to which Flow Invocation input must conform
         :type input_schema: dict, optional
@@ -317,7 +318,7 @@ class FlowsClient(client.BaseClient):
         :param flow_owner: An Auth Identity URN to set as flow owner; this must match
             the Identity URN of the entity calling `update_flow`
         :type flow_owner: str, optional
-        :param flow_viewers: A set of Principal URN values, or the value "public"
+        :param flow_viewers: A set of Principal URN values, or the value "public",
             indicating entities who can view the flow
 
             .. dropdown:: Example Values
@@ -335,7 +336,7 @@ class FlowsClient(client.BaseClient):
 
         :type flow_viewers: list[str], optional
         :param flow_starters: A set of Principal URN values, or the value
-            "all_authenticated_users" indicating entities who can initiate a *Run* of
+            "all_authenticated_users", indicating entities who can initiate a *Run* of
             the flow
 
             .. dropdown:: Example Values
@@ -371,7 +372,7 @@ class FlowsClient(client.BaseClient):
             discovery operations
         :type keywords: list[str] (0 - 1024 items), optional
         :param additional_fields: Additional Key/Value pairs sent to the create API
-        :type additional_fields: dict or str -> any, optional
+        :type additional_fields: dict of str -> any, optional
 
         .. tab-set::
 
