@@ -21,4 +21,4 @@ tdata.add_filter_rule("*.tgz", method="exclude")
 tdata.add_filter_rule("*.tgz", type="file")
 # bad values rejected (Literal)
 tdata.add_filter_rule("*.tgz", type="files")  # type: ignore[arg-type]
-tdata.add_filter_rule("*.tgz", method="include")  # type: ignore[arg-type]
+tdata.add_filter_rule("*.tgz", method="unclude")  # type: ignore[arg-type]

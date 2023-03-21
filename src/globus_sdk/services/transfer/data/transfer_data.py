@@ -352,7 +352,7 @@ class TransferData(utils.PayloadWrapper):
         self,
         name: str,
         *,
-        method: Literal["exclude"] = "exclude",
+        method: Literal["include", "exclude"] = "exclude",
         type: None  # pylint: disable=redefined-builtin
         | (Literal["file", "dir"]) = None,
     ) -> None:
@@ -360,31 +360,44 @@ class TransferData(utils.PayloadWrapper):
         Add a filter rule to the transfer document.
 
         These rules specify which items are or are not included when recursively
-        transferring directories.
-
-        Currently, only ``method="exclude"`` (the default) is supported. This means that
-        items matching the ``name`` field will be excluded from the transfer.
+        transferring directories. Each item that is found during recursive directory
+        traversal is matched against these rules in the order they are listed.
+        The method of the first filter rule that matches an item is applied (either
+        "include" or "exclude"), and filter rule matching stops. If no rules match,
+        the item is included in the transfer. Notably, this makes "include" filter
+        rules only useful when overriding more general "exclude" filter rules later
+        in the list.
 
         :param name: A pattern to match against item names. Wildcards are supported, as
             are character groups: ``*`` matches everything, ``?`` matches any single
             character, ``[]`` matches any single character within the brackets, and
             ``[!]`` matches any single character not within the brackets.
         :type name: str
-        :param method: The method to use for filtering. Only the default, ``"exclude"``
-            is supported.
+        :param method: The method to use for filtering. If "exclude" (the default)
+        items matching this rule will not be included in the transfer. If "include"
+        items matching this rule will be included in the transfer.
         :type method: str, optional
         :param type: The types of items on which to apply this filter rule. Either
             ``"file"`` or ``"dir"``. If unspecified, the rule applies to both.
+            Note that if a ``"dir"`` is excluded then all items within it will
+            also be excluded regardless if they would have matched any include rules.
         :type type: str, optional
 
         Example Usage:
 
         >>> tdata = TransferData(...)
-        >>> tdata.add_filter_rule("*.tgz", type="file")
-        >>> tdata.add_filter_rule("*.tar.gz", type="file")
+        >>> tdata.add_filter_rule(method="exclude", *.tgz", type="file")
+        >>> tdata.add_filter_rule(method="exclude", *.tar.gz", type="file")
 
         ``tdata`` now describes a transfer which will skip any gzipped tar files with
         the extensions `.tgz` or `.tar.gz`
+
+        >>> tdata = TransferData(...)
+        >>> tdata.add_filter_rule(method="include", *.txt", type="file")
+        >>> tdata.add_filter_rule(method="exclude", "*", type="file")
+
+        ``tdata`` now describes a transfer which will only transfer files
+        with the `.txt` extension.
         """
         if "filter_rules" not in self:
             self["filter_rules"] = []
