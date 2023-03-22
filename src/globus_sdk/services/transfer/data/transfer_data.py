@@ -386,18 +386,18 @@ class TransferData(utils.PayloadWrapper):
         Example Usage:
 
         >>> tdata = TransferData(...)
-        >>> tdata.add_filter_rule(method="exclude", *.tgz", type="file")
-        >>> tdata.add_filter_rule(method="exclude", *.tar.gz", type="file")
+        >>> tdata.add_filter_rule(method="exclude", "*.tgz", type="file")
+        >>> tdata.add_filter_rule(method="exclude", "*.tar.gz", type="file")
 
         ``tdata`` now describes a transfer which will skip any gzipped tar files with
-        the extensions `.tgz` or `.tar.gz`
+        the extensions ``.tgz`` or ``.tar.gz``
 
         >>> tdata = TransferData(...)
-        >>> tdata.add_filter_rule(method="include", *.txt", type="file")
+        >>> tdata.add_filter_rule(method="include", "*.txt", type="file")
         >>> tdata.add_filter_rule(method="exclude", "*", type="file")
 
         ``tdata`` now describes a transfer which will only transfer files
-        with the `.txt` extension.
+        with the ``.txt`` extension.
         """
         if "filter_rules" not in self:
             self["filter_rules"] = []
