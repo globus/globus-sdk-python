@@ -374,8 +374,8 @@ class TransferData(utils.PayloadWrapper):
             ``[!]`` matches any single character not within the brackets.
         :type name: str
         :param method: The method to use for filtering. If "exclude" (the default)
-        items matching this rule will not be included in the transfer. If "include"
-        items matching this rule will be included in the transfer.
+            items matching this rule will not be included in the transfer. If
+            "include" items matching this rule will be included in the transfer.
         :type method: str, optional
         :param type: The types of items on which to apply this filter rule. Either
             ``"file"`` or ``"dir"``. If unspecified, the rule applies to both.
