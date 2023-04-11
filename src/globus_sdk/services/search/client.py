@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import typing as t
 
-from globus_sdk import client, paging, response, utils
+from globus_sdk import client, paging, response
 from globus_sdk._types import UUIDLike
 from globus_sdk.exc.warnings import warn_deprecated
 from globus_sdk.scopes import SearchScopes
@@ -39,7 +39,6 @@ class SearchClient(client.BaseClient):
     # Index Management
     #
 
-    @utils.doc_api_method("Get Index Metadata", "search/reference/index_show/")
     def get_index(
         self,
         index_id: UUIDLike,
@@ -47,8 +46,6 @@ class SearchClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /v1/index/<index_id>``
-
         Get descriptive data about a Search index, including its title and description
         and how much data it contains.
 
@@ -57,15 +54,24 @@ class SearchClient(client.BaseClient):
         :param query_params: additional parameters to pass as query params
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> index = sc.get_index(index_id)
-        >>> assert index['id'] == index_id
-        >>> print(index["display_name"],
-        >>>       "(" + index_id + "):",
-        >>>       index["description"])
-        """
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    sc = globus_sdk.SearchClient(...)
+                    index = sc.get_index(index_id)
+                    assert index["id"] == index_id
+                    print(index["display_name"], "(" + index_id + "):", index["description"])
+
+            .. tab-item:: API Info
+
+                ``GET /v1/index/<index_id>``
+
+                .. extdoclink:: Index Show
+                    :ref: search/reference/index_show/
+        """  # noqa: E501
         log.info(f"SearchClient.get_index({index_id})")
         return self.get(f"/v1/index/{index_id}", query_params=query_params)
 
@@ -111,7 +117,7 @@ class SearchClient(client.BaseClient):
 
             .. tab-item:: Example Usage
 
-                .. code-block::
+                .. code-block:: python
 
                     sc = globus_sdk.SearchClient(...)
                     result = sc.search(index_id, "query string")
@@ -178,7 +184,7 @@ class SearchClient(client.BaseClient):
 
             .. tab-item:: Example Usage
 
-                .. code-block::
+                .. code-block:: python
 
                     sc = globus_sdk.SearchClient(...)
                     query_data = {
@@ -249,7 +255,7 @@ class SearchClient(client.BaseClient):
 
             .. tab-item:: Example Usage
 
-                .. code-block::
+                .. code-block:: python
 
                     sc = globus_sdk.SearchClient(...)
                     scroll_result = sc.scroll(index_id, {"q": "*"})
@@ -277,13 +283,10 @@ class SearchClient(client.BaseClient):
     # Bulk data indexing
     #
 
-    @utils.doc_api_method("Ingest", "search/reference/ingest")
     def ingest(
         self, index_id: UUIDLike, data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /v1/index/<index_id>/ingest``
-
         Write data to a Search index as an asynchronous task.
         The data can be provided as a single document or list of documents, but only one
         ``task_id`` value will be included in the response.
@@ -293,47 +296,54 @@ class SearchClient(client.BaseClient):
         :param data: an ingest document
         :type data: dict
 
-        **Examples**
+        .. tab-set::
 
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> ingest_data = {
-        >>>   "ingest_type": "GMetaEntry",
-        >>>   "ingest_data": {
-        >>>     "subject": "https://example.com/foo/bar",
-        >>>     "visible_to": ["public"],
-        >>>     "content": {
-        >>>       "foo/bar": "some val"
-        >>>     }
-        >>>   }
-        >>> }
-        >>> sc.ingest(index_id, ingest_data)
+            .. tab-item:: Example Usage
 
-        or with multiple entries at once via a GMetaList:
+                .. code-block:: python
 
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> ingest_data = {
-        >>>   "ingest_type": "GMetaList",
-        >>>   "ingest_data": {
-        >>>     "gmeta": [
-        >>>       {
-        >>>         "subject": "https://example.com/foo/bar",
-        >>>         "visible_to": ["public"],
-        >>>         "content": {
-        >>>           "foo/bar": "some val"
-        >>>         }
-        >>>       },
-        >>>       {
-        >>>         "subject": "https://example.com/foo/bar",
-        >>>         "id": "otherentry",
-        >>>         "visible_to": ["public"],
-        >>>         "content": {
-        >>>           "foo/bar": "some otherval"
-        >>>         }
-        >>>       }
-        >>>     ]
-        >>>   }
-        >>> }
-        >>> sc.ingest(index_id, ingest_data)
+                    sc = globus_sdk.SearchClient(...)
+                    ingest_data = {
+                        "ingest_type": "GMetaEntry",
+                        "ingest_data": {
+                            "subject": "https://example.com/foo/bar",
+                            "visible_to": ["public"],
+                            "content": {"foo/bar": "some val"},
+                        },
+                    }
+                    sc.ingest(index_id, ingest_data)
+
+                or with multiple entries at once via a GMetaList:
+
+                .. code-block:: python
+
+                    sc = globus_sdk.SearchClient(...)
+                    ingest_data = {
+                        "ingest_type": "GMetaList",
+                        "ingest_data": {
+                            "gmeta": [
+                                {
+                                    "subject": "https://example.com/foo/bar",
+                                    "visible_to": ["public"],
+                                    "content": {"foo/bar": "some val"},
+                                },
+                                {
+                                    "subject": "https://example.com/foo/bar",
+                                    "id": "otherentry",
+                                    "visible_to": ["public"],
+                                    "content": {"foo/bar": "some otherval"},
+                                },
+                            ]
+                        },
+                    }
+                    sc.ingest(index_id, ingest_data)
+
+            .. tab-item:: API Info
+
+                ``POST /v1/index/<index_id>/ingest``
+
+                .. extdoclink:: Ingest
+                    :ref: search/reference/ingest/
         """
         log.info(f"SearchClient.ingest({index_id}, ...)")
         return self.post(f"/v1/index/{index_id}/ingest", data=data)
@@ -342,13 +352,10 @@ class SearchClient(client.BaseClient):
     # Bulk delete
     #
 
-    @utils.doc_api_method("Delete By Query", "search/reference/delete_by_query")
     def delete_by_query(
         self, index_id: UUIDLike, data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /v1/index/<index_id>/delete_by_query``
-
         Delete data in a Search index as an asynchronous task, deleting all documents
         which match a given query.
         The query uses a restricted subset of the syntax available for complex queries,
@@ -361,23 +368,31 @@ class SearchClient(client.BaseClient):
         :param data: a query document for documents to delete
         :type data: dict
 
-        **Examples**
+        .. tab-set::
 
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> query_data = {
-        >>>   "q": "user query",
-        >>>   "filters": [
-        >>>     {
-        >>>       "type": "range",
-        >>>       "field_name": "path.to.date",
-        >>>       "values": [
-        >>>         {"from": "*",
-        >>>          "to": "2014-11-07"}
-        >>>       ]
-        >>>     }
-        >>>   ]
-        >>> }
-        >>> sc.delete_by_query(index_id, query_data)
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    sc = globus_sdk.SearchClient(...)
+                    query_data = {
+                        "q": "user query",
+                        "filters": [
+                            {
+                                "type": "range",
+                                "field_name": "path.to.date",
+                                "values": [{"from": "*", "to": "2014-11-07"}],
+                            }
+                        ],
+                    }
+                    sc.delete_by_query(index_id, query_data)
+
+            .. tab-item:: API Info
+
+                ``POST /v1/index/<index_id>/delete_by_query``
+
+                .. extdoclink:: Delete By Query
+                    :ref: search/reference/delete_by_query/
         """
         log.info(f"SearchClient.delete_by_query({index_id}, ...)")
         return self.post(f"/v1/index/{index_id}/delete_by_query", data=data)
@@ -386,7 +401,6 @@ class SearchClient(client.BaseClient):
     # Subject Operations
     #
 
-    @utils.doc_api_method("Get Subject", "search/reference/get_subject")
     def get_subject(
         self,
         index_id: UUIDLike,
@@ -395,8 +409,6 @@ class SearchClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /v1/index/<index_id>/subject``
-
         Fetch exactly one Subject document from Search, containing one or more Entries.
 
         :param index_id: the index containing this Subject
@@ -406,13 +418,24 @@ class SearchClient(client.BaseClient):
         :param query_params: additional parameters to pass as query params
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        Fetch the data for subject ``http://example.com/abc`` from index
-        ``index_id``:
+            .. tab-item:: Example Usage
 
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> subject_data = sc.get_subject(index_id, 'http://example.com/abc')
+                Fetch the data for subject ``http://example.com/abc`` from index
+                ``index_id``:
+
+                .. code-block:: python
+
+                    sc = globus_sdk.SearchClient(...)
+                    subject_data = sc.get_subject(index_id, "http://example.com/abc")
+
+            .. tab-item:: API Info
+
+                ``GET /v1/index/<index_id>/subject``
+
+                .. extdoclink:: Get By Subject
+                    :ref: search/reference/get_subject/
         """
         if query_params is None:
             query_params = {}
@@ -420,7 +443,6 @@ class SearchClient(client.BaseClient):
         log.info(f"SearchClient.get_subject({index_id}, {subject}, ...)")
         return self.get(f"/v1/index/{index_id}/subject", query_params=query_params)
 
-    @utils.doc_api_method("Delete Subject", "search/reference/delete_subject")
     def delete_subject(
         self,
         index_id: UUIDLike,
@@ -429,8 +451,6 @@ class SearchClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``DELETE /v1/index/<index_id>/subject``
-
         Delete exactly one Subject document from Search, containing one or more Entries,
         as an asynchronous task.
 
@@ -443,13 +463,25 @@ class SearchClient(client.BaseClient):
         :param query_params: additional parameters to pass as query params
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        Delete all data for subject ``http://example.com/abc`` from index
-        ``index_id``, even data which is not visible to the current user:
+            .. tab-item:: Example Usage
 
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> subject_data = sc.delete_subject(index_id, 'http://example.com/abc')
+                Delete all data for subject ``http://example.com/abc`` from index
+                ``index_id``, even data which is not visible to the current user:
+
+                .. code-block:: python
+
+                    sc = globus_sdk.SearchClient(...)
+                    response = sc.delete_subject(index_id, "http://example.com/abc")
+                    task_id = response["task_id"]
+
+            .. tab-item:: API Info
+
+                ``DELETE /v1/index/<index_id>/subject``
+
+                .. extdoclink:: Delete By Subject
+                    :ref: search/reference/delete_subject/
         """
         if query_params is None:
             query_params = {}
@@ -462,7 +494,6 @@ class SearchClient(client.BaseClient):
     # Entry Operations
     #
 
-    @utils.doc_api_method("Get Entry", "search/reference/get_entry")
     def get_entry(
         self,
         index_id: UUIDLike,
@@ -472,8 +503,6 @@ class SearchClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /v1/index/<index_id>/entry``
-
         Fetch exactly one Entry document from Search, identified by the combination of
         ``subject`` string and ``entry_id``, which defaults to ``null``.
 
@@ -487,21 +516,33 @@ class SearchClient(client.BaseClient):
         :param query_params: additional parameters to pass as query params
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        Lookup the entry with a subject of ``https://example.com/foo/bar`` and
-        a null entry_id:
+            .. tab-item:: Example Usage
 
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> entry_data = sc.get_entry(index_id, 'http://example.com/foo/bar')
+                Lookup the entry with a subject of ``https://example.com/foo/bar`` and
+                a null entry_id:
 
-        Lookup the entry with a subject of ``https://example.com/foo/bar`` and
-        an entry_id of ``foo/bar``:
+                .. code-block:: python
 
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> entry_data = sc.get_entry(index_id, 'http://example.com/foo/bar',
-        >>>                           entry_id='foo/bar')
-        """
+                    sc = globus_sdk.SearchClient(...)
+                    entry_data = sc.get_entry(index_id, "http://example.com/foo/bar")
+
+                Lookup the entry with a subject of ``https://example.com/foo/bar`` and
+                an entry_id of ``foo/bar``:
+
+                .. code-block:: python
+
+                    sc = globus_sdk.SearchClient(...)
+                    entry_data = sc.get_entry(index_id, "http://example.com/foo/bar", entry_id="foo/bar")
+
+            .. tab-item:: API Info
+
+                ``GET /v1/index/<index_id>/entry``
+
+                .. extdoclink:: Get Entry
+                    :ref: search/reference/get_entry/
+        """  # noqa: E501
         if query_params is None:
             query_params = {}
         query_params["subject"] = subject
@@ -515,15 +556,12 @@ class SearchClient(client.BaseClient):
         )
         return self.get(f"/v1/index/{index_id}/entry", query_params=query_params)
 
-    @utils.doc_api_method("Create Entry", "search/reference/create_or_update_entry")
     def create_entry(
         self, index_id: UUIDLike, data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
         This API method is in effect an alias of ingest and is deprecated.
         Users are recommended to use :meth:`~.ingest` instead.
-
-        ``POST /v1/index/<index_id>/entry``
 
         Create or update one Entry document in Search.
 
@@ -535,32 +573,47 @@ class SearchClient(client.BaseClient):
         :param data: the entry document to write
         :type data: dict
 
-        **Examples**
+        .. tab-set::
 
-        Create an entry with a subject of ``https://example.com/foo/bar`` and
-        a null entry_id:
+            .. tab-item:: Example Usage
 
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> sc.create_entry(index_id, {
-        >>>     "subject": "https://example.com/foo/bar",
-        >>>     "visible_to": ["public"],
-        >>>     "content": {
-        >>>         "foo/bar": "some val"
-        >>>     }
-        >>> })
+                Create an entry with a subject of ``https://example.com/foo/bar`` and
+                a null entry_id:
 
-        Create an entry with a subject of ``https://example.com/foo/bar`` and
-        an entry_id of ``foo/bar``:
+                .. code-block:: python
 
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> sc.create_entry(index_id, {
-        >>>     "subject": "https://example.com/foo/bar",
-        >>>     "visible_to": ["public"],
-        >>>     "id": "foo/bar",
-        >>>     "content": {
-        >>>         "foo/bar": "some val"
-        >>>     }
-        >>> })
+                    sc = globus_sdk.SearchClient(...)
+                    sc.create_entry(
+                        index_id,
+                        {
+                            "subject": "https://example.com/foo/bar",
+                            "visible_to": ["public"],
+                            "content": {"foo/bar": "some val"},
+                        },
+                    )
+
+                Create an entry with a subject of ``https://example.com/foo/bar`` and
+                an entry_id of ``foo/bar``:
+
+                .. code-block:: python
+
+                    sc = globus_sdk.SearchClient(...)
+                    sc.create_entry(
+                        index_id,
+                        {
+                            "subject": "https://example.com/foo/bar",
+                            "visible_to": ["public"],
+                            "id": "foo/bar",
+                            "content": {"foo/bar": "some val"},
+                        },
+                    )
+
+            .. tab-item:: API Info
+
+                ``POST /v1/index/<index_id>/entry``
+
+                .. extdoclink:: Create Entry
+                    :ref: search/reference/create_or_update_entry/
         """
         warn_deprecated(
             "SearchClient.create_entry is deprecated. "
@@ -569,15 +622,12 @@ class SearchClient(client.BaseClient):
         log.info(f"SearchClient.create_entry({index_id}, ...)")
         return self.post(f"/v1/index/{index_id}/entry", data=data)
 
-    @utils.doc_api_method("Update Entry", "search/reference/create_or_update_entry")
     def update_entry(
         self, index_id: UUIDLike, data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
         This API method is in effect an alias of ingest and is deprecated.
         Users are recommended to use :meth:`~.ingest` instead.
-
-        ``PUT /v1/index/<index_id>/entry``
 
         Create or update one Entry document in Search.
 
@@ -588,19 +638,31 @@ class SearchClient(client.BaseClient):
         :param data: the entry document to write
         :type data: dict
 
-        **Examples**
+        .. tab-set::
 
-        Update an entry with a subject of ``https://example.com/foo/bar`` and
-        a null entry_id:
+            .. tab-item:: Example Usage
 
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> sc.update_entry(index_id, {
-        >>>     "subject": "https://example.com/foo/bar",
-        >>>     "visible_to": ["public"],
-        >>>     "content": {
-        >>>         "foo/bar": "some val"
-        >>>     }
-        >>> })
+                Update an entry with a subject of ``https://example.com/foo/bar`` and
+                a null entry_id:
+
+                .. code-block:: python
+
+                    sc = globus_sdk.SearchClient(...)
+                    sc.update_entry(
+                        index_id,
+                        {
+                            "subject": "https://example.com/foo/bar",
+                            "visible_to": ["public"],
+                            "content": {"foo/bar": "some val"},
+                        },
+                    )
+
+            .. tab-item:: API Info
+
+                ``PUT /v1/index/<index_id>/entry``
+
+                .. extdoclink:: Update Entry
+                    :ref: search/reference/create_or_update_entry/
         """
         warn_deprecated(
             "SearchClient.update_entry is deprecated. "
@@ -609,7 +671,6 @@ class SearchClient(client.BaseClient):
         log.info(f"SearchClient.update_entry({index_id}, ...)")
         return self.put(f"/v1/index/{index_id}/entry", data=data)
 
-    @utils.doc_api_method("Delete Entry", "search/reference/delete_entry")
     def delete_entry(
         self,
         index_id: UUIDLike,
@@ -619,8 +680,6 @@ class SearchClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``DELETE  /v1/index/<index_id>/entry``
-
         Delete exactly one Entry document in Search as an asynchronous task.
 
         A ``task_id`` value will be included in the response.
@@ -634,21 +693,33 @@ class SearchClient(client.BaseClient):
         :param query_params: additional parameters to pass as query params
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        Delete an entry with a subject of ``https://example.com/foo/bar`` and
-        a null entry_id:
+            .. tab-item:: Example Usage
 
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> sc.delete_entry(index_id, "https://example.com/foo/bar")
+                Delete an entry with a subject of ``https://example.com/foo/bar`` and
+                a null entry_id:
 
-        Delete an entry with a subject of ``https://example.com/foo/bar`` and
-        an entry_id of "foo/bar":
+                .. code-block:: python
 
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> sc.delete_entry(index_id, "https://example.com/foo/bar",
-        >>>                 entry_id="foo/bar")
-        """
+                    sc = globus_sdk.SearchClient(...)
+                    sc.delete_entry(index_id, "https://example.com/foo/bar")
+
+                Delete an entry with a subject of ``https://example.com/foo/bar`` and
+                an entry_id of "foo/bar":
+
+                .. code-block:: python
+
+                    sc = globus_sdk.SearchClient(...)
+                    sc.delete_entry(index_id, "https://example.com/foo/bar", entry_id="foo/bar")
+
+            .. tab-item:: API Info
+
+                ``DELETE  /v1/index/<index_id>/entry``
+
+                .. extdoclink:: Delete Entry
+                    :ref: search/reference/delete_entry/
+        """  # noqa: E501
         if query_params is None:
             query_params = {}
         query_params["subject"] = subject
@@ -665,7 +736,6 @@ class SearchClient(client.BaseClient):
     # Task Management
     #
 
-    @utils.doc_api_method("Get Task", "search/reference/get_task")
     def get_task(
         self,
         task_id: UUIDLike,
@@ -673,8 +743,6 @@ class SearchClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /v1/task/<task_id>``
-
         Fetch a Task document by ID, getting task details and status.
 
         :param task_id: the task ID from the original task submission
@@ -682,17 +750,27 @@ class SearchClient(client.BaseClient):
         :param query_params: additional parameters to pass as query params
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> task = sc.get_task(task_id)
-        >>> assert task['index_id'] == known_index_id
-        >>> print(task["task_id"] + " | " + task['state'])
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    sc = globus_sdk.SearchClient(...)
+                    task = sc.get_task(task_id)
+                    assert task["index_id"] == known_index_id
+                    print(task["task_id"] + " | " + task["state"])
+
+            .. tab-item:: API Info
+
+                ``GET /v1/task/<task_id>``
+
+                .. extdoclink:: Get Task
+                    :ref: search/reference/get_task/
         """
         log.info(f"SearchClient.get_task({task_id})")
         return self.get(f"/v1/task/{task_id}", query_params=query_params)
 
-    @utils.doc_api_method("Task List", "search/reference/task_list")
     def get_task_list(
         self,
         index_id: UUIDLike,
@@ -700,8 +778,6 @@ class SearchClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /v1/task_list/<index_id>``
-
         Fetch a list of recent Task documents for an index, getting task details and
         status.
 
@@ -710,12 +786,23 @@ class SearchClient(client.BaseClient):
         :param query_params: additional parameters to pass as query params
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> task_list = sc.get_task_list(index_id)
-        >>> for task in task_list['tasks']:
-        >>>     print(task["task_id"] + " | " + task['state'])
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    sc = globus_sdk.SearchClient(...)
+                    task_list = sc.get_task_list(index_id)
+                    for task in task_list["tasks"]:
+                        print(task["task_id"] + " | " + task["state"])
+
+            .. tab-item:: API Info
+
+                ``GET /v1/task_list/<index_id>``
+
+                .. extdoclink:: Task List
+                    :ref: search/reference/task_list/
         """
         log.info(f"SearchClient.get_task_list({index_id})")
         return self.get(f"/v1/task_list/{index_id}", query_params=query_params)
@@ -724,7 +811,6 @@ class SearchClient(client.BaseClient):
     # Role Management
     #
 
-    @utils.doc_api_method("Create Role", "search/reference/role_create/")
     def create_role(
         self,
         index_id: UUIDLike,
@@ -733,8 +819,6 @@ class SearchClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /v1/index/<index_id>/role``
-
         Create a new role on an index. You must already have the ``owner`` or
         ``admin`` role on an index to create additional roles.
 
@@ -749,24 +833,31 @@ class SearchClient(client.BaseClient):
         :param query_params: Any additional query params to pass
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        >>> identity_id = "46bd0f56-e24f-11e5-a510-131bef46955c"
-        >>> sc = globus_sdk.SearchClient(...)
-        >>> sc.create_role(
-        >>>     index_id,
-        >>>     {
-        >>>         "role_name": "writer",
-        >>>         "principal": f"urn:globus:auth:identity:{identity_id}"
-        >>>     }
-        >>> )
-        """
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    identity_id = "46bd0f56-e24f-11e5-a510-131bef46955c"
+                    sc = globus_sdk.SearchClient(...)
+                    sc.create_role(
+                        index_id,
+                        {"role_name": "writer", "principal": f"urn:globus:auth:identity:{identity_id}"},
+                    )
+
+            .. tab-item:: API Info
+
+                ``POST /v1/index/<index_id>/role``
+
+                .. extdoclink:: Create Role
+                    :ref: search/reference/role_create/
+        """  # noqa: E501
         log.info("SearchClient.create_role(%s, ...)", index_id)
         return self.post(
             f"/v1/index/{index_id}/role", data=data, query_params=query_params
         )
 
-    @utils.doc_api_method("Get Role List", "search/reference/role_list/")
     def get_role_list(
         self,
         index_id: UUIDLike,
@@ -774,8 +865,6 @@ class SearchClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /v1/index/<index_id>/role_list``
-
         List all roles on an index. You must have the ``owner`` or ``admin``
         role on an index to list roles.
 
@@ -783,11 +872,19 @@ class SearchClient(client.BaseClient):
         :type index_id: uuid or str
         :param query_params: Any additional query params to pass
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /v1/index/<index_id>/role_list``
+
+                .. extdoclink:: Get Role List
+                    :ref: search/reference/role_list/
         """
         log.info("SearchClient.get_role_list(%s)", index_id)
         return self.get(f"/v1/index/{index_id}/role_list", query_params=query_params)
 
-    @utils.doc_api_method("Role Delete", "search/reference/role_delete/")
     def delete_role(
         self,
         index_id: UUIDLike,
@@ -796,8 +893,6 @@ class SearchClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``DELETE /v1/index/<index_id>/role/<role_id>``
-
         Delete a role from an index. You must have the ``owner`` or ``admin``
         role on an index to delete roles. You cannot remove the last ``owner`` from an
         index.
@@ -808,6 +903,15 @@ class SearchClient(client.BaseClient):
         :type role_id: str
         :param query_params: Any additional query params to pass
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``DELETE /v1/index/<index_id>/role/<role_id>``
+
+                .. extdoclink:: Role Delete
+                    :ref: search/reference/role_delete/
         """
         log.info("SearchClient.delete_role(%s, %s)", index_id, role_id)
         return self.delete(
