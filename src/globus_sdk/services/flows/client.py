@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import typing as t
 
-from globus_sdk import GlobusHTTPResponse, client, paging, scopes, utils
+from globus_sdk import GlobusHTTPResponse, client, paging, scopes
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.scopes import ScopeBuilder
@@ -12,21 +12,6 @@ from .errors import FlowsAPIError
 from .response import IterableFlowsResponse
 
 log = logging.getLogger(__name__)
-
-C = t.TypeVar("C", bound=t.Callable[..., t.Any])
-
-
-def _flowdoc(message: str, link: str) -> t.Callable[[C], C]:
-    # do not use functools.partial because it doesn't preserve type information
-    # see: https://github.com/python/mypy/issues/1484
-    def partial(func: C) -> C:
-        return utils.doc_api_method(
-            message,
-            link,
-            external_base_url="https://globusonline.github.io/flows#tag",
-        )(func)
-
-    return partial
 
 
 class FlowsClient(client.BaseClient):
@@ -39,7 +24,6 @@ class FlowsClient(client.BaseClient):
     service_name = "flows"
     scopes = scopes.FlowsScopes
 
-    @_flowdoc("Create Flow", "Flows/paths/~1flows/post")
     def create_flow(
         self,
         title: str,
@@ -156,6 +140,12 @@ class FlowsClient(client.BaseClient):
             .. tab-item:: Example Response Data
 
                 .. expandtestfixture:: flows.create_flow
+
+            .. tab-item:: API Info
+
+                .. extdoclink:: Create Flow
+                    :service: flows
+                    :ref: Flows/paths/~1flows/post
         """  # noqa E501
 
         data = {
@@ -177,7 +167,6 @@ class FlowsClient(client.BaseClient):
 
         return self.post("/flows", data=data)
 
-    @_flowdoc("Get Flow", "Flows/paths/~1flows~1{flow_id}/get")
     def get_flow(
         self,
         flow_id: UUIDLike,
@@ -191,6 +180,14 @@ class FlowsClient(client.BaseClient):
         :param query_params: Any additional parameters to be passed through
             as query params.
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                .. extdoclink:: Get Flow
+                    :service: flows
+                    :ref: Flows/paths/~1flows~1{flow_id}/get
         """
 
         if query_params is None:
@@ -198,7 +195,6 @@ class FlowsClient(client.BaseClient):
 
         return self.get(f"/flows/{flow_id}", query_params=query_params)
 
-    @_flowdoc("List Flows", "Flows/paths/~1flows/get")
     @paging.has_paginator(paging.MarkerPaginator, items_key="flows")
     def list_flows(
         self,
@@ -261,6 +257,12 @@ class FlowsClient(client.BaseClient):
             .. tab-item:: Paginated Usage
 
                 .. paginatedusage:: list_flows
+
+            .. tab-item:: API Info
+
+                .. extdoclink:: List Flows
+                    :service: flows
+                    :ref: Flows/paths/~1flows/get
         """
 
         if query_params is None:
@@ -276,7 +278,6 @@ class FlowsClient(client.BaseClient):
 
         return IterableFlowsResponse(self.get("/flows", query_params=query_params))
 
-    @_flowdoc("Update Flow", "Flows/paths/~1flows~1{flow_id}/put")
     def update_flow(
         self,
         flow_id: UUIDLike,
@@ -378,7 +379,7 @@ class FlowsClient(client.BaseClient):
 
             .. tab-item:: Example Usage
 
-                .. code-block::
+                .. code-block:: python
 
                     from globus_sdk import FlowsClient
 
@@ -386,12 +387,18 @@ class FlowsClient(client.BaseClient):
                     flows = FlowsClient(...)
                     flows.update_flow(
                         flow_id="581753c7-45da-43d3-ad73-246b46e7cb6b",
-                        keywords=["new", "overriding", "keywords"]
+                        keywords=["new", "overriding", "keywords"],
                     )
 
             .. tab-item:: Example Response Data
 
                 .. expandtestfixture:: flows.update_flow
+
+            .. tab-item:: API Info
+
+                .. extdoclink:: Update Flow
+                    :service: flows
+                    :ref: Flows/paths/~1flows~1{flow_id}/put
         """  # noqa E501
 
         data = {
@@ -414,7 +421,6 @@ class FlowsClient(client.BaseClient):
 
         return self.put(f"/flows/{flow_id}", data=data)
 
-    @_flowdoc("Delete Flow", "Flows/paths/~1flows~1{flow_id}/delete")
     def delete_flow(
         self,
         flow_id: UUIDLike,
@@ -428,6 +434,14 @@ class FlowsClient(client.BaseClient):
         :param query_params: Any additional parameters to be passed through
             as query params.
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                .. extdoclink:: Delete Flow
+                    :service: flows
+                    :ref: Flows/paths/~1flows~1{flow_id}/delete
         """
 
         if query_params is None:
@@ -474,7 +488,6 @@ class SpecificFlowClient(client.BaseClient):
             known_url_scopes=[("user", user_scope_value)],
         )
 
-    @_flowdoc("Run Flow", "~1flows~1{flow_id}~1run/post")
     def run_flow(
         self,
         body: dict[str, t.Any],
@@ -486,7 +499,6 @@ class SpecificFlowClient(client.BaseClient):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
         """
-
         :param body: The input json object handed to the first flow state. The flows
             service will validate this object against the flow's supplied input schema.
         :type body: json dict
@@ -505,6 +517,14 @@ class SpecificFlowClient(client.BaseClient):
         :param additional_fields: Additional Key/Value pairs sent to the run API
             (this parameter is used to bypass local sdk key validation helping)
         :type additional_fields: Optional dictionary
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                .. extdoclink:: Run Flow
+                    :service: flows
+                    :ref: ~1flows~1{flow_id}~1run/post
         """
         data = {
             k: v
