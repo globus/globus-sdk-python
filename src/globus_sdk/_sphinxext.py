@@ -208,7 +208,7 @@ class ExternalDocLink(AddContentDirective):
         base_url = self.options.get("base_url", default_base_url)
         relative_link = self.options["ref"]
         yield (
-            f"See `{message} <{base_url}/{relative_link}>`_ in the "
+            f"See `{message} <{base_url}/{relative_link}>`__ in the "
             "API documentation for details."
         )
 
