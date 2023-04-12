@@ -138,13 +138,16 @@ class TransferClient(client.BaseClient):
             as query params.
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> endpoint = tc.get_endpoint(endpoint_id)
-        >>> print("Endpoint name:",
-        >>>       endpoint["display_name"] or endpoint["canonical_name"])
-        """
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TransferClient(...)
+                    endpoint = tc.get_endpoint(endpoint_id)
+                    print("Endpoint name:", endpoint["display_name"] or endpoint["canonical_name"])
+        """  # noqa: E501
         log.info(f"TransferClient.get_endpoint({endpoint_id})")
         return self.get(f"endpoint/{endpoint_id}", query_params=query_params)
 
@@ -169,13 +172,16 @@ class TransferClient(client.BaseClient):
             as query params.
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> epup = dict(display_name="My New Endpoint Name",
-        >>>             description="Better Description")
-        >>> update_result = tc.update_endpoint(endpoint_id, epup)
-        """
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TransferClient(...)
+                    epup = dict(display_name="My New Endpoint Name", description="Better Description")
+                    update_result = tc.update_endpoint(endpoint_id, epup)
+        """  # noqa: E501
         if data.get("myproxy_server"):
             if data.get("oauth_server"):
                 raise exc.GlobusSDKUsageError(
@@ -199,21 +205,25 @@ class TransferClient(client.BaseClient):
         :param data: An endpoint document with fields for the new endpoint
         :type data: dict
 
-        **Examples**
+        .. tab-set::
 
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> ep_data = {
-        >>>   "DATA_TYPE": "endpoint",
-        >>>   "display_name": display_name,
-        >>>   "DATA": [
-        >>>     {
-        >>>       "DATA_TYPE": "server",
-        >>>       "hostname": "gridftp.example.edu",
-        >>>     },
-        >>>   ],
-        >>> }
-        >>> create_result = tc.create_endpoint(ep_data)
-        >>> endpoint_id = create_result["id"]
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TransferClient(...)
+                    ep_data = {
+                        "DATA_TYPE": "endpoint",
+                        "display_name": display_name,
+                        "DATA": [
+                            {
+                                "DATA_TYPE": "server",
+                                "hostname": "gridftp.example.edu",
+                            },
+                        ],
+                    }
+                    create_result = tc.create_endpoint(ep_data)
+                    endpoint_id = create_result["id"]
         """
         if data.get("myproxy_server") and data.get("oauth_server"):
             raise exc.GlobusSDKUsageError(
@@ -235,10 +245,14 @@ class TransferClient(client.BaseClient):
         :param endpoint_id: ID of endpoint to delete
         :type endpoint_id: str or UUID
 
-        **Examples**
+        .. tab-set::
 
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> delete_result = tc.delete_endpoint(endpoint_id)
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TransferClient(...)
+                    delete_result = tc.delete_endpoint(endpoint_id)
         """
         log.info(f"TransferClient.delete_endpoint({endpoint_id})")
         return self.delete(f"endpoint/{endpoint_id}")
@@ -311,7 +325,7 @@ class TransferClient(client.BaseClient):
                 .. code-block::
 
                     for ep in tc.endpoint_search("foo", filter_scope="my-endpoints"):
-                        print("{0} has ID {1}".format(ep["display_name"], ep["id"]))
+                        print(f"{ep['display_name']} has ID {ep['id']}")
 
             .. tab-item:: Paginated Usage
 
@@ -378,45 +392,47 @@ class TransferClient(client.BaseClient):
         hour (3600 seconds). If that fails, direct the user to the
         globus website to perform activation:
 
-        **Examples**
+        .. tab-set::
 
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> r = tc.endpoint_autoactivate(ep_id, if_expires_in=3600)
-        >>> while (r["code"] == "AutoActivationFailed"):
-        >>>     print(
-        >>>         "Endpoint requires manual activation, please open "
-        >>>         "the following URL in a browser to activate the endpoint:"
-        >>>         f"https://app.globus.org/file-manager?origin_id={ep_id}"
-        >>>     )
-        >>>     input("Press ENTER after activating the endpoint:")
-        >>>     r = tc.endpoint_autoactivate(ep_id, if_expires_in=3600)
+            .. tab-item:: Example Usage
 
-        This is the recommended flow for most thick client applications,
-        because many endpoints require activation via OAuth MyProxy,
-        which must be done in a browser anyway. Web based clients can
-        link directly to the URL.
+                .. code-block:: python
 
-        You also might want messaging or logging depending on why and how the
-        operation succeeded, in which case you'll need to look at the value of
-        the "code" field and either decide on your own messaging or use the
-        response's "message" field.
+                    tc = globus_sdk.TransferClient(...)
+                    r = tc.endpoint_autoactivate(ep_id, if_expires_in=3600)
+                    while r["code"] == "AutoActivationFailed":
+                        print(
+                            "Endpoint requires manual activation, please open "
+                            "the following URL in a browser to activate the endpoint:"
+                            f"https://app.globus.org/file-manager?origin_id={ep_id}"
+                        )
+                        input("Press ENTER after activating the endpoint:")
+                        r = tc.endpoint_autoactivate(ep_id, if_expires_in=3600)
 
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> r = tc.endpoint_autoactivate(ep_id, if_expires_in=3600)
-        >>> if r['code'] == 'AutoActivationFailed':
-        >>>     print('Endpoint({}) Not Active! Error! Source message: {}'
-        >>>           .format(ep_id, r['message']))
-        >>>     sys.exit(1)
-        >>> elif r['code'] == 'AutoActivated.CachedCredential':
-        >>>     print('Endpoint({}) autoactivated using a cached credential.'
-        >>>           .format(ep_id))
-        >>> elif r['code'] == 'AutoActivated.GlobusOnlineCredential':
-        >>>     print(('Endpoint({}) autoactivated using a built-in Globus '
-        >>>            'credential.').format(ep_id))
-        >>> elif r['code'] = 'AlreadyActivated':
-        >>>     print('Endpoint({}) already active until at least {}'
-        >>>           .format(ep_id, 3600))
-        """
+                This is the recommended flow for most thick client applications,
+                because many endpoints require activation via OAuth MyProxy,
+                which must be done in a browser anyway. Web based clients can
+                link directly to the URL.
+
+                You also might want messaging or logging depending on why and how the
+                operation succeeded, in which case you'll need to look at the value of
+                the "code" field and either decide on your own messaging or use the
+                response's "message" field.
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TransferClient(...)
+                    r = tc.endpoint_autoactivate(ep_id, if_expires_in=3600)
+                    if r["code"] == "AutoActivationFailed":
+                        print(f"Endpoint({ep_id}) Not Active! Error! Source message: {r['message']}")
+                        sys.exit(1)
+                    elif r["code"] == "AutoActivated.CachedCredential":
+                        print(f"Endpoint({ep_id}) autoactivated using a cached credential.")
+                    elif r["code"] == "AutoActivated.GlobusOnlineCredential":
+                        print(f"Endpoint({ep_id}) autoactivated using a built-in Globus credential.")
+                    elif r["code"] == "AlreadyActivated":
+                        print(f"Endpoint({ep_id}) already active for at least 3600 seconds")
+        """  # noqa: E501
         if query_params is None:
             query_params = {}
         if if_expires_in is not None:
@@ -630,19 +646,23 @@ class TransferClient(client.BaseClient):
         :param data: A python dict representation of a ``shared_endpoint`` document
         :type data: dict
 
-        **Examples**
+        .. tab-set::
 
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> shared_ep_data = {
-        >>>   "DATA_TYPE": "shared_endpoint",
-        >>>   "host_endpoint": host_endpoint_id,
-        >>>   "host_path": host_path,
-        >>>   "display_name": display_name,
-        >>>   # optionally specify additional endpoint fields
-        >>>   "description": "my test share"
-        >>> }
-        >>> create_result = tc.create_shared_endpoint(shared_ep_data)
-        >>> endpoint_id = create_result["id"]
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TransferClient(...)
+                    shared_ep_data = {
+                        "DATA_TYPE": "shared_endpoint",
+                        "host_endpoint": host_endpoint_id,
+                        "host_path": host_path,
+                        "display_name": display_name,
+                        # optionally specify additional endpoint fields
+                        "description": "my test share",
+                    }
+                    create_result = tc.create_shared_endpoint(shared_ep_data)
+                    endpoint_id = create_result["id"]
         """
         log.info("TransferClient.create_shared_endpoint(...)")
         return self.post("shared_endpoint", data=data)
@@ -915,21 +935,25 @@ class TransferClient(client.BaseClient):
         :param rule_data: A python dict representation of an ``access`` document
         :type rule_data: dict
 
-        **Examples**
+        .. tab-set::
 
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> rule_data = {
-        >>>   "DATA_TYPE": "access",
-        >>>   "principal_type": "identity",
-        >>>   "principal": identity_id,
-        >>>   "path": "/dataset1/",
-        >>>   "permissions": "rw",
-        >>> }
-        >>> result = tc.add_endpoint_acl_rule(endpoint_id, rule_data)
-        >>> rule_id = result["access_id"]
+            .. tab-item:: Example Usage
 
-        Note that if this rule is being created on a shared endpoint
-        the "path" field is relative to the "host_path" of the shared endpoint.
+                .. code-block:: python
+
+                    tc = globus_sdk.TransferClient(...)
+                    rule_data = {
+                        "DATA_TYPE": "access",
+                        "principal_type": "identity",
+                        "principal": identity_id,
+                        "path": "/dataset1/",
+                        "permissions": "rw",
+                    }
+                    result = tc.add_endpoint_acl_rule(endpoint_id, rule_data)
+                    rule_id = result["access_id"]
+
+                Note that if this rule is being created on a shared endpoint
+                the "path" field is relative to the "host_path" of the shared endpoint.
         """
         log.info(f"TransferClient.add_endpoint_acl_rule({endpoint_id}, ...)")
         return self.post(f"endpoint/{endpoint_id}/access", data=rule_data)
@@ -1105,35 +1129,39 @@ class TransferClient(client.BaseClient):
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        List with a path:
+            .. tab-item:: Example Usage
 
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> for entry in tc.operation_ls(ep_id, path="/~/project1/"):
-        >>>     print(entry["name"], entry["type"])
+                List with a path:
 
-        List with explicit ordering:
+                .. code-block:: python
 
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> for entry in tc.operation_ls(
-        >>>     ep_id,
-        >>>     path="/~/project1/",
-        >>>     orderby=["type", "name"]
-        >>> ):
-        >>>     print(entry["name DESC"], entry["type"])
+                    tc = globus_sdk.TransferClient(...)
+                    for entry in tc.operation_ls(ep_id, path="/~/project1/"):
+                        print(entry["name"], entry["type"])
 
-        List filtering to files modified before January 1, 2021. Note the use of an
-        empty "start date" for the filter:
+                List with explicit ordering:
 
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> for entry in tc.operation_ls(
-        >>>     ep_id,
-        >>>     path="/~/project1/",
-        >>>     filter={"last_modified": ["", "2021-01-01"]},
-        >>> ):
-        >>>     print(entry["name"], entry["type"])
-        """
+                .. code-block:: python
+
+                    tc = globus_sdk.TransferClient(...)
+                    for entry in tc.operation_ls(ep_id, path="/~/project1/", orderby=["type", "name"]):
+                        print(entry["name DESC"], entry["type"])
+
+                List filtering to files modified before January 1, 2021. Note the use
+                of an empty "start date" for the filter:
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TransferClient(...)
+                    for entry in tc.operation_ls(
+                        ep_id,
+                        path="/~/project1/",
+                        filter={"last_modified": ["", "2021-01-01"]},
+                    ):
+                        print(entry["name"], entry["type"])
+        """  # noqa: E501
         if query_params is None:
             query_params = {}
         if path is not None:
@@ -1171,10 +1199,14 @@ class TransferClient(client.BaseClient):
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> tc.operation_mkdir(ep_id, path="/~/newdir/")
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TransferClient(...)
+                    tc.operation_mkdir(ep_id, path="/~/newdir/")
         """
         log.info(
             "TransferClient.operation_mkdir({}, {}, {})".format(
@@ -1209,12 +1241,15 @@ class TransferClient(client.BaseClient):
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> tc.operation_rename(ep_id, oldpath="/~/file1.txt",
-        >>>                     newpath="/~/project1data.txt")
-        """
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TransferClient(...)
+                    tc.operation_rename(ep_id, oldpath="/~/file1.txt", newpath="/~/project1data.txt")
+        """  # noqa: E501
         log.info(
             "TransferClient.operation_rename({}, {}, {}, {})".format(
                 endpoint_id, oldpath, newpath, query_params
@@ -1248,12 +1283,15 @@ class TransferClient(client.BaseClient):
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> tc.operation_symlink(ep_id, symlink_target="/~/file1.txt",
-        >>>                      path="/~/link-to-file1.txt")
-        """
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TransferClient(...)
+                    tc.operation_symlink(ep_id, symlink_target="/~/file1.txt", path="/~/link-to-file1.txt")
+        """  # noqa: E501
         log.info(
             "TransferClient.operation_symlink({}, {}, {}, {})".format(
                 endpoint_id, symlink_target, path, query_params
@@ -1325,23 +1363,28 @@ class TransferClient(client.BaseClient):
         used automatically. The data passed to this method will be modified to include
         the ``submission_id``.
 
-        **Examples**
+        .. tab-set::
 
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> tdata = globus_sdk.TransferData(tc, source_endpoint_id,
-        >>>                                 destination_endpoint_id,
-        >>>                                 label="SDK example",
-        >>>                                 sync_level="checksum")
-        >>> tdata.add_item("/source/path/dir/", "/dest/path/dir/",
-        >>>                recursive=True)
-        >>> tdata.add_item("/source/path/file.txt",
-        >>>                "/dest/path/file.txt")
-        >>> transfer_result = tc.submit_transfer(tdata)
-        >>> print("task_id =", transfer_result["task_id"])
+            .. tab-item:: Example Usage
 
-        The `data` parameter can be a normal Python dictionary, or
-        a :class:`TransferData <globus_sdk.TransferData>` object.
-        """
+                .. code-block:: python
+
+                    tc = globus_sdk.TransferClient(...)
+                    tdata = globus_sdk.TransferData(
+                        tc,
+                        source_endpoint_id,
+                        destination_endpoint_id,
+                        label="SDK example",
+                        sync_level="checksum",
+                    )
+                    tdata.add_item("/source/path/dir/", "/dest/path/dir/", recursive=True)
+                    tdata.add_item("/source/path/file.txt", "/dest/path/file.txt")
+                    transfer_result = tc.submit_transfer(tdata)
+                    print("task_id =", transfer_result["task_id"])
+
+                The `data` parameter can be a normal Python dictionary, or
+                a :class:`TransferData <globus_sdk.TransferData>` object.
+        """  # noqa: E501
         log.info("TransferClient.submit_transfer(...)")
         if "submission_id" not in data:
             log.debug("submit_transfer autofetching submission_id")
@@ -1368,17 +1411,21 @@ class TransferClient(client.BaseClient):
         used automatically. The data passed to this method will be modified to include
         the ``submission_id``.
 
-        **Examples**
+        .. tab-set::
 
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> ddata = globus_sdk.DeleteData(tc, endpoint_id, recursive=True)
-        >>> ddata.add_item("/dir/to/delete/")
-        >>> ddata.add_item("/file/to/delete/file.txt")
-        >>> delete_result = tc.submit_delete(ddata)
-        >>> print("task_id =", delete_result["task_id"])
+            .. tab-item:: Example Usage
 
-        The `data` parameter can be a normal Python dictionary, or
-        a :class:`DeleteData <globus_sdk.DeleteData>` object.
+                .. code-block:: python
+
+                    tc = globus_sdk.TransferClient(...)
+                    ddata = globus_sdk.DeleteData(tc, endpoint_id, recursive=True)
+                    ddata.add_item("/dir/to/delete/")
+                    ddata.add_item("/file/to/delete/file.txt")
+                    delete_result = tc.submit_delete(ddata)
+                    print("task_id =", delete_result["task_id"])
+
+                The `data` parameter can be a normal Python dictionary, or
+                a :class:`DeleteData <globus_sdk.DeleteData>` object.
         """
         log.info("TransferClient.submit_delete(...)")
         if "submission_id" not in data:
@@ -1432,9 +1479,8 @@ class TransferClient(client.BaseClient):
                     tc = TransferClient(...)
                     for task in tc.task_list(limit=10):
                         print(
-                            "Task({}): {} -> {}".format(
-                                task["task_id"], task["source_endpoint"], task["destination_endpoint"]
-                            )
+                            f"Task({task['task_id']}): "
+                            f"{task['source_endpoint']} -> {task['destination_endpoint']}"
                         )
 
                 Fetch 3 *specific* tasks using a ``task_id`` filter:
@@ -1449,9 +1495,8 @@ class TransferClient(client.BaseClient):
                     ]
                     for task in tc.task_list(filter={"task_id": task_ids}):
                         print(
-                            "Task({}): {} -> {}".format(
-                                task["task_id"], task["source_endpoint"], task["destination_endpoint"]
-                            )
+                            f"Task({task['task_id']}): "
+                            f"{task['source_endpoint']} -> {task['destination_endpoint']}"
                         )
 
             .. tab-item:: Paginated Usage
@@ -1517,9 +1562,7 @@ class TransferClient(client.BaseClient):
                     task_id = ...
                     for event in tc.task_event_list(task_id, limit=10):
                         print(
-                            "Event on Task({}) at {}:\n{}".format(
-                                task_id, event["time"], event["description"]
-                            )
+                            f"Event on Task({task_id}) at {event['time']}:\n{event['description']}"
                         )
 
             .. tab-item:: Paginated Usage
@@ -1532,7 +1575,7 @@ class TransferClient(client.BaseClient):
 
                 .. extdoclink:: Get Event List
                     :ref: transfer/task/#get_event_list
-        """
+        """  # noqa: E501
         log.info(f"TransferClient.task_event_list({task_id}, ...)")
         if query_params is None:
             query_params = {}
@@ -1615,35 +1658,41 @@ class TransferClient(client.BaseClient):
             Task status. Minimum 1. [Default: ``10``]
         :type polling_interval: int, optional
 
-        **Examples**
+        .. tab-set::
 
-        If you want to wait for a task to terminate, but want to warn every
-        minute that it doesn't terminate, you could:
+            .. tab-item:: Example Usage
 
-        >>> tc = TransferClient(...)
-        >>> while not tc.task_wait(task_id, timeout=60):
-        >>>     print("Another minute went by without {0} terminating"
-        >>>           .format(task_id))
+                If you want to wait for a task to terminate, but want to warn every
+                minute that it doesn't terminate, you could:
 
-        Or perhaps you want to check on a task every minute for 10 minutes, and
-        give up if it doesn't complete in that time:
+                .. code-block:: python
 
-        >>> tc = TransferClient(...)
-        >>> done = tc.task_wait(task_id, timeout=600, polling_interval=60):
-        >>> if not done:
-        >>>     print("{0} didn't successfully terminate!"
-        >>>           .format(task_id))
-        >>> else:
-        >>>     print("{0} completed".format(task_id))
+                    tc = TransferClient(...)
+                    while not tc.task_wait(task_id, timeout=60):
+                        print(f"Another minute went by without {task_id} terminating")
 
-        You could print dots while you wait for a task by only waiting one
-        second at a time:
+                Or perhaps you want to check on a task every minute for 10 minutes, and
+                give up if it doesn't complete in that time:
 
-        >>> tc = TransferClient(...)
-        >>> while not tc.task_wait(task_id, timeout=1, polling_interval=1):
-        >>>     print(".", end="")
-        >>> print("\n{0} completed!".format(task_id))
-        """
+                .. code-block:: python
+
+                    tc = TransferClient(...)
+                    done = tc.task_wait(task_id, timeout=600, polling_interval=60)
+                    if not done:
+                        print(f"{task_id} didn't successfully terminate!")
+                    else:
+                        print(f"{task_id} completed")
+
+                You could print dots while you wait for a task by only waiting one
+                second at a time:
+
+                .. code-block:: python
+
+                    tc = TransferClient(...)
+                    while not tc.task_wait(task_id, timeout=1, polling_interval=1):
+                        print(".", end="")
+                    print(f"\n{task_id} completed!")
+        """  # noqa: E501
         log.info(
             "TransferClient.task_wait(%s, %s, %s)", task_id, timeout, polling_interval
         )
@@ -1757,7 +1806,7 @@ class TransferClient(client.BaseClient):
                     tc = TransferClient(...)
                     task_id = ...
                     for info in tc.task_successful_transfers(task_id):
-                        print("{} -> {}".format(info["source_path"], info["destination_path"]))
+                        print(f"{info['source_path']} -> {info['destination_path']}")
 
             .. tab-item:: Paginated Usage
 
@@ -1811,7 +1860,7 @@ class TransferClient(client.BaseClient):
                     tc = TransferClient(...)
                     task_id = ...
                     for info in tc.task_skipped_errors(task_id):
-                        print("{} -> {}".format(info["error_code"], info["source_path"]))
+                        print(f"{info['error_code']} -> {info['source_path']}")
 
             .. tab-item:: Paginated Usage
 
@@ -2038,12 +2087,10 @@ class TransferClient(client.BaseClient):
                     tc = TransferClient(...)
                     for task in tc.endpoint_manager_task_list(filter_status="ACTIVE"):
                         print(
-                            "Task({}): {} -> {}\n  was submitted by\n  {}".format(
-                                task["task_id"],
-                                task["source_endpoint"],
-                                task["destination_endpoint"],
-                                task["owner_string"],
-                            )
+                            f"Task({task['task_id']}): "
+                            f"{task['source_endpoint']} -> {task['destination_endpoint']}\n"
+                            "  was submitted by\n"
+                            f"  {task['owner_string']}"
                         )
 
             .. tab-item:: Paginated Usage
@@ -2059,12 +2106,10 @@ class TransferClient(client.BaseClient):
                     for page in tc.paginated.endpoint_manager_task_list(filter_status="ACTIVE"):
                         for task in page:
                             print(
-                                "Task({}): {} -> {}\n  was submitted by\n  {}".format(
-                                    task["task_id"],
-                                    task["source_endpoint"],
-                                    task["destination_endpoint"],
-                                    task["owner_string"],
-                                )
+                                f"Task({task['task_id']}): "
+                                f"{task['source_endpoint']} -> {task['destination_endpoint']}\n"
+                                "  was submitted by\n"
+                                f"  {task['owner_string']}"
                             )
 
             .. tab-item:: API Info
@@ -2487,18 +2532,22 @@ class TransferClient(client.BaseClient):
         :param data: A pause rule document describing the rule to create
         :type data: dict
 
-        **Examples**
+        .. tab-set::
 
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> rule_data = {
-        >>>   "DATA_TYPE": "pause_rule",
-        >>>   "message": "Message to users explaining why tasks are paused",
-        >>>   "endpoint_id": "339abc22-aab3-4b45-bb56-8d40535bfd80",
-        >>>   "identity_id": None,  # affect all users on endpoint
-        >>>   "start_time": None  # start now
-        >>> }
-        >>> create_result = tc.endpoint_manager_create_pause_rule(ep_data)
-        >>> rule_id = create_result["id"]
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TransferClient(...)
+                    rule_data = {
+                        "DATA_TYPE": "pause_rule",
+                        "message": "Message to users explaining why tasks are paused",
+                        "endpoint_id": "339abc22-aab3-4b45-bb56-8d40535bfd80",
+                        "identity_id": None,  # affect all users on endpoint
+                        "start_time": None,  # start now
+                    }
+                    create_result = tc.endpoint_manager_create_pause_rule(ep_data)
+                    rule_id = create_result["id"]
         """
         log.info("TransferClient.endpoint_manager_create_pause_rule(...)")
         return self.post("endpoint_manager/pause_rule", data=data)
@@ -2548,15 +2597,19 @@ class TransferClient(client.BaseClient):
         :param data: A partial pause rule document with fields to update
         :type data: dict
 
-        **Examples**
+        .. tab-set::
 
-        >>> tc = globus_sdk.TransferClient(...)
-        >>> rule_data = {
-        >>>   "message": "Update to pause, reads are now allowed.",
-        >>>   "pause_ls": False,
-        >>>   "pause_task_transfer_read": False
-        >>> }
-        >>> update_result = tc.endpoint_manager_update_pause_rule(ep_data)
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TransferClient(...)
+                    rule_data = {
+                        "message": "Update to pause, reads are now allowed.",
+                        "pause_ls": False,
+                        "pause_task_transfer_read": False,
+                    }
+                    update_result = tc.endpoint_manager_update_pause_rule(ep_data)
         """
         log.info(f"TransferClient.endpoint_manager_update_pause_rule({pause_rule_id})")
         return self.put(f"endpoint_manager/pause_rule/{pause_rule_id}", data=data)
