@@ -5,7 +5,7 @@ import time
 import typing as t
 import uuid
 
-from globus_sdk import client, exc, paging, response, utils
+from globus_sdk import client, exc, paging, response
 from globus_sdk._types import DateLike, IntLike, UUIDLike
 from globus_sdk.scopes import TransferScopes
 
@@ -122,7 +122,6 @@ class TransferClient(client.BaseClient):
     # Endpoint Management
     #
 
-    @utils.doc_api_method("Get Endpoint by ID", "transfer/endpoint/#get_endpoint_by_id")
     def get_endpoint(
         self,
         endpoint_id: UUIDLike,
@@ -149,13 +148,13 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /endpoint/<endpoint_id>``
+
+                .. extdoclink:: Get Endpoint by ID
+                    :ref: transfer/endpoint/#get_endpoint_by_id
         """  # noqa: E501
         log.info(f"TransferClient.get_endpoint({endpoint_id})")
         return self.get(f"endpoint/{endpoint_id}", query_params=query_params)
 
-    @utils.doc_api_method(
-        "Update Endpoint by ID", "transfer/endpoint/#update_endpoint_by_id"
-    )
     def update_endpoint(
         self,
         endpoint_id: UUIDLike,
@@ -185,6 +184,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``PUT /endpoint/<endpoint_id>``
+
+                .. extdoclink:: Update Endpoint by ID
+                    :ref: transfer/endpoint/#update_endpoint_by_id
         """  # noqa: E501
         if data.get("myproxy_server"):
             if data.get("oauth_server"):
@@ -201,7 +203,6 @@ class TransferClient(client.BaseClient):
         log.info(f"TransferClient.update_endpoint({endpoint_id}, ...)")
         return self.put(f"endpoint/{endpoint_id}", data=data, query_params=query_params)
 
-    @utils.doc_api_method("Create Endpoint", "transfer/endpoint/#create_endpoint")
     def create_endpoint(self, data: dict[str, t.Any]) -> response.GlobusHTTPResponse:
         """
         :param data: An endpoint document with fields for the new endpoint
@@ -230,6 +231,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /endpoint/<endpoint_id>``
+
+                .. extdoclink:: Create Endpoint
+                    :ref: transfer/endpoint/#create_endpoint
         """
         if data.get("myproxy_server") and data.get("oauth_server"):
             raise exc.GlobusSDKUsageError(
@@ -241,9 +245,6 @@ class TransferClient(client.BaseClient):
         log.info("TransferClient.create_endpoint(...)")
         return self.post("endpoint", data=data)
 
-    @utils.doc_api_method(
-        "Delete Endpoint by ID", "transfer/endpoint/#delete_endpoint_by_id"
-    )
     def delete_endpoint(self, endpoint_id: UUIDLike) -> response.GlobusHTTPResponse:
         """
         :param endpoint_id: ID of endpoint to delete
@@ -261,6 +262,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``DELETE /endpoint/<endpoint_id>``
+
+                .. extdoclink:: Delete Endpoint by ID
+                    :ref: transfer/endpoint/#delete_endpoint_by_id
         """
         log.info(f"TransferClient.delete_endpoint({endpoint_id})")
         return self.delete(f"endpoint/{endpoint_id}")
@@ -370,9 +374,6 @@ class TransferClient(client.BaseClient):
             self.get("endpoint_search", query_params=query_params)
         )
 
-    @utils.doc_api_method(
-        "Autoactivate Endpoint", "transfer/endpoint_activation/#autoactivate_endpoint"
-    )
     def endpoint_autoactivate(
         self,
         endpoint_id: UUIDLike,
@@ -442,6 +443,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /endpoint/<endpoint_id>/autoactivate``
+
+                .. extdoclink:: Autoactivate Endpoint
+                    :ref: transfer/endpoint_activation/#autoactivate_endpoint
         """  # noqa: E501
         if query_params is None:
             query_params = {}
@@ -452,9 +456,6 @@ class TransferClient(client.BaseClient):
             f"endpoint/{endpoint_id}/autoactivate", query_params=query_params
         )
 
-    @utils.doc_api_method(
-        "Deactivate Endpoint", "transfer/endpoint_activation/#deactivate_endpoint"
-    )
     def endpoint_deactivate(
         self,
         endpoint_id: UUIDLike,
@@ -473,15 +474,15 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /endpoint/<endpoint_id>/deactivate``
+
+                .. extdoclink:: Deactivate Endpoint
+                    :ref: transfer/endpoint_activation/#deactivate_endpoint
         """
         log.info(f"TransferClient.endpoint_deactivate({endpoint_id})")
         return self.post(
             f"endpoint/{endpoint_id}/deactivate", query_params=query_params
         )
 
-    @utils.doc_api_method(
-        "Activate Endpoint", "transfer/endpoint_activation/#activate_endpoint"
-    )
     def endpoint_activate(
         self,
         endpoint_id: UUIDLike,
@@ -510,6 +511,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /endpoint/<endpoint_id>/activate``
+
+                .. extdoclink:: Activate Endpoint
+                    :ref: transfer/endpoint_activation/#activate_endpoint
         """
         log.info(f"TransferClient.endpoint_activate({endpoint_id})")
         return self.post(
@@ -518,10 +522,6 @@ class TransferClient(client.BaseClient):
             query_params=query_params,
         )
 
-    @utils.doc_api_method(
-        "Get Activation Requirements",
-        "transfer/endpoint_activation/#get_activation_requirements",
-    )
     def endpoint_get_activation_requirements(
         self,
         endpoint_id: UUIDLike,
@@ -541,6 +541,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /endpoint/<endpoint_id>/activation_requirements``
+
+                .. extdoclink:: Get Activation Requirements
+                    :ref: transfer/endpoint_activation/#get_activation_requirements
         """
         return ActivationRequirementsResponse(
             self.get(
@@ -549,10 +552,6 @@ class TransferClient(client.BaseClient):
             )
         )
 
-    @utils.doc_api_method(
-        "Get my effective endpoint pause rules",
-        "transfer/endpoint/#get_endpoint_pause_rules",
-    )
     def my_effective_pause_rule_list(
         self,
         endpoint_id: UUIDLike,
@@ -571,6 +570,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /endpoint/<endpoint_id>/my_effective_pause_rule_list``
+
+                .. extdoclink:: Get my effective endpoint pause rules
+                    :ref: transfer/endpoint/#get_endpoint_pause_rules
         """
         log.info(f"TransferClient.my_effective_pause_rule_list({endpoint_id}, ...)")
         return IterableTransferResponse(
@@ -582,9 +584,6 @@ class TransferClient(client.BaseClient):
 
     # Shared Endpoints
 
-    @utils.doc_api_method(
-        "Get shared endpoint list", "transfer/endpoint/#get_shared_endpoint_list"
-    )
     def my_shared_endpoint_list(
         self,
         endpoint_id: UUIDLike,
@@ -605,6 +604,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /endpoint/<endpoint_id>/my_shared_endpoint_list``
+
+                .. extdoclink:: Get shared endpoint list
+                    :ref: transfer/endpoint/#get_shared_endpoint_list
         """
         log.info(f"TransferClient.my_shared_endpoint_list({endpoint_id}, ...)")
         return IterableTransferResponse(
@@ -664,9 +666,6 @@ class TransferClient(client.BaseClient):
             iter_key="shared_endpoints",
         )
 
-    @utils.doc_api_method(
-        "Create Shared Endpoint", "transfer/endpoint/#create_shared_endpoint"
-    )
     def create_shared_endpoint(
         self, data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
@@ -695,15 +694,15 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /shared_endpoint``
+
+                .. extdoclink:: Create Shared Endpoint
+                    :ref: transfer/endpoint/#create_shared_endpoint
         """
         log.info("TransferClient.create_shared_endpoint(...)")
         return self.post("shared_endpoint", data=data)
 
     # Endpoint servers
 
-    @utils.doc_api_method(
-        "Get endpoint server list", "transfer/endpoint/#get_endpoint_server_list"
-    )
     def endpoint_server_list(
         self,
         endpoint_id: UUIDLike,
@@ -722,15 +721,15 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /endpoint/<endpoint_id>/server_list``
+
+                .. extdoclink:: Get endpoint server list
+                    :ref: transfer/endpoint/#get_endpoint_server_list
         """
         log.info(f"TransferClient.endpoint_server_list({endpoint_id}, ...)")
         return IterableTransferResponse(
             self.get(f"endpoint/{endpoint_id}/server_list", query_params=query_params)
         )
 
-    @utils.doc_api_method(
-        "Get endpoint server by id", "transfer/endpoint/#get_endpoint_server_by_id"
-    )
     def get_endpoint_server(
         self,
         endpoint_id: UUIDLike,
@@ -751,6 +750,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /endpoint/<endpoint_id>/server/<server_id>``
+
+                .. extdoclink:: Get endpoint server by id
+                    :ref: transfer/endpoint/#get_endpoint_server_by_id
         """
         log.info(
             "TransferClient.get_endpoint_server(%s, %s, ...)", endpoint_id, server_id
@@ -759,9 +761,6 @@ class TransferClient(client.BaseClient):
             f"endpoint/{endpoint_id}/server/{server_id}", query_params=query_params
         )
 
-    @utils.doc_api_method(
-        "Add endpoint server", "transfer/endpoint/#add_endpoint_server"
-    )
     def add_endpoint_server(
         self, endpoint_id: UUIDLike, server_data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
@@ -776,14 +775,13 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /endpoint/<endpoint_id>/server``
+
+                .. extdoclink:: Add endpoint server
+                    :ref: transfer/endpoint/#add_endpoint_server
         """
         log.info(f"TransferClient.add_endpoint_server({endpoint_id}, ...)")
         return self.post(f"endpoint/{endpoint_id}/server", data=server_data)
 
-    @utils.doc_api_method(
-        "Update endpoint server by ID",
-        "transfer/endpoint/#update_endpoint_server_by_id",
-    )
     def update_endpoint_server(
         self,
         endpoint_id: UUIDLike,
@@ -803,6 +801,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``PUT /endpoint/<endpoint_id>/server/<server_id>``
+
+                .. extdoclink:: Update endpoint server by ID
+                    :ref: transfer/endpoint/#update_endpoint_server_by_id
         """
         log.info(
             "TransferClient.update_endpoint_server(%s, %s, ...)",
@@ -811,10 +812,6 @@ class TransferClient(client.BaseClient):
         )
         return self.put(f"endpoint/{endpoint_id}/server/{server_id}", data=server_data)
 
-    @utils.doc_api_method(
-        "Delete endpoint server by ID",
-        "transfer/endpoint/#delete_endpoint_server_by_id",
-    )
     def delete_endpoint_server(
         self, endpoint_id: UUIDLike, server_id: IntLike
     ) -> response.GlobusHTTPResponse:
@@ -829,6 +826,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``DELETE /endpoint/<endpoint_id>/server/<server_id>``
+
+                .. extdoclink:: Delete endpoint server by ID
+                    :ref: transfer/endpoint/#delete_endpoint_server_by_id
         """
         log.info(
             "TransferClient.delete_endpoint_server(%s, %s)", endpoint_id, server_id
@@ -839,9 +839,6 @@ class TransferClient(client.BaseClient):
     # Roles
     #
 
-    @utils.doc_api_method(
-        "Get list of endpoint roles", "transfer/endpoint_roles/#role_list"
-    )
     def endpoint_role_list(
         self,
         endpoint_id: UUIDLike,
@@ -860,15 +857,15 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /endpoint/<endpoint_id>/role_list``
+
+                .. extdoclink:: Get list of endpoint roles
+                    :ref: transfer/endpoint_roles/#role_list
         """
         log.info(f"TransferClient.endpoint_role_list({endpoint_id}, ...)")
         return IterableTransferResponse(
             self.get(f"endpoint/{endpoint_id}/role_list", query_params=query_params)
         )
 
-    @utils.doc_api_method(
-        "Create endpoint role", "transfer/endpoint_roles/#create_role"
-    )
     def add_endpoint_role(
         self, endpoint_id: UUIDLike, role_data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
@@ -883,13 +880,13 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /endpoint/<endpoint_id>/role``
+
+                .. extdoclink:: Create endpoint role
+                    :ref: transfer/endpoint_roles/#create_role
         """
         log.info(f"TransferClient.add_endpoint_role({endpoint_id}, ...)")
         return self.post(f"endpoint/{endpoint_id}/role", data=role_data)
 
-    @utils.doc_api_method(
-        "Get endpoint role by ID", "transfer/endpoint_roles/#get_endpoint_role_by_id"
-    )
     def get_endpoint_role(
         self,
         endpoint_id: UUIDLike,
@@ -910,16 +907,15 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /endpoint/<endpoint_id>/role/<role_id>``
+
+                .. extdoclink:: Get endpoint role by ID
+                    :ref: transfer/endpoint_roles/#get_endpoint_role_by_id
         """
         log.info(f"TransferClient.get_endpoint_role({endpoint_id}, {role_id}, ...)")
         return self.get(
             f"endpoint/{endpoint_id}/role/{role_id}", query_params=query_params
         )
 
-    @utils.doc_api_method(
-        "Delete endpoint role by ID",
-        "transfer/endpoint_roles/#delete_endpoint_role_by_id",
-    )
     def delete_endpoint_role(
         self, endpoint_id: UUIDLike, role_id: str
     ) -> response.GlobusHTTPResponse:
@@ -934,6 +930,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``DELETE /endpoint/<endpoint_id>/role/<role_id>``
+
+                .. extdoclink:: Delete endpoint role by ID
+                    :ref: transfer/endpoint_roles/#delete_endpoint_role_by_id
         """
         log.info(f"TransferClient.delete_endpoint_role({endpoint_id}, {role_id})")
         return self.delete(f"endpoint/{endpoint_id}/role/{role_id}")
@@ -942,9 +941,6 @@ class TransferClient(client.BaseClient):
     # ACLs
     #
 
-    @utils.doc_api_method(
-        "Get list of access rules", "transfer/acl/#rest_access_get_list"
-    )
     def endpoint_acl_list(
         self,
         endpoint_id: UUIDLike,
@@ -962,15 +958,15 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /endpoint/<endpoint_id>/access_list``
+
+                .. extdoclink:: Get list of access rules
+                    :ref: transfer/acl/#rest_access_get_list
         """
         log.info(f"TransferClient.endpoint_acl_list({endpoint_id}, ...)")
         return IterableTransferResponse(
             self.get(f"endpoint/{endpoint_id}/access_list", query_params=query_params)
         )
 
-    @utils.doc_api_method(
-        "Get access rule by ID", "transfer/acl/#get_access_rule_by_id"
-    )
     def get_endpoint_acl_rule(
         self,
         endpoint_id: UUIDLike,
@@ -991,6 +987,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /endpoint/<endpoint_id>/access/<rule_id>``
+
+                .. extdoclink:: Get access rule by ID
+                    :ref: transfer/acl/#get_access_rule_by_id
         """
         log.info(
             "TransferClient.get_endpoint_acl_rule(%s, %s, ...)", endpoint_id, rule_id
@@ -999,7 +998,6 @@ class TransferClient(client.BaseClient):
             f"endpoint/{endpoint_id}/access/{rule_id}", query_params=query_params
         )
 
-    @utils.doc_api_method("Create access rule", "transfer/acl/#rest_access_create")
     def add_endpoint_acl_rule(
         self, endpoint_id: UUIDLike, rule_data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
@@ -1032,11 +1030,13 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /endpoint/<endpoint_id>/access``
+
+                .. extdoclink:: Create access rule
+                    :ref: transfer/acl/#rest_access_create
         """
         log.info(f"TransferClient.add_endpoint_acl_rule({endpoint_id}, ...)")
         return self.post(f"endpoint/{endpoint_id}/access", data=rule_data)
 
-    @utils.doc_api_method("Update access rule", "transfer/acl/#update_access_rule")
     def update_endpoint_acl_rule(
         self,
         endpoint_id: UUIDLike,
@@ -1056,6 +1056,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``PUT /endpoint/<endpoint_id>/access/<rule_id>``
+
+                .. extdoclink:: Update access rule
+                    :ref: transfer/acl/#update_access_rule
         """
         log.info(
             "TransferClient.update_endpoint_acl_rule(%s, %s, ...)",
@@ -1064,7 +1067,6 @@ class TransferClient(client.BaseClient):
         )
         return self.put(f"endpoint/{endpoint_id}/access/{rule_id}", data=rule_data)
 
-    @utils.doc_api_method("Delete access rule", "transfer/acl/#delete_access_rule")
     def delete_endpoint_acl_rule(
         self, endpoint_id: UUIDLike, rule_id: str
     ) -> response.GlobusHTTPResponse:
@@ -1079,6 +1081,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``DELETE /endpoint/<endpoint_id>/access/<rule_id>``
+
+                .. extdoclink:: Delete access rule
+                    :ref: transfer/acl/#delete_access_rule
         """
         log.info(
             "TransferClient.delete_endpoint_acl_rule(%s, %s)", endpoint_id, rule_id
@@ -1089,9 +1094,6 @@ class TransferClient(client.BaseClient):
     # Bookmarks
     #
 
-    @utils.doc_api_method(
-        "Get list of bookmarks", "transfer/endpoint_bookmarks/#get_list_of_bookmarks"
-    )
     def bookmark_list(
         self, *, query_params: dict[str, t.Any] | None = None
     ) -> IterableTransferResponse:
@@ -1104,15 +1106,15 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /bookmark_list``
+
+                .. extdoclink:: Get list of bookmarks
+                    :ref: transfer/endpoint_bookmarks/#get_list_of_bookmarks
         """
         log.info(f"TransferClient.bookmark_list({query_params})")
         return IterableTransferResponse(
             self.get("bookmark_list", query_params=query_params)
         )
 
-    @utils.doc_api_method(
-        "Create bookmark", "transfer/endpoint_bookmarks/#create_bookmark"
-    )
     def create_bookmark(
         self, bookmark_data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
@@ -1125,13 +1127,13 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /bookmark``
+
+                .. extdoclink:: Create bookmark
+                    :ref: transfer/endpoint_bookmarks/#create_bookmark
         """
         log.info(f"TransferClient.create_bookmark({bookmark_data})")
         return self.post("bookmark", data=bookmark_data)
 
-    @utils.doc_api_method(
-        "Get bookmark by ID", "transfer/endpoint_bookmarks/#get_bookmark_by_id"
-    )
     def get_bookmark(
         self,
         bookmark_id: UUIDLike,
@@ -1149,13 +1151,13 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /bookmark/<bookmark_id>``
+
+                .. extdoclink:: Get bookmark by ID
+                    :ref: transfer/endpoint_bookmarks/#get_bookmark_by_id
         """
         log.info(f"TransferClient.get_bookmark({bookmark_id})")
         return self.get(f"bookmark/{bookmark_id}", query_params=query_params)
 
-    @utils.doc_api_method(
-        "Update bookmark", "transfer/endpoint_bookmarks/#update_bookmark"
-    )
     def update_bookmark(
         self, bookmark_id: UUIDLike, bookmark_data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
@@ -1170,13 +1172,13 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``PUT /bookmark/<bookmark_id>``
+
+                .. extdoclink:: Update bookmark
+                    :ref: transfer/endpoint_bookmarks/#update_bookmark
         """
         log.info(f"TransferClient.update_bookmark({bookmark_id})")
         return self.put(f"bookmark/{bookmark_id}", data=bookmark_data)
 
-    @utils.doc_api_method(
-        "Delete bookmark by ID", "transfer/endpoint_bookmarks/#delete_bookmark_by_id"
-    )
     def delete_bookmark(self, bookmark_id: UUIDLike) -> response.GlobusHTTPResponse:
         """
         :param bookmark_id: The ID of the bookmark to delete
@@ -1187,6 +1189,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``DELETE /bookmark/<bookmark_id>``
+
+                .. extdoclink:: Delete bookmark by ID
+                    :ref: transfer/endpoint_bookmarks/#delete_bookmark_by_id
         """
         log.info(f"TransferClient.delete_bookmark({bookmark_id})")
         return self.delete(f"bookmark/{bookmark_id}")
@@ -1195,9 +1200,6 @@ class TransferClient(client.BaseClient):
     # Synchronous Filesys Operations
     #
 
-    @utils.doc_api_method(
-        "List Directory Contents", "transfer/file_operations/#list_directory_contents"
-    )
     def operation_ls(
         self,
         endpoint_id: UUIDLike,
@@ -1269,6 +1271,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /operation/endpoint/<endpoint_id>/ls``
+
+                .. extdoclink:: List Directory Contents
+                    :ref: transfer/file_operations/#list_directory_contents
         """  # noqa: E501
         if query_params is None:
             query_params = {}
@@ -1289,7 +1294,6 @@ class TransferClient(client.BaseClient):
             self.get(f"operation/endpoint/{endpoint_id}/ls", query_params=query_params)
         )
 
-    @utils.doc_api_method("Make Directory", "transfer/file_operations/#make_directory")
     def operation_mkdir(
         self,
         endpoint_id: UUIDLike,
@@ -1317,6 +1321,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /operation/endpoint/<endpoint_id>/mkdir``
+
+                .. extdoclink:: Make Directory
+                    :ref: transfer/file_operations/#make_directory
         """
         log.info(
             "TransferClient.operation_mkdir({}, {}, {})".format(
@@ -1330,7 +1337,6 @@ class TransferClient(client.BaseClient):
             query_params=query_params,
         )
 
-    @utils.doc_api_method("Rename", "transfer/file_operations/#rename")
     def operation_rename(
         self,
         endpoint_id: UUIDLike,
@@ -1361,6 +1367,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /operation/endpoint/<endpoint_id>/rename``
+
+                .. extdoclink:: Rename
+                    :ref: transfer/file_operations/#rename
         """  # noqa: E501
         log.info(
             "TransferClient.operation_rename({}, {}, {}, {})".format(
@@ -1374,7 +1383,6 @@ class TransferClient(client.BaseClient):
             query_params=query_params,
         )
 
-    @utils.doc_api_method("Symlink", "transfer/file_operations/#symlink")
     def operation_symlink(
         self,
         endpoint_id: UUIDLike,
@@ -1405,6 +1413,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /operation/endpoint/<endpoint_id>/symlink``
+
+                .. extdoclink:: Symlink
+                    :ref: transfer/file_operations/#symlink
         """  # noqa: E501
         log.info(
             "TransferClient.operation_symlink({}, {}, {}, {})".format(
@@ -1457,9 +1468,6 @@ class TransferClient(client.BaseClient):
         log.info(f"TransferClient.get_submission_id({query_params})")
         return self.get("submission_id", query_params=query_params)
 
-    @utils.doc_api_method(
-        "Submit a transfer task", "transfer/task_submit/#submit_transfer_task"
-    )
     def submit_transfer(
         self, data: dict[str, t.Any] | TransferData
     ) -> response.GlobusHTTPResponse:
@@ -1500,6 +1508,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /transfer``
+
+                .. extdoclink:: Submit a transfer task
+                    :ref: transfer/task_submit/#submit_transfer_task
         """  # noqa: E501
         log.info("TransferClient.submit_transfer(...)")
         if "submission_id" not in data:
@@ -1507,9 +1518,6 @@ class TransferClient(client.BaseClient):
             data["submission_id"] = self.get_submission_id()["value"]
         return self.post("/transfer", data=data)
 
-    @utils.doc_api_method(
-        "Submit a delete task", "transfer/task_submit/#submit_delete_task"
-    )
     def submit_delete(
         self, data: dict[str, t.Any] | DeleteData
     ) -> response.GlobusHTTPResponse:
@@ -1544,6 +1552,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /delete``
+
+                .. extdoclink:: Submit a delete task
+                    :ref: transfer/task_submit/#submit_delete_task
         """
         log.info("TransferClient.submit_delete(...)")
         if "submission_id" not in data:
@@ -1705,7 +1716,6 @@ class TransferClient(client.BaseClient):
             self.get(f"task/{task_id}/event_list", query_params=query_params)
         )
 
-    @utils.doc_api_method("Get task by ID", "transfer/task/#get_task_by_id")
     def get_task(
         self,
         task_id: UUIDLike,
@@ -1723,11 +1733,13 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /task/<task_id>``
+
+                .. extdoclink:: Get task by ID
+                    :ref: transfer/task/#get_task_by_id
         """
         log.info(f"TransferClient.get_task({task_id}, ...)")
         return self.get(f"task/{task_id}", query_params=query_params)
 
-    @utils.doc_api_method("Update task by ID", "transfer/task/#update_task_by_id")
     def update_task(
         self,
         task_id: UUIDLike,
@@ -1751,11 +1763,13 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``PUT /task/<task_id>``
+
+                .. extdoclink:: Update task by ID
+                    :ref: transfer/task/#update_task_by_id
         """
         log.info(f"TransferClient.update_task({task_id}, ...)")
         return self.put(f"task/{task_id}", data=data, query_params=query_params)
 
-    @utils.doc_api_method("Cancel task by ID", "transfer/task/#cancel_task_by_id")
     def cancel_task(self, task_id: UUIDLike) -> response.GlobusHTTPResponse:
         """
         Cancel a task which is still running.
@@ -1768,6 +1782,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /task/<task_id>/cancel``
+
+                .. extdoclink:: Cancel task by ID
+                    :ref: transfer/task/#cancel_task_by_id
         """
         log.info(f"TransferClient.cancel_task({task_id})")
         return self.post(f"task/{task_id}/cancel")
@@ -1878,7 +1895,6 @@ class TransferClient(client.BaseClient):
             time.sleep(polling_interval)
         # unreachable -- end of task_wait
 
-    @utils.doc_api_method("Get task pause info", "transfer/task/#get_task_pause_info")
     def task_pause_info(
         self,
         task_id: UUIDLike,
@@ -1898,6 +1914,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /task/<task_id>/pause_info``
+
+                .. extdoclink:: Get task pause info
+                    :ref: transfer/task/#get_task_pause_info
         """
         log.info(f"TransferClient.task_pause_info({task_id}, ...)")
         return self.get(f"task/{task_id}/pause_info", query_params=query_params)
@@ -2020,10 +2039,6 @@ class TransferClient(client.BaseClient):
     # advanced endpoint management (requires endpoint manager role)
     #
 
-    @utils.doc_api_method(
-        "Get monitored endpoints",
-        "transfer/advanced_endpoint_management/#get_monitored_endpoints",
-    )
     def endpoint_manager_monitored_endpoints(
         self, *, query_params: dict[str, t.Any] | None = None
     ) -> IterableTransferResponse:
@@ -2038,16 +2053,15 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET endpoint_manager/monitored_endpoints``
+
+                .. extdoclink:: Get monitored endpoints
+                    :ref: transfer/advanced_endpoint_management/#get_monitored_endpoints
         """
         log.info(f"TransferClient.endpoint_manager_monitored_endpoints({query_params})")
         return IterableTransferResponse(
             self.get("endpoint_manager/monitored_endpoints", query_params=query_params)
         )
 
-    @utils.doc_api_method(
-        "Get hosted endpoint list",
-        "transfer/advanced_endpoint_management/#get_hosted_endpoint_list",
-    )
     def endpoint_manager_hosted_endpoint_list(
         self,
         endpoint_id: UUIDLike,
@@ -2067,7 +2081,10 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /endpoint_manager/endpoint/<endpoint_id>/hosted_endpoint_list``
-        """
+
+                .. extdoclink:: Get hosted endpoint list
+                    :ref: transfer/advanced_endpoint_management/#get_hosted_endpoint_list
+        """  # noqa: E501
         log.info(f"TransferClient.endpoint_manager_hosted_endpoint_list({endpoint_id})")
         return IterableTransferResponse(
             self.get(
@@ -2076,10 +2093,6 @@ class TransferClient(client.BaseClient):
             )
         )
 
-    @utils.doc_api_method(
-        "Get endpoint as admin",
-        "transfer/advanced_endpoint_management/#mc_get_endpoint",
-    )
     def endpoint_manager_get_endpoint(
         self,
         endpoint_id: UUIDLike,
@@ -2099,16 +2112,15 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /endpoint_manager/endpoint/<endpoint_id>``
+
+                .. extdoclink:: Get endpoint as admin
+                    :ref: transfer/advanced_endpoint_management/#mc_get_endpoint
         """
         log.info(f"TransferClient.endpoint_manager_get_endpoint({endpoint_id})")
         return self.get(
             f"endpoint_manager/endpoint/{endpoint_id}", query_params=query_params
         )
 
-    @utils.doc_api_method(
-        "Get endpoint access list as admin",
-        "transfer/advanced_endpoint_management/#get_endpoint_access_list_as_admin",
-    )
     def endpoint_manager_acl_list(
         self,
         endpoint_id: UUIDLike,
@@ -2128,7 +2140,10 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET endpoint_manager/endpoint/<endpoint_id>/access_list``
-        """
+
+                .. extdoclink:: Get endpoint access list as admin
+                    :ref: transfer/advanced_endpoint_management/#get_endpoint_access_list_as_admin
+        """  # noqa: E501
         log.info(
             f"TransferClient.endpoint_manager_endpoint_acl_list({endpoint_id}, ...)"
         )
@@ -2307,9 +2322,6 @@ class TransferClient(client.BaseClient):
             self.get("endpoint_manager/task_list", query_params=query_params)
         )
 
-    @utils.doc_api_method(
-        "Get task as admin", "transfer/advanced_endpoint_management/#get_task"
-    )
     def endpoint_manager_get_task(
         self,
         task_id: UUIDLike,
@@ -2330,6 +2342,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /endpoint_manager/task/<task_id>``
+
+                .. extdoclink:: Get task as admin
+                    :ref: transfer/advanced_endpoint_management/#get_task
         """
         log.info(f"TransferClient.endpoint_manager_get_task({task_id}, ...)")
         return self.get(f"endpoint_manager/task/{task_id}", query_params=query_params)
@@ -2395,10 +2410,6 @@ class TransferClient(client.BaseClient):
             )
         )
 
-    @utils.doc_api_method(
-        "Get task pause info as admin",
-        "transfer/advanced_endpoint_management/#get_task_pause_info_as_admin",
-    )
     def endpoint_manager_task_pause_info(
         self,
         task_id: UUIDLike,
@@ -2419,7 +2430,10 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /endpoint_manager/task/<task_id>/pause_info``
-        """
+
+                .. extdoclink:: Get task pause info as admin
+                    :ref: transfer/advanced_endpoint_management/#get_task_pause_info_as_admin
+        """  # noqa: E501
         log.info(f"TransferClient.endpoint_manager_task_pause_info({task_id}, ...)")
         return self.get(
             f"endpoint_manager/task/{task_id}/pause_info", query_params=query_params
@@ -2520,9 +2534,6 @@ class TransferClient(client.BaseClient):
             )
         )
 
-    @utils.doc_api_method(
-        "Cancel tasks as admin", "transfer/advanced_endpoint_management/#admin_cancel"
-    )
     def endpoint_manager_cancel_tasks(
         self,
         task_ids: t.Iterable[UUIDLike],
@@ -2546,6 +2557,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /endpoint_manager/admin_cancel``
+
+                .. extdoclink:: Cancel tasks as admin
+                    :ref: transfer/advanced_endpoint_management/#admin_cancel
         """
         str_task_ids = [str(i) for i in task_ids]
         log.info(
@@ -2556,10 +2570,6 @@ class TransferClient(client.BaseClient):
             "endpoint_manager/admin_cancel", data=data, query_params=query_params
         )
 
-    @utils.doc_api_method(
-        "Get cancel status by ID",
-        "transfer/advanced_endpoint_management/#get_cancel_status_by_id",
-    )
     def endpoint_manager_cancel_status(
         self,
         admin_cancel_id: UUIDLike,
@@ -2580,6 +2590,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /endpoint_manager/admin_cancel/<admin_cancel_id>``
+
+                .. extdoclink:: Get cancel status by ID
+                    :ref: transfer/advanced_endpoint_management/#get_cancel_status_by_id
         """
         log.info(f"TransferClient.endpoint_manager_cancel_status({admin_cancel_id})")
         return self.get(
@@ -2587,10 +2600,6 @@ class TransferClient(client.BaseClient):
             query_params=query_params,
         )
 
-    @utils.doc_api_method(
-        "Pause tasks as admin",
-        "transfer/advanced_endpoint_management/#pause_tasks_as_admin",
-    )
     def endpoint_manager_pause_tasks(
         self,
         task_ids: t.Iterable[UUIDLike],
@@ -2614,6 +2623,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /endpoint_manager/admin_pause``
+
+                .. extdoclink:: Pause tasks as admin
+                    :ref: transfer/advanced_endpoint_management/#pause_tasks_as_admin
         """
         str_task_ids = [str(i) for i in task_ids]
         log.info(
@@ -2624,10 +2636,6 @@ class TransferClient(client.BaseClient):
             "endpoint_manager/admin_pause", data=data, query_params=query_params
         )
 
-    @utils.doc_api_method(
-        "Resume tasks as admin",
-        "transfer/advanced_endpoint_management/#resume_tasks_as_admin",
-    )
     def endpoint_manager_resume_tasks(
         self,
         task_ids: t.Iterable[UUIDLike],
@@ -2648,6 +2656,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /endpoint_manager/admin_resume``
+
+                .. extdoclink:: Resume tasks as admin
+                    :ref: transfer/advanced_endpoint_management/#resume_tasks_as_admin
         """
         str_task_ids = [str(i) for i in task_ids]
         log.info(f"TransferClient.endpoint_manager_resume_tasks({str_task_ids})")
@@ -2660,9 +2671,6 @@ class TransferClient(client.BaseClient):
     # endpoint manager pause rule methods
     #
 
-    @utils.doc_api_method(
-        "Get pause rules", "transfer/advanced_endpoint_management/#get_pause_rules"
-    )
     def endpoint_manager_pause_rule_list(
         self,
         *,
@@ -2685,6 +2693,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /endpoint_manager/pause_rule_list``
+
+                .. extdoclink:: Get pause rules
+                    :ref: transfer/advanced_endpoint_management/#get_pause_rules
         """
         log.info("TransferClient.endpoint_manager_pause_rule_list(...)")
         if query_params is None:
@@ -2695,9 +2706,6 @@ class TransferClient(client.BaseClient):
             self.get("endpoint_manager/pause_rule_list", query_params=query_params)
         )
 
-    @utils.doc_api_method(
-        "Create pause rule", "transfer/advanced_endpoint_management/#create_pause_rule"
-    )
     def endpoint_manager_create_pause_rule(
         self, data: dict[str, t.Any] | None
     ) -> response.GlobusHTTPResponse:
@@ -2728,13 +2736,13 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``POST /endpoint_manager/pause_rule``
+
+                .. extdoclink:: Create pause rule
+                    :ref: transfer/advanced_endpoint_management/#create_pause_rule
         """
         log.info("TransferClient.endpoint_manager_create_pause_rule(...)")
         return self.post("endpoint_manager/pause_rule", data=data)
 
-    @utils.doc_api_method(
-        "Get pause rule", "transfer/advanced_endpoint_management/#get_pause_rule"
-    )
     def endpoint_manager_get_pause_rule(
         self,
         pause_rule_id: UUIDLike,
@@ -2755,15 +2763,15 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``GET /endpoint_manager/pause_rule/<pause_rule_id>``
+
+                .. extdoclink:: Get pause rule
+                    :ref: transfer/advanced_endpoint_management/#get_pause_rule
         """
         log.info(f"TransferClient.endpoint_manager_get_pause_rule({pause_rule_id})")
         return self.get(
             f"endpoint_manager/pause_rule/{pause_rule_id}", query_params=query_params
         )
 
-    @utils.doc_api_method(
-        "Update pause rule", "transfer/advanced_endpoint_management/#update_pause_rule"
-    )
     def endpoint_manager_update_pause_rule(
         self,
         pause_rule_id: UUIDLike,
@@ -2796,13 +2804,13 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``PUT /endpoint_manager/pause_rule/<pause_rule_id>``
+
+                .. extdoclink:: Update pause rule
+                    :ref: transfer/advanced_endpoint_management/#update_pause_rule
         """
         log.info(f"TransferClient.endpoint_manager_update_pause_rule({pause_rule_id})")
         return self.put(f"endpoint_manager/pause_rule/{pause_rule_id}", data=data)
 
-    @utils.doc_api_method(
-        "Delete pause rule", "transfer/advanced_endpoint_management/#delete_pause_rule"
-    )
     def endpoint_manager_delete_pause_rule(
         self,
         pause_rule_id: UUIDLike,
@@ -2824,6 +2832,9 @@ class TransferClient(client.BaseClient):
             .. tab-item:: API Info
 
                 ``DELETE /endpoint_manager/pause_rule/<pause_rule_id>``
+
+                .. extdoclink:: Delete pause rule
+                    :ref: transfer/advanced_endpoint_management/#delete_pause_rule
         """
         log.info(f"TransferClient.endpoint_manager_delete_pause_rule({pause_rule_id})")
         return self.delete(
