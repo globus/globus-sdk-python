@@ -19,19 +19,6 @@ from .response import IterableGCSResponse, UnpackingGCSResponse
 C = t.TypeVar("C", bound=t.Callable[..., t.Any])
 
 
-def _gcsdoc(message: str, link: str) -> t.Callable[[C], C]:
-    # do not use functools.partial because it doesn't preserve type information
-    # see: https://github.com/python/mypy/issues/1484
-    def partial(func: C) -> C:
-        return utils.doc_api_method(
-            message,
-            link,
-            external_base_url="https://docs.globus.org/globus-connect-server/v5/api",
-        )(func)
-
-    return partial
-
-
 class GCSClient(client.BaseClient):
     """
     A GCSClient provides communication with the GCS Manager API of a Globus Connect
@@ -129,7 +116,6 @@ class GCSClient(client.BaseClient):
     # collection methods
     #
 
-    @_gcsdoc("List Collections", "openapi_Collections/#ListCollections")
     def get_collection_list(
         self,
         *,
@@ -141,7 +127,7 @@ class GCSClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableGCSResponse:
         """
-        ``GET /collections``
+        List the Collections on an Endpoint
 
         :param mapped_collection_id: Filter collections which were created using this
             mapped collection ID.
@@ -155,7 +141,15 @@ class GCSClient(client.BaseClient):
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
-        List the Collections on an Endpoint
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /collections``
+
+                .. extdoclink:: List Collections
+                    :ref: openapi_Collections/#ListCollections
+                    :service: gcs
         """
         if query_params is None:
             query_params = {}
@@ -169,7 +163,6 @@ class GCSClient(client.BaseClient):
             query_params["filter"] = ",".join(filter)
         return IterableGCSResponse(self.get("collections", query_params=query_params))
 
-    @_gcsdoc("Get Collection", "openapi_Collections/#getCollection")
     def get_collection(
         self,
         collection_id: UUIDLike,
@@ -177,28 +170,33 @@ class GCSClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
-        ``GET /collections/{collection_id}``
+        Lookup a Collection on an Endpoint
 
         :param collection_id: The ID of the collection to lookup
         :type collection_id: str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
-        Lookup a Collection on an Endpoint
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /collections/{collection_id}``
+
+                .. extdoclink:: Get Collection
+                    :ref: openapi_Collections/#getCollection
+                    :service: gcs
         """
         return UnpackingGCSResponse(
             self.get(f"/collections/{collection_id}", query_params=query_params),
             "collection",
         )
 
-    @_gcsdoc("Create Collection", "openapi_Collections/#createCollection")
     def create_collection(
         self,
         collection_data: dict[str, t.Any] | CollectionDocument,
     ) -> UnpackingGCSResponse:
         """
-        ``POST /collections``
-
         Create a collection. This is used to create either a mapped or a guest
         collection. When created, a ``collection:administrator`` role for that
         collection will be created using the caller’s identity.
@@ -211,12 +209,21 @@ class GCSClient(client.BaseClient):
 
         :param collection_data: The collection document for the new collection
         :type collection_data: dict or CollectionDocument
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``POST /collections``
+
+                .. extdoclink:: Create Collection
+                    :ref: openapi_Collections/#createCollection
+                    :service: gcs
         """
         return UnpackingGCSResponse(
             self.post("/collections", data=collection_data), "collection"
         )
 
-    @_gcsdoc("Update Collection", "openapi_Collections/#patchCollection")
     def update_collection(
         self,
         collection_id: UUIDLike,
@@ -225,7 +232,7 @@ class GCSClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
-        ``PATCH /collections/{collection_id}``
+        Update a Collection
 
         :param collection_id: The ID of the collection to update
         :type collection_id: str or UUID
@@ -233,6 +240,16 @@ class GCSClient(client.BaseClient):
         :type collection_data: dict or CollectionDocument
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``PATCH /collections/{collection_id}``
+
+                .. extdoclink:: Update Collection
+                    :ref: openapi_Collections/#patchCollection
+                    :service: gcs
         """
         return UnpackingGCSResponse(
             self.patch(
@@ -243,7 +260,6 @@ class GCSClient(client.BaseClient):
             "collection",
         )
 
-    @_gcsdoc("Delete Collection", "openapi_Collections/#deleteCollection")
     def delete_collection(
         self,
         collection_id: UUIDLike,
@@ -251,12 +267,22 @@ class GCSClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``DELETE /collections/{collection_id}``
+        Delete a Collection
 
         :param collection_id: The ID of the collection to delete
         :type collection_id: str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``DELETE /collections/{collection_id}``
+
+                .. extdoclink:: Delete Collection
+                    :ref: openapi_Collections/#deleteCollection
+                    :service: gcs
         """
         return self.delete(f"/collections/{collection_id}", query_params=query_params)
 
@@ -264,7 +290,6 @@ class GCSClient(client.BaseClient):
     # storage gateway methods
     #
 
-    @_gcsdoc("List Storage Gateways", "openapi_Storage_Gateways/#getStorageGateways")
     @paging.has_paginator(
         paging.MarkerPaginator,
         items_key="data",
@@ -276,7 +301,7 @@ class GCSClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableGCSResponse:
         """
-        ``GET /storage_gateways``
+        List Storage Gateways
 
         :param include: Optional document types to include in the response. If
             'private_policies' is included, then include private storage gateway
@@ -291,6 +316,14 @@ class GCSClient(client.BaseClient):
             .. tab-item:: Paginated Usage
 
                 .. paginatedusage:: get_storage_gateway_list
+
+            .. tab-item:: API Info
+
+                ``GET /storage_gateways``
+
+                .. extdoclink:: Delete Collection
+                    :ref: openapi_Storage_Gateways/#getStorageGateways
+                    :service: gcs
         """
         if query_params is None:
             query_params = {}
@@ -300,7 +333,6 @@ class GCSClient(client.BaseClient):
             self.get("/storage_gateways", query_params=query_params)
         )
 
-    @_gcsdoc("Create a Storage Gateway", "openapi_Storage_Gateways/#postStorageGateway")
     def create_storage_gateway(
         self,
         data: dict[str, t.Any] | StorageGatewayDocument,
@@ -308,20 +340,29 @@ class GCSClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
-        ``POST /storage_gateways``
+        Create a Storage Gateway
 
         :param data: Data in the format of a Storage Gateway document, it is recommended
             to use the ``StorageGatewayDocumment`` class to construct this data.
         :type data: dict or StorageGatewayDocument
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``POST /storage_gateways``
+
+                .. extdoclink:: Create Storage Gateway
+                    :ref: openapi_Storage_Gateways/#postStorageGateway
+                    :service: gcs
         """
         return UnpackingGCSResponse(
             self.post("/storage_gateways", data=data, query_params=query_params),
             "storage_gateway",
         )
 
-    @_gcsdoc("Get a Storage Gateway", "openapi_Storage_Gateways/#getStorageGateway")
     def get_storage_gateway(
         self,
         storage_gateway_id: UUIDLike,
@@ -330,7 +371,7 @@ class GCSClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
-        ``GET /storage_gateways/<storage_gateway_id>``
+        Lookup a Storage Gateway by ID
 
         :param storage_gateway_id: UUID for the Storage Gateway to be gotten
         :type storage_gateway_id: str or UUID
@@ -341,6 +382,16 @@ class GCSClient(client.BaseClient):
         :type include: str or iterable of str, optional
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /storage_gateways/<storage_gateway_id>``
+
+                .. extdoclink:: Get a Storage Gateway
+                    :ref: openapi_Storage_Gateways/#getStorageGateway
+                    :service: gcs
         """
         if query_params is None:
             query_params = {}
@@ -355,9 +406,6 @@ class GCSClient(client.BaseClient):
             "storage_gateway",
         )
 
-    @_gcsdoc(
-        "Update a Storage Gateway", "openapi_Storage_Gateways/#patchStorageGateway"
-    )
     def update_storage_gateway(
         self,
         storage_gateway_id: UUIDLike,
@@ -366,7 +414,7 @@ class GCSClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``PATCH /storage_gateways/<storage_gateway_id>``
+        Update a Storage Gateway
 
         :param storage_gateway_id: UUID for the Storage Gateway to be updated
         :type storage_gateway_id: str or UUID
@@ -375,6 +423,16 @@ class GCSClient(client.BaseClient):
         :type data: dict or StorageGatewayDocument
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``PATCH /storage_gateways/<storage_gateway_id>``
+
+                .. extdoclink:: Update a Storage Gateway
+                    :ref: openapi_Storage_Gateways/#patchStorageGateway
+                    :service: gcs
         """
         return self.patch(
             f"/storage_gateways/{storage_gateway_id}",
@@ -382,9 +440,6 @@ class GCSClient(client.BaseClient):
             query_params=query_params,
         )
 
-    @_gcsdoc(
-        "Delete a Storage Gateway", "openapi_Storage_Gateways/#deleteStorageGateway"
-    )
     def delete_storage_gateway(
         self,
         storage_gateway_id: str | uuid.UUID,
@@ -392,12 +447,22 @@ class GCSClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``DELETE /storage_gateways/<storage_gateway_id>``
+        Delete a Storage Gateway
 
         :param storage_gateway_id: UUID for the Storage Gateway to be deleted
         :type storage_gateway_id: str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``DELETE /storage_gateways/<storage_gateway_id>``
+
+                .. extdoclink:: Delete a Storage Gateway
+                    :ref: openapi_Storage_Gateways/#deleteStorageGateway
+                    :service: gcs
         """
         return self.delete(
             f"/storage_gateways/{storage_gateway_id}", query_params=query_params
@@ -407,7 +472,6 @@ class GCSClient(client.BaseClient):
     # role methods
     #
 
-    @_gcsdoc("List Roles", "openapi_Roles/#listRoles")
     @paging.has_paginator(
         paging.MarkerPaginator,
         items_key="data",
@@ -419,7 +483,7 @@ class GCSClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableGCSResponse:
         """
-        ``GET /roles``
+        List Roles
 
         :param collection_id: UUID of a Collection. If given then only roles
             related to that Collection are returned, otherwise only Endpoint
@@ -431,6 +495,16 @@ class GCSClient(client.BaseClient):
         :type include: str, optional
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /roles``
+
+                .. extdoclink:: Delete a Storage Gateway
+                    :ref: openapi_Roles/#listRoles
+                    :service: gcs
         """
         if query_params is None:
             query_params = {}
@@ -442,20 +516,29 @@ class GCSClient(client.BaseClient):
         path = "/roles"
         return IterableGCSResponse(self.get(path, query_params=query_params))
 
-    @_gcsdoc("Create Role", "openapi_Roles/#postRole")
     def create_role(
         self,
         data: dict[str, t.Any] | GCSRoleDocument,
         query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
-        POST /roles
+        Create a Role
 
         :param data: Data in the format of a Role document, it is recommended
             to use the `GCSRoleDocumment` class to construct this data.
         :type data: dict
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``POST /roles``
+
+                .. extdoclink:: Create Role
+                    :ref: openapi_Roles/#postRole
+                    :service: gcs
         """
         path = "/roles"
         return UnpackingGCSResponse(
@@ -463,53 +546,80 @@ class GCSClient(client.BaseClient):
             "role",
         )
 
-    @_gcsdoc("Get a Role", "openapi_Roles/#getRole")
     def get_role(
         self,
         role_id: UUIDLike,
         query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
-        GET /roles/{role_id}
+        Get a Role by ID
 
         :param role_id: UUID for the Role to be gotten
         :type role_id: str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /roles/{role_id}``
+
+                .. extdoclink:: Get Role
+                    :ref: openapi_Roles/#getRole
+                    :service: gcs
         """
         path = f"/roles/{role_id}"
         return UnpackingGCSResponse(self.get(path, query_params=query_params), "role")
 
-    @_gcsdoc("Delete a Role", "openapi_Roles/#deleteRole")
     def delete_role(
         self,
         role_id: UUIDLike,
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        DELETE /roles/{role_id}
+        Delete a Role
 
         :param role_id: UUID for the Role to be deleted
         :type role_id: str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``DELETE /roles/{role_id}``
+
+                .. extdoclink:: Delete Role
+                    :ref: openapi_Roles/#deleteRole
+                    :service: gcs
         """
         path = f"/roles/{role_id}"
         return self.delete(path, query_params=query_params)
 
-    @_gcsdoc("Get User Credential list", "openapi_User_Credentials/#getUserCredentials")
     def get_user_credential_list(
         self,
         storage_gateway: UUIDLike | None = None,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableGCSResponse:
         """
-        GET /user_credentials
+        Get User Credentials
 
         :param storage_gateway: UUID of a storage gateway to limit results to
         :type storage_gateway: str or UUID, optional
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /user_credentials``
+
+                .. extdoclink:: Get User Credential List
+                    :ref: openapi_User_Credentials/#getUserCredentials
+                    :service: gcs
         """
         if query_params is None:
             query_params = {}
@@ -519,20 +629,29 @@ class GCSClient(client.BaseClient):
         path = "/user_credentials"
         return IterableGCSResponse(self.get(path, query_params=query_params))
 
-    @_gcsdoc("Create a User Credential", "openapi_User_Credentials/#postUserCredential")
     def create_user_credential(
         self,
         data: dict[str, t.Any] | UserCredentialDocument,
         query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
-        POST /user_credentials
+        Create a User Credential
 
         :param data: Data in the format of a UserCredential document, it is
             recommended to use the `UserCredential` class to construct this
         :type data: dict
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``POST /user_credentials``
+
+                .. extdoclink:: Create User Credential
+                    :ref: openapi_User_Credentials/#postUserCredential
+                    :service: gcs
         """
         path = "/user_credentials"
         return UnpackingGCSResponse(
@@ -540,28 +659,34 @@ class GCSClient(client.BaseClient):
             "user_credential",
         )
 
-    @_gcsdoc("Get a User Credential", "openapi_User_Credentials/#getUserCredential")
     def get_user_credential(
         self,
         user_credential_id: UUIDLike,
         query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
-        GET /user_credentials/{user_credential_id}
+        Get a User Credential by ID
 
         :param user_credential_id: UUID for the UserCredential to be gotten
         :type user_credential_id: str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /user_credentials/{user_credential_id}``
+
+                .. extdoclink:: Get a User Credential
+                    :ref: openapi_User_Credentials/#getUserCredential
+                    :service: gcs
         """
         path = f"/user_credentials/{user_credential_id}"
         return UnpackingGCSResponse(
             self.get(path, query_params=query_params), "user_credential"
         )
 
-    @_gcsdoc(
-        "Update a User Credential", "openapi_User_Credentials/#patchUserCredential"
-    )
     def update_user_credential(
         self,
         user_credential_id: UUIDLike,
@@ -569,7 +694,7 @@ class GCSClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
-        PATCH /user_credentials/{user_credential_id}
+        Update a User Credential
 
         :param user_credential_id: UUID for the UserCredential to be updated
         :type user_credential_id: str or UUID
@@ -578,27 +703,44 @@ class GCSClient(client.BaseClient):
         :type data: dict
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``PATCH /user_credentials/{user_credential_id}``
+
+                .. extdoclink:: Update a User Credential
+                    :ref: openapi_User_Credentials/#patchUserCredential
+                    :service: gcs
         """
         path = f"/user_credentials/{user_credential_id}"
         return UnpackingGCSResponse(
             self.patch(path, data=data, query_params=query_params), "user_credential"
         )
 
-    @_gcsdoc(
-        "Delete a User Credential", "openapi_User_Credentials/#deleteUserCredential"
-    )
     def delete_user_credential(
         self,
         user_credential_id: UUIDLike,
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        DELETE /user_credentials/{user_credential_id}
+        Delete a User Credential
 
         :param user_credential_id: UUID for the UserCredential to be deleted
         :type user_credential_id: str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``DELETE /user_credentials/{user_credential_id}``
+
+                .. extdoclink:: Delete User Credential
+                    :ref: openapi_User_Credentials/#deleteUserCredential
+                    :service: gcs
         """
         path = f"/user_credentials/{user_credential_id}"
         return self.delete(path, query_params=query_params)
