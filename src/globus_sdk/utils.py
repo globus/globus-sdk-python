@@ -9,7 +9,6 @@ import typing as t
 from base64 import b64encode
 from enum import Enum
 
-C = t.TypeVar("C", bound=t.Callable[..., t.Any])
 T = t.TypeVar("T")
 R = t.TypeVar("R")
 
@@ -42,29 +41,6 @@ def slash_join(a: str, b: str | None) -> str:
     if b.startswith("/"):
         return a + b
     return a + "/" + b
-
-
-def doc_api_method(
-    external_message: str,
-    external_link: str,
-    *,
-    external_base_url: str = "https://docs.globus.org/api",
-    # we could override the format string if wanted (after the normal header)
-    external_format_str: str = (
-        "See `{message} <{base_url}/{link}>`_ in the API documentation for details."
-    ),
-) -> t.Callable[[C], C]:
-    def decorate(func: C) -> C:
-        func.__doc__ = f"""{func.__doc__}
-
-        **External Documentation**
-
-        """ + external_format_str.format(
-            message=external_message, base_url=external_base_url, link=external_link
-        )
-        return func
-
-    return decorate
 
 
 def safe_strseq_iter(
