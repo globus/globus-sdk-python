@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import typing as t
 
-from globus_sdk import exc, utils
+from globus_sdk import exc
 from globus_sdk._types import ScopeCollectionType, UUIDLike
 from globus_sdk.authorizers import NullAuthorizer
 
@@ -41,14 +41,6 @@ class NativeAppAuthClient(AuthClient):
         super().__init__(client_id=client_id, authorizer=NullAuthorizer(), **kwargs)
         log.info(f"Finished initializing client, client_id={client_id}")
 
-    @utils.doc_api_method(
-        "The PKCE Security Protocol",
-        "auth/developer-guide/#pkce",
-        external_format_str=(
-            "The Globus Auth specification for Native App grants details modifications "
-            "to the Authorization Code grant flow as `{message} <{base_url}/{link}>`_."
-        ),
-    )
     def oauth2_start_flow(
         self,
         requested_scopes: ScopeCollectionType | None = None,
@@ -91,10 +83,19 @@ class NativeAppAuthClient(AuthClient):
         :param prefill_named_grant: Prefill the named grant label on the consent page
         :type prefill_named_grant: str, optional
 
-        **Examples**
+        .. tab-set::
 
-        You can see an example of this flow :ref:`in the usage examples
-        <examples_native_app_login>`
+            .. tab-item:: Example Usage
+
+                You can see an example of this flow :ref:`in the usage examples
+                <examples_native_app_login>`
+
+            .. tab-item:: API Info
+
+                The Globus Auth specification for Native App grants details
+                modifications to the Authorization Code grant flow as
+                `The PKCE Security Protocol
+                <https://docs.globus.org/api/auth/developer-guide/#pkce>`_.
         """
         log.info("Starting Native App Grant Flow")
         self.current_oauth2_flow_manager = GlobusNativeAppFlowManager(
