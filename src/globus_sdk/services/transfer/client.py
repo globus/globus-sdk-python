@@ -326,7 +326,7 @@ class TransferClient(client.BaseClient):
 
                 Search for a given string as a fulltext search:
 
-                .. code-block::
+                .. code-block:: python
 
                     tc = globus_sdk.TransferClient(...)
                     for ep in tc.endpoint_search("String to search for!"):
@@ -334,7 +334,7 @@ class TransferClient(client.BaseClient):
 
                 Search for a given string, but only on endpoints that you own:
 
-                .. code-block::
+                .. code-block:: python
 
                     for ep in tc.endpoint_search("foo", filter_scope="my-endpoints"):
                         print(f"{ep['display_name']} has ID {ep['id']}")
@@ -1603,7 +1603,7 @@ class TransferClient(client.BaseClient):
 
                 Fetch 10 tasks and print some basic info:
 
-                .. code-block::
+                .. code-block:: python
 
                     tc = TransferClient(...)
                     for task in tc.task_list(limit=10):
@@ -1614,7 +1614,7 @@ class TransferClient(client.BaseClient):
 
                 Fetch 3 *specific* tasks using a ``task_id`` filter:
 
-                .. code-block::
+                .. code-block:: python
 
                     tc = TransferClient(...)
                     task_ids = [
@@ -1685,14 +1685,12 @@ class TransferClient(client.BaseClient):
 
                 Fetch 10 events and print some basic info:
 
-                .. code-block::
+                .. code-block:: python
 
                     tc = TransferClient(...)
                     task_id = ...
                     for event in tc.task_event_list(task_id, limit=10):
-                        print(
-                            f"Event on Task({task_id}) at {event['time']}:\n{event['description']}"
-                        )
+                        print(f"Event on Task({task_id}) at {event['time']}:\n{event['description']}")
 
             .. tab-item:: Paginated Usage
 
@@ -1954,7 +1952,7 @@ class TransferClient(client.BaseClient):
 
                 Fetch all transferred files for a task and print some basic info:
 
-                .. code-block::
+                .. code-block:: python
 
                     tc = TransferClient(...)
                     task_id = ...
@@ -2008,7 +2006,7 @@ class TransferClient(client.BaseClient):
 
                 Fetch all skipped errors for a task and print some basic info:
 
-                .. code-block::
+                .. code-block:: python
 
                     tc = TransferClient(...)
                     task_id = ...
@@ -2247,7 +2245,7 @@ class TransferClient(client.BaseClient):
 
                 Fetch some tasks and print some basic info:
 
-                .. code-block::
+                .. code-block:: python
 
                     tc = TransferClient(...)
                     for task in tc.endpoint_manager_task_list(filter_status="ACTIVE"):
@@ -2265,7 +2263,7 @@ class TransferClient(client.BaseClient):
                 For example, fetch and print all active tasks visible via
                 ``activity_monitor`` permissions:
 
-                .. code-block::
+                .. code-block:: python
 
                     tc = TransferClient(...)
                     for page in tc.paginated.endpoint_manager_task_list(filter_status="ACTIVE"):

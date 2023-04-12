@@ -48,3 +48,8 @@ repos:
       language: python
       always_run: true
       pass_filenames: false
+    - id: forbid-code-block-without-language
+      name: Require code-block directives to specify a language
+      types_or: [python,rst]
+      language: pygrep
+      entry: "\\.\\. code-block::$"
