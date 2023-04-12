@@ -264,7 +264,7 @@ class GroupsClient(client.BaseClient):
 
             .. tab-item:: Example Usage
 
-                .. code-block::
+                .. code-block:: python
 
                     gc = globus_sdk.GroupsClient(...)
                     gc.set_identity_preferences({"allow_add": False})
@@ -362,7 +362,7 @@ class GroupsClient(client.BaseClient):
 
             .. tab-item:: Example Usage
 
-                .. code-block::
+                .. code-block:: python
 
                     gc = globus_sdk.GroupsClient(...)
                     group_id = ...
