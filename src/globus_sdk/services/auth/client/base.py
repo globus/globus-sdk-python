@@ -76,9 +76,6 @@ class AuthClient(client.BaseClient):
         # managers
         self.current_oauth2_flow_manager: GlobusOAuthFlowManager | None = None
 
-    @utils.doc_api_method(
-        "Identities Resources", "auth/reference/#v2_api_identities_resources"
-    )
     def get_identities(
         self,
         *,
@@ -88,8 +85,6 @@ class AuthClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
         r"""
-        GET /v2/api/identities
-
         Given ``usernames=<U>`` or (exclusive) ``ids=<I>`` as keyword
         arguments, looks up identity information for the set of identities
         provided.
@@ -115,48 +110,62 @@ class AuthClient(client.BaseClient):
             as query params.
         :type query_params: dict, optional
 
-        **Examples**
+        .. tab-set::
 
-        >>> ac = globus_sdk.AuthClient(...)
-        >>> # by IDs
-        >>> r = ac.get_identities(ids="46bd0f56-e24f-11e5-a510-131bef46955c")
-        >>> r.data
-        {'identities': [{'email': None,
-           'id': '46bd0f56-e24f-11e5-a510-131bef46955c',
-           'identity_provider': '7daddf46-70c5-45ee-9f0f-7244fe7c8707',
-           'name': None,
-           'organization': None,
-           'status': 'unused',
-           'username': 'globus@globus.org'}]}
-        >>> ac.get_identities(
-        >>>     ids=",".join(
-        >>>         ("46bd0f56-e24f-11e5-a510-131bef46955c",
-        >>>          "168edc3d-c6ba-478c-9cf8-541ff5ebdc1c"))
-        ...
-        >>> # or by usernames
-        >>> ac.get_identities(usernames='globus@globus.org')
-        ...
-        >>> ac.get_identities(
-        >>>     usernames='globus@globus.org,auth@globus.org')
-        ...
+            .. tab-item:: Example Usage
 
-        You could also use iterables:
+                .. code-block:: pycon
 
-        >>> ac.get_identities(
-        >>>     usernames=['globus@globus.org', 'auth@globus.org'])
-        ...
-        >>> ac.get_identities(
-        >>>     ids=["46bd0f56-e24f-11e5-a510-131bef46955c",
-        >>>          "168edc3d-c6ba-478c-9cf8-541ff5ebdc1c"])
-        ...
+                    >>> ac = globus_sdk.AuthClient(...)
+                    >>> # get by ID
+                    >>> r = ac.get_identities(ids="46bd0f56-e24f-11e5-a510-131bef46955c")
+                    >>> r.data
+                    {
+                      'identities': [
+                        {
+                          'email': None,
+                          'id': '46bd0f56-e24f-11e5-a510-131bef46955c',
+                          'identity_provider': '7daddf46-70c5-45ee-9f0f-7244fe7c8707',
+                          'name': None,
+                          'organization': None,
+                          'status': 'unused',
+                          'username': 'globus@globus.org'
+                        }
+                      ]
+                    }
+                    >>> ac.get_identities(
+                    ...     ids=",".join(
+                    ...         ("46bd0f56-e24f-11e5-a510-131bef46955c", "168edc3d-c6ba-478c-9cf8-541ff5ebdc1c")
+                    ...     )
+                    ... )
+                    >>> # or by usernames
+                    >>> ac.get_identities(usernames="globus@globus.org")
+                    >>> ac.get_identities(usernames="globus@globus.org,auth@globus.org")
 
-        The result itself is iterable, so you can use it like so:
+                You could also use iterables:
 
-        >>> for identity in ac.get_identities(
-        >>>     usernames=['globus@globus.org', 'auth@globus.org']
-        >>> ):
-        >>>     print(identity["id"])
-        """
+                .. code-block:: python
+
+                    ac.get_identities(usernames=["globus@globus.org", "auth@globus.org"])
+
+                    ac.get_identities(
+                        ids=["46bd0f56-e24f-11e5-a510-131bef46955c", "168edc3d-c6ba-478c-9cf8-541ff5ebdc1c"]
+                    )
+
+                The result itself is iterable, so you can use it like so:
+
+                .. code-block:: python
+
+                    for identity in ac.get_identities(usernames=["globus@globus.org", "auth@globus.org"]):
+                        print(identity["id"])
+
+            .. tab-item:: API Info
+
+                ``GET /v2/api/identities``
+
+                .. extdoclink:: Get Identities
+                    :ref: auth/reference/#v2_api_identities_resources
+        """  # noqa: E501
 
         def _convert_listarg(
             val: (t.Iterable[IntLike | UUIDLike] | IntLike | UUIDLike),
@@ -469,9 +478,6 @@ class AuthClient(client.BaseClient):
             )
         )
 
-    @utils.doc_api_method(
-        "Userinfo", "auth/reference/#get_or_post_v2_oauth2_userinfo_resource"
-    )
     def oauth2_userinfo(self) -> GlobusHTTPResponse:
         """
         Call the Userinfo endpoint of Globus Auth.
@@ -480,14 +486,28 @@ class AuthClient(client.BaseClient):
 
         The exact data returned will depend upon the set of OIDC-related scopes
         which were used to acquire the token being used for this call. For
-        details, see the **External Documentation** below.
+        details, see the **API Info** below.
 
-        **Examples**
+        .. tab-set::
 
-        >>> ac = AuthClient(...)
-        >>> info = ac.oauth2_userinfo()
-        >>> print('Effective Identity "{}" has Full Name "{}" and Email "{}"'
-        >>>       .format(info["sub"], info["name"], info["email"]))
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    ac = AuthClient(...)
+                    info = ac.oauth2_userinfo()
+                    print(
+                        'Effective Identity "{info["sub"]}" has '
+                        f'Full Name "{info["name"]}" and '
+                        f'Email "{info["email"]}"'
+                    )
+
+            .. tab-item:: API Info
+
+                ``GET /v2/oauth2/userinfo``
+
+                .. extdoclink:: Get Userinfo
+                    :ref: auth/reference/#get_or_post_v2_oauth2_userinfo_resource
         """
         log.info("Looking up OIDC-style Userinfo from Globus Auth")
         return self.get("/v2/oauth2/userinfo")
