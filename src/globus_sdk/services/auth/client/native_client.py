@@ -88,7 +88,7 @@ class NativeAppAuthClient(AuthClient):
             .. tab-item:: Example Usage
 
                 You can see an example of this flow :ref:`in the usage examples
-                <examples_native_app_login>`
+                <examples_native_app_login>`.
 
             .. tab-item:: API Info
 

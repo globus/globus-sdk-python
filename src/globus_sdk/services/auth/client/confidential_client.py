@@ -118,7 +118,7 @@ class ConfidentialAppAuthClient(AuthClient):
             .. tab-item:: Example Usage
 
                 You can see an example of this flow :ref:`in the usage examples
-                <examples_three_legged_oauth_login>`
+                <examples_three_legged_oauth_login>`.
 
             .. tab-item:: API Info
 

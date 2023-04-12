@@ -178,7 +178,10 @@ class TransferClient(client.BaseClient):
                 .. code-block:: python
 
                     tc = globus_sdk.TransferClient(...)
-                    epup = dict(display_name="My New Endpoint Name", description="Better Description")
+                    epup = {
+                        "display_name": "My New Endpoint Name",
+                        "description": "Better Description",
+                    }
                     update_result = tc.update_endpoint(endpoint_id, epup)
 
             .. tab-item:: API Info
@@ -410,7 +413,7 @@ class TransferClient(client.BaseClient):
                     while r["code"] == "AutoActivationFailed":
                         print(
                             "Endpoint requires manual activation, please open "
-                            "the following URL in a browser to activate the endpoint:"
+                            "the following URL in a browser to activate the endpoint: "
                             f"https://app.globus.org/file-manager?origin_id={ep_id}"
                         )
                         input("Press ENTER after activating the endpoint:")

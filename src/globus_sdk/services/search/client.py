@@ -759,7 +759,7 @@ class SearchClient(client.BaseClient):
                     sc = globus_sdk.SearchClient(...)
                     task = sc.get_task(task_id)
                     assert task["index_id"] == known_index_id
-                    print(task["task_id"] + " | " + task["state"])
+                    print(task["task_id"], "|", task["state"])
 
             .. tab-item:: API Info
 
@@ -795,7 +795,7 @@ class SearchClient(client.BaseClient):
                     sc = globus_sdk.SearchClient(...)
                     task_list = sc.get_task_list(index_id)
                     for task in task_list["tasks"]:
-                        print(task["task_id"] + " | " + task["state"])
+                        print(task["task_id"], "|", task["state"])
 
             .. tab-item:: API Info
 

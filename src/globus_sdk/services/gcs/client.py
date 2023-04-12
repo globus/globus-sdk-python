@@ -604,7 +604,7 @@ class GCSClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableGCSResponse:
         """
-        Get User Credentials
+        List User Credentials
 
         :param storage_gateway: UUID of a storage gateway to limit results to
         :type storage_gateway: str or UUID, optional

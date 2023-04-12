@@ -383,7 +383,6 @@ class FlowsClient(client.BaseClient):
 
                     from globus_sdk import FlowsClient
 
-                    ...
                     flows = FlowsClient(...)
                     flows.update_flow(
                         flow_id="581753c7-45da-43d3-ad73-246b46e7cb6b",

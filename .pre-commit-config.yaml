@@ -52,4 +52,4 @@ repos:
       name: Require code-block directives to specify a language
       types_or: [python,rst]
       language: pygrep
-      entry: "\\.\\. code-block::$"
+      entry: "\\.\\. +code-block::$"
