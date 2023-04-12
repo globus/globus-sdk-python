@@ -130,8 +130,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /endpoint/<endpoint_id>``
-
         :param endpoint_id: ID of endpoint to lookup
         :type endpoint_id: str or UUID
         :param query_params: Any additional parameters will be passed through
@@ -147,6 +145,10 @@ class TransferClient(client.BaseClient):
                     tc = globus_sdk.TransferClient(...)
                     endpoint = tc.get_endpoint(endpoint_id)
                     print("Endpoint name:", endpoint["display_name"] or endpoint["canonical_name"])
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint/<endpoint_id>``
         """  # noqa: E501
         log.info(f"TransferClient.get_endpoint({endpoint_id})")
         return self.get(f"endpoint/{endpoint_id}", query_params=query_params)
@@ -162,8 +164,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``PUT /endpoint/<endpoint_id>``
-
         :param endpoint_id: ID of endpoint to lookup
         :type endpoint_id: str or UUID
         :param data: A partial endpoint document with fields to update
@@ -181,6 +181,10 @@ class TransferClient(client.BaseClient):
                     tc = globus_sdk.TransferClient(...)
                     epup = dict(display_name="My New Endpoint Name", description="Better Description")
                     update_result = tc.update_endpoint(endpoint_id, epup)
+
+            .. tab-item:: API Info
+
+                ``PUT /endpoint/<endpoint_id>``
         """  # noqa: E501
         if data.get("myproxy_server"):
             if data.get("oauth_server"):
@@ -200,8 +204,6 @@ class TransferClient(client.BaseClient):
     @utils.doc_api_method("Create Endpoint", "transfer/endpoint/#create_endpoint")
     def create_endpoint(self, data: dict[str, t.Any]) -> response.GlobusHTTPResponse:
         """
-        ``POST /endpoint/<endpoint_id>``
-
         :param data: An endpoint document with fields for the new endpoint
         :type data: dict
 
@@ -224,6 +226,10 @@ class TransferClient(client.BaseClient):
                     }
                     create_result = tc.create_endpoint(ep_data)
                     endpoint_id = create_result["id"]
+
+            .. tab-item:: API Info
+
+                ``POST /endpoint/<endpoint_id>``
         """
         if data.get("myproxy_server") and data.get("oauth_server"):
             raise exc.GlobusSDKUsageError(
@@ -240,8 +246,6 @@ class TransferClient(client.BaseClient):
     )
     def delete_endpoint(self, endpoint_id: UUIDLike) -> response.GlobusHTTPResponse:
         """
-        ``DELETE /endpoint/<endpoint_id>``
-
         :param endpoint_id: ID of endpoint to delete
         :type endpoint_id: str or UUID
 
@@ -253,6 +257,10 @@ class TransferClient(client.BaseClient):
 
                     tc = globus_sdk.TransferClient(...)
                     delete_result = tc.delete_endpoint(endpoint_id)
+
+            .. tab-item:: API Info
+
+                ``DELETE /endpoint/<endpoint_id>``
         """
         log.info(f"TransferClient.delete_endpoint({endpoint_id})")
         return self.delete(f"endpoint/{endpoint_id}")
@@ -373,8 +381,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         r"""
-        ``POST /endpoint/<endpoint_id>/autoactivate``
-
         :param endpoint_id: The ID of the endpoint to autoactivate
         :type endpoint_id: str or UUID
         :param if_expires_in: A number of seconds. Autoactivation will only be attempted
@@ -432,6 +438,10 @@ class TransferClient(client.BaseClient):
                         print(f"Endpoint({ep_id}) autoactivated using a built-in Globus credential.")
                     elif r["code"] == "AlreadyActivated":
                         print(f"Endpoint({ep_id}) already active for at least 3600 seconds")
+
+            .. tab-item:: API Info
+
+                ``POST /endpoint/<endpoint_id>/autoactivate``
         """  # noqa: E501
         if query_params is None:
             query_params = {}
@@ -452,13 +462,17 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /endpoint/<endpoint_id>/deactivate``
-
         :param endpoint_id: The ID of the endpoint to deactivate
         :type endpoint_id: str or UUID
         :param query_params: Any additional parameters will be passed through
             as query params.
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``POST /endpoint/<endpoint_id>/deactivate``
         """
         log.info(f"TransferClient.endpoint_deactivate({endpoint_id})")
         return self.post(
@@ -476,8 +490,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /endpoint/<endpoint_id>/activate``
-
         :param endpoint_id: The ID of the endpoint to activate
         :type endpoint_id: str or UUID
         :pram requirements_data: Filled in activation requirements data, as can be
@@ -492,6 +504,12 @@ class TransferClient(client.BaseClient):
 
         Consider using autoactivate and web activation instead, described
         in the example for :meth:`~endpoint_autoactivate`.
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``POST /endpoint/<endpoint_id>/activate``
         """
         log.info(f"TransferClient.endpoint_activate({endpoint_id})")
         return self.post(
@@ -511,14 +529,18 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> ActivationRequirementsResponse:
         """
-        ``GET /endpoint/<endpoint_id>/activation_requirements``
-
         :param endpoint_id: The ID of the endpoint whose activation requirements data is
             being looked up
         :type endpoint_id: str or UUID
         :param query_params: Any additional parameters will be passed through
             as query params.
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint/<endpoint_id>/activation_requirements``
         """
         return ActivationRequirementsResponse(
             self.get(
@@ -538,13 +560,17 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
-        ``GET /endpoint/<endpoint_id>/my_effective_pause_rule_list``
-
         :param endpoint_id: the endpoint on which the current user's effective pause
             rules are fetched
         :type endpoint_id: str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint/<endpoint_id>/my_effective_pause_rule_list``
         """
         log.info(f"TransferClient.my_effective_pause_rule_list({endpoint_id}, ...)")
         return IterableTransferResponse(
@@ -566,8 +592,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
-        ``GET /endpoint/<endpoint_id>/my_shared_endpoint_list``
-
         :param endpoint_id: the host endpoint whose shares are listed
         :type endpoint_id: str or UUID
         :param query_params: Additional passthrough query parameters
@@ -575,6 +599,12 @@ class TransferClient(client.BaseClient):
 
         Get a list of shared endpoints for which the user has ``administrator`` or
         ``access_manager`` on a given host endpoint.
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint/<endpoint_id>/my_shared_endpoint_list``
         """
         log.info(f"TransferClient.my_shared_endpoint_list({endpoint_id}, ...)")
         return IterableTransferResponse(
@@ -641,8 +671,6 @@ class TransferClient(client.BaseClient):
         self, data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /shared_endpoint``
-
         :param data: A python dict representation of a ``shared_endpoint`` document
         :type data: dict
 
@@ -663,6 +691,10 @@ class TransferClient(client.BaseClient):
                     }
                     create_result = tc.create_shared_endpoint(shared_ep_data)
                     endpoint_id = create_result["id"]
+
+            .. tab-item:: API Info
+
+                ``POST /shared_endpoint``
         """
         log.info("TransferClient.create_shared_endpoint(...)")
         return self.post("shared_endpoint", data=data)
@@ -679,13 +711,17 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
-        ``GET /endpoint/<endpoint_id>/server_list``
-
         :param endpoint_id: The endpoint whose servers are being listed
         :type endpoint_id: str or UUID
         :param query_params: Any additional parameters to be passed through
             as query params.
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint/<endpoint_id>/server_list``
         """
         log.info(f"TransferClient.endpoint_server_list({endpoint_id}, ...)")
         return IterableTransferResponse(
@@ -703,14 +739,18 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /endpoint/<endpoint_id>/server/<server_id>``
-
         :param endpoint_id: The endpoint under which the server is registered
         :type endpoint_id: str or UUID
         :param server_id: The ID of the server
         :type server_id: str or int
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint/<endpoint_id>/server/<server_id>``
         """
         log.info(
             "TransferClient.get_endpoint_server(%s, %s, ...)", endpoint_id, server_id
@@ -726,12 +766,16 @@ class TransferClient(client.BaseClient):
         self, endpoint_id: UUIDLike, server_data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /endpoint/<endpoint_id>/server``
-
         :param endpoint_id: The endpoint under which the server is being registered
         :type endpoint_id: str or UUID
         :param server_data: Fields for the new server, as a server document
         :type server_data: dict
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``POST /endpoint/<endpoint_id>/server``
         """
         log.info(f"TransferClient.add_endpoint_server({endpoint_id}, ...)")
         return self.post(f"endpoint/{endpoint_id}/server", data=server_data)
@@ -747,14 +791,18 @@ class TransferClient(client.BaseClient):
         server_data: dict[str, t.Any],
     ) -> response.GlobusHTTPResponse:
         """
-        ``PUT /endpoint/<endpoint_id>/server/<server_id>``
-
         :param endpoint_id: The endpoint under which the server is registered
         :type endpoint_id: str or UUID
         :param server_id: The ID of the server to update
         :type server_id: str or int
         :param server_data: Fields on the server to update, as a partial server document
         :type server_data: dict
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``PUT /endpoint/<endpoint_id>/server/<server_id>``
         """
         log.info(
             "TransferClient.update_endpoint_server(%s, %s, ...)",
@@ -771,12 +819,16 @@ class TransferClient(client.BaseClient):
         self, endpoint_id: UUIDLike, server_id: IntLike
     ) -> response.GlobusHTTPResponse:
         """
-        ``DELETE /endpoint/<endpoint_id>/server/<server_id>``
-
         :param endpoint_id: The endpoint under which the server is registered
         :type endpoint_id: str or UUID
         :param server_id: The ID of the server to delete
         :type server_id: str or int
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``DELETE /endpoint/<endpoint_id>/server/<server_id>``
         """
         log.info(
             "TransferClient.delete_endpoint_server(%s, %s)", endpoint_id, server_id
@@ -797,13 +849,17 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
-        ``GET /endpoint/<endpoint_id>/role_list``
-
         :param endpoint_id: The endpoint whose roles are being listed
         :type endpoint_id: str or UUID
         :param query_params: Any additional parameters to be passed through
             as query params.
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint/<endpoint_id>/role_list``
         """
         log.info(f"TransferClient.endpoint_role_list({endpoint_id}, ...)")
         return IterableTransferResponse(
@@ -817,12 +873,16 @@ class TransferClient(client.BaseClient):
         self, endpoint_id: UUIDLike, role_data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /endpoint/<endpoint_id>/role``
-
         :param endpoint_id: The endpoint on which the role is being added
         :type endpoint_id: str or UUID
         :param role_data: A role document for the new role
         :type role_data: dict
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``POST /endpoint/<endpoint_id>/role``
         """
         log.info(f"TransferClient.add_endpoint_role({endpoint_id}, ...)")
         return self.post(f"endpoint/{endpoint_id}/role", data=role_data)
@@ -838,14 +898,18 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /endpoint/<endpoint_id>/role/<role_id>``
-
         :param endpoint_id: The endpoint on which the role applies
         :type endpoint_id: str or UUID
         :param role_id: The ID of the role
         :type role_id: str
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint/<endpoint_id>/role/<role_id>``
         """
         log.info(f"TransferClient.get_endpoint_role({endpoint_id}, {role_id}, ...)")
         return self.get(
@@ -860,12 +924,16 @@ class TransferClient(client.BaseClient):
         self, endpoint_id: UUIDLike, role_id: str
     ) -> response.GlobusHTTPResponse:
         """
-        ``DELETE /endpoint/<endpoint_id>/role/<role_id>``
-
         :param endpoint_id: The endpoint on which the role applies
         :type endpoint_id: str or UUID
         :param role_id: The ID of the role to delete
         :type role_id: str
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``DELETE /endpoint/<endpoint_id>/role/<role_id>``
         """
         log.info(f"TransferClient.delete_endpoint_role({endpoint_id}, {role_id})")
         return self.delete(f"endpoint/{endpoint_id}/role/{role_id}")
@@ -884,12 +952,16 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
-        ``GET /endpoint/<endpoint_id>/access_list``
-
         :param endpoint_id: The endpoint whose ACLs are being listed
         :type endpoint_id: str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint/<endpoint_id>/access_list``
         """
         log.info(f"TransferClient.endpoint_acl_list({endpoint_id}, ...)")
         return IterableTransferResponse(
@@ -907,14 +979,18 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /endpoint/<endpoint_id>/access/<rule_id>``
-
         :param endpoint_id: The endpoint on which the access rule applies
         :type endpoint_id: str or UUID
         :param rule_id: The ID of the rule to fetch
         :type rule_id: str
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint/<endpoint_id>/access/<rule_id>``
         """
         log.info(
             "TransferClient.get_endpoint_acl_rule(%s, %s, ...)", endpoint_id, rule_id
@@ -928,8 +1004,6 @@ class TransferClient(client.BaseClient):
         self, endpoint_id: UUIDLike, rule_data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /endpoint/<endpoint_id>/access``
-
         :param endpoint_id: ID of endpoint to which to add the acl
         :type endpoint_id: str
         :param rule_data: A python dict representation of an ``access`` document
@@ -954,6 +1028,10 @@ class TransferClient(client.BaseClient):
 
                 Note that if this rule is being created on a shared endpoint
                 the "path" field is relative to the "host_path" of the shared endpoint.
+
+            .. tab-item:: API Info
+
+                ``POST /endpoint/<endpoint_id>/access``
         """
         log.info(f"TransferClient.add_endpoint_acl_rule({endpoint_id}, ...)")
         return self.post(f"endpoint/{endpoint_id}/access", data=rule_data)
@@ -966,14 +1044,18 @@ class TransferClient(client.BaseClient):
         rule_data: dict[str, t.Any],
     ) -> response.GlobusHTTPResponse:
         """
-        ``PUT /endpoint/<endpoint_id>/access/<rule_id>``
-
         :param endpoint_id: The endpoint on which the access rule applies
         :type endpoint_id: str or UUID
         :param rule_id: The ID of the access rule to modify
         :type rule_id: str
         :param rule_data: A partial ``access`` document containing fields to update
         :type rule_data: dict
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``PUT /endpoint/<endpoint_id>/access/<rule_id>``
         """
         log.info(
             "TransferClient.update_endpoint_acl_rule(%s, %s, ...)",
@@ -987,12 +1069,16 @@ class TransferClient(client.BaseClient):
         self, endpoint_id: UUIDLike, rule_id: str
     ) -> response.GlobusHTTPResponse:
         """
-        ``DELETE /endpoint/<endpoint_id>/access/<rule_id>``
-
         :param endpoint_id: The endpoint on which the access rule applies
         :type endpoint_id: str or UUID
         :param rule_id: The ID of the access rule to remove
         :type rule_id: str
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``DELETE /endpoint/<endpoint_id>/access/<rule_id>``
         """
         log.info(
             "TransferClient.delete_endpoint_acl_rule(%s, %s)", endpoint_id, rule_id
@@ -1010,10 +1096,14 @@ class TransferClient(client.BaseClient):
         self, *, query_params: dict[str, t.Any] | None = None
     ) -> IterableTransferResponse:
         """
-        ``GET /bookmark_list``
-
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /bookmark_list``
         """
         log.info(f"TransferClient.bookmark_list({query_params})")
         return IterableTransferResponse(
@@ -1027,10 +1117,14 @@ class TransferClient(client.BaseClient):
         self, bookmark_data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /bookmark``
-
         :param bookmark_data: A bookmark document for the bookmark to create
         :type bookmark_data: dict
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``POST /bookmark``
         """
         log.info(f"TransferClient.create_bookmark({bookmark_data})")
         return self.post("bookmark", data=bookmark_data)
@@ -1045,12 +1139,16 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /bookmark/<bookmark_id>``
-
         :param bookmark_id: The ID of the bookmark to lookup
         :type bookmark_id: str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /bookmark/<bookmark_id>``
         """
         log.info(f"TransferClient.get_bookmark({bookmark_id})")
         return self.get(f"bookmark/{bookmark_id}", query_params=query_params)
@@ -1062,12 +1160,16 @@ class TransferClient(client.BaseClient):
         self, bookmark_id: UUIDLike, bookmark_data: dict[str, t.Any]
     ) -> response.GlobusHTTPResponse:
         """
-        ``PUT /bookmark/<bookmark_id>``
-
         :param bookmark_id: The ID of the bookmark to modify
         :type bookmark_id: str or UUID
         :param bookmark_data: A partial bookmark document with fields to update
         :type bookmark_data: dict
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``PUT /bookmark/<bookmark_id>``
         """
         log.info(f"TransferClient.update_bookmark({bookmark_id})")
         return self.put(f"bookmark/{bookmark_id}", data=bookmark_data)
@@ -1077,10 +1179,14 @@ class TransferClient(client.BaseClient):
     )
     def delete_bookmark(self, bookmark_id: UUIDLike) -> response.GlobusHTTPResponse:
         """
-        ``DELETE /bookmark/<bookmark_id>``
-
         :param bookmark_id: The ID of the bookmark to delete
         :type bookmark_id: str or UUID
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``DELETE /bookmark/<bookmark_id>``
         """
         log.info(f"TransferClient.delete_bookmark({bookmark_id})")
         return self.delete(f"bookmark/{bookmark_id}")
@@ -1107,8 +1213,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
-        ``GET /operation/endpoint/<endpoint_id>/ls``
-
         :param endpoint_id: The ID of the endpoint on which to do a dir listing
         :type endpoint_id: str or UUID
         :param path: Path to a directory on the endpoint to list
@@ -1161,6 +1265,10 @@ class TransferClient(client.BaseClient):
                         filter={"last_modified": ["", "2021-01-01"]},
                     ):
                         print(entry["name"], entry["type"])
+
+            .. tab-item:: API Info
+
+                ``GET /operation/endpoint/<endpoint_id>/ls``
         """  # noqa: E501
         if query_params is None:
             query_params = {}
@@ -1190,8 +1298,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /operation/endpoint/<endpoint_id>/mkdir``
-
         :param endpoint_id: The ID of the endpoint on which to create a directory
         :type endpoint_id: str or UUID
         :param path: Path to the new directory to create
@@ -1207,6 +1313,10 @@ class TransferClient(client.BaseClient):
 
                     tc = globus_sdk.TransferClient(...)
                     tc.operation_mkdir(ep_id, path="/~/newdir/")
+
+            .. tab-item:: API Info
+
+                ``POST /operation/endpoint/<endpoint_id>/mkdir``
         """
         log.info(
             "TransferClient.operation_mkdir({}, {}, {})".format(
@@ -1230,8 +1340,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /operation/endpoint/<endpoint_id>/rename``
-
         :param endpoint_id: The ID of the endpoint on which to rename a file
         :type endpoint_id: str or UUID
         :param oldpath: Path to the old filename
@@ -1249,6 +1357,10 @@ class TransferClient(client.BaseClient):
 
                     tc = globus_sdk.TransferClient(...)
                     tc.operation_rename(ep_id, oldpath="/~/file1.txt", newpath="/~/project1data.txt")
+
+            .. tab-item:: API Info
+
+                ``POST /operation/endpoint/<endpoint_id>/rename``
         """  # noqa: E501
         log.info(
             "TransferClient.operation_rename({}, {}, {}, {})".format(
@@ -1272,8 +1384,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /operation/endpoint/<endpoint_id>/symlink``
-
         :param endpoint_id: The ID of the endpoint on which to create a symlink
         :type endpoint_id: str or UUID
         :param symlink_target: The path referenced by the new symlink
@@ -1291,6 +1401,10 @@ class TransferClient(client.BaseClient):
 
                     tc = globus_sdk.TransferClient(...)
                     tc.operation_symlink(ep_id, symlink_target="/~/file1.txt", path="/~/link-to-file1.txt")
+
+            .. tab-item:: API Info
+
+                ``POST /operation/endpoint/<endpoint_id>/symlink``
         """  # noqa: E501
         log.info(
             "TransferClient.operation_symlink({}, {}, {}, {})".format(
@@ -1350,8 +1464,6 @@ class TransferClient(client.BaseClient):
         self, data: dict[str, t.Any] | TransferData
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /transfer``
-
         :param data: A transfer task document listing files and directories, and setting
             various options. See :class:`TransferData <globus_sdk.TransferData>` for
             details
@@ -1384,6 +1496,10 @@ class TransferClient(client.BaseClient):
 
                 The `data` parameter can be a normal Python dictionary, or
                 a :class:`TransferData <globus_sdk.TransferData>` object.
+
+            .. tab-item:: API Info
+
+                ``POST /transfer``
         """  # noqa: E501
         log.info("TransferClient.submit_transfer(...)")
         if "submission_id" not in data:
@@ -1398,8 +1514,6 @@ class TransferClient(client.BaseClient):
         self, data: dict[str, t.Any] | DeleteData
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /delete``
-
         :param data: A delete task document listing files and directories, and setting
             various options. See :class:`DeleteData <globus_sdk.DeleteData>` for
             details
@@ -1426,6 +1540,10 @@ class TransferClient(client.BaseClient):
 
                 The `data` parameter can be a normal Python dictionary, or
                 a :class:`DeleteData <globus_sdk.DeleteData>` object.
+
+            .. tab-item:: API Info
+
+                ``POST /delete``
         """
         log.info("TransferClient.submit_delete(...)")
         if "submission_id" not in data:
@@ -1595,12 +1713,16 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /task/<task_id>``
-
         :param task_id: The ID of the task to inspect
         :type task_id: str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /task/<task_id>``
         """
         log.info(f"TransferClient.get_task({task_id}, ...)")
         return self.get(f"task/{task_id}", query_params=query_params)
@@ -1614,8 +1736,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``PUT /task/<task_id>``
-
         Modify a task. Only tasks which are still running can be modified, and only the
         ``label`` and ``deadline`` fields can be updated.
 
@@ -1625,6 +1745,12 @@ class TransferClient(client.BaseClient):
         :type data: dict
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``PUT /task/<task_id>``
         """
         log.info(f"TransferClient.update_task({task_id}, ...)")
         return self.put(f"task/{task_id}", data=data, query_params=query_params)
@@ -1632,12 +1758,16 @@ class TransferClient(client.BaseClient):
     @utils.doc_api_method("Cancel task by ID", "transfer/task/#cancel_task_by_id")
     def cancel_task(self, task_id: UUIDLike) -> response.GlobusHTTPResponse:
         """
-        ``POST /task/<task_id>/cancel``
-
         Cancel a task which is still running.
 
         :param task_id: The ID of the task to cancel
         :type task_id: str or UUID
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``POST /task/<task_id>/cancel``
         """
         log.info(f"TransferClient.cancel_task({task_id})")
         return self.post(f"task/{task_id}/cancel")
@@ -1756,14 +1886,18 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /task/<task_id>/pause_info``
-
         Get info about why a task is paused or about to be paused.
 
         :param task_id: The ID of the task to inspect
         :type task_id: str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /task/<task_id>/pause_info``
         """
         log.info(f"TransferClient.task_pause_info({task_id}, ...)")
         return self.get(f"task/{task_id}/pause_info", query_params=query_params)
@@ -1894,12 +2028,16 @@ class TransferClient(client.BaseClient):
         self, *, query_params: dict[str, t.Any] | None = None
     ) -> IterableTransferResponse:
         """
-        ``GET endpoint_manager/monitored_endpoints``
-
         Get endpoints the current user is a monitor or manager on.
 
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET endpoint_manager/monitored_endpoints``
         """
         log.info(f"TransferClient.endpoint_manager_monitored_endpoints({query_params})")
         return IterableTransferResponse(
@@ -1917,14 +2055,18 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
-        ``GET /endpoint_manager/endpoint/<endpoint_id>/hosted_endpoint_list``
-
         Get shared endpoints hosted on the given endpoint.
 
         :param endpoint_id: The ID of the host endpoint
         :type endpoint_id: str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint_manager/endpoint/<endpoint_id>/hosted_endpoint_list``
         """
         log.info(f"TransferClient.endpoint_manager_hosted_endpoint_list({endpoint_id})")
         return IterableTransferResponse(
@@ -1945,14 +2087,18 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /endpoint_manager/endpoint/<endpoint_id>``
-
         Get endpoint details as an admin.
 
         :param endpoint_id: The ID of the endpoint
         :type endpoint_id: str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint_manager/endpoint/<endpoint_id>``
         """
         log.info(f"TransferClient.endpoint_manager_get_endpoint({endpoint_id})")
         return self.get(
@@ -1970,14 +2116,18 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
-        ``GET endpoint_manager/endpoint/<endpoint_id>/access_list``
-
         Get a list of access control rules on specified endpoint as an admin.
 
         :param endpoint_id: The ID of the endpoint
         :type endpoint_id: str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET endpoint_manager/endpoint/<endpoint_id>/access_list``
         """
         log.info(
             f"TransferClient.endpoint_manager_endpoint_acl_list({endpoint_id}, ...)"
@@ -2167,8 +2317,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /endpoint_manager/task/<task_id>``
-
         Get task info as an admin. Requires activity monitor effective role on
         the destination endpoint of the task.
 
@@ -2176,6 +2324,12 @@ class TransferClient(client.BaseClient):
         :type task_id: str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint_manager/task/<task_id>``
         """
         log.info(f"TransferClient.endpoint_manager_get_task({task_id}, ...)")
         return self.get(f"endpoint_manager/task/{task_id}", query_params=query_params)
@@ -2252,8 +2406,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /endpoint_manager/task/<task_id>/pause_info``
-
         Get details about why a task is paused as an admin. Requires activity
         monitor effective role on the destination endpoint of the task.
 
@@ -2261,6 +2413,12 @@ class TransferClient(client.BaseClient):
         :type task_id: str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint_manager/task/<task_id>/pause_info``
         """
         log.info(f"TransferClient.endpoint_manager_task_pause_info({task_id}, ...)")
         return self.get(
@@ -2373,8 +2531,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /endpoint_manager/admin_cancel``
-
         Cancel a list of tasks as an admin. Requires activity manager effective
         role on the task(s) source or destination endpoint(s).
 
@@ -2384,6 +2540,12 @@ class TransferClient(client.BaseClient):
         :type message: str
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``POST /endpoint_manager/admin_cancel``
         """
         str_task_ids = [str(i) for i in task_ids]
         log.info(
@@ -2405,8 +2567,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /endpoint_manager/admin_cancel/<admin_cancel_id>``
-
         Get the status of an an admin cancel (result of
         endpoint_manager_cancel_tasks).
 
@@ -2414,6 +2574,12 @@ class TransferClient(client.BaseClient):
         :type admin_cancel_id: str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint_manager/admin_cancel/<admin_cancel_id>``
         """
         log.info(f"TransferClient.endpoint_manager_cancel_status({admin_cancel_id})")
         return self.get(
@@ -2433,8 +2599,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /endpoint_manager/admin_pause``
-
         Pause a list of tasks as an admin. Requires activity manager effective
         role on the task(s) source or destination endpoint(s).
 
@@ -2444,6 +2608,12 @@ class TransferClient(client.BaseClient):
         :type message: str
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``POST /endpoint_manager/admin_pause``
         """
         str_task_ids = [str(i) for i in task_ids]
         log.info(
@@ -2465,8 +2635,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /endpoint_manager/admin_resume``
-
         Resume a list of tasks as an admin. Requires activity manager effective
         role on the task(s) source or destination endpoint(s).
 
@@ -2474,6 +2642,12 @@ class TransferClient(client.BaseClient):
         :type task_ids: iterable of str or UUID
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``POST /endpoint_manager/admin_resume``
         """
         str_task_ids = [str(i) for i in task_ids]
         log.info(f"TransferClient.endpoint_manager_resume_tasks({str_task_ids})")
@@ -2496,8 +2670,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
-        ``GET /endpoint_manager/pause_rule_list``
-
         Get a list of pause rules on endpoints that the current user has the
         activity monitor effective role on.
 
@@ -2507,6 +2679,12 @@ class TransferClient(client.BaseClient):
         :type filter_endpoint: str
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint_manager/pause_rule_list``
         """
         log.info("TransferClient.endpoint_manager_pause_rule_list(...)")
         if query_params is None:
@@ -2524,8 +2702,6 @@ class TransferClient(client.BaseClient):
         self, data: dict[str, t.Any] | None
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /endpoint_manager/pause_rule``
-
         Create a new pause rule. Requires the activity manager effective role
         on the endpoint defined in the rule.
 
@@ -2548,6 +2724,10 @@ class TransferClient(client.BaseClient):
                     }
                     create_result = tc.endpoint_manager_create_pause_rule(ep_data)
                     rule_id = create_result["id"]
+
+            .. tab-item:: API Info
+
+                ``POST /endpoint_manager/pause_rule``
         """
         log.info("TransferClient.endpoint_manager_create_pause_rule(...)")
         return self.post("endpoint_manager/pause_rule", data=data)
@@ -2562,8 +2742,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``GET /endpoint_manager/pause_rule/<pause_rule_id>``
-
         Get an existing pause rule by ID. Requires the activity manager
         effective role on the endpoint defined in the rule.
 
@@ -2571,6 +2749,12 @@ class TransferClient(client.BaseClient):
         :type pause_rule_id: str
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint_manager/pause_rule/<pause_rule_id>``
         """
         log.info(f"TransferClient.endpoint_manager_get_pause_rule({pause_rule_id})")
         return self.get(
@@ -2586,8 +2770,6 @@ class TransferClient(client.BaseClient):
         data: dict[str, t.Any] | None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``PUT /endpoint_manager/pause_rule/<pause_rule_id>``
-
         Update an existing pause rule by ID. Requires the activity manager
         effective role on the endpoint defined in the rule.
         Note that non update-able fields in data will be ignored.
@@ -2610,6 +2792,10 @@ class TransferClient(client.BaseClient):
                         "pause_task_transfer_read": False,
                     }
                     update_result = tc.endpoint_manager_update_pause_rule(ep_data)
+
+            .. tab-item:: API Info
+
+                ``PUT /endpoint_manager/pause_rule/<pause_rule_id>``
         """
         log.info(f"TransferClient.endpoint_manager_update_pause_rule({pause_rule_id})")
         return self.put(f"endpoint_manager/pause_rule/{pause_rule_id}", data=data)
@@ -2624,8 +2810,6 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``DELETE /endpoint_manager/pause_rule/<pause_rule_id>``
-
         Delete an existing pause rule by ID. Requires the user to see the
         "editable" field of the rule as True. Any tasks affected by this rule
         will no longer be once it is deleted.
@@ -2634,6 +2818,12 @@ class TransferClient(client.BaseClient):
         :type pause_rule_id: str
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``DELETE /endpoint_manager/pause_rule/<pause_rule_id>``
         """
         log.info(f"TransferClient.endpoint_manager_delete_pause_rule({pause_rule_id})")
         return self.delete(
