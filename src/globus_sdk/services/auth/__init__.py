@@ -5,7 +5,11 @@ from .flow_managers import (
     GlobusNativeAppFlowManager,
 )
 from .identity_map import IdentityMap
-from .response import OAuthDependentTokenResponse, OAuthTokenResponse
+from .response import (
+    GetIdentitiesResponse,
+    OAuthDependentTokenResponse,
+    OAuthTokenResponse,
+)
 
 __all__ = [
     "AuthClient",
@@ -15,6 +19,7 @@ __all__ = [
     "IdentityMap",
     "GlobusNativeAppFlowManager",
     "GlobusAuthorizationCodeFlowManager",
+    "GetIdentitiesResponse",
     "OAuthDependentTokenResponse",
     "OAuthTokenResponse",
 ]

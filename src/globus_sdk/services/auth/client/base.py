@@ -83,7 +83,7 @@ class AuthClient(client.BaseClient):
         ids: t.Iterable[UUIDLike] | UUIDLike | None = None,
         provision: bool = False,
         query_params: dict[str, t.Any] | None = None,
-    ) -> GlobusHTTPResponse:
+    ) -> GetIdentitiesResponse:
         r"""
         Given ``usernames=<U>`` or (exclusive) ``ids=<I>`` as keyword
         arguments, looks up identity information for the set of identities

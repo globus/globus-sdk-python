@@ -114,6 +114,7 @@ _LAZY_IMPORT_TABLE: list[tuple[str, tuple[str, ...]]] = [
             "ConfidentialAppAuthClient",
             "IdentityMap",
             "NativeAppAuthClient",
+            "GetIdentitiesResponse",
             "OAuthDependentTokenResponse",
             "OAuthTokenResponse",
         ),
