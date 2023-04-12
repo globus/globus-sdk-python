@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import typing as t
 
-from globus_sdk import exc, utils
+from globus_sdk import exc
 from globus_sdk._types import ScopeCollectionType, UUIDLike
 from globus_sdk.authorizers import BasicAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
@@ -81,14 +81,6 @@ class ConfidentialAppAuthClient(AuthClient):
             {"grant_type": "client_credentials", "scope": requested_scopes_string}
         )
 
-    @utils.doc_api_method(
-        "in the Globus Auth Specification",
-        "auth/developer-guide/#obtaining-authorization",
-        external_format_str=(
-            "The Authorization Code Grant flow is described "
-            "`{message} <{base_url}/{link}>`_."
-        ),
-    )
     def oauth2_start_flow(
         self,
         redirect_uri: str,
@@ -121,10 +113,18 @@ class ConfidentialAppAuthClient(AuthClient):
             tokens. [Default: ``False``]
         :type refresh_tokens: bool, optional
 
-        **Examples**
+        .. tab-set::
 
-        You can see an example of this flow :ref:`in the usage examples
-        <examples_three_legged_oauth_login>`
+            .. tab-item:: Example Usage
+
+                You can see an example of this flow :ref:`in the usage examples
+                <examples_three_legged_oauth_login>`
+
+            .. tab-item:: API Info
+
+                The Authorization Code Grant flow is described
+                `in the Globus Auth Specification
+                <https://docs.globus.org/api/auth/developer-guide/#obtaining-authorization>`_.
         """
         log.info("Starting OAuth2 Authorization Code Grant Flow")
         self.current_oauth2_flow_manager = GlobusAuthorizationCodeFlowManager(
@@ -188,38 +188,44 @@ class ConfidentialAppAuthClient(AuthClient):
 
         return self.oauth2_token(form_data, response_class=OAuthDependentTokenResponse)
 
-    @utils.doc_api_method(
-        "Token Introspection",
-        "auth/reference/#token_introspection_post_v2_oauth2_token_introspect",
-    )
     def oauth2_token_introspect(
         self, token: str, *, include: str | None = None
     ) -> GlobusHTTPResponse:
         """
-        POST /v2/oauth2/token/introspect
-
         Get information about a Globus Auth token.
-
-        >>> ac = globus_sdk.ConfidentialAppAuthClient(
-        ...     CLIENT_ID, CLIENT_SECRET)
-        >>> ac.oauth2_token_introspect('<token_string>')
-
-        Get information about a Globus Auth token including the full identity
-        set of the user to whom it belongs
-
-        >>> ac = globus_sdk.ConfidentialAppAuthClient(
-        ...     CLIENT_ID, CLIENT_SECRET)
-        >>> data = ac.oauth2_token_introspect(
-        ...     '<token_string>', include='identity_set')
-        >>> for identity in data['identity_set']:
-        >>>     print('token authenticates for "{}"'.format(identity))
 
         :param token: An Access Token as a raw string, being evaluated
         :type token: str
         :param include: A value for the ``include`` parameter in the request body.
             Default is to omit the parameter.
         :type include: str, optional
-        """
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    ac = globus_sdk.ConfidentialAppAuthClient(CLIENT_ID, CLIENT_SECRET)
+                    ac.oauth2_token_introspect("<token_string>")
+
+                Get information about a Globus Auth token including the full identity
+                set of the user to whom it belongs
+
+                .. code-block:: python
+
+                    ac = globus_sdk.ConfidentialAppAuthClient(CLIENT_ID, CLIENT_SECRET)
+                    data = ac.oauth2_token_introspect("<token_string>", include="identity_set")
+                    for identity in data["identity_set"]:
+                        print('token authenticates for "{}"'.format(identity))
+
+            .. tab-item:: API Info
+
+                ``POST /v2/oauth2/token/introspect``
+
+                .. extdoclink:: Token Introspection
+                    :ref: auth/reference/#token_introspection_post_v2_oauth2_token_introspect
+        """  # noqa: E501
         log.info("Checking token validity (introspect)")
         body = {"token": token}
         if include is not None:
