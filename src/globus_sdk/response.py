@@ -119,6 +119,13 @@ class GlobusHTTPResponse:
         return self._raw_response.text
 
     @property
+    def binary_content(self) -> bytes:
+        """
+        The raw response data in bytes.
+        """
+        return self._raw_response.content
+
+    @property
     def data(self) -> t.Any:
         return self._parsed_json
 

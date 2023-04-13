@@ -32,7 +32,7 @@ def test_get_identities_unauthorized(client):
 
     err = excinfo.value
     assert err.code == "UNAUTHORIZED"
-    assert data.metadata["error_id"] in err.raw_text
+    assert data.metadata["error_id"] in err.text
     assert err.raw_json == data.json
 
 

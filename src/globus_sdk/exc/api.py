@@ -7,6 +7,7 @@ import requests
 
 from .base import GlobusError
 from .err_info import ErrorInfoContainer
+from .warnings import warn_deprecated
 
 log = logging.getLogger(__name__)
 
@@ -58,6 +59,10 @@ class GlobusAPIError(GlobusError):
         """
         return self._underlying_response.headers
 
+    @property
+    def content_type(self) -> str | None:
+        return self.headers.get("Content-Type")
+
     def _json_content_type(self) -> bool:
         r = self._underlying_response
         return "Content-Type" in r.headers and (
@@ -89,11 +94,29 @@ class GlobusAPIError(GlobusError):
             return None
 
     @property
-    def raw_text(self) -> str:
+    def text(self) -> str:
         """
         Get the verbatim error message received from a Globus API as a *string*
         """
         return self._underlying_response.text
+
+    @property
+    def raw_text(self) -> str:
+        """
+        Deprecated alias of the ``text`` property.
+        """
+        warn_deprecated(
+            "The 'raw_text' property of GlobusAPIError objects is deprecated. "
+            "Use the 'text' property instead."
+        )
+        return self.text
+
+    @property
+    def binary_content(self) -> bytes:
+        """
+        The error message received from a Globus API in bytes.
+        """
+        return self._underlying_response.content
 
     @property
     def info(self) -> ErrorInfoContainer:

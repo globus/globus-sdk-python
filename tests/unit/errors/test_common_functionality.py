@@ -4,7 +4,7 @@ import json
 import pytest
 import requests
 
-from globus_sdk import GlobusAPIError, exc
+from globus_sdk import GlobusAPIError, RemovedInV4Warning, exc
 
 
 def _strmatch_any_order(inputstr, prefix, midfixes, suffix, sep=", "):
@@ -27,11 +27,30 @@ def test_raw_json_fail(default_text_response, malformed_response):
     assert err.raw_json is None
 
 
-def test_raw_text_works(default_json_response, default_text_response):
+def test_text_property_works(default_json_response, default_text_response):
     err = GlobusAPIError(default_json_response.r)
-    assert err.raw_text == json.dumps(default_json_response.data)
+    assert err.text == json.dumps(default_json_response.data)
     err = GlobusAPIError(default_text_response.r)
-    assert err.raw_text == default_text_response.data
+    assert err.text == default_text_response.data
+
+
+def test_binary_content_property(default_text_response):
+    err = GlobusAPIError(default_text_response.r)
+    assert err.binary_content == default_text_response.data.encode("utf-8")
+
+
+def test_raw_text_property_works_but_warns(
+    default_json_response, default_text_response
+):
+    err = GlobusAPIError(default_json_response.r)
+    with pytest.warns(
+        RemovedInV4Warning,
+        match=(
+            r"The 'raw_text' property of GlobusAPIError objects is deprecated\. "
+            r"Use the 'text' property instead\."
+        ),
+    ):
+        assert err.raw_text == json.dumps(default_json_response.data)
 
 
 def test_get_args(default_json_response, default_text_response, malformed_response):

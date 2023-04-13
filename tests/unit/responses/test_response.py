@@ -231,6 +231,16 @@ def test_text(malformed_http_response, text_http_response):
     assert text_http_response.r.text == text_http_response.data
 
 
+def test_binary_content_property(malformed_http_response, text_http_response):
+    """
+    Gets the text from each HTTPResponse, confirms expected results
+    """
+    assert malformed_http_response.r.binary_content == b"{"
+    assert text_http_response.r.binary_content == text_http_response.data.encode(
+        "utf-8"
+    )
+
+
 def test_no_content_type_header(http_no_content_type_response):
     """
     Response without a Content-Type HTTP header should be okay
