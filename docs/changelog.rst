@@ -640,7 +640,7 @@ v3.0.0b4 (2021-09-01)
 * Remove ``BaseClient.qjoin_path`` (:pr:`452`)
 * The ``additional_params`` parameter to ``AuthClient.oauth2_get_authorize_url``
   has been renamed to ``query_params`` for consistency with other methods (:pr:`453`)
-* Enforce keyword-only arguments for most SDK-provied APIs (:pr:`453`)
+* Enforce keyword-only arguments for most SDK-provided APIs (:pr:`453`)
 * Fix annotations for ``server_id`` on ``TransferClient`` methods (:pr:`455`)
 * Add ``delete_destination_extra`` param to ``TransferData`` (:pr:`456`)
 * Ensure all ``TransferClient`` method parameters are documented (:pr:`449`,

@@ -5,7 +5,7 @@ import pytest
 import globus_sdk
 
 
-def test_epxlicit_dir_func_works():
+def test_explicit_dir_func_works():
     assert "TransferClient" in dir(globus_sdk)
     assert "__all__" in dir(globus_sdk)
 

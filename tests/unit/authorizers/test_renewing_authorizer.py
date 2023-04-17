@@ -92,7 +92,7 @@ def test_init(token_data, expires_at):
 
 def test_get_new_access_token(authorizer, token_data, on_refresh):
     """
-    Calls get_new_acces token, confirms that the mock _get_token_data
+    Calls get_new_access token, confirms that the mock _get_token_data
     is used and that the mock on_refresh function is called.
     """
     # take note of original access_token_hash

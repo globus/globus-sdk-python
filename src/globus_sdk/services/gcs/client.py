@@ -343,7 +343,7 @@ class GCSClient(client.BaseClient):
         Create a Storage Gateway
 
         :param data: Data in the format of a Storage Gateway document, it is recommended
-            to use the ``StorageGatewayDocumment`` class to construct this data.
+            to use the ``StorageGatewayDocument`` class to construct this data.
         :type data: dict or StorageGatewayDocument
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
@@ -419,7 +419,7 @@ class GCSClient(client.BaseClient):
         :param storage_gateway_id: UUID for the Storage Gateway to be updated
         :type storage_gateway_id: str or UUID
         :param data: Data in the format of a Storage Gateway document, it is recommended
-            to use the ``StorageGatewayDocumment`` class to construct this data.
+            to use the ``StorageGatewayDocument`` class to construct this data.
         :type data: dict or StorageGatewayDocument
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
@@ -525,7 +525,7 @@ class GCSClient(client.BaseClient):
         Create a Role
 
         :param data: Data in the format of a Role document, it is recommended
-            to use the `GCSRoleDocumment` class to construct this data.
+            to use the `GCSRoleDocument` class to construct this data.
         :type data: dict
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional

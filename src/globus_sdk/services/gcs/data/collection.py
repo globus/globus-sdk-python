@@ -28,7 +28,7 @@ from ._common import (
 # - DATA_TYPE is special, and always first
 # - next, the common optional arguments (shared by all)
 # - after that, the specific optional arguments for this type/subtype
-# - 'additional_fileds' is special, and always last
+# - 'additional_fields' is special, and always last
 #
 # within those listings of common and specific arguments, the following ordering is
 # maintained:

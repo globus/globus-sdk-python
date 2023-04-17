@@ -6,7 +6,7 @@ from globus_sdk.services.transfer.client import _format_filter
 from tests.common import GO_EP1_ID, GO_EP2_ID
 
 
-def test_tranfer_init_simple():
+def test_transfer_init_simple():
     """
     Creates TransferData objects with and without parameters,
     Verifies TransferData field initialization
@@ -23,7 +23,7 @@ def test_tranfer_init_simple():
     assert len(tdata["DATA"]) == 0
 
 
-def test_tranfer_init_w_params():
+def test_transfer_init_w_params():
     tc = TransferClient()
     meta = load_response(tc.get_submission_id).metadata
     # init with params
@@ -45,7 +45,7 @@ def test_tranfer_init_w_params():
         assert tdata[par] == params[par]
 
 
-def test_tranfer_init_no_client():
+def test_transfer_init_no_client():
     tdata1 = TransferData(None, GO_EP1_ID, GO_EP2_ID)
     tdata2 = TransferData(source_endpoint=GO_EP1_ID, destination_endpoint=GO_EP2_ID)
     tdata3 = TransferData(
@@ -70,7 +70,7 @@ def test_tranfer_init_no_client():
         (None, None, GO_EP2_ID),
     ],
 )
-def test_tranfer_init_rejects_bad_usage(tdata_args):
+def test_transfer_init_rejects_bad_usage(tdata_args):
     with pytest.raises(GlobusSDKUsageError):
         TransferData(*tdata_args)
 
@@ -322,7 +322,7 @@ def test_notification_options(n_succeeded, n_failed, n_inactive):
         (100, 100),
     ],
 )
-def test_tranfer_sync_levels_result(sync_level, result):
+def test_transfer_sync_levels_result(sync_level, result):
     if isinstance(result, type) and issubclass(result, Exception):
         with pytest.raises(result):
             TransferData(

@@ -14,7 +14,7 @@ def filename(tempdir):
     return os.path.join(tempdir, "mydata.json")
 
 
-def test_file_dne(filename):
+def test_file_done(filename):
     adapter = SimpleJSONFileAdapter(filename)
     assert not adapter.file_exists()
 

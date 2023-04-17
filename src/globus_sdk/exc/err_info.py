@@ -47,7 +47,7 @@ class AuthorizationParameterInfo(ErrorInfo):
     >>> try:
     >>>     ...  # something
     >>> except GlobusAPIError as err:
-    >>>     # get a parsed AuthorizationParamaterInfo object, and check if it's truthy
+    >>>     # get a parsed AuthorizationParameterInfo object, and check if it's truthy
     >>>     authz_params = err.info.authorization_parameters
     >>>     if not authz_params:
     >>>         raise

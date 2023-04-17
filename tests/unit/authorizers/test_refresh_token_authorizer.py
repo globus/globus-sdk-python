@@ -47,7 +47,7 @@ def test_get_token_response(authorizer, client, response):
     # get new_access_token
     res = authorizer._get_token_response()
     assert res == response
-    # confirm mock ConfidentailAppAuthClient was used as expected
+    # confirm mock ConfidentialAppAuthClient was used as expected
     client.oauth2_refresh_token.assert_called_once_with(REFRESH_TOKEN)
 
 
