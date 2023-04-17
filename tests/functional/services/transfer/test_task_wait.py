@@ -34,7 +34,7 @@ def test_task_wait_bad_args_min_wait(client, mocksleep, add_kwargs):
 
 
 def test_task_wait_success_case(client, mocksleep):
-    # first the task will show as active, then as succeded
+    # first the task will show as active, then as succeeded
     register_api_route_fixture_file(
         "transfer", f"/task/{TASK1_ID}", "get_task1_active.json"
     )

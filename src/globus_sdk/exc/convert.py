@@ -33,7 +33,7 @@ class GlobusConnectionTimeoutError(GlobusTimeoutError):
 
 
 class GlobusConnectionError(NetworkError):
-    """A connection error occured while making a REST request."""
+    """A connection error occurred while making a REST request."""
 
 
 def convert_request_exception(exc: requests.RequestException) -> GlobusError:

@@ -38,6 +38,10 @@ repos:
   hooks:
     - id: pyupgrade
       args: ["--py37-plus"]
+- repo: https://github.com/codespell-project/codespell
+  rev: v2.2.4
+  hooks:
+    - id: codespell
 
 # custom local hooks
 - repo: local

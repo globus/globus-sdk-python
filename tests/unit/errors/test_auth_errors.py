@@ -33,7 +33,7 @@ def nested_auth_response(make_json_response):
         ("default_json_response", "400", "Json Error", "json error message"),
         # defaults for non-json data
         ("default_text_response", "401", "Error", "error message"),
-        # malformed data is at least rendered successully into an error
+        # malformed data is at least rendered successfully into an error
         ("malformed_response", "403", "Error", "{"),
     ),
 )

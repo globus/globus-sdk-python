@@ -99,7 +99,7 @@ response is ``"default"``.
     # or just one response from it by name
     rset.activate("default")
 
-Note that activating a whole repsonse set may or may not make sense. For
+Note that activating a whole response set may or may not make sense. For
 example, the response set for ``AuthClient.get_identities`` provides various
 responses for the same API call.
 

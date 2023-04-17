@@ -131,7 +131,7 @@ Serializing Scopes
 ~~~~~~~~~~~~~~~~~~
 
 Whenever scopes are being sent to Globus services, they need to be encoded as
-strings. All mutabl scope objects support this by means of their defined
+strings. All mutable scope objects support this by means of their defined
 ``serialize`` method. Note that ``__str__`` for a ``MutableScope`` is just an
 alias for ``serialize``. For example, the following is valid usage to demonstrate
 ``str()``, ``repr()``, and ``serialize()``:

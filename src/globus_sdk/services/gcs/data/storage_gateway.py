@@ -533,7 +533,7 @@ class IrodsStoragePolicies(StorageGatewayPolicies):
     :param DATA_TYPE: Versioned document type. Defaults to the appropriate type for
         this class.
     :type DATA_TYPE: str, optional
-    :param irods_environment_file: Path to iRODS environent file on the endpoint
+    :param irods_environment_file: Path to iRODS environment file on the endpoint
     :type irods_environment_file: str
     :param irods_authentication_file: Path to iRODS authentication file on the endpoint
     :type irods_authentication_file: str
