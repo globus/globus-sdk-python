@@ -106,14 +106,14 @@ TWO_HOP_TRANSFER_FLOW_DOC = {
     "flow_owner": f"urn:globus:auth:identity:{TWO_HOP_TRANSFER_FLOW_OWNER_ID}",
     "flow_viewers": [
         "public",
-        f"urn:globus:auth:identity:{TWO_HOP_TRANSFER_FLOW_OWNER_ID}",
+        "urn:globus:auth:identity:51abb9ce-6e05-4ab1-9a09-9c524313827c",
     ],
     "flow_starters": [
         "all_authenticated_users",
-        f"urn:globus:auth:identity:{TWO_HOP_TRANSFER_FLOW_OWNER_ID}",
+        "urn:globus:auth:identity:d0a15d1b-28f5-42de-9463-b8b6540421b6",
     ],
     "flow_administrators": [
-        f"urn:globus:auth:identity:{TWO_HOP_TRANSFER_FLOW_OWNER_ID}"
+        "urn:globus:auth:identity:05d29dab-bd26-4510-9290-468972e8ac01"
     ],
 }
 
