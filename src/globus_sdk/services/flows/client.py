@@ -448,6 +448,47 @@ class FlowsClient(client.BaseClient):
 
         return self.delete(f"/flows/{flow_id}", query_params=query_params)
 
+    def get_run(
+        self, run_id: UUIDLike, *, include_flow_description: bool = False
+    ) -> GlobusHTTPResponse:
+        """
+        Retrieve information about a particular Run of a Flow
+
+        :param run_id: The ID of the run to get
+        :type run_id: str or UUID
+        :param include_flow_description: If set to true, the lookup will attempt to
+           attach metadata about the flow to the run to the run response under the key
+           "flow_description"
+        :type include_flow_description: bool, optional - default False
+
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    from globus_sdk import FlowsClient
+
+                    flows = FlowsClient(...)
+                    flows.get_run("581753c7-45da-43d3-ad73-246b46e7cb6b")
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: flows.get_run
+
+            .. tab-item:: API Info
+
+                .. extdoclink:: Get Run
+                    :service: flows
+                    :ref: Flows/paths/~1runs~1{run_id}/get
+        """
+
+        return self.get(
+            f"/runs/{run_id}",
+            query_params={"include_flow_description": include_flow_description},
+        )
+
 
 class SpecificFlowClient(client.BaseClient):
     r"""

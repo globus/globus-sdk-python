@@ -13,6 +13,8 @@ from docutils.parsers.rst import Directive, directives
 from docutils.statemachine import ViewList
 from sphinx.util.nodes import nested_parse_with_titles
 
+from globus_sdk._testing import ResponseList
+
 
 def _extract_known_scopes(scope_builder_name):
     sb = locate(scope_builder_name)
@@ -242,6 +244,9 @@ class ExpandTestingFixture(AddContentDirective):
             casename = self.options["case"].strip()
         response_set = get_response_set(response_set_name)
         response = response_set.lookup(casename)
+        if isinstance(response, ResponseList):
+            # If the default responses is a list of responses, use the first one
+            response = response.responses[0]
         if response.json is not None:
             yield ".. code-block:: json"
             yield ""
