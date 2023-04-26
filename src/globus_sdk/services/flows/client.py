@@ -448,6 +448,59 @@ class FlowsClient(client.BaseClient):
 
         return self.delete(f"/flows/{flow_id}", query_params=query_params)
 
+    @paging.has_paginator(paging.MarkerPaginator, items_key="entries")
+    def get_run_logs(
+        self,
+        run_id: UUIDLike,
+        *,
+        limit: int | None = None,
+        reverse_order: bool | None = None,
+        marker: str | None = None,
+    ) -> IterableFlowsResponse:
+        """
+        Retrieve the execution logs associated with a run
+
+        These logs describe state transitions and associated payloads for a run
+
+        :param run_id: Run ID to retrieve logs for
+        :type run_id: str or UUID, optional
+        :param limit: Maximum number of log entries to return (server default: 10)
+        :type limit: int (value between 1 and 100 inclusive), optional
+        :param reverse_order: Return results in reverse chronological order (server
+            default: false)
+        :type reverse_order: bool
+        :param marker: Marker for the next page of results (provided by the server)
+        :type marker: str, optional
+
+        .. tab-set::
+
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: get_run_logs
+
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: flows.get_run_logs
+
+            .. tab-item:: API Info
+
+                .. extdoclink:: Get Run Log
+                    :service: flows
+                    :ref: Runs/paths/~1runs~1{action_id}~1log/get
+        """
+
+        query_params = {
+            "limit": limit,
+            "reverse_order": reverse_order,
+            "marker": marker,
+        }
+        # Filter out request keys with None values to allow server defaults
+        query_params = {k: v for k, v in query_params.items() if v is not None}
+        return IterableFlowsResponse(
+            self.get(f"/runs/{run_id}/log", query_params=query_params)
+        )
+
 
 class SpecificFlowClient(client.BaseClient):
     r"""
