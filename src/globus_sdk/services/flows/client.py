@@ -465,7 +465,8 @@ class FlowsClient(client.BaseClient):
         :param run_id: Run ID to retrieve logs for
         :type run_id: str or UUID, optional
         :param limit: Maximum number of log entries to return (server default: 10)
-        :type limit: int (value between 1 and 100 inclusive), optional
+             (value between 1 and 100 inclusive)
+        :type limit: int, optional
         :param reverse_order: Return results in reverse chronological order (server
             default: false)
         :type reverse_order: bool
@@ -485,7 +486,7 @@ class FlowsClient(client.BaseClient):
 
             .. tab-item:: API Info
 
-                .. extdoclink:: Get Run Log
+                .. extdoclink:: Get Run Logs
                     :service: flows
                     :ref: Runs/paths/~1runs~1{action_id}~1log/get
         """
