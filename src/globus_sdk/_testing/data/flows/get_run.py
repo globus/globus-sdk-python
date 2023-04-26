@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 from responses.matchers import query_param_matcher
 
 from globus_sdk._testing import RegisteredResponse, ResponseList, ResponseSet
@@ -67,8 +65,10 @@ RUN = {
     "user_role": "run_owner",
 }
 
-RUN_WITH_FLOW_DESCRIPTION = deepcopy(RUN)
-RUN_WITH_FLOW_DESCRIPTION["flow_description"] = FLOW_DESCRIPTION
+RUN_WITH_FLOW_DESCRIPTION = {
+    **RUN,
+    "flow_description": FLOW_DESCRIPTION,
+}
 
 RESPONSES = ResponseSet(
     metadata={"run_id": RUN_ID},

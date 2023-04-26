@@ -458,8 +458,8 @@ class FlowsClient(client.BaseClient):
         :type run_id: str or UUID
         :param include_flow_description: If set to true, the lookup will attempt to
            attach metadata about the flow to the run to the run response under the key
-           "flow_description"
-        :type include_flow_description: bool, optional - default False
+           "flow_description" (default: False)
+        :type include_flow_description: bool, optional
 
 
         .. tab-set::
