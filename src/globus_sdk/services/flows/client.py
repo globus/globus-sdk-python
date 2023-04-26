@@ -649,3 +649,32 @@ class SpecificFlowClient(client.BaseClient):
         data.update(additional_fields or {})
 
         return self.post(f"/flows/{self._flow_id}/run", data=data)
+
+    def resume_run(self, run_id: UUIDLike) -> GlobusHTTPResponse:
+        """
+        :param run_id: The ID of the run to resume
+        :type run_id: str or UUID
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    from globus_sdk import SpecificFlowClient
+
+                    ...
+                    flow = SpecificFlowClient(flow_id, ...)
+                    flow.resume_run(run_id)
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: flows.resume_run
+
+            .. tab-item:: API Info
+
+                .. extdoclink:: Resume Run
+                    :service: flows
+                    :ref: Runs/paths/~1flows~1{flow_id}~1runs~1{run_id}~1resume/post
+        """
+        return self.post(f"/runs/{run_id}/resume")
