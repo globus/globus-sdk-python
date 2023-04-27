@@ -504,6 +504,57 @@ class FlowsClient(client.BaseClient):
         query_params = {k: v for k, v in query_params.items() if v is not None}
         return IterableFlowsResponse(
             self.get(f"/runs/{run_id}/log", query_params=query_params)
+
+    def get_run(
+        self,
+        run_id: UUIDLike,
+        *,
+        include_flow_description: bool = False,
+        query_params: dict[str, t.Any] | None = None,
+    ) -> GlobusHTTPResponse:
+        """
+        Retrieve information about a particular Run of a Flow
+
+        :param run_id: The ID of the run to get
+        :type run_id: str or UUID
+        :param include_flow_description: If set to true, the lookup will attempt to
+           attach metadata about the flow to the run to the run response under the key
+           "flow_description" (default: False)
+        :type include_flow_description: bool, optional
+        :param query_params: Any additional parameters to be passed through
+        :type query_params: dict, optional
+
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    from globus_sdk import FlowsClient
+
+                    flows = FlowsClient(...)
+                    flows.get_run("581753c7-45da-43d3-ad73-246b46e7cb6b")
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: flows.get_run
+
+            .. tab-item:: API Info
+
+                .. extdoclink:: Get Run
+                    :service: flows
+                    :ref: Flows/paths/~1runs~1{run_id}/get
+        """
+
+        additional_query_params = query_params or {}
+
+        return self.get(
+            f"/runs/{run_id}",
+            query_params={
+                "include_flow_description": include_flow_description,
+                **additional_query_params,
+            },
         )
 
 
