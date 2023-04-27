@@ -504,6 +504,7 @@ class FlowsClient(client.BaseClient):
         query_params = {k: v for k, v in query_params.items() if v is not None}
         return IterableFlowsResponse(
             self.get(f"/runs/{run_id}/log", query_params=query_params)
+        )
 
     def get_run(
         self,
