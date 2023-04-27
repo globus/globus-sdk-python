@@ -449,7 +449,11 @@ class FlowsClient(client.BaseClient):
         return self.delete(f"/flows/{flow_id}", query_params=query_params)
 
     def get_run(
-        self, run_id: UUIDLike, *, include_flow_description: bool = False
+        self,
+        run_id: UUIDLike,
+        *,
+        include_flow_description: bool = False,
+        query_params: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
         """
         Retrieve information about a particular Run of a Flow
@@ -484,9 +488,14 @@ class FlowsClient(client.BaseClient):
                     :ref: Flows/paths/~1runs~1{run_id}/get
         """
 
+        additional_query_params = query_params or {}
+
         return self.get(
             f"/runs/{run_id}",
-            query_params={"include_flow_description": include_flow_description},
+            query_params={
+                "include_flow_description": include_flow_description,
+                **additional_query_params,
+            },
         )
 
 
