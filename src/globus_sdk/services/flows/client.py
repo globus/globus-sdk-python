@@ -464,6 +464,8 @@ class FlowsClient(client.BaseClient):
            attach metadata about the flow to the run to the run response under the key
            "flow_description" (default: False)
         :type include_flow_description: bool, optional
+        :param query_params: Any additional parameters to be passed through
+        :type query_params: dict, optional
 
 
         .. tab-set::
