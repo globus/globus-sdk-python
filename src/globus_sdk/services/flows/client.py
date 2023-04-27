@@ -456,6 +456,7 @@ class FlowsClient(client.BaseClient):
         limit: int | None = None,
         reverse_order: bool | None = None,
         marker: str | None = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> IterableFlowsResponse:
         """
         Retrieve the execution logs associated with a run
@@ -472,6 +473,8 @@ class FlowsClient(client.BaseClient):
         :type reverse_order: bool
         :param marker: Marker for the next page of results (provided by the server)
         :type marker: str, optional
+        :param query_params: Any additional parameters to be passed through
+        :type query_params: dict, optional
 
         .. tab-set::
 
@@ -495,6 +498,7 @@ class FlowsClient(client.BaseClient):
             "limit": limit,
             "reverse_order": reverse_order,
             "marker": marker,
+            **(query_params or {}),
         }
         # Filter out request keys with None values to allow server defaults
         query_params = {k: v for k, v in query_params.items() if v is not None}
