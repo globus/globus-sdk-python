@@ -93,16 +93,23 @@ class ConsentRequiredInfo(ErrorInfo):
     :vartype required_scopes: list of str, optional
     """
 
-    def __init__(self, error_data: dict[str, t.Any]):
+    def __init__(self, error_data: dict[str, t.Any]) -> None:
         # data is only considered parseable if this error has the code 'ConsentRequired'
         has_code = error_data.get("code") == "ConsentRequired"
         data = error_data if has_code else {}
-        self.required_scopes = t.cast(
-            t.Optional[t.List[str]], data.get("required_scopes")
-        )
+        self.required_scopes = self._parse_required_scopes(data)
 
         # but the result is only considered valid if both parts are present
-        self._has_data = has_code and isinstance(self.required_scopes, list)
+        self._has_data = has_code and bool(self.required_scopes)
+
+    def _parse_required_scopes(self, data: dict[str, t.Any]) -> list[str]:
+        if isinstance(data.get("required_scopes"), list) and all(
+            isinstance(item, str) for item in data["required_scopes"]
+        ):
+            return t.cast("list[str]", data["required_scopes"])
+        if isinstance(data.get("required_scope"), str):
+            return [data["required_scope"]]
+        return []
 
 
 class ErrorInfoContainer:

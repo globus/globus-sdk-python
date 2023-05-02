@@ -117,23 +117,44 @@ def test_info_is_falsey_on_non_dict_json(make_json_response):
     assert str(err.info) == "AuthorizationParameterInfo(:)|ConsentRequiredInfo(:)"
 
 
-def test_consent_required_info(make_json_response):
-    res = make_json_response(
-        {"code": "ConsentRequired", "required_scopes": ["foo", "bar"]}, 401
-    )
+@pytest.mark.parametrize(
+    "body, is_detected, required_scopes",
+    (
+        (
+            {"code": "ConsentRequired", "required_scopes": ["foo", "bar"]},
+            True,
+            ["foo", "bar"],
+        ),
+        (
+            {"code": "ConsentRequired", "required_scope": "foo bar"},
+            True,
+            ["foo bar"],
+        ),
+        ({"code": "ConsentRequired"}, False, None),
+        ({"code": "ConsentRequired", "required_scopes": []}, False, None),
+        ({"code": "ConsentRequired", "required_scopes": ["foo", 123]}, False, None),
+        ({"code": "ConsentRequired", "required_scope": 1}, False, None),
+    ),
+)
+def test_consent_required_info(make_json_response, body, is_detected, required_scopes):
+    res = make_json_response(body, 401)
     err = GlobusAPIError(res.r)
-    assert bool(err.info.consent_required) is True
-    assert err.info.consent_required.required_scopes == ["foo", "bar"]
-    assert str(err.info.consent_required) == (
-        "ConsentRequiredInfo(required_scopes=['foo', 'bar'])"
-    )
 
-    # if the code is right but the scope list is missing, it should be falsey
-    res = make_json_response({"code": "ConsentRequired"}, 401)
-    err = GlobusAPIError(res.r)
-    assert bool(err.info.consent_required) is False
-    assert err.info.consent_required.required_scopes is None
-    assert str(err.info.consent_required) == "ConsentRequiredInfo(:)"
+    if is_detected:
+        assert bool(err.info.consent_required) is True
+        assert err.info.consent_required.required_scopes == required_scopes
+    else:
+        assert bool(err.info.consent_required) is False
+
+
+def test_consent_required_info_str(make_json_response):
+    info = exc.ConsentRequiredInfo(
+        {"code": "ConsentRequired", "required_scopes": ["foo", "bar"]}
+    )
+    assert str(info) == "ConsentRequiredInfo(required_scopes=['foo', 'bar'])"
+
+    info = exc.ConsentRequiredInfo({})
+    assert str(info) == "ConsentRequiredInfo(:)"
 
 
 def test_authz_params_info_containing_session_message(make_json_response):
