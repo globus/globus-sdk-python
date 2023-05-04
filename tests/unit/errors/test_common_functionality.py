@@ -137,7 +137,7 @@ def test_info_is_falsey_on_non_dict_json(make_json_response):
     ),
 )
 def test_consent_required_info(make_json_response, body, is_detected, required_scopes):
-    res = make_json_response(body, 401)
+    res = make_json_response(body, 403)
     err = GlobusAPIError(res.r)
 
     if is_detected:
