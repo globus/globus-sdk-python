@@ -201,7 +201,7 @@ class FlowsClient(client.BaseClient):
         *,
         filter_role: str | None = None,
         filter_fulltext: str | None = None,
-        orderby: str | None = None,
+        orderby: str | t.Iterable[str] | None = None,
         marker: str | None = None,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableFlowsResponse:
@@ -250,9 +250,41 @@ class FlowsClient(client.BaseClient):
           - ``updated_at``
 
         For example, ``orderby="updated_at DESC"`` requests a descending sort on update
-        times, getting the most recently updated flow first.
+        times, getting the most recently updated flow first. Multiple ``orderby`` values
+        may be given as an iterable, e.g. ``orderby=["updated_at DESC", "title ASC"]``.
 
         .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    import json
+                    import textwrap
+
+                    from globus_sdk import FlowsClient
+
+                    flows = FlowsClient(...)
+                    my_frobulate_flows = flows.list_flows(
+                        filter_role="flow_owner",
+                        filter_fulltext="frobulate",
+                        orderby=("title ASC", "updated_at DESC"),
+                    )
+                    for flow_doc in my_frobulate_flows:
+                        print(f"Title: {flow_doc['title']}")
+                        print(f"Description: {flow_doc['description']}")
+                        print("Definition:")
+                        print(
+                            textwrap.indent(
+                                json.dumps(
+                                    flow_doc["definition"],
+                                    indent=2,
+                                    separators=(",", ": "),
+                                ),
+                                "    ",
+                            )
+                        )
+                        print()
 
             .. tab-item:: Paginated Usage
 
@@ -272,7 +304,14 @@ class FlowsClient(client.BaseClient):
         if filter_fulltext is not None:
             query_params["filter_fulltext"] = filter_fulltext
         if orderby is not None:
-            query_params["orderby"] = orderby
+            if isinstance(orderby, str):
+                query_params["orderby"] = orderby
+            else:
+                # copy any input sequence to force the type to `list` which is known to
+                # behave well
+                # this also ensures that we will consume non-sequence iterables
+                # (e.g. generator expressions) in a well-defined way
+                query_params["orderby"] = list(orderby)
         if marker is not None:
             query_params["marker"] = marker
 
