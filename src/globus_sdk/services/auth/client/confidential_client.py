@@ -25,7 +25,7 @@ class ConfidentialAppAuthClient(AuthClient):
     for authorization purposes.
     Additionally, the Client ID is stored for use in various calls.
 
-    Confidential Applications (i.e. Applications with are not Native Apps) are
+    Confidential Applications (i.e. Applications which are not Native Apps) are
     those like the `Sample Data Portal
     <https://github.com/globus/globus-sample-data-portal>`_, which have their
     own credentials for authenticating against Globus Auth.
