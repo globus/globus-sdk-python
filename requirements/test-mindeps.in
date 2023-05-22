@@ -2,7 +2,7 @@
 # this version of requests is newer than the minimum in package data
 # however, if we pin back to 2.19.1, we break 'responses' behaviors used by the
 # testsuite
-requests==2.22.0
+requests==2.31.0
 
 pyjwt==2.0.0
 cryptography==3.3.1
