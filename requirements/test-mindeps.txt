@@ -4,15 +4,13 @@
 #
 #    tox run -e freezedeps
 #
-attrs==22.2.0
-    # via pytest
-certifi==2022.12.7
+certifi==2023.5.7
     # via requests
 cffi==1.15.1
     # via cryptography
 chardet==3.0.4
     # via requests
-coverage==7.2.1
+coverage==7.2.5
     # via -r test.in
 cryptography==3.3.1
     # via -r test-mindeps.in
@@ -22,7 +20,7 @@ idna==2.8
     # via requests
 iniconfig==2.0.0
     # via pytest
-packaging==23.0
+packaging==23.1
     # via pytest
 pluggy==1.0.0
     # via pytest
@@ -30,11 +28,11 @@ pycparser==2.21
     # via cffi
 pyjwt==2.0.0
     # via -r test-mindeps.in
-pytest==7.2.2
+pytest==7.3.1
     # via
     #   -r test.in
     #   pytest-xdist
-pytest-xdist==3.2.0
+pytest-xdist==3.3.1
     # via -r test.in
 pyyaml==6.0
     # via responses
@@ -46,7 +44,7 @@ responses==0.23.1
     # via -r test.in
 six==1.16.0
     # via cryptography
-types-pyyaml==6.0.12.8
+types-pyyaml==6.0.12.10
     # via responses
 typing-extensions==4.0.0
     # via -r test-mindeps.in
