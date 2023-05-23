@@ -23,7 +23,7 @@ def main():
     reqs_in_files = REQS_DIR.glob("*.in")
     print(f'running pip-compile on "{REQS_DIR}/*.in"')
     for absolute_source in reqs_in_files:
-        source = absolute_source.relative_to(REPO_ROOT)
+        source = absolute_source.relative_to(REQS_DIR)
         dest = source.with_suffix(".txt")
         print(f"{source} -> {dest}")
         subprocess.run(
@@ -39,7 +39,7 @@ def main():
                 str(dest),
             ],
             check=True,
-            cwd=REPO_ROOT,
+            cwd=REQS_DIR,
             env={"CUSTOM_COMPILE_COMMAND": "tox run -e freezedeps"},
         )
 
