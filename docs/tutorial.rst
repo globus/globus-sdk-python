@@ -252,15 +252,15 @@ response, and for each one, the response contains the following info:
 
     The keys into ``by_resource_server`` are the registered ``resource_server``
     value for the service.
-    In general, the ``resource_server`` value will by the ID of the client used
-    in a service.
 
-    However, for Globus services like Globus Auth and Globus Transfer, the
-    ``resource_server`` has been customized to be the hostname for the service.
+    For Globus hosted services like Globus Auth and Globus Transfer, the
+    ``resource_server`` is the hostname for the service, and can be retrieved
+    via the ``resource_server`` class attribute for the relevant client.
+    e.g., ``globus_sdk.TransferClient.resource_server``.
 
-    You can lookup the ``resource_server`` for most globus-sdk supported
-    clients by looking at the ``resource_server`` class attribute, e.g.
-    ``globus_sdk.TransferClient.resource_server``.
+    For other services, including Globus Connect Server v5, the ``resource_server``
+    value will be the ID of the service client. For Globus Connect Server v5, this
+    is the ID of the Endpoint.
 
 .. _tutorial_step5:
 
