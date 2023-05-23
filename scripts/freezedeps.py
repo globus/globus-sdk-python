@@ -37,6 +37,7 @@ def main():
                 str(source),
                 "-o",
                 str(dest),
+                "--upgrade",
             ],
             check=True,
             cwd=REQS_DIR,
