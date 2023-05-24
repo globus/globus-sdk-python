@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import pathlib
 import sqlite3
 import typing as t
 
@@ -43,12 +44,12 @@ class SQLiteAdapter(FileAdapter):
 
     def __init__(
         self,
-        dbname: str,
+        dbname: pathlib.Path | str,
         *,
         namespace: str = "DEFAULT",
         connect_params: dict[str, t.Any] | None = None,
     ):
-        self.filename = self.dbname = dbname
+        self.filename = self.dbname = str(dbname)
         self.namespace = namespace
         self._connection = self._init_and_connect(connect_params)
 

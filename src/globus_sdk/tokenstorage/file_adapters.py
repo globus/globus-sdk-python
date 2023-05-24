@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import pathlib
 import typing as t
 
 from globus_sdk.services.auth import OAuthTokenResponse
@@ -23,8 +24,8 @@ class SimpleJSONFileAdapter(FileAdapter):
     # the supported versions (data not in these versions causes an error)
     supported_versions = ("1.0",)
 
-    def __init__(self, filename: str):
-        self.filename = filename
+    def __init__(self, filename: pathlib.Path | str):
+        self.filename = str(filename)
 
     def _raw_load(self) -> dict[str, t.Any]:
         """
