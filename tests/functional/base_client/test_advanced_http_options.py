@@ -10,7 +10,6 @@ def test_allow_redirects_false(client):
             headers={
                 "Date": "Fri, 15 Apr 2022 15:35:44 GMT",
                 "Content-Type": "text/html",
-                "Content-Length": "138",
                 "Connection": "keep-alive",
                 "Server": "nginx",
                 "Location": "https://www.globus.org/",
