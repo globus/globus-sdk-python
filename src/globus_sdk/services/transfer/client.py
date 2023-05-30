@@ -1215,6 +1215,7 @@ class TransferClient(client.BaseClient):
         filter: (
             str | TransferFilterDict | list[str | TransferFilterDict] | None
         ) = None,
+        local_user: str | None = None,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
@@ -1235,6 +1236,10 @@ class TransferClient(client.BaseClient):
             If a list is supplied, it is passed as multiple params.
             See :ref:`filter formatting <transfer_filter_formatting>` for details.
         :type filter: str or dict, optional
+        :param local_user: Optional value passed through to identity mapping specifying
+            which local user account to map to. Only usable with Globus Connect Server
+            v5 mapped collections.
+        :type local_user: str, optional
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
@@ -1291,6 +1296,8 @@ class TransferClient(client.BaseClient):
                 query_params["orderby"] = ",".join(orderby)
         if filter is not None:
             query_params["filter"] = _format_filter(filter)
+        if local_user is not None:
+            query_params["local_user"] = local_user
 
         log.info(f"TransferClient.operation_ls({endpoint_id}, {query_params})")
         return IterableTransferResponse(
@@ -1302,6 +1309,7 @@ class TransferClient(client.BaseClient):
         endpoint_id: UUIDLike,
         path: str,
         *,
+        local_user: str | None = None,
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
@@ -1309,6 +1317,9 @@ class TransferClient(client.BaseClient):
         :type endpoint_id: str or UUID
         :param path: Path to the new directory to create
         :type path: str
+        :param local_user: Optional value passed through to identity mapping specifying
+            which local user account to map to. Only usable with Globus Connect Server
+            v5 mapped collections.
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
@@ -1333,7 +1344,7 @@ class TransferClient(client.BaseClient):
                 endpoint_id, path, query_params
             )
         )
-        json_body = {"DATA_TYPE": "mkdir", "path": path}
+        json_body = {"DATA_TYPE": "mkdir", "path": path, "local_user": local_user}
         return self.post(
             f"operation/endpoint/{endpoint_id}/mkdir",
             data=json_body,
@@ -1346,6 +1357,7 @@ class TransferClient(client.BaseClient):
         oldpath: str,
         newpath: str,
         *,
+        local_user: str | None = None,
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
@@ -1355,6 +1367,10 @@ class TransferClient(client.BaseClient):
         :type oldpath: str
         :param newpath: Path to the new filename
         :type newpath: str
+        :param local_user: Optional value passed through to identity mapping specifying
+            which local user account to map to. Only usable with Globus Connect Server
+            v5 mapped collections.
+        :type local_user: str, optional
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
@@ -1379,7 +1395,12 @@ class TransferClient(client.BaseClient):
                 endpoint_id, oldpath, newpath, query_params
             )
         )
-        json_body = {"DATA_TYPE": "rename", "old_path": oldpath, "new_path": newpath}
+        json_body = {
+            "DATA_TYPE": "rename",
+            "old_path": oldpath,
+            "new_path": newpath,
+            "local_user": local_user,
+        }
         return self.post(
             f"operation/endpoint/{endpoint_id}/rename",
             data=json_body,

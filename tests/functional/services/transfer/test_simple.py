@@ -147,6 +147,12 @@ def test_operation_ls(client):
     parsed_qs = urllib.parse.parse_qs(urllib.parse.urlparse(req.url).query)
     assert parsed_qs == {"orderby": ["name"], "filter": ["name:~*.png"]}
 
+    # local_user
+    client.operation_ls(GO_EP1_ID, local_user="my-user")
+    req = get_last_request()
+    parsed_qs = urllib.parse.parse_qs(urllib.parse.urlparse(req.url).query)
+    assert parsed_qs == {"local_user": ["my-user"]}
+
 
 def test_autoactivation(client):
     """

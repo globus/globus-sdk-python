@@ -34,6 +34,8 @@ def test_transfer_submit_success(client):
         label="mytask",
         sync_level="exists",
         deadline="2018-06-01",
+        source_local_user="my-source-user",
+        destination_local_user="my-dest-user",
         additional_fields={"custom_param": "foo"},
     )
     assert tdata["custom_param"] == "foo"
@@ -48,6 +50,10 @@ def test_transfer_submit_success(client):
     assert res["submission_id"] == meta["submission_id"]
     assert res["task_id"] == meta["task_id"]
 
+    req_body = json.loads(get_last_request().body)
+    assert req_body["source_local_user"] == "my-source-user"
+    assert req_body["destination_local_user"] == "my-dest-user"
+
 
 def test_delete_submit_success(client):
     load_response(client.get_submission_id)
@@ -57,6 +63,7 @@ def test_delete_submit_success(client):
         endpoint=GO_EP1_ID,
         label="mytask",
         deadline="2018-06-01",
+        local_user="my-user",
         additional_fields={"custom_param": "foo"},
     )
     assert ddata["custom_param"] == "foo"
@@ -68,6 +75,9 @@ def test_delete_submit_success(client):
     assert res
     assert res["submission_id"] == meta["submission_id"]
     assert res["task_id"] == meta["task_id"]
+
+    req_body = json.loads(get_last_request().body)
+    assert req_body["local_user"] == "my-user"
 
 
 @pytest.mark.parametrize("datatype", ("transfer", "delete"))

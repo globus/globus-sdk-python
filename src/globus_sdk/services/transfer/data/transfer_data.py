@@ -128,6 +128,14 @@ class TransferData(utils.PayloadWrapper):
         status to INACTIVE. e.g. From credentials expiring.
         [default: ``True``]
     :type notify_on_inactive: bool, optional
+    :param source_local_user: Optional value passed through to the source's identity
+        mapping specifying which local user account to map to. Only usable with Globus
+        Connect Server v5 mapped collections.
+    :type source_local_user: string, optional
+    :param destination_local_user: Optional value passed through to the destination's
+        identity mapping specifying which local user account to map to. Only usable
+        with Globus Connect Server v5 mapped collections.
+    :type destination_local_user: string, optional
     :param additional_fields: additional fields to be added to the transfer
         document. Mostly intended for internal use
     :type additional_fields: dict, optional
@@ -200,6 +208,8 @@ class TransferData(utils.PayloadWrapper):
         notify_on_succeeded: bool = True,
         notify_on_failed: bool = True,
         notify_on_inactive: bool = True,
+        source_local_user: str | None = None,
+        destination_local_user: str | None = None,
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
@@ -225,6 +235,8 @@ class TransferData(utils.PayloadWrapper):
             ),
             recursive_symlinks=recursive_symlinks,
             deadline=deadline,
+            source_local_user=source_local_user,
+            destination_local_user=destination_local_user,
         )
         self._set_optbools(
             verify_checksum=verify_checksum,

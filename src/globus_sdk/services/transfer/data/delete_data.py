@@ -72,6 +72,10 @@ class DeleteData(utils.PayloadWrapper):
         status to INACTIVE. e.g. From credentials expiring.
         [default: ``True``]
     :type notify_on_inactive: bool, optional
+    :param local_user: Optional value passed through to identity mapping specifying
+        which local user account to map to. Only usable with Globus Connect Server
+        v5 mapped collections.
+    :type local_user: string, optional
     :param additional_fields: additional fields to be added to the delete
         document. Mostly intended for internal use
     :type additional_fields: dict, optional
@@ -109,6 +113,7 @@ class DeleteData(utils.PayloadWrapper):
         notify_on_succeeded: bool = True,
         notify_on_failed: bool = True,
         notify_on_inactive: bool = True,
+        local_user: str | None = None,
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
@@ -129,6 +134,7 @@ class DeleteData(utils.PayloadWrapper):
                 else None
             ),
             deadline=deadline,
+            local_user=local_user,
         )
         self._set_optbools(
             recursive=recursive,
