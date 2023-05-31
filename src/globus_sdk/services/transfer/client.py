@@ -1320,6 +1320,7 @@ class TransferClient(client.BaseClient):
         :param local_user: Optional value passed through to identity mapping specifying
             which local user account to map to. Only usable with Globus Connect Server
             v5 mapped collections.
+        :type local_user: str, optional
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
