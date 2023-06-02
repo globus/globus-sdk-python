@@ -298,6 +298,8 @@ class GCSClient(client.BaseClient):
         self,
         *,
         include: None | str | t.Iterable[str] = None,
+        page_size: int | None = None,
+        marker: str | None = None,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableGCSResponse:
         """
@@ -308,6 +310,11 @@ class GCSClient(client.BaseClient):
             policies in the attached storage_gateways document. This requires an
             ``administrator`` role on the Endpoint.
         :type include: str or iterable of str, optional
+        :param page_size: Number of results to return per page
+        :type page_size: int, optional
+        :param marker: Pagination marker supplied by previous API calls in the event
+            a request returns more values than the page size
+        :type marker: str, optional
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
@@ -329,6 +336,10 @@ class GCSClient(client.BaseClient):
             query_params = {}
         if include is not None:
             query_params["include"] = ",".join(utils.safe_strseq_iter(include))
+        if page_size is not None:
+            query_params["page_size"] = page_size
+        if marker is not None:
+            query_params["marker"] = marker
         return IterableGCSResponse(
             self.get("/storage_gateways", query_params=query_params)
         )
@@ -480,6 +491,8 @@ class GCSClient(client.BaseClient):
         self,
         collection_id: UUIDLike | None = None,
         include: str | None = None,
+        page_size: int | None = None,
+        marker: str | None = None,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableGCSResponse:
         """
@@ -492,6 +505,11 @@ class GCSClient(client.BaseClient):
         :param include: Pass "all_roles" to request all roles all roles
             relevant to the resource instead of only those the caller has on
             the resource
+        :param page_size: Number of results to return per page
+        :type page_size: int, optional
+        :param marker: Pagination marker supplied by previous API calls in the event
+            a request returns more values than the page size
+        :type marker: str, optional
         :type include: str, optional
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
@@ -510,6 +528,10 @@ class GCSClient(client.BaseClient):
             query_params = {}
         if include is not None:
             query_params["include"] = include
+        if page_size is not None:
+            query_params["page_size"] = page_size
+        if marker is not None:
+            query_params["marker"] = marker
         if collection_id is not None:
             query_params["collection_id"] = collection_id
 
