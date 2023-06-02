@@ -116,6 +116,10 @@ class GCSClient(client.BaseClient):
     # collection methods
     #
 
+    @paging.has_paginator(
+        paging.MarkerPaginator,
+        items_key="data",
+    )
     def get_collection_list(
         self,
         *,
@@ -124,6 +128,8 @@ class GCSClient(client.BaseClient):
             str | t.Iterable[str] | None
         ) = None,
         include: str | t.Iterable[str] | None = None,
+        page_size: int | None = None,
+        marker: str | None = None,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableGCSResponse:
         """
@@ -138,6 +144,11 @@ class GCSClient(client.BaseClient):
         :type filter: str or iterable of str, optional
         :param include: Names of additional documents to include in the response
         :type include: str or iterable of str, optional
+        :param page_size: Number of results to return per page
+        :type page_size: int, optional
+        :param marker: Pagination marker supplied by previous API calls in the event
+            a request returns more values than the page size
+        :type marker: str, optional
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
 
@@ -155,6 +166,10 @@ class GCSClient(client.BaseClient):
             query_params = {}
         if include is not None:
             query_params["include"] = ",".join(utils.safe_strseq_iter(include))
+        if page_size is not None:
+            query_params["page_size"] = page_size
+        if marker is not None:
+            query_params["marker"] = marker
         if mapped_collection_id is not None:
             query_params["mapped_collection_id"] = mapped_collection_id
         if filter is not None:
@@ -620,10 +635,16 @@ class GCSClient(client.BaseClient):
         path = f"/roles/{role_id}"
         return self.delete(path, query_params=query_params)
 
+    @paging.has_paginator(
+        paging.MarkerPaginator,
+        items_key="data",
+    )
     def get_user_credential_list(
         self,
         storage_gateway: UUIDLike | None = None,
         query_params: dict[str, t.Any] | None = None,
+        page_size: int | None = None,
+        marker: str | None = None,
     ) -> IterableGCSResponse:
         """
         List User Credentials
@@ -632,6 +653,11 @@ class GCSClient(client.BaseClient):
         :type storage_gateway: str or UUID, optional
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
+        :param page_size: Number of results to return per page
+        :type page_size: int, optional
+        :param marker: Pagination marker supplied by previous API calls in the event
+            a request returns more values than the page size
+        :type marker: str, optional
 
         .. tab-set::
 
@@ -647,6 +673,10 @@ class GCSClient(client.BaseClient):
             query_params = {}
         if storage_gateway is not None:
             query_params["storage_gateway"] = storage_gateway
+        if page_size is not None:
+            query_params["page_size"] = page_size
+        if marker is not None:
+            query_params["marker"] = marker
 
         path = "/user_credentials"
         return IterableGCSResponse(self.get(path, query_params=query_params))
