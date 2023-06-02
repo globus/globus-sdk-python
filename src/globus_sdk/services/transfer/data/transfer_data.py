@@ -128,13 +128,13 @@ class TransferData(utils.PayloadWrapper):
         status to INACTIVE. e.g. From credentials expiring.
         [default: ``True``]
     :type notify_on_inactive: bool, optional
-    :param source_local_user: Optional value passed through to the source's identity
+    :param source_local_user: Optional value passed to the source's identity mapping
+        specifying which local user account to map to. Only usable with Globus Connect
+        Server v5 mapped collections.
+    :type source_local_user: string, optional
+    :param destination_local_user: Optional value passed to the destination's identity
         mapping specifying which local user account to map to. Only usable with Globus
         Connect Server v5 mapped collections.
-    :type source_local_user: string, optional
-    :param destination_local_user: Optional value passed through to the destination's
-        identity mapping specifying which local user account to map to. Only usable
-        with Globus Connect Server v5 mapped collections.
     :type destination_local_user: string, optional
     :param additional_fields: additional fields to be added to the transfer
         document. Mostly intended for internal use

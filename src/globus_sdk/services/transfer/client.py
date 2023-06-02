@@ -1236,9 +1236,9 @@ class TransferClient(client.BaseClient):
             If a list is supplied, it is passed as multiple params.
             See :ref:`filter formatting <transfer_filter_formatting>` for details.
         :type filter: str or dict, optional
-        :param local_user: Optional value passed through to identity mapping specifying
-            which local user account to map to. Only usable with Globus Connect Server
-            v5 mapped collections.
+        :param local_user: Optional value passed to identity mapping specifying which
+            local user account to map to. Only usable with Globus Connect Server v5
+            mapped collections.
         :type local_user: str, optional
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
@@ -1317,9 +1317,9 @@ class TransferClient(client.BaseClient):
         :type endpoint_id: str or UUID
         :param path: Path to the new directory to create
         :type path: str
-        :param local_user: Optional value passed through to identity mapping specifying
-            which local user account to map to. Only usable with Globus Connect Server
-            v5 mapped collections.
+        :param local_user: Optional value passed to identity mapping specifying which
+            local user account to map to. Only usable with Globus Connect Server v5
+            mapped collections.
         :type local_user: str, optional
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional
@@ -1368,9 +1368,9 @@ class TransferClient(client.BaseClient):
         :type oldpath: str
         :param newpath: Path to the new filename
         :type newpath: str
-        :param local_user: Optional value passed through to identity mapping specifying
-            which local user account to map to. Only usable with Globus Connect Server
-            v5 mapped collections.
+        :param local_user: Optional value passed to identity mapping specifying which
+            local user account to map to. Only usable with Globus Connect Server v5
+            mapped collections.
         :type local_user: str, optional
         :param query_params: Additional passthrough query parameters
         :type query_params: dict, optional

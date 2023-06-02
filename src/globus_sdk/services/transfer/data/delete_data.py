@@ -72,9 +72,9 @@ class DeleteData(utils.PayloadWrapper):
         status to INACTIVE. e.g. From credentials expiring.
         [default: ``True``]
     :type notify_on_inactive: bool, optional
-    :param local_user: Optional value passed through to identity mapping specifying
-        which local user account to map to. Only usable with Globus Connect Server
-        v5 mapped collections.
+    :param local_user: Optional value passed to identity mapping specifying which local
+        user account to map to. Only usable with Globus Connect Server v5 mapped
+        collections.
     :type local_user: string, optional
     :param additional_fields: additional fields to be added to the delete
         document. Mostly intended for internal use
