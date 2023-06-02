@@ -12,7 +12,7 @@ chardet==3.0.4
     # via requests
 coverage==7.2.5
     # via -r test.in
-cryptography==3.3.1
+cryptography==41.0.0
     # via -r test-mindeps.in
 execnet==1.9.0
     # via pytest-xdist
@@ -42,11 +42,9 @@ requests==2.22.0
     #   responses
 responses==0.23.1
     # via -r test.in
-six==1.16.0
-    # via cryptography
 types-pyyaml==6.0.12.10
     # via responses
-typing-extensions==4.0.0
+typing-extensions==4.0
     # via -r test-mindeps.in
 urllib3==1.25.11
     # via
