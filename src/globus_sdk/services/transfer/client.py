@@ -1345,7 +1345,9 @@ class TransferClient(client.BaseClient):
                 endpoint_id, path, query_params
             )
         )
-        json_body = {"DATA_TYPE": "mkdir", "path": path, "local_user": local_user}
+        json_body = {"DATA_TYPE": "mkdir", "path": path}
+        if local_user is not None:
+            json_body["local_user"] = local_user
         return self.post(
             f"operation/endpoint/{endpoint_id}/mkdir",
             data=json_body,
@@ -1400,8 +1402,9 @@ class TransferClient(client.BaseClient):
             "DATA_TYPE": "rename",
             "old_path": oldpath,
             "new_path": newpath,
-            "local_user": local_user,
         }
+        if local_user is not None:
+            json_body["local_user"] = local_user
         return self.post(
             f"operation/endpoint/{endpoint_id}/rename",
             data=json_body,
