@@ -16,14 +16,6 @@ class StringWrapper:
         return self.s
 
 
-@pytest.fixture
-def client(no_retry_transport):
-    class CustomAuthClient(globus_sdk.AuthClient):
-        transport_class = no_retry_transport
-
-    return CustomAuthClient()
-
-
 def test_get_identities_unauthorized(client):
     data = load_response(client.get_identities, case="unauthorized")
 

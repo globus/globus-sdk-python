@@ -2,7 +2,7 @@ import uuid
 
 from globus_sdk._testing.models import RegisteredResponse, ResponseSet
 
-from ._common import ERROR_ID, UNAUTHORIZED_AUTH_RESPONSE_JSON
+from ._common import UNAUTHORIZED_AUTH_RESPONSE
 
 _globus_at_globus_data = {
     "email": None,
@@ -85,7 +85,7 @@ RESPONSES = ResponseSet(
         service="auth",
         path="/v2/api/identities",
         status=401,
-        json=UNAUTHORIZED_AUTH_RESPONSE_JSON,
-        metadata={"error_id": ERROR_ID},
+        json=UNAUTHORIZED_AUTH_RESPONSE.json,
+        metadata={"error_id": UNAUTHORIZED_AUTH_RESPONSE.error_id},
     ),
 )
