@@ -293,3 +293,7 @@ def setup(app):
     app.add_directive("expandtestfixture", ExpandTestingFixture)
     app.add_directive("extdoclink", ExternalDocLink)
     app.add_directive("paginatedusage", PaginatedUsage)
+    return {
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
+    }
