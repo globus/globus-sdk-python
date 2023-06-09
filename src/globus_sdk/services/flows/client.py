@@ -651,7 +651,7 @@ class SpecificFlowClient(client.BaseClient):
             service will validate this object against the flow's supplied input schema.
         :type body: json dict
         :param label: A short human-readable title
-        :type label: Optional string (0 - 64 chars)
+        :type label: Optional string (1 - 64 chars)
         :param tags: A collection of searchable tags associated with the run. Tags are
             normalized by stripping leading and trailing whitespace, and replacing all
             whitespace with a single space.
