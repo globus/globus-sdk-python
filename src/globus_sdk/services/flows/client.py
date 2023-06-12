@@ -608,9 +608,9 @@ class FlowsClient(client.BaseClient):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
         """
-        Retrieve information about a particular Run of a Flow
+        Update the metadata of a specific run.
 
-        :param run_id: The ID of the run to get
+        :param run_id: The ID of the run to update
         :type run_id: str or UUID
         :param label: A short human-readable title
         :type label: Optional string (1 - 64 chars)
