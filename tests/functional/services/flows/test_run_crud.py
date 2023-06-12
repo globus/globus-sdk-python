@@ -5,6 +5,17 @@ import pytest
 from globus_sdk._testing import get_last_request, load_response
 
 
+def test_cancel_run(flows_client):
+    """Verify that run cancellation requests meet expectations."""
+
+    run_id = load_response(flows_client.cancel_run).metadata["run_id"]
+
+    flows_client.cancel_run(run_id)
+    request = get_last_request()
+    assert request.method == "POST"
+    assert request.url.endswith(f"/runs/{run_id}/cancel")
+
+
 @pytest.mark.parametrize(
     "values",
     (

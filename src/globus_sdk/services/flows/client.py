@@ -597,6 +597,38 @@ class FlowsClient(client.BaseClient):
             },
         )
 
+    def cancel_run(self, run_id: UUIDLike) -> GlobusHTTPResponse:
+        """
+        Cancel a run.
+
+        :param run_id: The ID of the run to cancel
+        :type run_id: str or UUID
+
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    from globus_sdk import FlowsClient
+
+                    flows = FlowsClient(...)
+                    flows.cancel_run("581753c7-45da-43d3-ad73-246b46e7cb6b")
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: flows.cancel_run
+
+            .. tab-item:: API Info
+
+                .. extdoclink:: Cancel Run
+                    :service: flows
+                    :ref: Runs/paths/~1runs~1{run_id}~1cancel/post
+        """
+
+        return self.post(f"/runs/{run_id}/cancel")
+
     def update_run(
         self,
         run_id: UUIDLike,
