@@ -597,6 +597,77 @@ class FlowsClient(client.BaseClient):
             },
         )
 
+    def update_run(
+        self,
+        run_id: UUIDLike,
+        *,
+        label: str | None = None,
+        tags: list[str] | None = None,
+        run_monitors: list[str] | None = None,
+        run_managers: list[str] | None = None,
+        additional_fields: dict[str, t.Any] | None = None,
+    ) -> GlobusHTTPResponse:
+        """
+        Retrieve information about a particular Run of a Flow
+
+        :param run_id: The ID of the run to get
+        :type run_id: str or UUID
+        :param label: A short human-readable title
+        :type label: Optional string (1 - 64 chars)
+        :param tags: A collection of searchable tags associated with the run.
+            Tags are normalized by stripping leading and trailing whitespace,
+            and replacing all whitespace with a single space.
+        :type tags: Optional list of strings
+        :param run_monitors: A list of authenticated entities (identified by URN)
+            authorized to view this run in addition to the run owner
+        :type run_monitors: Optional list of strings
+        :param run_managers: A list of authenticated entities (identified by URN)
+            authorized to view & cancel this run in addition to the run owner
+        :type run_managers: Optional list of strings
+        :param additional_fields: Additional Key/Value pairs sent to the run API
+            (this parameter is used to bypass local sdk key validation helping)
+        :type additional_fields: Optional dictionary
+
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    from globus_sdk import FlowsClient
+
+                    flows = FlowsClient(...)
+                    flows.update_run(
+                        "581753c7-45da-43d3-ad73-246b46e7cb6b",
+                        label="Crunch numbers for experiment xDA202-batch-10",
+                    )
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: flows.update_run
+
+            .. tab-item:: API Info
+
+                .. extdoclink:: Update Run
+                    :service: flows
+                    :ref: Runs/paths/~1runs~1{run_id}/put
+        """
+
+        data = {
+            k: v
+            for k, v in {
+                "tags": tags,
+                "label": label,
+                "run_monitors": run_monitors,
+                "run_managers": run_managers,
+            }.items()
+            if v is not None
+        }
+        data.update(additional_fields or {})
+
+        return self.put(f"/runs/{run_id}", data=data)
+
 
 class SpecificFlowClient(client.BaseClient):
     r"""
