@@ -2,6 +2,7 @@ import json
 
 import pytest
 
+from globus_sdk import FlowsAPIError
 from globus_sdk._testing import get_last_request, load_response
 
 
@@ -55,3 +56,27 @@ def test_update_run_additional_fields(flows_client):
     assert request.method == "PUT"
     assert request.url.endswith(f"/runs/{metadata['run_id']}")
     assert json.loads(request.body) == additional_fields
+
+
+def test_delete_run_success(flows_client):
+    """Verify `.delete_run()` requests match expectations."""
+
+    metadata = load_response(flows_client.delete_run).metadata
+    flows_client.delete_run(metadata["run_id"])
+
+    request = get_last_request()
+    assert request.method == "POST"
+    assert request.url.endswith(f"/runs/{metadata['run_id']}/release")
+    # Ensure no deprecated routes are used.
+    assert "/flows/" not in request.url
+
+
+def test_delete_run_conflict(flows_client):
+    """Verify the `.delete_run()` HTTP 409 CONFLICT test case matches expectations."""
+
+    metadata = load_response(flows_client.delete_run, case="conflict").metadata
+
+    with pytest.raises(FlowsAPIError) as error:
+        flows_client.delete_run(metadata["run_id"])
+
+    assert error.value.http_status == 409

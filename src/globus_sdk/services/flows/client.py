@@ -668,6 +668,38 @@ class FlowsClient(client.BaseClient):
 
         return self.put(f"/runs/{run_id}", data=data)
 
+    def delete_run(self, run_id: UUIDLike) -> GlobusHTTPResponse:
+        """
+        Delete a run.
+
+        :param run_id: The ID of the run to update
+        :type run_id: str or UUID
+
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    from globus_sdk import FlowsClient
+
+                    flows = FlowsClient(...)
+                    flows.delete_run("581753c7-45da-43d3-ad73-246b46e7cb6b")
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: flows.delete_run
+
+            .. tab-item:: API Info
+
+                .. extdoclink:: Delete Run
+                    :service: flows
+                    :ref: Runs/paths/~1runs~1{run_id}~1release/post
+        """
+
+        return self.post(f"/runs/{run_id}/release")
+
 
 class SpecificFlowClient(client.BaseClient):
     r"""
