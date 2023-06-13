@@ -672,7 +672,7 @@ class FlowsClient(client.BaseClient):
         """
         Delete a run.
 
-        :param run_id: The ID of the run to update
+        :param run_id: The ID of the run to delete
         :type run_id: str or UUID
 
 
