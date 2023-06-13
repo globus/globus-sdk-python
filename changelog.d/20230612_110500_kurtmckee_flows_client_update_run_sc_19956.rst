@@ -1,1 +1,1 @@
-* Support updating run metadata in the Flows service. (:pr:`744`)
+* Add a ``FlowsClient.update_run()`` method. (:pr:`744`)
