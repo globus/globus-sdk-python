@@ -1,1 +1,1 @@
-* Support deleting runs from the Flows service. (:pr:`NUMBER`)
+* Add a ``FlowsClient.delete_run()`` method. (:pr:`NUMBER`)
