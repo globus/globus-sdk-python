@@ -1,1 +1,1 @@
-* Support canceling runs in the Flows service. (:pr:`NUMBER`)
+* Add a ``FlowsClient.cancel_run()`` method. (:pr:`NUMBER`)
