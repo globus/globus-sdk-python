@@ -66,6 +66,5 @@ Code Style
 
 Style guidance which doesn't get handled by linters and fixers:
 
-  - When using `typing`, always import from `typing`, as in `from typing import ...`
   - If a docstring contains special characters like `\\`, consider using a raw
     string to ensure it renders correctly
