@@ -16,7 +16,6 @@ showvars:
 	@echo "SDK_VERSION=$(SDK_VERSION)"
 prepare-release:
 	tox -e prepare-release
-	$(EDITOR) changelog.rst
 tag-release:
 	git tag -s "$(SDK_VERSION)" -m "v$(SDK_VERSION)"
 	-git push $(shell git rev-parse --abbrev-ref @{push} | cut -d '/' -f1) refs/tags/$(SDK_VERSION)
