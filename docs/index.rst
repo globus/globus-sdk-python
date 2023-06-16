@@ -40,6 +40,13 @@ Table of Contents
     core/index
 
 .. toctree::
+    :caption: Unstable
+    :maxdepth: 1
+
+    testing/index
+    experimental/index
+
+.. toctree::
     :caption: Additional Info
     :maxdepth: 1
 

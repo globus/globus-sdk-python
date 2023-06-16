@@ -1,5 +1,3 @@
-:orphan:
-
 .. warning::
 
     This component is an *alpha*. Interfaces may change outside of the
@@ -7,8 +5,8 @@
 
 .. _testing_root:
 
-Globus SDK _testing (alpha)
-===========================
+Globus SDK _testing
+===================
 
 .. warning::
 
