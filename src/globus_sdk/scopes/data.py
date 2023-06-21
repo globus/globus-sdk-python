@@ -55,6 +55,7 @@ class _AuthScopesBuilder(ScopeBuilder):
 AuthScopes = _AuthScopesBuilder(
     "auth.globus.org",
     known_scopes=[
+        "manage_projects",
         "view_authentications",
         "view_clients",
         "view_clients_and_scopes",
