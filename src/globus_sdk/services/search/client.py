@@ -397,6 +397,52 @@ class SearchClient(client.BaseClient):
         log.info(f"SearchClient.delete_by_query({index_id}, ...)")
         return self.post(f"/v1/index/{index_id}/delete_by_query", data=data)
 
+    def batch_delete_by_subject(
+        self, index_id: UUIDLike, data: dict[str, t.Any]
+    ) -> response.GlobusHTTPResponse:
+        """
+        Delete data in a Search index as an asynchronous task, deleting multiple
+        documents based on their ``subject`` values.
+
+        A ``task_id`` value will be included in the response.
+
+        :param index_id: The index in which to delete data
+        :type index_id: str or UUID
+        :param data: a batch-delete-by-subject document listing documents to delete
+        :type data: dict
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    sc = globus_sdk.SearchClient(...)
+                    sc.batch_delete_by_subject(
+                        index_id,
+                        {
+                            "subjects": [
+                                "very-cool-document",
+                                "less-cool-document",
+                                "document-wearing-sunglasses",
+                            ]
+                        },
+                    )
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: search.batch_delete_by_subject
+
+            .. tab-item:: API Info
+
+                ``POST /v1/index/<index_id>/batch_delete_by_subject``
+
+                .. extdoclink:: Delete By Subject
+                    :ref: search/reference/batch_delete_by_subject/
+        """
+        log.info(f"SearchClient.batch_delete_by_subject({index_id}, ...)")
+        return self.post(f"/v1/index/{index_id}/batch_delete_by_subject", data=data)
+
     #
     # Subject Operations
     #
