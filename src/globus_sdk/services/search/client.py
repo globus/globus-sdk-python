@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import typing as t
 
-from globus_sdk import client, paging, response
+from globus_sdk import client, paging, response, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.exc.warnings import warn_deprecated
 from globus_sdk.scopes import SearchScopes
@@ -398,7 +398,10 @@ class SearchClient(client.BaseClient):
         return self.post(f"/v1/index/{index_id}/delete_by_query", data=data)
 
     def batch_delete_by_subject(
-        self, index_id: UUIDLike, data: dict[str, t.Any]
+        self,
+        index_id: UUIDLike,
+        subjects: t.Iterable[str],
+        additional_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
         Delete data in a Search index as an asynchronous task, deleting multiple
@@ -408,8 +411,10 @@ class SearchClient(client.BaseClient):
 
         :param index_id: The index in which to delete data
         :type index_id: str or UUID
-        :param data: a batch-delete-by-subject document listing documents to delete
-        :type data: dict
+        :param subjects: The subjects to delete, as an iterable of strings
+        :type subjects: iterable of str
+        :param additional_params: Additional parameters to include in the request body
+        :type additional_params: dict, optional
 
         .. tab-set::
 
@@ -420,13 +425,11 @@ class SearchClient(client.BaseClient):
                     sc = globus_sdk.SearchClient(...)
                     sc.batch_delete_by_subject(
                         index_id,
-                        {
-                            "subjects": [
-                                "very-cool-document",
-                                "less-cool-document",
-                                "document-wearing-sunglasses",
-                            ]
-                        },
+                        subjects=[
+                            "very-cool-document",
+                            "less-cool-document",
+                            "document-wearing-sunglasses",
+                        ],
                     )
 
             .. tab-item:: Example Response Data
@@ -441,7 +444,13 @@ class SearchClient(client.BaseClient):
                     :ref: search/reference/batch_delete_by_subject/
         """
         log.info(f"SearchClient.batch_delete_by_subject({index_id}, ...)")
-        return self.post(f"/v1/index/{index_id}/batch_delete_by_subject", data=data)
+        # convert the provided subjects to a list and use the "safe iter" helper to
+        # ensure that a single string is *not* treated as an iterable of strings,
+        # which is usually not intentional
+        body = {"subjects": list(utils.safe_strseq_iter(subjects))}
+        if additional_params:
+            body.update(additional_params)
+        return self.post(f"/v1/index/{index_id}/batch_delete_by_subject", data=body)
 
     #
     # Subject Operations
