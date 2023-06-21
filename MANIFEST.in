@@ -1,4 +1,0 @@
-include tox.ini
-include README.rst
-include LICENSE
-include COPYING
