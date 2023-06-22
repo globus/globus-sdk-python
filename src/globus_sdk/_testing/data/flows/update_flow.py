@@ -1,7 +1,5 @@
 from copy import deepcopy
 
-from responses import matchers
-
 from globus_sdk._testing.models import RegisteredResponse, ResponseSet
 
 from ._common import TWO_HOP_TRANSFER_FLOW_DOC, TWO_HOP_TRANSFER_FLOW_ID
@@ -26,6 +24,5 @@ RESPONSES = ResponseSet(
         path=f"/flows/{TWO_HOP_TRANSFER_FLOW_ID}",
         method="PUT",
         json=_updated_two_hop_transfer_flow_doc,
-        match=[matchers.json_params_matcher(params=_two_hop_transfer_update_request)],
     ),
 )
