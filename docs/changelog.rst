@@ -547,6 +547,8 @@ v3.8.0 (2022-05-04)
     from a scope name to a ``MutableScope`` object. See documentation on scopes
     for usage details
 
+.. _changelog-3.7.0:
+
 v3.7.0 (2022-04-08)
 -------------------
 
@@ -560,6 +562,8 @@ v3.7.0 (2022-04-08)
 * Fix annotations to allow request data to be a string. This is
   supported at runtime but was missing from annotations. (:pr:`549`)
 
+.. _changelog-3.6.0:
+
 v3.6.0 (2022-03-18)
 -------------------
 
@@ -569,6 +573,8 @@ v3.6.0 (2022-03-18)
 
 * Add the ``RequestsTransport.tune`` contextmanager to the transport layer,
   allowing the settings on the transport to be set temporarily (:pr:`540`)
+
+.. _changelog-3.5.0:
 
 v3.5.0 (2022-03-02)
 -------------------
@@ -591,6 +597,8 @@ v3.5.0 (2022-03-02)
 * Add a new method to tokenstorage, ``SQLiteAdapter.iter_namespaces``, which
   iterates over all namespaces visible in the token database (:pr:`529`)
 
+.. _changelog-3.4.2:
+
 v3.4.2 (2022-02-18)
 -------------------
 
@@ -599,12 +607,16 @@ v3.4.2 (2022-02-18)
   variants of these methods. Prior to the fix, paginated calls would return a
   single page of results and then stop (:pr:`520`)
 
+.. _changelog-3.4.1:
+
 v3.4.1 (2022-02-11)
 -------------------
 
 * The ``typing_extensions`` requirement in package metadata now sets a lower
   bound of ``4.0``, to force upgrades of installations to get a new enough version
   (:pr:`518`)
+
+.. _changelog-3.4.0:
 
 v3.4.0 (2022-02-11)
 -------------------
@@ -631,11 +643,15 @@ v3.4.0 (2022-02-11)
 * The response from ``AuthClient.get_identities`` now supports iteration,
   returning results from the ``"identities"`` array (:pr:`514`)
 
+.. _changelog-3.3.1:
+
 v3.3.1 (2022-01-25)
 -------------------
 
 * Packaging bugfix. ``globus-sdk`` is now built with pypa's ``build`` tool, to
   resolve issues with wheel builds.
+
+.. _changelog-3.3.0:
 
 v3.3.0 (2022-01-25)
 -------------------
@@ -678,10 +694,14 @@ v3.3.0 (2022-01-25)
   * Internally, these are updated to be able to default to the ``GLOBUS_SDK_ENVIRONMENT`` setting,
     so specifying an environment is no longer required
 
+.. _changelog-3.2.1:
+
 v3.2.1 (2021-12-13)
 -------------------
 
 * Update to avoid deprecation warnings on python 3.10 (:pr:`499`)
+
+.. _changelog-3.2.0:
 
 v3.2.0 (2021-12-02)
 -------------------
@@ -707,6 +727,8 @@ v3.2.0 (2021-12-02)
   * Responses now implement ``http_status`` and ``content_type`` as
     properties without setters
 
+.. _changelog-3.1.0:
+
 v3.1.0 (2021-10-13)
 -------------------
 
@@ -720,11 +742,15 @@ v3.1.0 (2021-10-13)
   issues in which an older `cryptography` version is installed gets used in
   spite of it being incompatible with `pyjwt[crypto]>=2.0` (:pr:`486`)
 
+.. _changelog-3.0.3:
+
 v3.0.3 (2021-10-11)
 -------------------
 
 * Fix several internal decorators which were destroying type information about
   decorated functions. Type signatures of many methods are therefore corrected (:pr:`485`)
+
+.. _changelog-3.0.2:
 
 v3.0.2 (2021-09-29)
 -------------------
@@ -733,6 +759,8 @@ v3.0.2 (2021-09-29)
   work with the testsuite (:pr:`482`)
 * Produce more debug logging when SDK logs are enabled (:pr:`480`)
 
+.. _changelog-3.0.1:
+
 v3.0.1 (2021-09-15)
 -------------------
 
@@ -740,6 +768,8 @@ v3.0.1 (2021-09-15)
   know that dynamic attributes are strings (:pr:`472`)
 * Fix remaining ``type: ignore`` usages in globus-sdk (:pr:`473`)
 * Fix malformed PEP508 ``python_version`` bound in dev dependencies (:pr:`474`)
+
+.. _changelog-3.0.0:
 
 v3.0.0 (2021-09-14)
 -------------------
@@ -751,6 +781,8 @@ v3.0.0 (2021-09-14)
   helpers, ``MappedCollectionDcoument`` and ``GuestCollectionDocument`` (:pr:`468`)
 * Remove support for ``bytes`` values for fields consuming UUIDs (:pr:`471`)
 * Add support for specifying ``config_dir`` to ``LocalGlobusConnectPersonal`` (:pr:`470`)
+
+.. _changelog-3.0.0b4:
 
 v3.0.0b4 (2021-09-01)
 ---------------------
@@ -778,6 +810,8 @@ v3.0.0b4 (2021-09-01)
 * All type annotations for ``Sequence`` which could be relaxed to ``Iterable``
   have been updated (:pr:`465`)
 
+.. _changelog-3.0.0b3:
+
 v3.0.0b3 (2021-08-13)
 ---------------------
 
@@ -788,6 +822,8 @@ v3.0.0b3 (2021-08-13)
 * globus-sdk now provides much more complete type annotations coverage,
   allowing type checkers like ``mypy`` to catch a much wider range of usage
   errors (:pr:`442`)
+
+.. _changelog-3.0.0b2:
 
 v3.0.0b2 (2021-07-16)
 ---------------------
@@ -803,6 +839,8 @@ v3.0.0b2 (2021-07-16)
   applicable. See the :ref:`ErrorInfo documentation <error_info>` for details
   (:pr:`441`)
 
+.. _changelog-3.0.0b1:
+
 v3.0.0b1 (2021-07-02)
 ---------------------
 
@@ -816,6 +854,8 @@ v3.0.0b1 (2021-07-02)
   ``max_retries`` may now be supplied directly as ``transport_params``
   (:pr:`430`)
 
+.. _changelog-3.0.0a4:
+
 v3.0.0a4 (2021-06-28)
 ---------------------
 
@@ -823,6 +863,8 @@ v3.0.0a4 (2021-06-28)
 * Add ``BaseClient`` to the top-level exports of ``globus_sdk``, so it can now
   be accessed under the name ``globus_sdk.BaseClient``
 * Autodocumentation of paginated methods (:pr:`432`)
+
+.. _changelog-3.0.0a3:
 
 v3.0.0a3 (2021-06-25)
 ---------------------
@@ -844,6 +886,8 @@ v3.0.0a3 (2021-06-25)
     types, use ``items()``, as in
     ``client.paginated.endpoint_search("query").items()``
 
+.. _changelog-3.0.0a2:
+
 v3.0.0a2 (2021-06-10)
 ---------------------
 
@@ -852,6 +896,8 @@ v3.0.0a2 (2021-06-10)
   ``globus_sdk.tokenstorage`` (:pr:`405`)
 * Add client for Globus Groups API, ``globus_sdk.GroupsClient``. Includes a
   dedicated error class, ``globus_sdk.GroupsAPIError``
+
+.. _changelog-3.0.0a1:
 
 v3.0.0a1 (2021-06-04)
 ---------------------
@@ -888,6 +934,8 @@ v3.0.0a1 (2021-06-04)
 
 .. _changelog_version2:
 
+.. _changelog-2.0.1:
+
 v2.0.1 (2021-02-02)
 -------------------
 
@@ -895,6 +943,8 @@ v2.0.1 (2021-02-02)
 
 .. note:: globus-sdk version 2.0.0 was yanked due to a release issue.
           Version 2.0.1 is the first 2.x version.
+
+.. _changelog-1.11.0:
 
 v1.11.0 (2021-01-29)
 --------------------
@@ -904,15 +954,21 @@ v1.11.0 (2021-01-29)
   ``TransferClient.endpoint_manager_task_skipped_errors`` (:pr:`393`)
 * Internal maintenance (:pr:`389`, :pr:`390`, :pr:`391`, :pr:`392`)
 
+.. _changelog-1.10.0:
+
 v1.10.0 (2020-12-18)
 --------------------
 
 * Add support for pyinstaller installation of globus-sdk (:pr:`387`)
 
+.. _changelog-1.9.1:
+
 v1.9.1 (2020-08-27)
 -------------------
 
 * Fix ``GlobusHTTPResponse`` to handle responses with no ``Content-Type`` header (:pr:`375`)
+
+.. _changelog-1.9.0:
 
 v1.9.0 (2020-03-05)
 -------------------
@@ -921,6 +977,8 @@ v1.9.0 (2020-03-05)
 * Minor documentation and build improvements (:pr:`369`, :pr:`362`)
 * Don't append trailing slashes when no path is given to a low-level client method like ``get()`` (:pr:`364`)
 * Add ``external_checksum`` and ``checksum_algorithm`` to ``TransferData.add_item()`` named arguments (:pr:`365`)
+
+.. _changelog-1.8.0:
 
 v1.8.0 (2019-07-11)
 -------------------
@@ -931,11 +989,15 @@ v1.8.0 (2019-07-11)
 * Fix typo in endpoint_search log message (:pr:`355`)
 * Fix Globus Web App activation links in docs (:pr:`356`)
 
+.. _changelog-1.7.1:
+
 v1.7.1 (2019-02-21)
 -------------------
 
 * Allow arbitrary keyword args to ``TransferData.add_item()`` and ``DeleteData.add_item()``, which passthrough to the item bodies (:pr:`339`)
 * Minor internal improvements (:pr:`342`, :pr:`343`)
+
+.. _changelog-1.7.0:
 
 v1.7.0 (2018-12-18)
 -------------------
@@ -943,11 +1005,15 @@ v1.7.0 (2018-12-18)
 * Add ``get_task`` and ``get_task_list`` to ``SearchClient`` (:pr:`335`, :pr:`336`)
 * Internal maintenance and testing improvements (:pr:`331`, :pr:`334`, :pr:`333`)
 
+.. _changelog-1.6.1:
+
 v1.6.1 (2018-10-30)
 -------------------
 
 * Replace egg distribution format with wheels (:pr:`314`)
 * Internal maintenance
+
+.. _changelog-1.6.0:
 
 v1.6.0 (2018-08-29)
 -------------------
@@ -962,17 +1028,23 @@ v1.6.0 (2018-08-29)
 * Malformed SDK usage may now raise GlobusSDKUsageError instead of ValueError. GlobusSDKUsageError inherits from ValueError (:pr:`281`)
 * Numerous documentation improvements (:pr:`279`, :pr:`294`, :pr:`296`, :pr:`297`)
 
+.. _changelog-1.5.0:
+
 v1.5.0 (2018-02-09)
 -------------------
 
 * Add support for retrieving a local Globus Connect Personal endpoint's UUID (:pr:`276`)
 * Fix bug in search client parameter handling (:pr:`274`)
 
+.. _changelog-1.4.1:
+
 v1.4.1 (2017-12-20)
 -------------------
 
 * Send ``Content-Type: application/json`` on requests with JSON request bodies (:pr:`266`)
 * Support connection timeouts. Default timeout of 60 seconds (:pr:`264`)
+
+.. _changelog-1.4.0:
 
 v1.4.0 (2017-12-13)
 -------------------
@@ -982,11 +1054,15 @@ v1.4.0 (2017-12-13)
 * Simplify OAuthTokenResponse.decode_id_token to not require the client as an argument (:pr:`255`)
 * Add (beta) SearchClient class (:pr:`259`)
 
+.. _changelog-1.3.0:
+
 v1.3.0 (2017-11-20)
 -------------------
 
 * Improve error message when installation onto python2.6 is attempted (:pr:`245`)
 * Raise errors on client instantiation when ``GLOBUS_SDK_ENVIRONMENT`` appears to be invalid, support ``GLOBUS_SDK_ENVIRONMENT=preview`` (:pr:`247`)
+
+.. _changelog-1.2.2:
 
 v1.2.2 (2017-11-01)
 -------------------
@@ -995,10 +1071,14 @@ v1.2.2 (2017-11-01)
 * Fix packaging to not include testsuite (:pr:`232`)
 * Improve docs on ``TransferClient`` helper classes (:pr:`231`, :pr:`233`)
 
+.. _changelog-1.2.1:
+
 v1.2.1 (2017-09-29)
 -------------------
 
 * Use PyJWT instead of python-jose for JWT support (:pr:`227`)
+
+.. _changelog-1.2.0:
 
 v1.2.0 (2017-08-18)
 -------------------
@@ -1008,10 +1088,14 @@ v1.2.0 (2017-08-18)
 * Fix endpoint manager resume (:pr:`224`)
 * Doc Updates & Minor Improvements
 
+.. _changelog-1.1.1:
+
 v1.1.1 (2017-05-19)
 -------------------
 
 * Use correct paging style when making ``endpoint_manager_task_list`` calls (:pr:`210`)
+
+.. _changelog-1.1.0:
 
 v1.1.0 (2017-05-01)
 -------------------
@@ -1025,16 +1109,22 @@ v1.1.0 (2017-05-01)
 * Update dev status classifier to 5, prod (:pr:`178`)
 * Numerous improvements to testsuite
 
+.. _changelog-1.0.0:
+
 v1.0.0 (2017-04-10)
 -------------------
 
 * Adds ``AuthAPIError`` with more flexible error payload handling (:pr:`175`)
+
+.. _changelog-0.7.2:
 
 v0.7.2 (2017-04-05)
 -------------------
 
 * Add ``AuthClient.validate_token`` (:pr:`172`)
 * Bugfix for ``on_refresh`` users of ``RefreshTokenAuthorizer`` and ``ClientCredentialsAuthorizer`` (:pr:`173`)
+
+.. _changelog-0.7.1:
 
 v0.7.1 (2017-04-03)
 -------------------
@@ -1043,11 +1133,15 @@ v0.7.1 (2017-04-03)
 * Add the ``ClientCredentialsAuthorizer`` (:pr:`164`)
 * Add ``jwt`` extra install target. ``pip install "globus_sdk[jwt]"`` installs ``python-jose`` (:pr:`169`)
 
+.. _changelog-0.7.0:
+
 v0.7.0 (2017-03-30)
 -------------------
 
 * Make ``OAuthTokenResponse.decode_id_token()`` respect ``ssl_verify=no`` configuration (:pr:`161`)
 * Remove all properties of ``OAuthTokenResponse`` other than ``by_resource_server`` (:pr:`162`)
+
+.. _changelog-0.6.0:
 
 v0.6.0 (2017-03-21)
 -------------------
@@ -1056,6 +1150,8 @@ v0.6.0 (2017-03-21)
 * Fixup OAuth2 PKCE to be spec-compliant (:pr:`154`)
 * Wrap some ``requests`` network-related errors in custom exceptions (:pr:`155`)
 * Add ``deadline`` support to ``TransferData`` and ``DeleteData`` (:pr:`159`)
+
+.. _changelog-0.5.1:
 
 v0.5.1 (2017-02-25)
 -------------------
