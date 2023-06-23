@@ -1,10 +1,15 @@
 ..
 .. A new scriv changelog fragment
 ..
-.. Add one or more items to the list below describing the change in clear, concise terms.
+.. Uncomment the header that is right (remove the leading dots).
 ..
-.. Leave the ":pr:`...`" text alone. When you open a pull request, GitHub Actions will
-.. automatically replace it when the PR is merged.
+.. Leave the "(:pr:`...`)" text in your change description.
+.. GitHub Actions will automatically replace it when the PR is merged.
 ..
-
-* REPLACE_ME (:pr:`NUMBER`)
+{% for cat in config.categories -%}
+.. {{ cat }}
+.. {{ config.rst_header_chars[1] * (cat|length) }}
+..
+.. - A bullet item for the {{ cat }} category. (:pr:`NUMBER`)
+..
+{% endfor -%}
