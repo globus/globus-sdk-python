@@ -1,3 +1,6 @@
+Changed
+~~~~~~~
+
 * ``AuthClient``, ``NativeAppAuthClient``, and ``ConfidentialAppAuthClient``
   have had their init signatures updated to explicitly list available
   parameters. (:pr:`764`)
