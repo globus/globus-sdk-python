@@ -21,7 +21,7 @@ else:
 from globus_sdk import client, exc, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import NullAuthorizer
-from globus_sdk.response import GlobusHTTPResponse
+from globus_sdk.response import GlobusHTTPResponse, IterableResponse
 from globus_sdk.scopes import AuthScopes
 
 from ..errors import AuthAPIError
@@ -29,6 +29,7 @@ from ..flow_managers import GlobusOAuthFlowManager
 from ..response import (
     GetIdentitiesResponse,
     GetIdentityProvidersResponse,
+    GetProjectsResponse,
     OAuthTokenResponse,
 )
 
@@ -316,6 +317,58 @@ class AuthClient(client.BaseClient):
         return GetIdentityProvidersResponse(
             self.get("/v2/api/identity_providers", query_params=query_params)
         )
+
+    def get_projects(self) -> IterableResponse:
+        """
+        Look up projects on which the authenticated user is an admin.
+        Requires the ``manage_projects`` scope.
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: pycon
+
+                    >>> ac = globus_sdk.AuthClient(...)
+                    >>> r = ac.get_projects()
+                    >>> r.data
+                    {
+                      'projects": [
+                        {
+                          'admin_ids": ["41143743-f3c8-4d60-bbdb-eeecaba85bd9"]
+                          'contact_email": "support@globus.org",
+                          'display_name": "Globus SDK Demo Project",
+                          'admin_group_ids": None,
+                          'id": "927d7238-f917-4eb2-9ace-c523fa9ba34e",
+                          'project_name": "Globus SDK Demo Project",
+                          'admins": {
+                            'identities": ["41143743-f3c8-4d60-bbdb-eeecaba85bd9"],
+                            'groups": [],
+                          },
+                      ]
+                    }
+
+                The result itself is iterable, so you can use it like so:
+
+                .. code-block:: python
+
+                    for project in ac.get_projects():
+                        print(f"name: {project['display_name']}")
+                        print(f"id: {project['id']}")
+                        print()
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: auth.get_projects
+
+            .. tab-item:: API Info
+
+                ``GET /v2/api/projects``
+
+                .. extdoclink:: Get Projects
+                    :ref: auth/reference/#get_projects
+        """  # noqa: E501
+        return GetProjectsResponse(self.get("/v2/api/projects"))
 
     def oauth2_get_authorize_url(
         self, *, query_params: dict[str, t.Any] | None = None
