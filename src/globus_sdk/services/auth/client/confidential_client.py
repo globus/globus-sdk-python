@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import typing as t
 
-from globus_sdk import exc
 from globus_sdk._types import ScopeCollectionType, UUIDLike
 from globus_sdk.authorizers import BasicAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
@@ -36,18 +35,23 @@ class ConfidentialAppAuthClient(AuthClient):
     .. automethodlist:: globus_sdk.ConfidentialAppAuthClient
     """
 
-    def __init__(self, client_id: UUIDLike, client_secret: str, **kwargs: t.Any):
-        if "authorizer" in kwargs:
-            log.error("ArgumentError(ConfidentialAppClient.authorizer)")
-            raise exc.GlobusSDKUsageError(
-                "Cannot give a ConfidentialAppAuthClient an authorizer"
-            )
+    def __init__(
+        self,
+        client_id: UUIDLike,
+        client_secret: str,
+        environment: str | None = None,
+        base_url: str | None = None,
+        app_name: str | None = None,
+        transport_params: dict[str, t.Any] | None = None,
+    ) -> None:
         super().__init__(
             client_id=client_id,
             authorizer=BasicAuthorizer(str(client_id), client_secret),
-            **kwargs,
+            environment=environment,
+            base_url=base_url,
+            app_name=app_name,
+            transport_params=transport_params,
         )
-        log.info(f"Finished initializing client, client_id={client_id}")
 
     def oauth2_client_credentials_tokens(
         self,

@@ -9,6 +9,8 @@ import typing as t
 import jwt
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 
+from globus_sdk.authorizers import GlobusAuthorizer
+
 if sys.version_info >= (3, 8):
     # pylint can't handle quoted annotations yet:
     # https://github.com/PyCQA/pylint/issues/3299
@@ -72,13 +74,32 @@ class AuthClient(client.BaseClient):
     error_class = AuthAPIError
     scopes = AuthScopes
 
-    def __init__(self, client_id: UUIDLike | None = None, **kwargs: t.Any) -> None:
-        super().__init__(**kwargs)
+    def __init__(
+        self,
+        client_id: UUIDLike | None = None,
+        environment: str | None = None,
+        base_url: str | None = None,
+        authorizer: GlobusAuthorizer | None = None,
+        app_name: str | None = None,
+        transport_params: dict[str, t.Any] | None = None,
+    ) -> None:
+        super().__init__(
+            environment=environment,
+            base_url=base_url,
+            authorizer=authorizer,
+            app_name=app_name,
+            transport_params=transport_params,
+        )
         self.client_id: str | None = str(client_id) if client_id is not None else None
         # an AuthClient may contain a GlobusOAuth2FlowManager in order to
         # encapsulate the functionality of various different types of flow
         # managers
         self.current_oauth2_flow_manager: GlobusOAuthFlowManager | None = None
+
+        log.info(
+            "Finished initializing AuthClient. "
+            f"client_id='{client_id}', type(authorizer)={type(authorizer)}"
+        )
 
     def get_identities(
         self,

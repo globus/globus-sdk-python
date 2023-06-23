@@ -1,3 +1,4 @@
+import unittest.mock
 import uuid
 
 import pytest
@@ -28,3 +29,15 @@ def test_can_use_uuid_or_str_for_client_id(client_type, pass_value_as):
         raise NotImplementedError
 
     assert client.client_id == CLIENT_ID_STR
+
+
+def test_native_app_auth_client_rejects_authorizer():
+    authorizer = unittest.mock.Mock()
+    with pytest.raises(TypeError):
+        NativeAppAuthClient(CLIENT_ID_UUID, authorizer=authorizer)
+
+
+def test_confidential_app_auth_client_rejects_authorizer():
+    authorizer = unittest.mock.Mock()
+    with pytest.raises(TypeError):
+        ConfidentialAppAuthClient(CLIENT_ID_UUID, "foo-secret", authorizer=authorizer)

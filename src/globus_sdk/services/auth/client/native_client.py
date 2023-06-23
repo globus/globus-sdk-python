@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 import typing as t
 
-from globus_sdk import exc
 from globus_sdk._types import ScopeCollectionType, UUIDLike
 from globus_sdk.authorizers import NullAuthorizer
 
@@ -31,15 +30,22 @@ class NativeAppAuthClient(AuthClient):
     .. automethodlist:: globus_sdk.NativeAppAuthClient
     """
 
-    def __init__(self, client_id: UUIDLike, **kwargs: t.Any) -> None:
-        if "authorizer" in kwargs:
-            log.error("ArgumentError(NativeAppClient.authorizer)")
-            raise exc.GlobusSDKUsageError(
-                "Cannot give a NativeAppAuthClient an authorizer"
-            )
-
-        super().__init__(client_id=client_id, authorizer=NullAuthorizer(), **kwargs)
-        log.info(f"Finished initializing client, client_id={client_id}")
+    def __init__(
+        self,
+        client_id: UUIDLike,
+        environment: str | None = None,
+        base_url: str | None = None,
+        app_name: str | None = None,
+        transport_params: dict[str, t.Any] | None = None,
+    ) -> None:
+        super().__init__(
+            client_id=client_id,
+            authorizer=NullAuthorizer(),
+            environment=environment,
+            base_url=base_url,
+            app_name=app_name,
+            transport_params=transport_params,
+        )
 
     def oauth2_start_flow(
         self,
