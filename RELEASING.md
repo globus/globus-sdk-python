@@ -20,5 +20,5 @@
     _This will run a workflow to publish to test-pypi_
 - Create a GitHub release with a copy of the changelog
     _This will run a workflow to publish to pypi_
-    - You can use `./scripts/last-changelog-as-md.py` to get GitHub-flavored
+    - You can use `./scripts/changelog2md.py` to get GitHub-flavored
       markdown from the last changelog section
