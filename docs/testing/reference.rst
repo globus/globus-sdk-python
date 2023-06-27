@@ -6,8 +6,6 @@
 _testing Reference
 ==================
 
-:ref:`Back to _testing root <testing_root>`.
-
 .. module:: globus_sdk._testing
 
 Functions

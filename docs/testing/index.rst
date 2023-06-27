@@ -19,4 +19,4 @@ Globus SDK _testing
 
     getting_started
     reference
-    method_list
+    methods/index

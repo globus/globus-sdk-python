@@ -6,8 +6,6 @@
 Getting Started with _testing
 =============================
 
-:ref:`Back to _testing root <testing_root>`.
-
 Dependencies
 ------------
 
