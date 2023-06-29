@@ -378,6 +378,7 @@ class AuthClient(client.BaseClient):
         self,
         display_name: str,
         contact_email: str,
+        *,
         admin_ids: UUIDLike | t.Iterable[UUIDLike] | None = None,
         admin_group_ids: UUIDLike | t.Iterable[UUIDLike] | None = None,
     ) -> GlobusHTTPResponse:
@@ -437,6 +438,67 @@ class AuthClient(client.BaseClient):
         if admin_group_ids is not None:
             body["admin_group_ids"] = list(utils.safe_strseq_iter(admin_group_ids))
         return self.post("/v2/api/projects", data={"project": body})
+
+    def update_project(
+        self,
+        project_id: UUIDLike,
+        *,
+        display_name: str | None = None,
+        contact_email: str | None = None,
+        admin_ids: UUIDLike | t.Iterable[UUIDLike] | None = None,
+        admin_group_ids: UUIDLike | t.Iterable[UUIDLike] | None = None,
+    ) -> GlobusHTTPResponse:
+        """
+        Update a project. Requires the ``manage_projects`` scope.
+
+        :param project_id: The ID of the project to update
+        :type project_id: str or uuid
+        :param display_name: The name of the project
+        :type display_name: str
+        :param contact_email: The email address of the project's point of contact
+        :type contact_email: str
+        :param admin_ids: A list of user IDs to be set as admins of the project
+        :type admin_ids: str or uuid or iterable of str or uuid, optional
+        :param admin_group_ids: A list of group IDs to be set as admins of the project
+        :type admin_group_ids: str or uuid or iterable of str or uuid, optional
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                The following snippet uses the ``manage_projects`` scope as well
+                as the ``email`` scope to get the current user email address and set it
+                as a project's contact email:
+
+                .. code-block:: pycon
+
+                    >>> ac = globus_sdk.AuthClient(...)
+                    >>> project_id = ...
+                    >>> userinfo = ac.oauth2_userinfo()
+                    >>> email = userinfo["email"]
+                    >>> r = ac.update_project(project_id, contact_email=email)
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: auth.update_project
+
+            .. tab-item:: API Info
+
+                ``POST /v2/api/projects``
+
+                .. extdoclink:: Update Project
+                    :ref: auth/reference/#update_project
+        """
+        body: dict[str, t.Any] = {}
+        if display_name is not None:
+            body["display_name"] = display_name
+        if contact_email is not None:
+            body["contact_email"] = contact_email
+        if admin_ids is not None:
+            body["admin_ids"] = list(utils.safe_strseq_iter(admin_ids))
+        if admin_group_ids is not None:
+            body["admin_group_ids"] = list(utils.safe_strseq_iter(admin_group_ids))
+        return self.put(f"/v2/api/projects/{project_id}", data={"project": body})
 
     #
     # OAuth2 Behaviors & APIs
