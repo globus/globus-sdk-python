@@ -71,16 +71,20 @@ class AuthorizationParameterInfo(ErrorInfo):
             data.get("session_required_single_domain"),
         )
 
-        # get str|None and parse as appropriate
+        # get str|list[str]|None and parse as appropriate
         self.session_required_policies: list[str] | None = None
         session_required_policies = data.get("session_required_policies")
         if isinstance(session_required_policies, str):
             self.session_required_policies = session_required_policies.split(",")
+        elif isinstance(session_required_policies, list):
+            self.session_required_policies = [
+                p for p in session_required_policies if isinstance(p, str)
+            ]
         elif session_required_policies is not None:
             log.warning(
                 "During ErrorInfo instantiation, got unexpected type for "
                 "'session_required_policies'. "
-                f"Expected 'str', but got '{type(session_required_policies)}'"
+                f"Expected 'str' or 'list', but got '{type(session_required_policies)}'"
             )
 
 
