@@ -180,6 +180,29 @@ def test_authz_params_info_containing_session_message(make_json_response):
     )
 
 
+def test_authz_params_info_containing_malformed_session_message(make_json_response):
+    res = make_json_response(
+        {"authorization_parameters": {"session_message": 100}}, 401
+    )
+    err = GlobusAPIError(res.r)
+    assert bool(err.info.authorization_parameters) is True
+    assert err.info.authorization_parameters.session_message is None
+    assert err.info.authorization_parameters.session_required_identities is None
+    assert err.info.authorization_parameters.session_required_single_domain is None
+    assert err.info.authorization_parameters.session_required_policies is None
+    _strmatch_any_order(
+        str(err.info.authorization_parameters),
+        "AuthorizationParameterInfo(",
+        [
+            "session_message=None",
+            "session_required_identities=None",
+            "session_required_single_domain=None",
+            "session_required_policies=None",
+        ],
+        ")",
+    )
+
+
 def test_authz_params_info_containing_session_required_identities(make_json_response):
     res = make_json_response(
         {"authorization_parameters": {"session_required_identities": ["foo", "bar"]}},
@@ -200,6 +223,32 @@ def test_authz_params_info_containing_session_required_identities(make_json_resp
         [
             "session_message=None",
             "session_required_identities=['foo', 'bar']",
+            "session_required_single_domain=None",
+            "session_required_policies=None",
+        ],
+        ")",
+    )
+
+
+def test_authz_params_info_containing_malformed_session_required_identities(
+    make_json_response,
+):
+    res = make_json_response(
+        {"authorization_parameters": {"session_required_identities": "foo,bar"}},
+        401,
+    )
+    err = GlobusAPIError(res.r)
+    assert bool(err.info.authorization_parameters) is True
+    assert err.info.authorization_parameters.session_message is None
+    assert err.info.authorization_parameters.session_required_identities is None
+    assert err.info.authorization_parameters.session_required_single_domain is None
+    assert err.info.authorization_parameters.session_required_policies is None
+    _strmatch_any_order(
+        str(err.info.authorization_parameters),
+        "AuthorizationParameterInfo(",
+        [
+            "session_message=None",
+            "session_required_identities=None",
             "session_required_single_domain=None",
             "session_required_policies=None",
         ],
@@ -240,9 +289,38 @@ def test_authz_params_info_containing_session_required_single_domain(
     )
 
 
-def test_authz_params_info_containing_session_required_policies(make_json_response):
+def test_authz_params_info_containing_malformed_session_required_single_domain(
+    make_json_response,
+):
     res = make_json_response(
-        {"authorization_parameters": {"session_required_policies": "foo,bar"}}, 401
+        {"authorization_parameters": {"session_required_single_domain": "foo,bar"}},
+        401,
+    )
+    err = GlobusAPIError(res.r)
+    assert bool(err.info.authorization_parameters) is True
+    assert err.info.authorization_parameters.session_message is None
+    assert err.info.authorization_parameters.session_required_identities is None
+    assert err.info.authorization_parameters.session_required_single_domain is None
+    assert err.info.authorization_parameters.session_required_policies is None
+    _strmatch_any_order(
+        str(err.info.authorization_parameters),
+        "AuthorizationParameterInfo(",
+        [
+            "session_message=None",
+            "session_required_identities=None",
+            "session_required_single_domain=None",
+            "session_required_policies=None",
+        ],
+        ")",
+    )
+
+
+@pytest.mark.parametrize("policies_value", ["foo,bar", ["foo", "bar"]])
+def test_authz_params_info_containing_session_required_policies(
+    make_json_response, policies_value
+):
+    res = make_json_response(
+        {"authorization_parameters": {"session_required_policies": policies_value}}, 401
     )
     err = GlobusAPIError(res.r)
     assert bool(err.info.authorization_parameters) is True
@@ -269,7 +347,7 @@ def test_authz_params_info_containing_malformed_session_required_policies(
     # confirm that if `session_required_policies` is not a string,
     # it will parse as `None`
     res = make_json_response(
-        {"authorization_parameters": {"session_required_policies": ["foo"]}}, 401
+        {"authorization_parameters": {"session_required_policies": {"foo": "bar"}}}, 401
     )
     err = GlobusAPIError(res.r)
     assert bool(err.info.authorization_parameters) is True

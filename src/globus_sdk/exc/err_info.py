@@ -6,6 +6,10 @@ import typing as t
 log = logging.getLogger(__name__)
 
 
+def _is_list_of_strs(obj: t.Any) -> bool:
+    return isinstance(obj, list) and all(isinstance(item, str) for item in obj)
+
+
 class ErrorInfo:
     """
     Errors may contain "containers" of data which are testable (define ``__bool__``).
@@ -62,30 +66,75 @@ class AuthorizationParameterInfo(ErrorInfo):
             t.Dict[str, t.Any], error_data.get("authorization_parameters", {})
         )
 
-        self.session_message = t.cast(t.Optional[str], data.get("session_message"))
-        self.session_required_identities = t.cast(
-            t.Optional[t.List[str]], data.get("session_required_identities")
-        )
-        self.session_required_single_domain = t.cast(
-            t.Optional[t.List[str]],
-            data.get("session_required_single_domain"),
-        )
+        self.session_message: str | None = self._parse_session_message(data)
 
-        # get str|list[str]|None and parse as appropriate
-        self.session_required_policies: list[str] | None = None
+        self.session_required_identities: (
+            list[str] | None
+        ) = self._parse_session_required_identities(data)
+
+        self.session_required_single_domain: (
+            list[str] | None
+        ) = self._parse_session_required_single_domain(data)
+
+        self.session_required_policies: (
+            list[str] | None
+        ) = self._parse_session_required_policies(data)
+
+    def _parse_session_message(self, data: dict[str, t.Any]) -> str | None:
+        session_message = data.get("session_message")
+        if isinstance(session_message, str):
+            return session_message
+        elif session_message is not None:
+            self._warn_type("session_message", "str", session_message)
+        return None
+
+    def _parse_session_required_identities(
+        self, data: dict[str, t.Any]
+    ) -> list[str] | None:
+        session_required_identities = data.get("session_required_identities")
+        if _is_list_of_strs(session_required_identities):
+            return session_required_identities
+        elif session_required_identities is not None:
+            self._warn_type(
+                "session_required_identities",
+                "list[str]",
+                session_required_identities,
+            )
+        return None
+
+    def _parse_session_required_single_domain(
+        self, data: dict[str, t.Any]
+    ) -> list[str] | None:
+        session_required_single_domain = data.get("session_required_single_domain")
+        if _is_list_of_strs(session_required_single_domain):
+            return session_required_single_domain
+        elif session_required_single_domain is not None:
+            self._warn_type(
+                "session_required_single_domain",
+                "list[str]",
+                session_required_single_domain,
+            )
+        return None
+
+    def _parse_session_required_policies(
+        self, data: dict[str, t.Any]
+    ) -> list[str] | None:
         session_required_policies = data.get("session_required_policies")
         if isinstance(session_required_policies, str):
-            self.session_required_policies = session_required_policies.split(",")
-        elif isinstance(session_required_policies, list):
-            self.session_required_policies = [
-                p for p in session_required_policies if isinstance(p, str)
-            ]
+            return session_required_policies.split(",")
+        elif _is_list_of_strs(session_required_policies):
+            return session_required_policies
         elif session_required_policies is not None:
-            log.warning(
-                "During ErrorInfo instantiation, got unexpected type for "
-                "'session_required_policies'. "
-                f"Expected 'str' or 'list', but got '{type(session_required_policies)}'"
+            self._warn_type(
+                "session_required_policies", "list[str]|str", session_required_policies
             )
+        return None
+
+    def _warn_type(self, key: str, expected: str, got: t.Any) -> None:
+        log.warning(
+            f"During ErrorInfo instantiation, got unexpected type for '{key}'. "
+            f"Expected '{expected}'. Got '{got}'"
+        )
 
 
 class ConsentRequiredInfo(ErrorInfo):
@@ -107,11 +156,9 @@ class ConsentRequiredInfo(ErrorInfo):
         self._has_data = has_code and bool(self.required_scopes)
 
     def _parse_required_scopes(self, data: dict[str, t.Any]) -> list[str]:
-        if isinstance(data.get("required_scopes"), list) and all(
-            isinstance(item, str) for item in data["required_scopes"]
-        ):
+        if _is_list_of_strs(data.get("required_scopes")):
             return t.cast("list[str]", data["required_scopes"])
-        if isinstance(data.get("required_scope"), str):
+        elif isinstance(data.get("required_scope"), str):
             return [data["required_scope"]]
         return []
 
