@@ -21,7 +21,7 @@ def test_raw_json_works():
         "errors": [
             {
                 "message": "json error message",
-                "title": "json error message",
+                "title": "json error title",
             }
         ],
     }
