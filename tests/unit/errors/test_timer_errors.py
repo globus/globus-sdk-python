@@ -1,20 +1,22 @@
 from globus_sdk import TimerAPIError
+from globus_sdk._testing import construct_error
 
 
-def test_timer_error_load_simple(make_json_response):
-    response = make_json_response(
-        {"error": {"code": "ERROR", "detail": "Request failed", "status": 500}},
-        500,
+def test_timer_error_load_simple():
+    err = construct_error(
+        error_class=TimerAPIError,
+        body={"error": {"code": "ERROR", "detail": "Request failed", "status": 500}},
+        http_status=500,
     )
 
-    err = TimerAPIError(response.r)
     assert err.code == "ERROR"
     assert err.message == "Request failed"
 
 
-def test_timer_error_load_nested(make_json_response):
-    response = make_json_response(
-        {
+def test_timer_error_load_nested():
+    err = construct_error(
+        error_class=TimerAPIError,
+        body={
             "detail": [
                 {
                     "loc": ["body", "start"],
@@ -28,17 +30,14 @@ def test_timer_error_load_nested(make_json_response):
                 },
             ]
         },
-        422,
+        http_status=422,
     )
 
-    err = TimerAPIError(response.r)
     assert err.code == "Validation Error"
     assert err.message == "field required: body.start; field required: body.end"
 
 
-def test_timer_error_load_unrecognized_format(make_json_response):
-    response = make_json_response({}, 400)
-
-    err = TimerAPIError(response.r)
+def test_timer_error_load_unrecognized_format():
+    err = construct_error(error_class=TimerAPIError, body={}, http_status=400)
     assert err.code == "Error"
     assert err.message is None

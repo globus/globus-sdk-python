@@ -1,56 +1,85 @@
 import pytest
 
 from globus_sdk import AuthAPIError
+from globus_sdk._testing import construct_error
 
 
-@pytest.fixture
-def simple_auth_response(make_json_response):
-    auth_data = {"detail": "simple auth error message"}
-    return make_json_response(auth_data, 404)
+def test_auth_error_get_args_simple():
+    err = construct_error(
+        error_class=AuthAPIError,
+        http_status=404,
+        body={"detail": "simple auth error message"},
+    )
+    req = err._underlying_response.request
+
+    assert err._get_args() == [
+        req.method,
+        req.url,
+        None,
+        404,
+        "Error",
+        "simple auth error message",
+    ]
 
 
-@pytest.fixture
-def nested_auth_response(make_json_response):
-    auth_data = {
-        "errors": [
-            {"detail": "nested auth error message", "code": "Auth Error"},
-            {
-                "title": "some secondary error",
-                "code": "HiddenError",
-            },
-        ]
-    }
-    return make_json_response(auth_data, 404)
+def test_nested_auth_error_message_and_code():
+    err = construct_error(
+        error_class=AuthAPIError,
+        http_status=404,
+        body={
+            "errors": [
+                {"detail": "nested auth error message", "code": "Auth Error"},
+                {
+                    "title": "some secondary error",
+                    "code": "HiddenError",
+                },
+            ]
+        },
+    )
+
+    assert err.message == "nested auth error message; some secondary error"
+    assert err.code == "Error"
 
 
 @pytest.mark.parametrize(
-    "response_fixture_name, status, code, message",
+    "error_body, expected_error_id",
     (
-        # normal auth error data
-        ("simple_auth_response", "404", "Error", "simple auth error message"),
         (
-            "nested_auth_response",
-            "404",
-            "Error",
-            "nested auth error message; some secondary error",
+            {
+                "errors": [
+                    {"id": "foo"},
+                ]
+            },
+            "foo",
         ),
-        # wrong format (but still parseable)
-        ("default_json_response", "400", "Json Error", "json error message"),
-        # defaults for non-json data
-        ("default_text_response", "401", "Error", "Unauthorized"),
-        # malformed data is at least rendered successfully into an error
-        ("malformed_response", "403", "Error", "Forbidden"),
+        (
+            {
+                "errors": [
+                    {"id": "foo"},
+                    {"id": "bar"},
+                ]
+            },
+            None,
+        ),
+        (
+            {
+                "errors": [
+                    {"id": "foo"},
+                    {"id": "foo"},
+                ]
+            },
+            "foo",
+        ),
+        (
+            {"errors": [{"id": "foo"}, {"id": "foo"}, {}]},
+            "foo",
+        ),
     ),
 )
-def test_get_args_auth(request, response_fixture_name, status, code, message):
-    response = request.getfixturevalue(response_fixture_name)
-
-    err = AuthAPIError(response.r)
-    assert err._get_args() == [
-        response.method,
-        response.url,
-        None,
-        status,
-        code,
-        message,
-    ]
+def test_auth_error_parses_error_id(error_body, expected_error_id):
+    err = construct_error(
+        error_class=AuthAPIError,
+        http_status=404,
+        body=error_body,
+    )
+    assert err.request_id == expected_error_id

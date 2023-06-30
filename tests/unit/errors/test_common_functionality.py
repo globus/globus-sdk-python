@@ -5,6 +5,7 @@ import pytest
 import requests
 
 from globus_sdk import ErrorSubdocument, GlobusAPIError, RemovedInV4Warning, exc
+from globus_sdk._testing import construct_error
 
 
 def _strmatch_any_order(inputstr, prefix, midfixes, suffix, sep=", "):
@@ -14,35 +15,54 @@ def _strmatch_any_order(inputstr, prefix, midfixes, suffix, sep=", "):
     ]
 
 
-def test_raw_json_works(default_json_response):
-    err = GlobusAPIError(default_json_response.r)
-    assert err.raw_json == default_json_response.data
+def test_raw_json_works():
+    data = {
+        "code": "Json Error",
+        "errors": [
+            {
+                "message": "json error message",
+                "title": "json error message",
+            }
+        ],
+    }
+
+    err = construct_error(error_class=GlobusAPIError, body=data, http_status=400)
+    assert err.raw_json == data
 
 
-def test_raw_json_fail(default_text_response, malformed_response):
-    err = GlobusAPIError(default_text_response.r)
+@pytest.mark.parametrize(
+    "body, response_headers",
+    (
+        ("text_data", {}),  # plain text
+        ("{", {"Content-Type": "application/json"}),  # malformed JSON
+    ),
+)
+def test_raw_json_none_on_nonjson_data(body, response_headers):
+    err = construct_error(
+        error_class=GlobusAPIError,
+        body=body,
+        response_headers=response_headers,
+        http_status=400,
+    )
     assert err.raw_json is None
 
-    err = GlobusAPIError(malformed_response.r)
-    assert err.raw_json is None
+
+@pytest.mark.parametrize("body", ("text_data", {"foo": "bar"}))
+def test_text_property_works(body):
+    err = construct_error(error_class=GlobusAPIError, body=body, http_status=400)
+    expected_text = body if isinstance(body, str) else json.dumps(body)
+    assert err.text == expected_text
 
 
-def test_text_property_works(default_json_response, default_text_response):
-    err = GlobusAPIError(default_json_response.r)
-    assert err.text == json.dumps(default_json_response.data)
-    err = GlobusAPIError(default_text_response.r)
-    assert err.text == default_text_response.data
+def test_binary_content_property():
+    body_text = "some data"
+    err = construct_error(error_class=GlobusAPIError, body=body_text, http_status=400)
+    assert err.binary_content == body_text.encode("utf-8")
 
 
-def test_binary_content_property(default_text_response):
-    err = GlobusAPIError(default_text_response.r)
-    assert err.binary_content == default_text_response.data.encode("utf-8")
-
-
-def test_raw_text_property_works_but_warns(
-    default_json_response, default_text_response
-):
-    err = GlobusAPIError(default_json_response.r)
+def test_raw_text_property_works_but_warns():
+    body_text = "some data"
+    err = construct_error(error_class=GlobusAPIError, body=body_text, http_status=400)
     with pytest.warns(
         RemovedInV4Warning,
         match=(
@@ -50,68 +70,72 @@ def test_raw_text_property_works_but_warns(
             r"Use the 'text' property instead\."
         ),
     ):
-        assert err.raw_text == json.dumps(default_json_response.data)
+        assert err.raw_text == body_text
 
 
-def test_get_args(default_json_response, default_text_response, malformed_response):
-    err = GlobusAPIError(default_json_response.r)
+@pytest.mark.parametrize(
+    "body, response_headers, http_status, expect_code, expect_message",
+    (
+        ("text_data", {}, 401, "Error", "Unauthorized"),  # text
+        # JSON with unrecognized contents
+        (
+            {"foo": "bar"},
+            {"Content-Type": "application/json"},
+            403,
+            "Error",
+            "Forbidden",
+        ),
+        # JSON with well-known contents
+        (
+            {"code": "foo", "message": "bar"},
+            {"Content-Type": "application/json"},
+            403,
+            "foo",
+            "bar",
+        ),
+        # non-dict JSON with well-known contents
+        (
+            "[]",
+            {"Content-Type": "application/json"},
+            403,
+            "Error",
+            "Forbidden",
+        ),
+        # invalid JSON
+        (
+            "{",
+            {"Content-Type": "application/json"},
+            400,
+            "Error",
+            "Bad Request",
+        ),
+    ),
+)
+def test_get_args(body, response_headers, http_status, expect_code, expect_message):
+    err = construct_error(
+        error_class=GlobusAPIError,
+        body=body,
+        response_headers=response_headers,
+        http_status=http_status,
+    )
+    req = err._underlying_response.request
     assert err._get_args() == [
-        default_json_response.method,
-        default_json_response.url,
+        req.method,
+        req.url,
         None,
-        "400",
-        "Json Error",
-        "json error message",
-    ]
-    err = GlobusAPIError(default_text_response.r)
-    assert err._get_args() == [
-        default_text_response.method,
-        default_text_response.url,
-        None,
-        "401",
-        "Error",
-        "Unauthorized",
-    ]
-    err = GlobusAPIError(malformed_response.r)
-    assert err._get_args() == [
-        default_text_response.method,
-        default_text_response.url,
-        None,
-        "403",
-        "Error",
-        "Forbidden",
+        http_status,
+        expect_code,
+        expect_message,
     ]
 
 
-def test_get_args_on_unknown_json(make_json_response):
-    res = make_json_response({"foo": "bar"}, 400)
-    err = GlobusAPIError(res.r)
-    assert err._get_args() == [
-        res.method,
-        res.url,
-        None,
-        "400",
-        "Error",
-        "Bad Request",
-    ]
-
-
-def test_get_args_on_non_dict_json(make_json_response):
-    res = make_json_response(["foo", "bar"], 400)
-    err = GlobusAPIError(res.r)
-    assert err._get_args() == [
-        res.method,
-        res.url,
-        None,
-        "400",
-        "Error",
-        "Bad Request",
-    ]
-
-
-def test_info_is_falsey_on_non_dict_json(make_json_response):
-    res = make_json_response(["foo", "bar"], 400)
-    err = GlobusAPIError(res.r)
+def test_info_is_falsey_on_non_dict_json():
+    err = construct_error(
+        error_class=GlobusAPIError,
+        body="[]",
+        response_headers={"Content-Type": "application/json"},
+        http_status=400,
+    )
     assert bool(err.info.consent_required) is False
     assert bool(err.info.authorization_parameters) is False
     assert str(err.info) == "AuthorizationParameterInfo(:)|ConsentRequiredInfo(:)"
@@ -136,9 +160,8 @@ def test_info_is_falsey_on_non_dict_json(make_json_response):
         ({"code": "ConsentRequired", "required_scope": 1}, False, None),
     ),
 )
-def test_consent_required_info(make_json_response, body, is_detected, required_scopes):
-    res = make_json_response(body, 403)
-    err = GlobusAPIError(res.r)
+def test_consent_required_info(body, is_detected, required_scopes):
+    err = construct_error(error_class=GlobusAPIError, body=body, http_status=403)
 
     if is_detected:
         assert bool(err.info.consent_required) is True
@@ -147,7 +170,7 @@ def test_consent_required_info(make_json_response, body, is_detected, required_s
         assert bool(err.info.consent_required) is False
 
 
-def test_consent_required_info_str(make_json_response):
+def test_consent_required_info_str():
     info = exc.ConsentRequiredInfo(
         {"code": "ConsentRequired", "required_scopes": ["foo", "bar"]}
     )
@@ -157,11 +180,10 @@ def test_consent_required_info_str(make_json_response):
     assert str(info) == "ConsentRequiredInfo(:)"
 
 
-def test_authz_params_info_containing_session_message(make_json_response):
-    res = make_json_response(
-        {"authorization_parameters": {"session_message": "foo"}}, 401
-    )
-    err = GlobusAPIError(res.r)
+def test_authz_params_info_containing_session_message():
+    body = {"authorization_parameters": {"session_message": "foo"}}
+    err = construct_error(error_class=GlobusAPIError, body=body, http_status=403)
+
     assert bool(err.info.authorization_parameters) is True
     assert err.info.authorization_parameters.session_message == "foo"
     assert err.info.authorization_parameters.session_required_identities is None
@@ -181,10 +203,9 @@ def test_authz_params_info_containing_session_message(make_json_response):
 
 
 def test_authz_params_info_containing_malformed_session_message(make_json_response):
-    res = make_json_response(
-        {"authorization_parameters": {"session_message": 100}}, 401
-    )
-    err = GlobusAPIError(res.r)
+    body = {"authorization_parameters": {"session_message": 100}}
+    err = construct_error(error_class=GlobusAPIError, body=body, http_status=403)
+
     assert bool(err.info.authorization_parameters) is True
     assert err.info.authorization_parameters.session_message is None
     assert err.info.authorization_parameters.session_required_identities is None
@@ -203,12 +224,10 @@ def test_authz_params_info_containing_malformed_session_message(make_json_respon
     )
 
 
-def test_authz_params_info_containing_session_required_identities(make_json_response):
-    res = make_json_response(
-        {"authorization_parameters": {"session_required_identities": ["foo", "bar"]}},
-        401,
-    )
-    err = GlobusAPIError(res.r)
+def test_authz_params_info_containing_session_required_identities():
+    body = {"authorization_parameters": {"session_required_identities": ["foo", "bar"]}}
+    err = construct_error(error_class=GlobusAPIError, body=body, http_status=403)
+
     assert bool(err.info.authorization_parameters) is True
     assert err.info.authorization_parameters.session_message is None
     assert err.info.authorization_parameters.session_required_identities == [
@@ -230,14 +249,10 @@ def test_authz_params_info_containing_session_required_identities(make_json_resp
     )
 
 
-def test_authz_params_info_containing_malformed_session_required_identities(
-    make_json_response,
-):
-    res = make_json_response(
-        {"authorization_parameters": {"session_required_identities": "foo,bar"}},
-        401,
-    )
-    err = GlobusAPIError(res.r)
+def test_authz_params_info_containing_malformed_session_required_identities():
+    body = {"authorization_parameters": {"session_required_identities": "foo,bar"}}
+    err = construct_error(error_class=GlobusAPIError, body=body, http_status=403)
+
     assert bool(err.info.authorization_parameters) is True
     assert err.info.authorization_parameters.session_message is None
     assert err.info.authorization_parameters.session_required_identities is None
@@ -256,18 +271,11 @@ def test_authz_params_info_containing_malformed_session_required_identities(
     )
 
 
-def test_authz_params_info_containing_session_required_single_domain(
-    make_json_response,
-):
-    res = make_json_response(
-        {
-            "authorization_parameters": {
-                "session_required_single_domain": ["foo", "bar"]
-            }
-        },
-        401,
-    )
-    err = GlobusAPIError(res.r)
+def test_authz_params_info_containing_session_required_single_domain():
+    body = {
+        "authorization_parameters": {"session_required_single_domain": ["foo", "bar"]}
+    }
+    err = construct_error(error_class=GlobusAPIError, body=body, http_status=403)
     assert bool(err.info.authorization_parameters) is True
     assert err.info.authorization_parameters.session_message is None
     assert err.info.authorization_parameters.session_required_identities is None
@@ -289,14 +297,12 @@ def test_authz_params_info_containing_session_required_single_domain(
     )
 
 
-def test_authz_params_info_containing_malformed_session_required_single_domain(
-    make_json_response,
-):
-    res = make_json_response(
+def test_authz_params_info_containing_malformed_session_required_single_domain():
+    body = (
         {"authorization_parameters": {"session_required_single_domain": "foo,bar"}},
-        401,
     )
-    err = GlobusAPIError(res.r)
+    err = construct_error(error_class=GlobusAPIError, body=body, http_status=403)
+
     assert bool(err.info.authorization_parameters) is True
     assert err.info.authorization_parameters.session_message is None
     assert err.info.authorization_parameters.session_required_identities is None
@@ -316,13 +322,9 @@ def test_authz_params_info_containing_malformed_session_required_single_domain(
 
 
 @pytest.mark.parametrize("policies_value", ["foo,bar", ["foo", "bar"]])
-def test_authz_params_info_containing_session_required_policies(
-    make_json_response, policies_value
-):
-    res = make_json_response(
-        {"authorization_parameters": {"session_required_policies": policies_value}}, 401
-    )
-    err = GlobusAPIError(res.r)
+def test_authz_params_info_containing_session_required_policies(policies_value):
+    body = {"authorization_parameters": {"session_required_policies": policies_value}}
+    err = construct_error(error_class=GlobusAPIError, body=body, http_status=403)
     assert bool(err.info.authorization_parameters) is True
     assert err.info.authorization_parameters.session_message is None
     assert err.info.authorization_parameters.session_required_identities is None
@@ -341,15 +343,12 @@ def test_authz_params_info_containing_session_required_policies(
     )
 
 
-def test_authz_params_info_containing_malformed_session_required_policies(
-    make_json_response,
-):
-    # confirm that if `session_required_policies` is not a string,
+def test_authz_params_info_containing_malformed_session_required_policies():
+    # confirm that if `session_required_policies` is not str|list[str],
     # it will parse as `None`
-    res = make_json_response(
-        {"authorization_parameters": {"session_required_policies": {"foo": "bar"}}}, 401
-    )
-    err = GlobusAPIError(res.r)
+    body = {"authorization_parameters": {"session_required_policies": {"foo": "bar"}}}
+    err = construct_error(error_class=GlobusAPIError, body=body, http_status=403)
+
     assert bool(err.info.authorization_parameters) is True
     assert err.info.authorization_parameters.session_required_policies is None
     _strmatch_any_order(
@@ -409,26 +408,21 @@ def test_convert_requests_exception(orig, conv_class):
         (500, "Internal Server Error"),
     ],
 )
-def test_http_reason_exposure(make_response, status, expect_reason):
-    res = make_response(
-        {"errors": [{"message": "json error message", "code": "Json Error"}]},
-        status,
-        data_transform=json.dumps,
-        headers={"Content-Type": "application/json"},
-    )
-    err = GlobusAPIError(res.r)
+def test_http_reason_exposure(status, expect_reason):
+    body = {"errors": [{"message": "json error message", "code": "Json Error"}]}
+    err = construct_error(error_class=GlobusAPIError, body=body, http_status=status)
     assert err.http_reason == expect_reason
 
 
 def test_http_header_exposure(make_response):
-    res = make_response(
-        {"errors": [{"message": "json error message", "code": "Json Error"}]},
-        400,
-        data_transform=json.dumps,
-        headers={"Content-Type": "application/json", "Spam": "Eggs"},
+    body = {"errors": [{"message": "json error message", "code": "Json Error"}]}
+    err = construct_error(
+        error_class=GlobusAPIError,
+        body=body,
+        http_status=400,
+        response_headers={"Content-Type": "application/json", "Spam": "Eggs"},
     )
-    err = GlobusAPIError(res.r)
-    assert err.headers["spam"] == "Eggs"
+    assert err.headers["Spam"] == "Eggs"
     assert err.headers["Content-Type"] == "application/json"
 
 
@@ -451,7 +445,6 @@ def test_http_header_exposure(make_response):
     ],
 )
 def test_error_repr_has_expected_info(
-    make_response,
     http_method,
     http_status,
     authz_scheme,
@@ -475,16 +468,15 @@ def test_error_repr_has_expected_info(
         request_headers["Authorization"] = f"{authz_scheme} TOKENINFO"
 
     # build the response -> error -> error repr
-    res = make_response(
-        body,
-        http_status,
+    err = construct_error(
+        error_class=GlobusAPIError,
+        body=body,
+        http_status=http_status,
         method=http_method,
-        data_transform=json.dumps,
         url=request_url,
-        headers=headers,
+        response_headers=headers,
         request_headers=request_headers,
     )
-    err = GlobusAPIError(res.r)
     stringified = repr(err)
 
     # check using substring -- do not check exact format
@@ -513,32 +505,32 @@ def test_error_repr_has_expected_info(
     "content_type",
     ("application/json", "application/unknown+json", "application/vnd.api+json"),
 )
-def test_loads_jsonapi_error_subdocuments(make_response, content_type):
-    res = make_response(
-        {
-            "errors": [
-                {
-                    "code": "TooShort",
-                    "title": "Password data too short",
-                    "detail": "password was only 3 chars long, must be at least 8",
-                },
-                {
-                    "code": "MissingSpecial",
-                    "title": "Password data missing special chars",
-                    "detail": "password must have non-alphanumeric characters",
-                },
-                {
-                    "code": "ContainsCommonDogName",
-                    "title": "Password data has a popular dog name",
-                    "detail": "password cannot contain 'spot', 'woofy', or 'clifford'",
-                },
-            ]
-        },
-        422,
-        data_transform=json.dumps,
-        headers={"Content-Type": content_type},
+def test_loads_jsonapi_error_subdocuments(content_type):
+    body = {
+        "errors": [
+            {
+                "code": "TooShort",
+                "title": "Password data too short",
+                "detail": "password was only 3 chars long, must be at least 8",
+            },
+            {
+                "code": "MissingSpecial",
+                "title": "Password data missing special chars",
+                "detail": "password must have non-alphanumeric characters",
+            },
+            {
+                "code": "ContainsCommonDogName",
+                "title": "Password data has a popular dog name",
+                "detail": "password cannot contain 'spot', 'woofy', or 'clifford'",
+            },
+        ]
+    }
+    err = construct_error(
+        error_class=GlobusAPIError,
+        body=body,
+        http_status=422,
+        response_headers={"Content-Type": content_type},
     )
-    err = GlobusAPIError(res.r)
 
     # code is not taken from any of the subdocuments (inherently too ambiguous)
     # behavior will depend on which parsing path was taken
@@ -562,27 +554,27 @@ def test_loads_jsonapi_error_subdocuments(make_response, content_type):
     "content_type",
     ("application/json", "application/unknown+json", "application/vnd.api+json"),
 )
-def test_loads_jsonapi_error_subdocuments_with_common_code(make_response, content_type):
-    res = make_response(
-        {
-            "errors": [
-                {
-                    "code": "MissingClass",
-                    "title": "Must contain capital letter",
-                    "detail": "password must contain at least one capital letter",
-                },
-                {
-                    "code": "MissingClass",
-                    "title": "Must contain special chars",
-                    "detail": "password must have non-alphanumeric characters",
-                },
-            ]
-        },
-        422,
-        data_transform=json.dumps,
-        headers={"Content-Type": content_type},
+def test_loads_jsonapi_error_subdocuments_with_common_code(content_type):
+    body = {
+        "errors": [
+            {
+                "code": "MissingClass",
+                "title": "Must contain capital letter",
+                "detail": "password must contain at least one capital letter",
+            },
+            {
+                "code": "MissingClass",
+                "title": "Must contain special chars",
+                "detail": "password must have non-alphanumeric characters",
+            },
+        ]
+    }
+    err = construct_error(
+        error_class=GlobusAPIError,
+        body=body,
+        http_status=422,
+        response_headers={"Content-Type": content_type},
     )
-    err = GlobusAPIError(res.r)
     # code is taken because all subdocuments have the same code
     assert err.code == "MissingClass"
 
@@ -591,26 +583,27 @@ def test_loads_jsonapi_error_subdocuments_with_common_code(make_response, conten
     "content_type",
     ("application/json", "application/unknown+json", "application/vnd.api+json"),
 )
-def test_loads_jsonapi_error_messages_from_various_fields(make_response, content_type):
-    res = make_response(
-        {
-            "errors": [
-                {
-                    "message": "invalid password value",
-                },
-                {
-                    "title": "Must contain capital letter",
-                },
-                {
-                    "detail": "password must have non-alphanumeric characters",
-                },
-            ]
-        },
-        422,
-        data_transform=json.dumps,
-        headers={"Content-Type": content_type},
+def test_loads_jsonapi_error_messages_from_various_fields(content_type):
+    body = {
+        "errors": [
+            {
+                "message": "invalid password value",
+            },
+            {
+                "title": "Must contain capital letter",
+            },
+            {
+                "detail": "password must have non-alphanumeric characters",
+            },
+        ]
+    }
+    err = construct_error(
+        error_class=GlobusAPIError,
+        body=body,
+        http_status=422,
+        response_headers={"Content-Type": content_type},
     )
-    err = GlobusAPIError(res.r)
+
     # messages are extracted, and they use whichever field is appropriate for
     # each sub-error
     # note that 'message' will *not* be extracted if the Content-Type indicated JSON:API
@@ -643,16 +636,8 @@ def test_loads_jsonapi_error_messages_from_various_fields(make_response, content
         {"message": "FooMessage"},
     ),
 )
-def test_non_jsonapi_parsing_uses_root_as_errors_array_by_default(
-    make_response, error_doc
-):
-    res = make_response(
-        error_doc,
-        422,
-        data_transform=json.dumps,
-        headers={"Content-Type": "application/json"},
-    )
-    err = GlobusAPIError(res.r)
+def test_non_jsonapi_parsing_uses_root_as_errors_array_by_default(error_doc):
+    err = construct_error(error_class=GlobusAPIError, body=error_doc, http_status=422)
 
     # errors is the doc root wrapped in a list, but converted to a subdocument error
     assert len(err.errors) == 1
@@ -677,14 +662,8 @@ def test_non_jsonapi_parsing_uses_root_as_errors_array_by_default(
         {"message": "FooMessage", "errors": []},
     ),
 )
-def test_non_jsonapi_parsing_uses_errors_array_if_present(make_response, error_doc):
-    res = make_response(
-        error_doc,
-        422,
-        data_transform=json.dumps,
-        headers={"Content-Type": "application/json"},
-    )
-    err = GlobusAPIError(res.r)
+def test_non_jsonapi_parsing_uses_errors_array_if_present(error_doc):
+    err = construct_error(error_class=GlobusAPIError, body=error_doc, http_status=422)
 
     # errors is the 'errors' list converted to error subdocs
     # first some sanity checks...

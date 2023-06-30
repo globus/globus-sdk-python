@@ -21,6 +21,8 @@ Functions
 
 .. autofunction:: load_response
 
+.. autofunction:: construct_error
+
 Classes
 -------
 

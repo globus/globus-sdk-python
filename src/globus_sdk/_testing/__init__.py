@@ -1,4 +1,4 @@
-from .helpers import get_last_request
+from .helpers import construct_error, get_last_request
 from .models import RegisteredResponse, ResponseList, ResponseSet
 from .registry import (
     get_response_set,
@@ -9,6 +9,7 @@ from .registry import (
 
 __all__ = (
     "get_last_request",
+    "construct_error",
     "ResponseSet",
     "ResponseList",
     "RegisteredResponse",
