@@ -1,5 +1,4 @@
 import itertools
-import json
 
 import pytest
 import requests
@@ -15,7 +14,7 @@ def _strmatch_any_order(inputstr, prefix, midfixes, suffix, sep=", "):
     ]
 
 
-def test_raw_json_works():
+def test_raw_json_property():
     data = {
         "code": "Json Error",
         "errors": [
@@ -26,7 +25,7 @@ def test_raw_json_works():
         ],
     }
 
-    err = construct_error(error_class=GlobusAPIError, body=data, http_status=400)
+    err = construct_error(body=data, http_status=400)
     assert err.raw_json == data
 
 
@@ -38,31 +37,24 @@ def test_raw_json_works():
     ),
 )
 def test_raw_json_none_on_nonjson_data(body, response_headers):
-    err = construct_error(
-        error_class=GlobusAPIError,
-        body=body,
-        response_headers=response_headers,
-        http_status=400,
-    )
+    err = construct_error(body=body, response_headers=response_headers, http_status=400)
     assert err.raw_json is None
 
 
-@pytest.mark.parametrize("body", ("text_data", {"foo": "bar"}))
-def test_text_property_works(body):
-    err = construct_error(error_class=GlobusAPIError, body=body, http_status=400)
-    expected_text = body if isinstance(body, str) else json.dumps(body)
-    assert err.text == expected_text
+def test_text_property():
+    err = construct_error(body="text_data", http_status=400)
+    assert err.text == "text_data"
 
 
 def test_binary_content_property():
     body_text = "some data"
-    err = construct_error(error_class=GlobusAPIError, body=body_text, http_status=400)
+    err = construct_error(body=body_text, http_status=400)
     assert err.binary_content == body_text.encode("utf-8")
 
 
-def test_raw_text_property_works_but_warns():
+def test_raw_text_property_warns():
     body_text = "some data"
-    err = construct_error(error_class=GlobusAPIError, body=body_text, http_status=400)
+    err = construct_error(body=body_text, http_status=400)
     with pytest.warns(
         RemovedInV4Warning,
         match=(
@@ -113,10 +105,7 @@ def test_raw_text_property_works_but_warns():
 )
 def test_get_args(body, response_headers, http_status, expect_code, expect_message):
     err = construct_error(
-        error_class=GlobusAPIError,
-        body=body,
-        response_headers=response_headers,
-        http_status=http_status,
+        body=body, response_headers=response_headers, http_status=http_status
     )
     req = err._underlying_response.request
     assert err._get_args() == [
@@ -131,7 +120,6 @@ def test_get_args(body, response_headers, http_status, expect_code, expect_messa
 
 def test_info_is_falsey_on_non_dict_json():
     err = construct_error(
-        error_class=GlobusAPIError,
         body="[]",
         response_headers={"Content-Type": "application/json"},
         http_status=400,
@@ -161,7 +149,7 @@ def test_info_is_falsey_on_non_dict_json():
     ),
 )
 def test_consent_required_info(body, is_detected, required_scopes):
-    err = construct_error(error_class=GlobusAPIError, body=body, http_status=403)
+    err = construct_error(body=body, http_status=403)
 
     if is_detected:
         assert bool(err.info.consent_required) is True
@@ -182,7 +170,7 @@ def test_consent_required_info_str():
 
 def test_authz_params_info_containing_session_message():
     body = {"authorization_parameters": {"session_message": "foo"}}
-    err = construct_error(error_class=GlobusAPIError, body=body, http_status=403)
+    err = construct_error(body=body, http_status=403)
 
     assert bool(err.info.authorization_parameters) is True
     assert err.info.authorization_parameters.session_message == "foo"
@@ -226,7 +214,7 @@ def test_authz_params_info_containing_malformed_session_message(make_json_respon
 
 def test_authz_params_info_containing_session_required_identities():
     body = {"authorization_parameters": {"session_required_identities": ["foo", "bar"]}}
-    err = construct_error(error_class=GlobusAPIError, body=body, http_status=403)
+    err = construct_error(body=body, http_status=403)
 
     assert bool(err.info.authorization_parameters) is True
     assert err.info.authorization_parameters.session_message is None
@@ -275,7 +263,8 @@ def test_authz_params_info_containing_session_required_single_domain():
     body = {
         "authorization_parameters": {"session_required_single_domain": ["foo", "bar"]}
     }
-    err = construct_error(error_class=GlobusAPIError, body=body, http_status=403)
+    err = construct_error(body=body, http_status=403)
+
     assert bool(err.info.authorization_parameters) is True
     assert err.info.authorization_parameters.session_message is None
     assert err.info.authorization_parameters.session_required_identities is None
@@ -301,7 +290,7 @@ def test_authz_params_info_containing_malformed_session_required_single_domain()
     body = (
         {"authorization_parameters": {"session_required_single_domain": "foo,bar"}},
     )
-    err = construct_error(error_class=GlobusAPIError, body=body, http_status=403)
+    err = construct_error(body=body, http_status=403)
 
     assert bool(err.info.authorization_parameters) is True
     assert err.info.authorization_parameters.session_message is None
@@ -347,7 +336,7 @@ def test_authz_params_info_containing_malformed_session_required_policies():
     # confirm that if `session_required_policies` is not str|list[str],
     # it will parse as `None`
     body = {"authorization_parameters": {"session_required_policies": {"foo": "bar"}}}
-    err = construct_error(error_class=GlobusAPIError, body=body, http_status=403)
+    err = construct_error(body=body, http_status=403)
 
     assert bool(err.info.authorization_parameters) is True
     assert err.info.authorization_parameters.session_required_policies is None
@@ -410,14 +399,13 @@ def test_convert_requests_exception(orig, conv_class):
 )
 def test_http_reason_exposure(status, expect_reason):
     body = {"errors": [{"message": "json error message", "code": "Json Error"}]}
-    err = construct_error(error_class=GlobusAPIError, body=body, http_status=status)
+    err = construct_error(body=body, http_status=status)
     assert err.http_reason == expect_reason
 
 
 def test_http_header_exposure(make_response):
     body = {"errors": [{"message": "json error message", "code": "Json Error"}]}
     err = construct_error(
-        error_class=GlobusAPIError,
         body=body,
         http_status=400,
         response_headers={"Content-Type": "application/json", "Spam": "Eggs"},
@@ -469,7 +457,6 @@ def test_error_repr_has_expected_info(
 
     # build the response -> error -> error repr
     err = construct_error(
-        error_class=GlobusAPIError,
         body=body,
         http_status=http_status,
         method=http_method,
@@ -526,10 +513,7 @@ def test_loads_jsonapi_error_subdocuments(content_type):
         ]
     }
     err = construct_error(
-        error_class=GlobusAPIError,
-        body=body,
-        http_status=422,
-        response_headers={"Content-Type": content_type},
+        body=body, http_status=422, response_headers={"Content-Type": content_type}
     )
 
     # code is not taken from any of the subdocuments (inherently too ambiguous)
@@ -570,10 +554,7 @@ def test_loads_jsonapi_error_subdocuments_with_common_code(content_type):
         ]
     }
     err = construct_error(
-        error_class=GlobusAPIError,
-        body=body,
-        http_status=422,
-        response_headers={"Content-Type": content_type},
+        body=body, http_status=422, response_headers={"Content-Type": content_type}
     )
     # code is taken because all subdocuments have the same code
     assert err.code == "MissingClass"
@@ -598,10 +579,7 @@ def test_loads_jsonapi_error_messages_from_various_fields(content_type):
         ]
     }
     err = construct_error(
-        error_class=GlobusAPIError,
-        body=body,
-        http_status=422,
-        response_headers={"Content-Type": content_type},
+        body=body, http_status=422, response_headers={"Content-Type": content_type}
     )
 
     # messages are extracted, and they use whichever field is appropriate for
@@ -637,7 +615,7 @@ def test_loads_jsonapi_error_messages_from_various_fields(content_type):
     ),
 )
 def test_non_jsonapi_parsing_uses_root_as_errors_array_by_default(error_doc):
-    err = construct_error(error_class=GlobusAPIError, body=error_doc, http_status=422)
+    err = construct_error(body=error_doc, http_status=422)
 
     # errors is the doc root wrapped in a list, but converted to a subdocument error
     assert len(err.errors) == 1
@@ -663,7 +641,7 @@ def test_non_jsonapi_parsing_uses_root_as_errors_array_by_default(error_doc):
     ),
 )
 def test_non_jsonapi_parsing_uses_errors_array_if_present(error_doc):
-    err = construct_error(error_class=GlobusAPIError, body=error_doc, http_status=422)
+    err = construct_error(body=error_doc, http_status=422)
 
     # errors is the 'errors' list converted to error subdocs
     # first some sanity checks...
