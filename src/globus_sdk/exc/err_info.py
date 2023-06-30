@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 import logging
+import sys
 import typing as t
+
+if sys.version_info < (3, 10):
+    from typing_extensions import TypeGuard
+else:
+    from typing import TypeGuard
 
 log = logging.getLogger(__name__)
 
 
-def _is_list_of_strs(obj: t.Any) -> bool:
+def _is_list_of_strs(obj: t.Any) -> TypeGuard[list[str]]:
     return isinstance(obj, list) and all(isinstance(item, str) for item in obj)
 
 
