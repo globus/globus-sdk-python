@@ -190,7 +190,7 @@ def test_authz_params_info_containing_session_message():
     )
 
 
-def test_authz_params_info_containing_malformed_session_message(make_json_response):
+def test_authz_params_info_containing_malformed_session_message():
     body = {"authorization_parameters": {"session_message": 100}}
     err = construct_error(error_class=GlobusAPIError, body=body, http_status=403)
 
