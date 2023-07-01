@@ -287,9 +287,7 @@ def test_authz_params_info_containing_session_required_single_domain():
 
 
 def test_authz_params_info_containing_malformed_session_required_single_domain():
-    body = (
-        {"authorization_parameters": {"session_required_single_domain": "foo,bar"}},
-    )
+    body = {"authorization_parameters": {"session_required_single_domain": "foo,bar"}}
     err = construct_error(body=body, http_status=403)
 
     assert bool(err.info.authorization_parameters) is True
