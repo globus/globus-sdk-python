@@ -371,13 +371,27 @@ class AuthClient(client.BaseClient):
         return GetProjectsResponse(self.get("/v2/api/projects"))
 
     def oauth2_get_authorize_url(
-        self, *, query_params: dict[str, t.Any] | None = None
+        self,
+        *,
+        session_required_identities: UUIDLike | t.Iterable[UUIDLike] | None = None,
+        session_required_single_domain: str | t.Iterable[str] | None = None,
+        session_required_policies: UUIDLike | t.Iterable[UUIDLike] | None = None,
+        query_params: dict[str, t.Any] | None = None,
     ) -> str:
         """
         Get the authorization URL to which users should be sent.
         This method may only be called after ``oauth2_start_flow``
         has been called on this ``AuthClient``.
 
+        :param session_required_identities: A list of identities must be
+            added to the session.
+        :type session_required_identities: str or uuid or list of str or uuid, optional
+        :param session_required_single_domain: A list of domain requirements
+            which must be satisfied by identities added to the session.
+        :type session_required_single_domain: str or list of str, optional
+        :param session_required_policies: A list of IDs for policies which must
+            be satisfied by the user.
+        :type session_required_policies: str or uuid or list of str or uuid, optional
         :param query_params: Additional query parameters to include in the
             authorize URL. Primarily for internal use
         :type query_params: dict, optional
@@ -389,6 +403,20 @@ class AuthClient(client.BaseClient):
                 "Cannot get authorize URL until starting an OAuth2 flow. "
                 "Call the oauth2_start_flow() method on this "
                 "AuthClient to resolve"
+            )
+        if query_params is None:
+            query_params = {}
+        if session_required_identities is not None:
+            query_params["session_required_identities"] = _commasep(
+                session_required_identities
+            )
+        if session_required_single_domain is not None:
+            query_params["session_required_single_domain"] = _commasep(
+                session_required_single_domain
+            )
+        if session_required_policies is not None:
+            query_params["session_required_policies"] = _commasep(
+                session_required_policies
             )
         auth_url = self.current_oauth2_flow_manager.get_authorize_url(
             query_params=query_params

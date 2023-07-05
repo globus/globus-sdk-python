@@ -1,4 +1,5 @@
 import urllib.parse
+import uuid
 
 import pytest
 
@@ -16,6 +17,135 @@ def client(no_retry_transport):
         transport_class = no_retry_transport
 
     return CustomAuthClient(client_id=CLIENT_ID)
+
+
+@pytest.fixture
+def native_client(no_retry_transport):
+    class CustomAuthClient(globus_sdk.NativeAppAuthClient):
+        transport_class = no_retry_transport
+
+    return CustomAuthClient(client_id=CLIENT_ID)
+
+
+@pytest.fixture
+def confidential_client(no_retry_transport):
+    class CustomAuthClient(globus_sdk.ConfidentialAppAuthClient):
+        transport_class = no_retry_transport
+
+    return CustomAuthClient(
+        client_id=CLIENT_ID, client_secret="SECRET_SECRET_HES_GOT_A_SECRET"
+    )
+
+
+# build a partial matrix over
+#
+#   domain: str | list[str]
+#   identities: uuid | str | list[uuid] | list[str] | list[str | uuid]
+#   policies: uuid | str | list[uuid] | list[str] | list[str | uuid]
+#
+# start by seeding a small set of combinations of params to test, then run some loops to
+# fill in the rest
+_ALL_SESSION_PARAM_COMBINATIONS = [
+    (None, None, None),
+    ("foo-id", "bar-id", "baz-id"),
+    (["foo-id", "bar-id"], None, ["quux-id", "snork-id"]),
+    (None, ["foo-id", "bar-id"], ["quux-id", "snork-id"]),
+]
+for domain_option in (None, "example.edu", ["example.edu", "example.org"]):
+    _ALL_SESSION_PARAM_COMBINATIONS.append((domain_option, None, None))
+for identity_option in (
+    None,
+    uuid.UUID(int=0),
+    "foo-id",
+    [uuid.UUID(int=0), uuid.UUID(int=1)],
+    ["foo-id", "bar-id"],
+    ["foo-id", uuid.UUID(int=2)],
+):
+    _ALL_SESSION_PARAM_COMBINATIONS.append((None, identity_option, None))
+for policy_option in (
+    None,
+    uuid.UUID(int=3),
+    "baz-id",
+    [uuid.UUID(int=3), uuid.UUID(int=4)],
+    ["baz-id", "quux-id"],
+    ["baz-id", uuid.UUID(int=5)],
+):
+    _ALL_SESSION_PARAM_COMBINATIONS.append((None, None, policy_option))
+
+
+@pytest.mark.parametrize("flow_type", ("native_app", "confidential_app"))
+# parametrize over both what is and what *is not* passed as a parameter
+@pytest.mark.parametrize(
+    "domain_option, identity_option, policy_option", _ALL_SESSION_PARAM_COMBINATIONS
+)
+def test_oauth2_get_authorize_url_supports_session_params(
+    native_client,
+    confidential_client,
+    flow_type,
+    domain_option,
+    identity_option,
+    policy_option,
+):
+    if flow_type == "native_app":
+        client = native_client
+    elif flow_type == "confidential_app":
+        client = confidential_client
+    else:
+        raise NotImplementedError
+
+    # get the url...
+    client.oauth2_start_flow(redirect_uri="https://example.com", requested_scopes="foo")
+    url_res = client.oauth2_get_authorize_url(
+        session_required_single_domain=domain_option,
+        session_required_identities=identity_option,
+        session_required_policies=policy_option,
+    )
+
+    # parse the result..
+    parsed_url = urllib.parse.urlparse(url_res)
+    parsed_params = urllib.parse.parse_qs(parsed_url.query)
+
+    # prepare some helper data...
+    expected_params_keys = {
+        "session_required_single_domain" if domain_option else None,
+        "session_required_identities" if identity_option else None,
+        "session_required_policies" if policy_option else None,
+    }
+    expected_params_keys.discard(None)
+    unexpected_query_params = {
+        "session_required_single_domain",
+        "session_required_identities",
+        "session_required_policies",
+    } - expected_params_keys
+    parsed_params_keys = set(parsed_params.keys())
+
+    # ...and validate!
+    assert expected_params_keys <= parsed_params_keys
+    assert (unexpected_query_params - parsed_params_keys) == unexpected_query_params
+
+    if domain_option is not None:
+        strized_option = (
+            ",".join(str(x) for x in domain_option)
+            if isinstance(domain_option, list)
+            else str(domain_option)
+        )
+        assert parsed_params["session_required_single_domain"] == [strized_option]
+
+    if identity_option is not None:
+        strized_option = (
+            ",".join(str(x) for x in identity_option)
+            if isinstance(identity_option, list)
+            else str(identity_option)
+        )
+        assert parsed_params["session_required_identities"] == [strized_option]
+
+    if policy_option is not None:
+        strized_option = (
+            ",".join(str(x) for x in policy_option)
+            if isinstance(policy_option, list)
+            else str(policy_option)
+        )
+        assert parsed_params["session_required_policies"] == [strized_option]
 
 
 def test_oauth2_get_authorize_url_native_defaults(client):
