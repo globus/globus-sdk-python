@@ -68,3 +68,14 @@ Style guidance which doesn't get handled by linters and fixers:
 
   - If a docstring contains special characters like `\\`, consider using a raw
     string to ensure it renders correctly
+
+  - Use the `*` marker for keyword-only arguments for any signatures which
+    take keyword arguments. (For an explanation, see
+    [PEP 3102](https://peps.python.org/pep-3102/).)
+
+  - Avoid use of `**kwargs` to capture arbitrary keyword arguments.  Instead,
+    always define a named dict argument for any open extension points (see
+    `query_params` for prior art in the SDK, or `extra` in `logging` for a
+    case from the stdlib).
+    This makes type checking more effective and avoids a class of backwards
+    compatibility issues when arguments are added.
