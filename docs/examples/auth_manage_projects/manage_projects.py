@@ -71,8 +71,7 @@ def create_project(args):
 
 def update_project(args):
     auth_client = get_auth_client(reauth=args.reauth)
-    userinfo = auth_client.oauth2_userinfo()
-    kwargs = {"admin_ids": userinfo["sub"]}
+    kwargs = {}
     if args.name is not None:
         kwargs["display_name"] = args.name
     print(auth_client.update_project(args.project_id, **kwargs))

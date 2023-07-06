@@ -41,9 +41,6 @@ List, Create, Update, and Delete Projects via the Auth API
 
     The following script has destructive capabilities.
 
-    On update, the current user is *always* set as the only admin and
-    contact for projects. This means that other admins are implicitly removed.
-
     Deleting projects may be harmful to your production applications.
     Only delete with care.
 
