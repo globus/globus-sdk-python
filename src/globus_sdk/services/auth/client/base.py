@@ -500,6 +500,36 @@ class AuthClient(client.BaseClient):
             body["admin_group_ids"] = list(utils.safe_strseq_iter(admin_group_ids))
         return self.put(f"/v2/api/projects/{project_id}", data={"project": body})
 
+    def delete_project(self, project_id: UUIDLike) -> GlobusHTTPResponse:
+        """
+        Delete a project. Requires the ``manage_projects`` scope.
+
+        :param project_id: The ID of the project to delete
+        :type project_id: str or uuid
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: pycon
+
+                    >>> ac = globus_sdk.AuthClient(...)
+                    >>> project_id = ...
+                    >>> r = ac.delete_project(project_id)
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: auth.delete_project
+
+            .. tab-item:: API Info
+
+                ``DELETE /v2/api/projects/{project_id}``
+
+                .. extdoclink:: Delete Project
+                    :ref: auth/reference/#delete_project
+        """
+        return self.delete(f"/v2/api/projects/{project_id}")
+
     #
     # OAuth2 Behaviors & APIs
     #
