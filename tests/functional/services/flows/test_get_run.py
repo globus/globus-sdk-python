@@ -19,7 +19,7 @@ def test_get_run(flows_client, include_flow_description):
         assert "include_flow_description" not in request.url
     elif include_flow_description is False:
         assert "flow_description" not in response
-        assert "include_flow_description=false" in request.url
+        assert "include_flow_description=False" in request.url
     else:  # include_flow_description is True
         assert "flow_description" in response
-        assert "include_flow_description=true" in request.url
+        assert "include_flow_description=True" in request.url

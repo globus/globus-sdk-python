@@ -587,15 +587,11 @@ class FlowsClient(client.BaseClient):
                     :ref: Flows/paths/~1runs~1{run_id}/get
         """
 
-        consolidated_query_params = query_params or {}
+        query_params = query_params or {}
         if include_flow_description is not None:
-            value = str(include_flow_description).lower()  # "true" or "false"
-            consolidated_query_params["include_flow_description"] = value
+            query_params["include_flow_description"] = include_flow_description
 
-        return self.get(
-            f"/runs/{run_id}",
-            query_params=consolidated_query_params,
-        )
+        return self.get(f"/runs/{run_id}", query_params=query_params)
 
     def cancel_run(self, run_id: UUIDLike) -> GlobusHTTPResponse:
         """
