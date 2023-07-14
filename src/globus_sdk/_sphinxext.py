@@ -221,7 +221,7 @@ class ExternalDocLink(AddContentDirective):
         elif service == "gcs":
             default_base_url = "https://docs.globus.org/globus-connect-server/v5/api"
         elif service == "flows":
-            default_base_url = "https://globusonline.github.io/flows#tag"
+            default_base_url = "https://globusonline.github.io/globus-flows#tag"
         else:
             raise ValueError(f"Unsupported extdoclink service '{service}'")
 
