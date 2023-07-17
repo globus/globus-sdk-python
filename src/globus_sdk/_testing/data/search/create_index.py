@@ -26,5 +26,30 @@ RESPONSES = ResponseSet(
             "status": "open",
         },
         metadata={"index_id": INDEX_ID},
-    )
+    ),
+    trial_limit=RegisteredResponse(
+        service="search",
+        method="POST",
+        path="/v1/index",
+        status=409,
+        json={
+            "@datatype": "GError",
+            "request_id": "38186e960f3a64c9d530d48ba2271285",
+            "status": 409,
+            "error_data": {
+                "cause": (
+                    "When creating an index, an 'owner' role is created "
+                    "automatically. If this would exceed ownership limits, this error "
+                    "is raised instead."
+                ),
+                "constraint": (
+                    "Cannot create more ownership roles on trial indices "
+                    "than the limit (3)"
+                ),
+            },
+            "@version": "2017-09-01",
+            "message": "Role limit exceeded",
+            "code": "Conflict.LimitExceeded",
+        },
+    ),
 )
