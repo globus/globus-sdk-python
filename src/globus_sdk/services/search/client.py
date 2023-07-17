@@ -39,6 +39,119 @@ class SearchClient(client.BaseClient):
     # Index Management
     #
 
+    def create_index(
+        self, display_name: str, description: str
+    ) -> response.GlobusHTTPResponse:
+        """
+        Create a new index.
+
+        :param display_name: the name of the index
+        :type display_name: str
+        :param description: a description of the index
+        :type description: str
+
+        New indices default to trial status. For subscribers with a subscription ID,
+        indices can be converted to non-trial by sending a request to support@globus.org
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    sc = globus_sdk.SearchClient(...)
+                    r = sc.create_index(
+                        "History and Witchcraft",
+                        "Searchable information about history and witchcraft",
+                    )
+                    print(f"index ID: {r['id']}")
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: search.create_index
+
+            .. tab-item:: API Info
+
+                ``POST /v1/index``
+
+                .. extdoclink:: Index Create
+                    :ref: search/reference/index_create/
+        """
+        log.info(f"SearchClient.create_index({display_name!r}, ...)")
+        return self.post(
+            "/v1/index", data={"display_name": display_name, "description": description}
+        )
+
+    def delete_index(self, index_id: UUIDLike) -> response.GlobusHTTPResponse:
+        """
+        Mark an index for deletion.
+
+        Globus Search does not immediately delete indices. Instead, this API sets the
+        index status to ``"delete-pending"``.
+        Search will move pending tasks on the index to the ``CANCELLED`` state and will
+        eventually delete the index.
+
+        If the index is a trial index, it will be deleted a few minutes after being
+        marked for deletion.
+        If the index is non-trial, it will be kept for 30 days and will be eligible for
+        use with the ``reopen`` API (see :meth:`~.reopen_index`) during that time.
+
+        :param index_id: the ID of the index
+        :type index_id: str or UUID
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    sc = globus_sdk.SearchClient(...)
+                    sc.delete_index(index_id)
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: search.delete_index
+
+            .. tab-item:: API Info
+
+                ``DELETE /v1/index/<index_id>``
+
+                .. extdoclink:: Index Delete
+                    :ref: search/reference/index_delete/
+        """
+        log.info(f"SearchClient.delete_index({index_id!r}, ...)")
+        return self.delete(f"/v1/index/{index_id}")
+
+    def reopen_index(self, index_id: UUIDLike) -> response.GlobusHTTPResponse:
+        """
+        Reopen an index that has been marked for deletion, cancelling the deletion.
+
+        :param index_id: the ID of the index
+        :type index_id: str or UUID
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    sc = globus_sdk.SearchClient(...)
+                    sc.reopen_index(index_id)
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: search.reopen_index
+
+            .. tab-item:: API Info
+
+                ``POST /v1/index/<index_id>/reopen``
+
+                .. extdoclink:: Index Reopen
+                    :ref: search/reference/index_reopen/
+        """
+        log.info(f"SearchClient.reopen_index({index_id!r}, ...)")
+        return self.post(f"/v1/index/{index_id}/reopen")
+
     def get_index(
         self,
         index_id: UUIDLike,
