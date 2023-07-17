@@ -36,6 +36,7 @@ class GCSClient(client.BaseClient):
     .. automethodlist:: globus_sdk.GCSClient
     """
 
+    # TODO: under SDK v4.0, service_name should not be set
     service_name = "globus_connect_server"
     error_class = GCSAPIError
 

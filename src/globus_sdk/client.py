@@ -27,6 +27,10 @@ class BaseClient:
         semantics of client actions. It is just passed as part of the User-Agent
         string, and may be useful when debugging issues with the Globus Team
     :type app_name: str
+    :param base_url: The URL for the service. Most client types initialize this value
+        intelligently by default. Set it when inheriting from BaseClient or
+        communicating through a proxy.
+    :type base_url: str
     :param transport_params: Options to pass to the transport for this client
     :type transport_params: dict
 
@@ -56,37 +60,40 @@ class BaseClient:
         app_name: str | None = None,
         transport_params: dict[str, t.Any] | None = None,
     ):
-        # explicitly check the `service_name` to ensure that it was set
-        #
-        # unfortunately, we can't rely on declaring BaseClient as an ABC because it
-        # doesn't have any abstract methods
-        #
-        # if we declare `service_name` without a value, we get AttributeError on access
-        # instead of the (desired) TypeError when instantiating a BaseClient because
-        # it's abstract
-        if self.service_name == "_base":
-            raise NotImplementedError(
-                "Cannot instantiate clients which do not set a 'service_name'"
-            )
-        log.info(
-            f'Creating client of type {type(self)} for service "{self.service_name}"'
-        )
-
         # if an environment was passed, it will be used, but otherwise lookup
         # the env var -- and in the special case of `production` translate to
         # `default`, regardless of the source of that value
         # logs the environment when it isn't `default`
         self.environment = config.get_environment_name(environment)
 
+        if self.service_name == "_base":
+            # service_name=="_base" means that either there was no inheritance (direct
+            # instantiation of BaseClient), or the inheriting class operates outside of
+            # the existing service_name->URL mapping paradigm
+            # in these cases, base_url must be set explicitly
+            log.info(f"Creating client of type {type(self)}")
+            if base_url is None:
+                raise NotImplementedError(
+                    "Cannot instantiate clients which do not set a 'service_name' "
+                    "unless they explicitly set 'base_url'."
+                )
+        else:
+            # if service_name is set, it can be used to deduce a base_url
+            # *if* necessary
+            log.info(
+                f"Creating client of type {type(self)} for "
+                f'service "{self.service_name}"'
+            )
+            if base_url is None:
+                base_url = config.get_service_url(
+                    self.service_name, environment=self.environment
+                )
+
+        # append the base_path to the base URL
+        self.base_url = utils.slash_join(base_url, self.base_path)
+
         self.transport = self.transport_class(**(transport_params or {}))
         log.debug(f"initialized transport of type {type(self.transport)}")
-
-        self.base_url = utils.slash_join(
-            config.get_service_url(self.service_name, environment=self.environment)
-            if base_url is None
-            else base_url,
-            self.base_path,
-        )
 
         self.authorizer = authorizer
 

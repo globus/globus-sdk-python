@@ -42,6 +42,14 @@ def test_cannot_instantiate_plain_base_client():
         globus_sdk.BaseClient()
 
 
+def test_can_instantiate_base_client_with_explicit_url():
+    # note how a trailing slash is added due to the default
+    # base_path of '/'
+    # this may change in a future major version, to preserve the base_url exactly
+    client = globus_sdk.BaseClient(base_url="https://example.org")
+    assert client.base_url == "https://example.org/"
+
+
 def test_set_http_timeout(base_client):
     class FooClient(globus_sdk.BaseClient):
         service_name = "foo"
