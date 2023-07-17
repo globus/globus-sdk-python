@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import typing as t
 
-from globus_sdk import GlobusHTTPResponse, client, paging, scopes
+from globus_sdk import GlobusHTTPResponse, client, paging, scopes, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.scopes import ScopeBuilder
@@ -491,12 +491,15 @@ class FlowsClient(client.BaseClient):
     def list_runs(
         self,
         *,
+        filter_flow_id: t.Iterable[UUIDLike] | UUIDLike | None = None,
         marker: str | None = None,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableRunsResponse:
         """
         List all runs.
 
+        :param filter_flow_id: One or more Flow IDs used to filter the results
+        :type filter_flow_id: str, UUID, or iterable of str or UUID, optional
         :param marker: A pagination marker, used to get the next page of results.
         :type marker: str, optional
         :param query_params: Any additional parameters to be passed through
@@ -524,6 +527,10 @@ class FlowsClient(client.BaseClient):
         """
         if query_params is None:
             query_params = {}
+        if filter_flow_id is not None:
+            query_params["filter_flow_id"] = ",".join(
+                utils.safe_strseq_iter(filter_flow_id)
+            )
         if marker is not None:
             query_params["marker"] = marker
         return IterableRunsResponse(self.get("/runs", query_params=query_params))
