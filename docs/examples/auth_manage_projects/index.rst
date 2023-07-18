@@ -34,8 +34,8 @@ calling the appropriate function.
     :language: python
 
 
-List, Create, Update, and Delete Projects via the Auth API
-----------------------------------------------------------
+List, Create, and Delete Projects via the Auth API
+--------------------------------------------------
 
 .. warning::
 
@@ -44,18 +44,13 @@ List, Create, Update, and Delete Projects via the Auth API
     Deleting projects may be harmful to your production applications.
     Only delete with care.
 
-The following example expands upon the former by adding update and delete
-functionality.
-For updates, the script only supports updating the ``display_name`` of a project.
+The following example expands upon the former by adding delete functionality.
 
-Because Delete and Update require authentication under a session policy, the
-login code grows here to include a storage adapter (with data kept in
+Because Delete requires authentication under a session policy, the login code
+grows here to include a storage adapter (with data kept in
 ``~/.sdk-manage-projects.json``). If a policy failure is encountered, the code
 will prompt the user to login again to satisfy the policy and then reexecute
 the desired activity.
-
-It also changes the handling of the session error to immediately and
-automatically retry execution of the operation.
 
 As a result, this example is significantly more complex, but it still follows
 the same basic pattern as above.

@@ -69,14 +69,6 @@ def create_project(args):
     )
 
 
-def update_project(args):
-    auth_client = get_auth_client(reauth=args.reauth)
-    kwargs = {}
-    if args.name is not None:
-        kwargs["display_name"] = args.name
-    print(auth_client.update_project(args.project_id, **kwargs))
-
-
 def delete_project(args):
     auth_client = get_auth_client()
     print(auth_client.delete_project(args.project_id))
@@ -92,7 +84,7 @@ def list_projects(args):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("action", choices=["create", "update", "delete", "list"])
+    parser.add_argument("action", choices=["create", "delete", "list"])
     parser.add_argument("-p", "--project-id", help="Project ID for delete")
     parser.add_argument("-n", "--name", help="Project name for create")
     args = parser.parse_args()
@@ -138,10 +130,6 @@ def execute(parser, args):
         if args.name is None:
             parser.error("create requires --name")
         create_project(args)
-    elif args.action == "update":
-        if args.project_id is None:
-            raise ValueError("update requires --project-id")
-        update_project(args)
     elif args.action == "delete":
         if args.project_id is None:
             parser.error("delete requires --project-id")
