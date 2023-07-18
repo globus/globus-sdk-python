@@ -10,11 +10,11 @@ cffi==1.15.1
     # via cryptography
 chardet==3.0.4
     # via requests
-coverage==7.2.5
+coverage==7.2.7
     # via -r test.in
 cryptography==3.3.1
     # via -r test-mindeps.in
-execnet==1.9.0
+execnet==2.0.2
     # via pytest-xdist
 idna==2.8
     # via requests
@@ -22,19 +22,19 @@ iniconfig==2.0.0
     # via pytest
 packaging==23.1
     # via pytest
-pluggy==1.0.0
+pluggy==1.2.0
     # via pytest
 pycparser==2.21
     # via cffi
 pyjwt==2.0.0
     # via -r test-mindeps.in
-pytest==7.3.1
+pytest==7.4.0
     # via
     #   -r test.in
     #   pytest-xdist
 pytest-xdist==3.3.1
     # via -r test.in
-pyyaml==6.0
+pyyaml==6.0.1
     # via responses
 requests==2.22.0
     # via

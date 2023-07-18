@@ -1,5 +1,4 @@
-# TODO: update to remove mypy pin
-mypy==0.991
+mypy
 types-docutils
 types-jwt
 types-requests
