@@ -4,7 +4,7 @@ import typing as t
 
 from globus_sdk.response import GlobusHTTPResponse
 
-from .base import PageT, Paginator
+from .base import Paginator
 
 C = t.TypeVar("C", bound=t.Callable[..., GlobusHTTPResponse])
 
@@ -40,14 +40,14 @@ class PaginatorTable:
         self._client = client
         # _bindings is a lazily loaded table of names -> callables which
         # return paginators
-        self._bindings: dict[str, t.Callable[..., Paginator[PageT]]] = {}
+        self._bindings: dict[str, t.Callable[..., Paginator[t.Any]]] = {}
 
     def _add_binding(
-        self, methodname: str, bound_method: t.Callable[..., PageT]
+        self, methodname: str, bound_method: t.Callable[..., t.Any]
     ) -> None:
         self._bindings[methodname] = Paginator.wrap(bound_method)
 
-    def __getattr__(self, attrname: str) -> t.Callable[..., Paginator[PageT]]:
+    def __getattr__(self, attrname: str) -> t.Callable[..., Paginator[t.Any]]:
         if attrname not in self._bindings:
             # this could raise AttributeError -- in which case, let it!
             method = getattr(self._client, attrname)
