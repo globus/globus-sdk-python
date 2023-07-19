@@ -48,7 +48,7 @@ def create_project(args):
     )
 
 
-def list_projects(args):
+def list_projects():
     auth_client = get_auth_client()
     for project in auth_client.get_projects():
         print(f"name: {project['display_name']}")
@@ -71,7 +71,7 @@ def execute(parser, args):
             parser.error("create requires --name")
         create_project(args)
     elif args.action == "list":
-        list_projects(args)
+        list_projects()
     else:
         raise NotImplementedError()
 

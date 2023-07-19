@@ -74,7 +74,7 @@ def delete_project(args):
     print(auth_client.delete_project(args.project_id))
 
 
-def list_projects(args):
+def list_projects():
     auth_client = get_auth_client()
     for project in auth_client.get_projects():
         print(f"name: {project['display_name']}")
@@ -135,7 +135,7 @@ def execute(parser, args):
             parser.error("delete requires --project-id")
         delete_project(args)
     elif args.action == "list":
-        list_projects(args)
+        list_projects()
     else:
         raise NotImplementedError()
 
