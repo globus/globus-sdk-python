@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 import json
 import logging
 import textwrap
@@ -190,13 +191,19 @@ class OAuthTokenResponse(GlobusHTTPResponse):
             will be fetched and parsed automatically.
         :type jwk: RSAPublicKey
         :param jwt_params: An optional dict of parameters to pass to the jwt decode
-            step. These are passed verbatim to the jwt library.
+            step. If ``"leeway"`` is included, it will be passed as the ``leeway``
+            parameter, and all other values are passed as ``options``.
         :type jwt_params: dict
         """
         logger.info('Decoding ID Token "%s"', self["id_token"])
         auth_client = t.cast("AuthClient", self.client)
 
         jwt_params = jwt_params or {}
+
+        jwt_leeway: float | datetime.timedelta = 0.5
+        if "leeway" in jwt_params:
+            jwt_params = jwt_params.copy()
+            jwt_leeway = jwt_params.pop("leeway")
 
         if not openid_configuration:
             if jwk:
@@ -222,6 +229,7 @@ class OAuthTokenResponse(GlobusHTTPResponse):
             algorithms=signing_algos,
             audience=auth_client.client_id,
             options=jwt_params,
+            leeway=jwt_leeway,
         )
         logger.debug("decode ID token finished successfully")
         return decoded

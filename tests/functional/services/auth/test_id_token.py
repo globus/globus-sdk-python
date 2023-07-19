@@ -1,4 +1,5 @@
 import json
+import time
 
 import jwt
 import pytest
@@ -69,6 +70,9 @@ TOKEN_PAYLOAD = {
     "id_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzUxMiJ9.eyJzdWIiOiJjOGFhZDQzZS1kMjc0LTExZTUtYmY5OC04YjAyODk2Y2Y3ODIiLCJvcmdhbml6YXRpb24iOiJHbG9idXMiLCJuYW1lIjoiU3RlcGhlbiBSb3NlbiIsInByZWZlcnJlZF91c2VybmFtZSI6InNpcm9zZW4yQGdsb2J1c2lkLm9yZyIsImlkZW50aXR5X3Byb3ZpZGVyIjoiNDExNDM3NDMtZjNjOC00ZDYwLWJiZGItZWVlY2FiYTg1YmQ5IiwiaWRlbnRpdHlfcHJvdmlkZXJfZGlzcGxheV9uYW1lIjoiR2xvYnVzIElEIiwiZW1haWwiOiJzaXJvc2VuQHVjaGljYWdvLmVkdSIsImxhc3RfYXV0aGVudGljYXRpb24iOjE2MjE0ODEwMDYsImlkZW50aXR5X3NldCI6W3sic3ViIjoiYzhhYWQ0M2UtZDI3NC0xMWU1LWJmOTgtOGIwMjg5NmNmNzgyIiwib3JnYW5pemF0aW9uIjoiR2xvYnVzIiwibmFtZSI6IlN0ZXBoZW4gUm9zZW4iLCJ1c2VybmFtZSI6InNpcm9zZW4yQGdsb2J1c2lkLm9yZyIsImlkZW50aXR5X3Byb3ZpZGVyIjoiNDExNDM3NDMtZjNjOC00ZDYwLWJiZGItZWVlY2FiYTg1YmQ5IiwiaWRlbnRpdHlfcHJvdmlkZXJfZGlzcGxheV9uYW1lIjoiR2xvYnVzIElEIiwiZW1haWwiOiJzaXJvc2VuQHVjaGljYWdvLmVkdSIsImxhc3RfYXV0aGVudGljYXRpb24iOjE2MjE0ODEwMDZ9LHsic3ViIjoiYjZlMjI3ZTgtZGI1Mi0xMWU1LWI2ZmYtYzNiMWNjMjU5ZTBkIiwibmFtZSI6bnVsbCwidXNlcm5hbWUiOiJzaXJvc2VuK2JhZGVtYWlsQGdsb2J1cy5vcmciLCJpZGVudGl0eV9wcm92aWRlciI6IjkyN2Q3MjM4LWY5MTctNGViMi05YWNlLWM1MjNmYTliYTM0ZSIsImlkZW50aXR5X3Byb3ZpZGVyX2Rpc3BsYXlfbmFtZSI6Ikdsb2J1cyBTdGFmZiIsImVtYWlsIjoic2lyb3NlbitiYWRlbWFpbEBnbG9idXMub3JnIiwibGFzdF9hdXRoZW50aWNhdGlvbiI6bnVsbH0seyJzdWIiOiJmN2Y4OWQwYS1kYzllLTExZTUtYWRkMC1hM2NiZDFhNTU5YjMiLCJuYW1lIjpudWxsLCJ1c2VybmFtZSI6InNpcm9zZW4rYmFkZW1haWwyQGdsb2J1cy5vcmciLCJpZGVudGl0eV9wcm92aWRlciI6IjkyN2Q3MjM4LWY5MTctNGViMi05YWNlLWM1MjNmYTliYTM0ZSIsImlkZW50aXR5X3Byb3ZpZGVyX2Rpc3BsYXlfbmFtZSI6Ikdsb2J1cyBTdGFmZiIsImVtYWlsIjoic2lyb3NlbitiYWRlbWFpbDJAZ2xvYnVzLm9yZyIsImxhc3RfYXV0aGVudGljYXRpb24iOm51bGx9XSwiaXNzIjoiaHR0cHM6Ly9hdXRoLmdsb2J1cy5vcmciLCJhdWQiOiI3ZmI1OGUwMC04MzlkLTQ0ZTMtODA0Ny0xMGE1MDI2MTJkY2EiLCJleHAiOjE2MjE2NTM4MTEsImlhdCI6MTYyMTQ4MTAxMSwiYXRfaGFzaCI6IjFQdlVhbmNFdUxfc2cxV1BsNWx1TUVGR2tjTDZQaDh1cWdpVUZzejhkZUEifQ.CtfnFtfM32ICo0euHv9GnpVHFL1jWz0NriPTXAv6w08Ylk9JBJtmB3oMKNSO-1TGoWUPFDp9TFFk6N32VyF0hsVDtT5DT3t5oq0qfqbPrZA3R04HARW0xtcK_ejNDHBmj6wysey3EzjT764XTvcGOe63CKQ_RJm97ulVaseIT0Aet7AYo5tQuOiSOQ70xzL7Oax3W6TrWi3FIAA-PIMSrAJKbsG7imGOVkaIObG9a-X5yTOcrB4IG4Wat-pN_QiCiiOw_LDCF-r455PwalmnSGUugMYfsdL2k3UxqwOMLIppHnx5-UVAzj3mygj8eZTp6imjqxNMdakS3vhG8dtxbw",  # noqa: E501
 }
 
+# this is the 'exp' value encoded above
+FIXED_JWT_EXPIRATION_TIME = 1621653811
+
 
 @pytest.fixture
 def client():
@@ -130,3 +134,21 @@ def test_decode_id_token_with_saved_oidc_config_and_jwk(token_response):
 def test_invalid_decode_id_token_usage(token_response):
     with pytest.raises(globus_sdk.exc.GlobusSDKUsageError):
         token_response.decode_id_token(jwk=JWK_PEM, jwt_params={"verify_exp": False})
+
+
+def test_decode_id_token_with_leeway(token_response):
+    register_api_route(
+        "auth",
+        "/.well-known/openid-configuration",
+        method="GET",
+        body=json.dumps(OIDC_CONFIG),
+    )
+    register_api_route("auth", "/jwk.json", method="GET", body=json.dumps(JWK))
+
+    # do a decode with a leeway parameter set high enough that the ancient
+    # expiration time will be tolerated
+    expiration_delta = time.time() - FIXED_JWT_EXPIRATION_TIME
+    decoded = token_response.decode_id_token(
+        jwt_params={"leeway": expiration_delta + 1}
+    )
+    assert decoded["preferred_username"] == "sirosen2@globusid.org"
