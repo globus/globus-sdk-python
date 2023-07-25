@@ -10,7 +10,7 @@ babel==2.12.1
     # via sphinx
 beautifulsoup4==4.12.2
     # via furo
-certifi==2023.5.7
+certifi==2023.7.22
     # via requests
 charset-normalizer==3.2.0
     # via requests
@@ -38,7 +38,7 @@ requests==2.31.0
     # via
     #   responses
     #   sphinx
-responses==0.23.1
+responses==0.23.2
     # via -r docs.in
 snowballstemmer==2.2.0
     # via sphinx
@@ -72,9 +72,9 @@ sphinxcontrib-qthelp==1.0.3
     # via sphinx
 sphinxcontrib-serializinghtml==1.1.5
     # via sphinx
-types-pyyaml==6.0.12.10
+types-pyyaml==6.0.12.11
     # via responses
-urllib3==2.0.3
+urllib3==2.0.4
     # via
     #   requests
     #   responses
