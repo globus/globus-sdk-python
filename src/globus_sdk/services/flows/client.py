@@ -10,6 +10,7 @@ from globus_sdk.scopes import ScopeBuilder
 
 from .errors import FlowsAPIError
 from .response import IterableFlowsResponse, IterableRunsResponse
+from .scopes import SpecificFlowScopesClassStub
 
 log = logging.getLogger(__name__)
 
@@ -791,6 +792,7 @@ class SpecificFlowClient(client.BaseClient):
 
     error_class = FlowsAPIError
     service_name = "flows"
+    scopes: ScopeBuilder = SpecificFlowScopesClassStub()
 
     def __init__(
         self,
