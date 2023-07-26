@@ -19,7 +19,7 @@ class SpecificFlowScopesClassStub(ScopeBuilder):
     """
 
     def __init__(self, *args: t.Any, **kwargs: t.Any) -> None:
-        pass
+        super().__init__("<stub>")
 
     def __getattr__(self, name: str) -> t.Any:
         if name == "user":
@@ -27,6 +27,11 @@ class SpecificFlowScopesClassStub(ScopeBuilder):
         elif name == "resource_server":
             _raise_attr_error("resource_server")
         return super().__getattr__(name)
+
+    def __getattribute__(self, name: str) -> t.Any:
+        if name == "resource_server":
+            _raise_attr_error("resource_server")
+        return object.__getattribute__(self, name)
 
 
 def _raise_attr_error(name: str) -> t.NoReturn:
