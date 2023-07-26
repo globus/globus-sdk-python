@@ -114,16 +114,16 @@ class BaseClient:
         self._app_name = self.transport.user_agent = value
 
     @utils.classproperty
-    def resource_server(cls) -> str | None:
+    def resource_server(self_or_cls) -> str | None:
         """
         The resource_server name for the API and scopes associated with this client.
 
         This information is pulled from the ``scopes`` attribute of the client class.
         If the client does not have associated scopes, this value will be ``None``.
         """
-        if cls.scopes is None:
+        if self_or_cls.scopes is None:
             return None
-        return cls.scopes.resource_server
+        return self_or_cls.scopes.resource_server
 
     def get(
         self,

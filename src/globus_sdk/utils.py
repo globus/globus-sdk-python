@@ -144,20 +144,14 @@ class _classproperty(t.Generic[T, R]):
     Everything in `globus_sdk.utils` is meant to be internal only, but that holds
     for this class **in particular**.
 
-    This is a well-typed Generic Descriptor which can be used to wrap `classmethod`
-    decorated functions. Usage should be:
+    This is a well-typed Generic Descriptor which can be used to wrap decorated
+    functions. Usage should be:
 
         @utils.classproperty
-        def foo(...): ...
+        def foo(self_or_cls): ...
 
-    After python3.8 EOL, this should be replaced with
-
-        @classmethod
-        @property
-        def foo(...): ...
-
-    However, this will also require proper mypy support. See also:
-      https://github.com/python/mypy/issues/2563
+    Note that this descriptor will pass an instance (self) if possible, and the
+    class (cls) only if there is no instance. This is unlike ``classmethod``.
 
     For more guidance on how this works, see the python3 descriptor guide:
       https://docs.python.org/3/howto/descriptor.html#properties
@@ -167,11 +161,20 @@ class _classproperty(t.Generic[T, R]):
         self.func = func
 
     def __get__(self, obj: t.Any, cls: type[T]) -> R:
-        return self.func(cls)
+        # NOTE: our __get__ here prefers the object over the class when possible
+        # although well-defined behavior for a descriptor, this contradicts the
+        # expectation that developers may have from `classmethod`
+        if obj is None:
+            return self.func(cls)
+        return self.func(obj)
 
 
 # if running under sphinx, define this as the stacked classmethod(property(...))
 # decoration, so that proper autodoc generation happens
+# this is based on the python3.9 behavior which supported stacking these decorators
+# however, that support was pulled in 3.10 and is not going to be reintroduced at
+# present
+# therefore, this sphinx behavior may not be stable in the long term
 if in_sphinx_build():  # pragma: no cover
 
     def classproperty(func: t.Callable[[T], R]) -> _classproperty[T, R]:
