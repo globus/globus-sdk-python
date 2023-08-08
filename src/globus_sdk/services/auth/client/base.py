@@ -9,6 +9,7 @@ import typing as t
 import jwt
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 
+from globus_sdk import _guards
 from globus_sdk.authorizers import GlobusAuthorizer
 
 if sys.version_info >= (3, 8):
@@ -701,9 +702,7 @@ class AuthClient(client.BaseClient):
 
         # if this client has no way of authenticating itself but
         # it does have a client_id, we'll send that in the request
-        no_authentication = self.authorizer is None or isinstance(
-            self.authorizer, NullAuthorizer
-        )
+        no_authentication = _guards.is_optional(self.authorizer, NullAuthorizer)
         if no_authentication and self.client_id:
             log.debug("Validating token with unauthenticated client")
             body.update({"client_id": self.client_id})

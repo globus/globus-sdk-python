@@ -7,6 +7,8 @@ import typing as t
 
 from requests import Response
 
+from globus_sdk import _guards
+
 log = logging.getLogger(__name__)
 
 if t.TYPE_CHECKING:
@@ -134,7 +136,7 @@ class GlobusHTTPResponse:
         ``get`` is just an alias for ``data.get(key, default)``, but with the added
         checks that if ``data`` is ``None`` or a list, it returns the default.
         """
-        if self.data is None or isinstance(self.data, list):
+        if _guards.is_optional(self.data, list):
             return default
         # NB: `default` is provided as a positional because the native dict type
         # doesn't recognize a keyword argument `default`

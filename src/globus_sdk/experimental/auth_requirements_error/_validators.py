@@ -20,15 +20,13 @@ def str_(name: str, value: t.Any) -> str:
 
 
 def opt_str(name: str, value: t.Any) -> str | None:
-    if value is None:
-        return None
-    if isinstance(value, str):
+    if _guards.is_optional(value, str):
         return value
     raise ValidationError(f"'{name}' must be a string or null")
 
 
 def opt_bool(name: str, value: t.Any) -> bool | None:
-    if value is None or isinstance(value, bool):
+    if _guards.is_optional(value, bool):
         return value
     raise ValidationError(f"'{name}' must be a bool or null")
 
@@ -40,20 +38,16 @@ def str_list(name: str, value: t.Any) -> list[str]:
 
 
 def opt_str_list(name: str, value: t.Any) -> list[str] | None:
-    if value is None:
-        return None
-    if _guards.is_list_of(value, str):
+    if _guards.is_optional_list_of(value, str):
         return value
     raise ValidationError(f"'{name}' must be a list of strings or null")
 
 
 def opt_str_list_or_commasep(name: str, value: t.Any) -> list[str] | None:
-    if value is None:
-        return None
-    if isinstance(value, str):
-        value = value.split(",")
-    if _guards.is_list_of(value, str):
+    if _guards.is_optional_list_of(value, str):
         return value
+    if isinstance(value, str):
+        return value.split(",")
     raise ValidationError(
         f"'{name}' must be a list of strings or a comma-delimited string or null"
     )

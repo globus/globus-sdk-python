@@ -12,6 +12,14 @@ T = t.TypeVar("T")
 
 
 def is_list_of(data: t.Any, typ: type[T]) -> TypeGuard[list[T]]:
-    if isinstance(data, list):
-        return all(isinstance(item, typ) for item in data)
-    return False
+    return isinstance(data, list) and all(isinstance(item, typ) for item in data)
+
+
+def is_optional(data: t.Any, typ: type[T]) -> TypeGuard[T | None]:
+    return data is None or isinstance(data, typ)
+
+
+def is_optional_list_of(data: t.Any, typ: type[T]) -> TypeGuard[list[T] | None]:
+    return data is None or (
+        isinstance(data, list) and all(isinstance(item, typ) for item in data)
+    )
