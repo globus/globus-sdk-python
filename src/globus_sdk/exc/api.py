@@ -6,6 +6,8 @@ import typing as t
 
 import requests
 
+from globus_sdk import _guards
+
 from .base import GlobusError
 from .err_info import ErrorInfoContainer
 from .warnings import warn_deprecated
@@ -273,7 +275,7 @@ class GlobusAPIError(GlobusError):
         # well-formed
         if self._jsonapi_mimetype():
             errors = self._dict_data.get("errors")
-            if not isinstance(errors, list):
+            if not _guards.is_list_of(errors, dict):
                 return _ErrorFormat.undefined
             elif len(errors) < 1:
                 return _ErrorFormat.undefined
@@ -321,9 +323,7 @@ class GlobusAPIError(GlobusError):
         self.code = self._dict_data["code"]
         self.messages = [self._dict_data["message"]]
         self.request_id = self._dict_data.get("request_id")
-        if isinstance(self._dict_data.get("errors"), list) and all(
-            isinstance(subdoc, dict) for subdoc in self._dict_data["errors"]
-        ):
+        if _guards.is_list_of(self._dict_data.get("errors"), dict):
             raw_errors = self._dict_data["errors"]
         else:
             raw_errors = [self._dict_data]
@@ -341,9 +341,7 @@ class GlobusAPIError(GlobusError):
         """
 
         # attempt to pull out errors if possible and valid
-        if isinstance(self._dict_data.get("errors"), list) and all(
-            isinstance(subdoc, dict) for subdoc in self._dict_data["errors"]
-        ):
+        if _guards.is_list_of(self._dict_data.get("errors"), dict):
             raw_errors = self._dict_data["errors"]
         # if no 'errors' were found, or 'errors' is invalid, then
         # 'errors' should be set to contain the root document

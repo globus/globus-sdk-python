@@ -1,19 +1,11 @@
 from __future__ import annotations
 
 import logging
-import sys
 import typing as t
 
-if sys.version_info < (3, 10):
-    from typing_extensions import TypeGuard
-else:
-    from typing import TypeGuard
+from globus_sdk import _guards
 
 log = logging.getLogger(__name__)
-
-
-def _is_list_of_strs(obj: t.Any) -> TypeGuard[list[str]]:
-    return isinstance(obj, list) and all(isinstance(item, str) for item in obj)
 
 
 class ErrorInfo:
@@ -98,7 +90,7 @@ class AuthorizationParameterInfo(ErrorInfo):
         self, data: dict[str, t.Any]
     ) -> list[str] | None:
         session_required_identities = data.get("session_required_identities")
-        if _is_list_of_strs(session_required_identities):
+        if _guards.is_list_of(session_required_identities, str):
             return session_required_identities
         elif session_required_identities is not None:
             self._warn_type(
@@ -112,7 +104,7 @@ class AuthorizationParameterInfo(ErrorInfo):
         self, data: dict[str, t.Any]
     ) -> list[str] | None:
         session_required_single_domain = data.get("session_required_single_domain")
-        if _is_list_of_strs(session_required_single_domain):
+        if _guards.is_list_of(session_required_single_domain, str):
             return session_required_single_domain
         elif session_required_single_domain is not None:
             self._warn_type(
@@ -128,7 +120,7 @@ class AuthorizationParameterInfo(ErrorInfo):
         session_required_policies = data.get("session_required_policies")
         if isinstance(session_required_policies, str):
             return session_required_policies.split(",")
-        elif _is_list_of_strs(session_required_policies):
+        elif _guards.is_list_of(session_required_policies, str):
             return session_required_policies
         elif session_required_policies is not None:
             self._warn_type(
@@ -162,7 +154,7 @@ class ConsentRequiredInfo(ErrorInfo):
         self._has_data = has_code and bool(self.required_scopes)
 
     def _parse_required_scopes(self, data: dict[str, t.Any]) -> list[str]:
-        if _is_list_of_strs(data.get("required_scopes")):
+        if _guards.is_list_of(data.get("required_scopes"), str):
             return t.cast("list[str]", data["required_scopes"])
         elif isinstance(data.get("required_scope"), str):
             return [data["required_scope"]]

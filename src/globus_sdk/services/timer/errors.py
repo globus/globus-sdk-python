@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import typing as t
 
+from globus_sdk import _guards
 from globus_sdk.exc import ErrorSubdocument, GlobusAPIError
 
 
@@ -54,7 +55,7 @@ class TimerAPIError(GlobusAPIError):
             self.code = self._extract_code_from_error_array(self.errors)
             self.messages = self._extract_messages_from_error_array(self.errors)
             return True
-        elif isinstance(self._dict_data.get("detail"), list):
+        elif _guards.is_list_of(self._dict_data.get("detail"), dict):
             # FIXME:
             # the 'code' is currently being set explicitly by the
             # SDK in this case even though none was provided by
@@ -63,11 +64,7 @@ class TimerAPIError(GlobusAPIError):
             self.code = "Validation Error"
 
             # collect the errors array from details
-            self.errors = [
-                ErrorSubdocument(d)
-                for d in self._dict_data["detail"]
-                if isinstance(d, dict)
-            ]
+            self.errors = [ErrorSubdocument(d) for d in self._dict_data["detail"]]
 
             # drop error objects which don't have the relevant fields
             # and then build custom 'messages' for Globus Timers errors
@@ -87,8 +84,6 @@ def _details_from_errors(
         if not isinstance(d.get("msg"), str):
             continue
         loc_list = d.get("loc")
-        if not isinstance(loc_list, list):
-            continue
-        if not all(isinstance(path_item, str) for path_item in loc_list):
+        if not _guards.is_list_of(loc_list, str):
             continue
         yield d.raw
