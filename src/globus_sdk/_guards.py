@@ -47,7 +47,9 @@ class _Reducer(t.Generic[T]):
     def __init__(self, typ: type[T]):
         self.typ = typ
 
-    def __call__(self, data: t.Any) -> TypeGuard[T]:
+    # although it might be nice to use __call__ here, type checkers (read: mypy) do not
+    # always correctly treat an arbitrary callable TypeGuard as a a guard
+    def apply(self, data: t.Any) -> TypeGuard[T]:
         return isinstance(data, self.typ)
 
     def list_of(self, data: t.Any) -> TypeGuard[list[T]]:

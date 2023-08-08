@@ -31,7 +31,7 @@ def _from_guard(
     return validator
 
 
-str_ = _from_guard(_guards.reduce(str), "a string")
+str_ = _from_guard(_guards.reduce(str).apply, "a string")
 opt_str = _from_guard(_guards.reduce(str).optional, "a string or null")
 opt_bool = _from_guard(_guards.reduce(bool).optional, "a bool or null")
 str_list = _from_guard(_guards.reduce(str).list_of, "a list of strings")
