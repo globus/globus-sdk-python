@@ -9,7 +9,11 @@ from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.scopes import ScopeBuilder
 
 from .errors import FlowsAPIError
-from .response import IterableFlowsResponse, IterableRunsResponse
+from .response import (
+    IterableFlowsResponse,
+    IterableRunLogsResponse,
+    IterableRunsResponse,
+)
 from .scopes import SpecificFlowScopesClassStub
 
 log = logging.getLogger(__name__)
@@ -545,7 +549,7 @@ class FlowsClient(client.BaseClient):
         reverse_order: bool | None = None,
         marker: str | None = None,
         query_params: dict[str, t.Any] | None = None,
-    ) -> IterableFlowsResponse:
+    ) -> IterableRunLogsResponse:
         """
         Retrieve the execution logs associated with a run
 
@@ -589,7 +593,7 @@ class FlowsClient(client.BaseClient):
         }
         # Filter out request keys with None values to allow server defaults
         query_params = {k: v for k, v in query_params.items() if v is not None}
-        return IterableFlowsResponse(
+        return IterableRunLogsResponse(
             self.get(f"/runs/{run_id}/log", query_params=query_params)
         )
 

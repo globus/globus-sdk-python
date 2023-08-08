@@ -15,3 +15,11 @@ class IterableRunsResponse(response.IterableResponse):
     """
 
     default_iter_key = "runs"
+
+
+class IterableRunLogsResponse(response.IterableResponse):
+    """
+    An iterable response containing an "entries" array.
+    """
+
+    default_iter_key = "entries"
