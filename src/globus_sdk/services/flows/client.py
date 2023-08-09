@@ -645,6 +645,40 @@ class FlowsClient(client.BaseClient):
 
         return self.get(f"/runs/{run_id}", query_params=query_params)
 
+    def get_run_definition(
+        self,
+        run_id: UUIDLike,
+    ) -> GlobusHTTPResponse:
+        """
+        Get the flow definition and input schema at the time the run was started.
+
+        :param run_id: The ID of the run to get
+        :type run_id: str or UUID
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    from globus_sdk import FlowsClient
+
+                    flows = FlowsClient(...)
+                    flows.get_run_definition("581753c7-45da-43d3-ad73-246b46e7cb6b")
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: flows.get_run_definition
+
+            .. tab-item:: API Info
+
+                .. extdoclink:: Get Run Definition
+                    :service: flows
+                    :ref: Flows/paths/~1runs~1{run_id}~1definition/get
+        """
+
+        return self.get(f"/runs/{run_id}/definition")
+
     def cancel_run(self, run_id: UUIDLike) -> GlobusHTTPResponse:
         """
         Cancel a run.

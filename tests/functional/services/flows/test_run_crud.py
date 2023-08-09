@@ -6,6 +6,17 @@ from globus_sdk import FlowsAPIError
 from globus_sdk._testing import get_last_request, load_response
 
 
+def test_get_run_definition(flows_client):
+    """Validate the HTTP method and route used to get the flow definition for a run."""
+
+    run_id = load_response(flows_client.get_run_definition).metadata["run_id"]
+
+    flows_client.get_run_definition(run_id)
+    request = get_last_request()
+    assert request.method == "GET"
+    assert request.url.endswith(f"/runs/{run_id}/definition")
+
+
 def test_cancel_run(flows_client):
     """Verify that run cancellation requests meet expectations."""
 
