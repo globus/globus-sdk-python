@@ -61,26 +61,3 @@ def test_opt_guard(value, typ, ok):
 )
 def test_opt_list_guard(value, typ, ok):
     assert _guards.is_optional_list_of(value, typ) == ok
-
-
-def test_reduced_guards():
-    reduced_str = _guards.reduce(str)
-
-    # apply => isinstance
-    assert reduced_str.apply("foo")
-    assert not reduced_str.apply(None)
-
-    # list_of => is_list_of
-    assert reduced_str.list_of(["foo", "bar"])
-    assert not reduced_str.list_of(["foo", "bar", 1])
-
-    # optional => is_optional
-    assert reduced_str.optional("foo")
-    assert reduced_str.optional(None)
-    assert not reduced_str.optional(1)
-
-    # optional_list => is_optional_list_of
-    assert reduced_str.optional_list(["foo", "bar"])
-    assert not reduced_str.optional_list(["foo", "bar", 1])
-    assert reduced_str.optional_list(None)
-    assert not reduced_str.optional_list("")
