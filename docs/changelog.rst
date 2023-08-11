@@ -12,6 +12,21 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-3.27.0:
+
+v3.27.0 (2023-08-11)
+--------------------
+
+Added
+~~~~~
+
+- Add a ``FlowsClient.get_run_definition()`` method. (:pr:`799`)
+
+Changed
+~~~~~~~
+
+- ``FlowsClient.get_run_logs()`` now uses an ``IterableRunLogsResponse``. (:pr:`797`)
+
 .. _changelog-3.26.0:
 
 v3.26.0 (2023-08-07)
