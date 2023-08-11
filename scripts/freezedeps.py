@@ -32,6 +32,7 @@ def main():
                 "-m",
                 "piptools",
                 "compile",
+                "--strip-extras",
                 "-q",
                 "--resolver=backtracking",
                 str(source),
