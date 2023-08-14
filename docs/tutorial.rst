@@ -49,41 +49,38 @@ Step 1: Create a Client
 In order to complete an OAuth2 flow to get tokens, you must have a client or
 "app" definition registered with Globus.
 
-Navigate to the `Developer Site <https://developers.globus.org>`_ and select
-"Register your app with Globus."
-You will be prompted to login -- do so with the account you wish to use as your
-app's administrator.
+The following steps will walk you through creating a Native App to be used as your
+Globus interaction client.
 
-When prompted, create a Project. A Project is a collection of clients with a
-shared list of administrators.
-Projects let you share the administrative burden of a collection of apps.
+1. Navigate to the `Developer Site <https://app.globus.org/settings/developers>`_
 
-In the "Add" menu for your Project, select "Add new app". To follow this
-tutorial, we will specify several values you should use.
+2. Select "Register a thick client or script that will be installed and run by users on
+   their devices."
 
-Enter the following pieces of information:
+3. Select "none of the above - create a new project" and click continue.
 
-- **Native App**: Check this Box
-- **Redirects**: https://auth.globus.org/v2/web/auth-code
+4. Fill in Project Info and click continue.
 
-and click "Create App".
+   * A Project is a collection of clients with a shared list of administrators. Projects
+     let you share the administrative burden of a collection of apps.
 
-.. warning::
+5. This will prompt you for another login, sign in with the account you chose to
+   administer the project.
 
-    The **Native App** setting cannot be changed after a client is created.
-    If it is not selected during creation, you must create a replacement client.
+6. Give your App a name; this is what users will see when they are asked to
+   authorize your app.
 
-Expand the dropdown for the new app, and you should see an array of
-attributes of your client.
+7. Click "Register App". This will create your app and take you to a page
+   describing it.
 
-You will need the Client ID from this screen.
-Feel free to think of this as your App's "username".
-You can hardcode it into scripts, store it in a config file, or even put it
-into a database.
-It's non-secure information and you can treat it as such.
+8. Copy the "Client UUID" from the page.
 
-In the rest of the tutorial we will assume in all code samples that it is
-available in the variable, ``CLIENT_ID``.
+   * This ID is can be thought of as your App's "username". It is non-secure information
+     and as such you can hardcode it into scripts, store it in a config file, or put it
+     into a database.
+
+In the rest of the tutorial we will assume in all code samples that it the Client UUID
+is available in the variable ``CLIENT_ID``.
 
 .. _tutorial_step2:
 
