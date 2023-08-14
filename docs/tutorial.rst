@@ -75,12 +75,11 @@ Globus interaction client.
 
 8. Copy the "Client UUID" from the page.
 
-   * This ID is can be thought of as your App's "username". It is non-secure information
-     and as such you can hardcode it into scripts, store it in a config file, or put it
-     into a database.
+   * This ID can be thought of as your App's "username". It is non-secure information
+     and as such, feel free to hardcode it into scripts.
 
-In the rest of the tutorial we will assume in all code samples that it the Client UUID
-is available in the variable ``CLIENT_ID``.
+In the rest of the tutorial we will assume in all code samples that the Client UUID is
+available in the variable ``CLIENT_ID``.
 
 .. _tutorial_step2:
 
