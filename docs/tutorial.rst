@@ -57,23 +57,22 @@ Globus interaction client.
 2. Select "Register a thick client or script that will be installed and run by users on
    their devices."
 
-3. Select "none of the above - create a new project" and click continue.
+3. Create or Select a Project
 
-4. Fill in Project Info and click continue.
+   * A project is a collection of apps with a shared list of administrators.
+   * If you don't own any projects, you will automatically be prompted to create one.
+   * If you do, you will be prompted to either select an existing or create a new one.
 
-   * A Project is a collection of clients with a shared list of administrators. Projects
-     let you share the administrative burden of a collection of apps.
+4. Creating or selecting a project will prompt you for another login, sign in with an
+   account that administers your project.
 
-5. This will prompt you for another login, sign in with the account you chose to
-   administer the project.
-
-6. Give your App a name; this is what users will see when they are asked to
+5. Give your App a name; this is what users will see when they are asked to
    authorize your app.
 
-7. Click "Register App". This will create your app and take you to a page
+6. Click "Register App". This will create your app and take you to a page
    describing it.
 
-8. Copy the "Client UUID" from the page.
+7. Copy the "Client UUID" from the page.
 
    * This ID can be thought of as your App's "username". It is non-secure information
      and as such, feel free to hardcode it into scripts.
