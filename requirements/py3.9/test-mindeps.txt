@@ -28,7 +28,7 @@ pluggy==1.2.0
     # via pytest
 pycparser==2.21
     # via cffi
-pyjwt==2.0.0
+pyjwt==2.4.0
     # via -r test-mindeps.in
 pytest==7.4.0
     # via
