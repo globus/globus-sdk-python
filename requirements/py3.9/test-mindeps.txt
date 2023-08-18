@@ -38,7 +38,7 @@ pytest-xdist==3.3.1
     # via -r test.in
 pyyaml==6.0.1
     # via responses
-requests==2.22.0
+requests==2.31.0
     # via
     #   -r test-mindeps.in
     #   responses
