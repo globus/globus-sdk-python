@@ -39,7 +39,7 @@ typing-extensions==4.0.0
     #   -r typing-mindeps.in
     #   -r typing.in
     #   mypy
-urllib3==2.0.4
+urllib3==1.26.5
     # via
     #   requests
     #   responses

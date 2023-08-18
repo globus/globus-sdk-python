@@ -38,7 +38,7 @@ typing-extensions==4.7.1
     # via
     #   -r typing.in
     #   mypy
-urllib3==2.0.4
+urllib3==1.26.5
     # via
     #   requests
     #   responses

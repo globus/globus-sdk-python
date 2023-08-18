@@ -52,7 +52,7 @@ types-pyyaml==6.0.12.11
     # via responses
 typing-extensions==4.0.0
     # via -r test-mindeps.in
-urllib3==1.25.11
+urllib3==1.26.5
     # via
     #   requests
     #   responses
