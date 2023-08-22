@@ -99,3 +99,17 @@ def test_delete_job(timer_client):
     response = timer_client.delete_job(meta["job_id"])
     assert response.http_status == 200
     assert response.data["job_id"] == meta["job_id"]
+
+
+def test_pause_job(timer_client):
+    meta = load_response(timer_client.pause_job).metadata
+    response = timer_client.pause_job(meta["job_id"])
+    assert response.http_status == 200
+    assert "Successfully paused" in response.data["message"]
+
+
+def test_resume_job(timer_client):
+    meta = load_response(timer_client.resume_job).metadata
+    response = timer_client.resume_job(meta["job_id"])
+    assert response.http_status == 200
+    assert "Successfully resumed" in response.data["message"]

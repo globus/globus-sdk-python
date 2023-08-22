@@ -1,0 +1,4 @@
+Added
+~~~~~
+
+- Add support for pausing and resuming timers. (:pr:`NUMBER`)

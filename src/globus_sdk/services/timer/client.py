@@ -116,3 +116,38 @@ class TimerClient(client.BaseClient):
         """
         log.info(f"TimerClient.delete_job({job_id})")
         return self.delete(f"/jobs/{job_id}")
+
+    def pause_job(
+        self,
+        job_id: UUIDLike,
+    ) -> response.GlobusHTTPResponse:
+        """
+        ``POST /jobs/<job_id>/pause``
+
+        **Examples**
+
+        >>> timer_client = globus_sdk.TimerClient(...)
+        >>> timer_client.pause_job(job_id)
+        """
+        log.info(f"TimerClient.pause_job({job_id})")
+        return self.post(f"/jobs/{job_id}/pause")
+
+    def resume_job(
+        self,
+        job_id: UUIDLike,
+        *,
+        update_credentials: bool | None = None,
+    ) -> response.GlobusHTTPResponse:
+        """
+        ``POST /jobs/<job_id>/resume``
+
+        **Examples**
+
+        >>> timer_client = globus_sdk.TimerClient(...)
+        >>> timer_client.resume_job(job_id)
+        """
+        log.info(f"TimerClient.resume_job({job_id})")
+        data = {}
+        if update_credentials is not None:
+            data["update_credentials"] = update_credentials
+        return self.post(f"/jobs/{job_id}/resume", data=data)
