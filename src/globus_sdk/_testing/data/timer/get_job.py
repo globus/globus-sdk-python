@@ -98,6 +98,7 @@ JOB_JSON = {
             ],
         }
     },
+    "inactive_reason": None,
     "scope": None,
     "job_id": JOB_ID,
     "status": "loaded",
@@ -109,6 +110,35 @@ JOB_JSON = {
     "results": {"data": [transfer_data], "page_next": None},
 }
 
+JOB_JSON_INACTIVE_USER = {
+    **JOB_JSON,
+    "status": "inactive",
+    "inactive_reason": {"cause": "user", "detail": None},
+}
+
+JOB_JSON_INACTIVE_GARE = {
+    **JOB_JSON,
+    "status": "inactive",
+    "inactive_reason": {
+        "cause": "globus_auth_requirements",
+        "detail": {
+            "code": "ConsentRequired",
+            "authorization_parameters": {
+                "session_message": "Missing required data_access consent",
+                "required_scopes": [
+                    (
+                        "https://auth.globus.org/scopes/actions.globus.org/"
+                        "transfer/transfer"
+                        "[urn:globus:auth:scope:transfer.api.globus.org:all"
+                        "[*https://auth.globus.org/scopes/"
+                        "543aade1-db97-4a4b-9bdf-0b58e78dfa69/data_access]]"
+                    )
+                ],
+            },
+        },
+    },
+}
+
 
 RESPONSES = ResponseSet(
     metadata={"job_id": JOB_ID},
@@ -117,6 +147,18 @@ RESPONSES = ResponseSet(
         path=f"/jobs/{JOB_ID}",
         method="GET",
         json=JOB_JSON,
+    ),
+    inactive_gare=RegisteredResponse(
+        service="timer",
+        path=f"/jobs/{JOB_ID}",
+        method="GET",
+        json=JOB_JSON_INACTIVE_GARE,
+    ),
+    inactive_user=RegisteredResponse(
+        service="timer",
+        path=f"/jobs/{JOB_ID}",
+        method="GET",
+        json=JOB_JSON_INACTIVE_USER,
     ),
     simple_500_error=RegisteredResponse(
         service="timer",
