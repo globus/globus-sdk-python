@@ -108,8 +108,14 @@ def test_pause_job(timer_client):
     assert "Successfully paused" in response.data["message"]
 
 
-def test_resume_job(timer_client):
+@pytest.mark.parametrize("update_credentials", [True, False, None])
+def test_resume_job(update_credentials, timer_client):
     meta = load_response(timer_client.resume_job).metadata
-    response = timer_client.resume_job(meta["job_id"])
+
+    kwargs = {}
+    if update_credentials is not None:
+        kwargs["update_credentials"] = update_credentials
+
+    response = timer_client.resume_job(meta["job_id"], **kwargs)
     assert response.http_status == 200
     assert "Successfully resumed" in response.data["message"]
