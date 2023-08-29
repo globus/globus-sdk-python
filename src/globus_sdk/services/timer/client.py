@@ -122,7 +122,10 @@ class TimerClient(client.BaseClient):
         job_id: UUIDLike,
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /jobs/<job_id>/pause``
+        Make a timer job inactive, preventing it from running until it is resumed.
+
+        :param job_id: The ID of the timer to pause
+        :type job_id: str or UUID
 
         **Examples**
 
@@ -139,7 +142,20 @@ class TimerClient(client.BaseClient):
         update_credentials: bool | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        ``POST /jobs/<job_id>/resume``
+        Resume an inactive timer job, optionally replacing credentials to resolve
+        issues with insufficient authorization.
+
+        :param job_id: The ID of the timer to resume
+        :type job_id: str or UUID
+        :param update_credentials: When true, replace the credentials for the timer
+            using the credentials for this resume call. This can be used to resolve
+            authorization errors (such as session and consent errors), but it also
+            could introduce session and consent errors, if the credentials being used
+            to resume lack some necessary properties of the credentials they're
+            replacing. If not supplied, the Timers service will determine whether to
+            replace credentials according to the reason why the timer job
+            became inactive.
+        :type update_credentials: bool, optional
 
         **Examples**
 

@@ -1,4 +1,5 @@
 Added
 ~~~~~
 
-- Add support for pausing and resuming timers. (:pr:`NUMBER`)
+- Add ``TimerClient.pause_job`` and ``TimerClient.resume_job`` for pausing and
+  resuming timers. (:pr:`NUMBER`)
