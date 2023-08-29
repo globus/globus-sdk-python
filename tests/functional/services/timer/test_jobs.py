@@ -118,4 +118,5 @@ def test_resume_job(update_credentials, timer_client):
 
     response = timer_client.resume_job(meta["job_id"], **kwargs)
     assert response.http_status == 200
+    assert json.loads(response._raw_response.request.body) == kwargs
     assert "Successfully resumed" in response.data["message"]
