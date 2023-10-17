@@ -59,7 +59,7 @@ typing-extensions==4.0.0
     #   -r test-mindeps.in
     #   importlib-metadata
     #   responses
-urllib3==1.25.11
+urllib3==1.26.18
     # via
     #   requests
     #   responses
