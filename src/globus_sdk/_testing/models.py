@@ -27,7 +27,7 @@ class RegisteredResponse:
         "transfer": "https://transfer.api.globus.org/v0.10",
         "search": "https://search.api.globus.org/",
         "gcs": "https://abc.xyz.data.globus.org/api",
-        "groups": "https://groups.api.globus.org/v2/",
+        "groups": "https://groups.api.globus.org/",
         "timer": "https://timer.automate.globus.org/",
         "flows": "https://flows.automate.globus.org/",
     }

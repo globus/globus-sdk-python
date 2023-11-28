@@ -175,7 +175,7 @@ RESPONSES = ResponseSet(
     },
     default=RegisteredResponse(
         service="groups",
-        path="/groups/my_groups",
+        path="/v2/groups/my_groups",
         json=raw_data,
     ),
 )

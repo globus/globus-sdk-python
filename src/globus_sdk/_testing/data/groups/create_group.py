@@ -6,7 +6,7 @@ RESPONSES = ResponseSet(
     metadata={"group_id": GROUP_ID},
     default=RegisteredResponse(
         service="groups",
-        path="/groups",
+        path="/v2/groups",
         method="POST",
         json=BASE_GROUP_DOC,
     ),

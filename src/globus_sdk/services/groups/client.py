@@ -22,7 +22,6 @@ class GroupsClient(client.BaseClient):
     .. automethodlist:: globus_sdk.GroupsClient
     """
 
-    base_path = "/v2/"
     error_class = GroupsAPIError
     service_name = "groups"
     scopes = GroupsScopes
@@ -47,7 +46,7 @@ class GroupsClient(client.BaseClient):
                     :ref: get_my_groups_and_memberships_v2_groups_my_groups_get
         """
         return response.ArrayResponse(
-            self.get("/groups/my_groups", query_params=query_params)
+            self.get("/v2/groups/my_groups", query_params=query_params)
         )
 
     def get_group(
@@ -83,7 +82,7 @@ class GroupsClient(client.BaseClient):
             query_params = {}
         if include is not None:
             query_params["include"] = ",".join(utils.safe_strseq_iter(include))
-        return self.get(f"/groups/{group_id}", query_params=query_params)
+        return self.get(f"/v2/groups/{group_id}", query_params=query_params)
 
     def delete_group(
         self,
@@ -109,7 +108,7 @@ class GroupsClient(client.BaseClient):
                     :service: groups
                     :ref: delete_group_v2_groups__group_id__delete
         """
-        return self.delete(f"/groups/{group_id}", query_params=query_params)
+        return self.delete(f"/v2/groups/{group_id}", query_params=query_params)
 
     def create_group(
         self,
@@ -135,7 +134,7 @@ class GroupsClient(client.BaseClient):
                     :service: groups
                     :ref: create_group_v2_groups_post
         """
-        return self.post("/groups", data=data, query_params=query_params)
+        return self.post("/v2/groups", data=data, query_params=query_params)
 
     def update_group(
         self,
@@ -164,7 +163,7 @@ class GroupsClient(client.BaseClient):
                     :service: groups
                     :ref: update_group_v2_groups__group_id__put
         """
-        return self.put(f"/groups/{group_id}", data=data, query_params=query_params)
+        return self.put(f"/v2/groups/{group_id}", data=data, query_params=query_params)
 
     def get_group_policies(
         self,
@@ -190,7 +189,7 @@ class GroupsClient(client.BaseClient):
                     :service: groups
                     :ref: get_policies_v2_groups__group_id__policies_get
         """
-        return self.get(f"/groups/{group_id}/policies", query_params=query_params)
+        return self.get(f"/v2/groups/{group_id}/policies", query_params=query_params)
 
     def set_group_policies(
         self,
@@ -220,7 +219,7 @@ class GroupsClient(client.BaseClient):
                     :ref: update_policies_v2_groups__group_id__policies_put
         """
         return self.put(
-            f"/groups/{group_id}/policies", data=data, query_params=query_params
+            f"/v2/groups/{group_id}/policies", data=data, query_params=query_params
         )
 
     def get_identity_preferences(
@@ -304,7 +303,7 @@ class GroupsClient(client.BaseClient):
                     :ref: get_membership_fields_v2_groups__group_id__membership_fields_get
         """  # noqa: E501
         return self.get(
-            f"/groups/{group_id}/membership_fields", query_params=query_params
+            f"/v2/groups/{group_id}/membership_fields", query_params=query_params
         )
 
     def set_membership_fields(
@@ -335,7 +334,7 @@ class GroupsClient(client.BaseClient):
                     :ref: put_membership_fields_v2_groups__group_id__membership_fields_put
         """  # noqa: E501
         return self.put(
-            f"/groups/{group_id}/membership_fields",
+            f"/v2/groups/{group_id}/membership_fields",
             data=data,
             query_params=query_params,
         )
@@ -379,4 +378,6 @@ class GroupsClient(client.BaseClient):
                     :service: groups
                     :ref: group_membership_post_actions_v2_groups__group_id__post
         """
-        return self.post(f"/groups/{group_id}", data=actions, query_params=query_params)
+        return self.post(
+            f"/v2/groups/{group_id}", data=actions, query_params=query_params
+        )

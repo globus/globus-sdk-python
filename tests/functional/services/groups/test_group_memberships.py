@@ -63,7 +63,7 @@ def test_batch_action_payload(groups_client, role):
     group_id = str(uuid.uuid1())
     load_response(
         RegisteredResponse(
-            service="groups", method="POST", path=f"/groups/{group_id}", json={}
+            service="groups", method="POST", path=f"/v2/groups/{group_id}", json={}
         )
     )
     rolestr = role if isinstance(role, str) else role.value
