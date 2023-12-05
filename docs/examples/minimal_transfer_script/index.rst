@@ -12,6 +12,10 @@ using the :class:`TransferClient <globus_sdk.TransferClient>`.
 It uses the tutorial client ID from the :ref:`tutorial <tutorial>`.
 For simplicity, the script will prompt for login on each use.
 
+.. note::
+    You will need to replace the values for ``source_collection_id`` and
+    ``dest_collection_id`` with UUIDs of collections that you have access to.
+
 .. literalinclude:: transfer_minimal.py
     :caption: ``transfer_minimal.py`` [:download:`download <transfer_minimal.py>`]
     :language: python

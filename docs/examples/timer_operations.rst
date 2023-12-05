@@ -4,6 +4,10 @@ Timer Operations Script
 This example demonstrates the usage of methods on the Timer client to
 schedule a recurring Transfer task.
 
+.. note::
+    You will need to replace the values for ``SOURCE_COLLECTION`` and ``DEST_COLLECTION``
+    with UUIDs of collections that you have access to.
+
 .. code-block:: python
 
     import os
@@ -23,8 +27,10 @@ schedule a recurring Transfer task.
         TransferScopes,
     )
 
-    GOEP1 = "ddb59aef-6d04-11e5-ba46-22000b92c6ec"
-    GOEP2 = "ddb59af0-6d04-11e5-ba46-22000b92c6ec"
+    # Replace these with UUIDs of collections that you have access to
+    SOURCE_COLLECTION = "..."
+    DEST_COLLECTION = "..."
+
     NATIVE_CLIENT_ID = "61338d24-54d5-408f-a10d-66c06b59f6d2"
     TIMER_CLIENT_ID = "524230d7-ea86-4a52-8312-86065a9e0417"
 
@@ -67,7 +73,9 @@ schedule a recurring Transfer task.
     timer_token = token_response.by_resource_server[TIMER_CLIENT_ID]["access_token"]
 
     # Create a `TransferData` object
-    data = TransferData(source_endpoint=GOEP1, destination_endpoint=GOEP2)
+    data = TransferData(
+        source_endpoint=SOURCE_COLLECTION, destination_endpoint=DEST_COLLECTION
+    )
     data.add_item("/share/godata/file1.txt", "/~/file1.txt")
 
     # Set up the Timer client

@@ -20,14 +20,13 @@ transfer_client = globus_sdk.TransferClient(
     authorizer=globus_sdk.AccessTokenAuthorizer(transfer_tokens["access_token"])
 )
 
-# Globus Tutorial Endpoint 1
-source_endpoint_id = "ddb59aef-6d04-11e5-ba46-22000b92c6ec"
-# Globus Tutorial Endpoint 2
-dest_endpoint_id = "ddb59af0-6d04-11e5-ba46-22000b92c6ec"
+# Replace these with your own collection UUIDs
+source_collection_id = "..."
+dest_collection_id = "..."
 
 # create a Transfer task consisting of one or more items
 task_data = globus_sdk.TransferData(
-    source_endpoint=source_endpoint_id, destination_endpoint=dest_endpoint_id
+    source_endpoint=source_collection_id, destination_endpoint=dest_collection_id
 )
 task_data.add_item(
     "/share/godata/file1.txt",  # source
