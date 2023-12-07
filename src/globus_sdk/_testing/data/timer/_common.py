@@ -134,8 +134,8 @@ V1_TIMER = {
             "skip_source_errors": True,
             "sync_level": 3,
             "verify_checksum": True,
-            "source_endpoint_id": "ddb59aef-6d04-11e5-ba46-22000b92c6ec",
-            "destination_endpoint_id": "ddb59af0-6d04-11e5-ba46-22000b92c6ec",
+            "source_endpoint_id": "aa752cea-8222-5bc8-acd9-555b090c0ccb",
+            "destination_endpoint_id": "313ce13e-b597-5858-ae13-29e46fea26e6",
             "transfer_items": [
                 {
                     "source_path": "/share/godata/file1.txt",
