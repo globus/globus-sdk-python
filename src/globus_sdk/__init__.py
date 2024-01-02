@@ -68,6 +68,7 @@ _LAZY_IMPORT_TABLE = {
         "GCSAPIError",
         "GCSClient",
         "GCSRoleDocument",
+        "EndpointDocument",
         "GuestCollectionDocument",
         "MappedCollectionDocument",
         "CollectionPolicies",
@@ -172,6 +173,7 @@ if t.TYPE_CHECKING:
     from .services.gcs import GCSAPIError
     from .services.gcs import GCSClient
     from .services.gcs import GCSRoleDocument
+    from .services.gcs import EndpointDocument
     from .services.gcs import GuestCollectionDocument
     from .services.gcs import MappedCollectionDocument
     from .services.gcs import CollectionPolicies
@@ -277,6 +279,7 @@ __all__ = (
     "ConfidentialAppAuthClient",
     "DeleteData",
     "DependentScopeSpec",
+    "EndpointDocument",
     "ErrorSubdocument",
     "FlowsAPIError",
     "FlowsClient",

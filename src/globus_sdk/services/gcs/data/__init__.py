@@ -7,6 +7,7 @@ from .collection import (
     POSIXCollectionPolicies,
     POSIXStagingCollectionPolicies,
 )
+from .endpoint import EndpointDocument
 from .role import GCSRoleDocument
 from .storage_gateway import (
     ActiveScaleStoragePolicies,
@@ -28,6 +29,8 @@ from .storage_gateway import (
 from .user_credential import UserCredentialDocument
 
 __all__ = (
+    # endpoint documents
+    "EndpointDocument",
     # collection documents
     "MappedCollectionDocument",
     "GuestCollectionDocument",

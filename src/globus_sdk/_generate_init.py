@@ -134,6 +134,7 @@ _LAZY_IMPORT_TABLE: list[tuple[str, tuple[str, ...]]] = [
             "GCSAPIError",
             "GCSClient",
             "GCSRoleDocument",
+            "EndpointDocument",
             "GuestCollectionDocument",
             "MappedCollectionDocument",
             "CollectionPolicies",

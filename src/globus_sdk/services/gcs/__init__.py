@@ -7,6 +7,7 @@ from .data import (
     CephStoragePolicies,
     CollectionDocument,
     CollectionPolicies,
+    EndpointDocument,
     GCSRoleDocument,
     GoogleCloudStorageCollectionPolicies,
     GoogleCloudStoragePolicies,
@@ -31,6 +32,7 @@ from .response import IterableGCSResponse, UnpackingGCSResponse
 __all__ = (
     "GCSClient",
     "GCSRoleDocument",
+    "EndpointDocument",
     "CollectionDocument",
     "GuestCollectionDocument",
     "MappedCollectionDocument",

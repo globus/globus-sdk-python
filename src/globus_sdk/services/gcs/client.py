@@ -9,6 +9,7 @@ from globus_sdk.authorizers import GlobusAuthorizer
 
 from .data import (
     CollectionDocument,
+    EndpointDocument,
     GCSRoleDocument,
     StorageGatewayDocument,
     UserCredentialDocument,
@@ -114,6 +115,71 @@ class GCSClient(client.BaseClient):
             "7e3f3f5e-350c-4717-891a-2f451c24b0d4": "SpectraLogic BlackPearl",
         }
         return connector_dict.get(str(connector_id))
+
+    #
+    # endpoint methods
+    #
+
+    def get_endpoint(
+        self, query_params: dict[str, t.Any] | None = None
+    ) -> UnpackingGCSResponse:
+        """
+        Get the details of the Endpoint that this client is configured to talk to.
+
+        :param query_params: Additional passthrough query parameters
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /endpoint``
+
+                .. extdoclink:: Get Endpoint
+                    :ref: openapi_Endpoint/#getEndpoint
+                    :service: gcs
+        """
+        return UnpackingGCSResponse(
+            self.get("/endpoint", query_params=query_params),
+            "endpoint",
+        )
+
+    def update_endpoint(
+        self,
+        endpoint_data: dict[str, t.Any] | EndpointDocument,
+        *,
+        include: list[t.Literal["endpoint"]] | None = None,
+        query_params: dict[str, t.Any] | None = None,
+    ) -> UnpackingGCSResponse:
+        """
+        Update a GCSv5 Endpoint
+
+        :param endpoint_data: The endpoint document for the modified endpoint
+        :param include: Optional list of document types to include in the response
+           (currently only supports the value ``["endpoint"]``)
+        :param query_params: Additional passthrough query parameters
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``PATCH /endpoint``
+
+                .. extdoclink:: Update Endpoint
+                    :ref: openapi_Endpoint/#patchEndpoint
+                    :service: gcs
+        """
+        query_params = query_params or {}
+        if include is not None:
+            query_params["include"] = ",".join(include)
+
+        return UnpackingGCSResponse(
+            self.patch(
+                "/endpoint",
+                data=endpoint_data,
+                query_params=query_params,
+            ),
+            "endpoint",
+        )
 
     #
     # collection methods
