@@ -147,28 +147,70 @@ class PayloadWrapper(PayloadWrapperBase):
     # internal helpers for setting non-null values
     #
 
+    # Some payloads use None to represent "no value" and others use the MISSING sentinel
+    _MISSING_SENTINEL: None | MissingType = None
+
     def _set_value(
         self,
         key: str,
         val: t.Any,
         callback: t.Callable[[t.Any], t.Any] | None = None,
     ) -> None:
-        if val is not None:
+        """
+        Internal helper for setting a value on the payload.
+
+        If the value matches the class level _MISSING_SENTINEL (defaults to None),
+            it will be omitted from the payload.
+
+        :param key: The key to set.
+        :param val: The value to set.
+        :param callback: An optional callback to apply to the value immediately
+            before it is set.
+        """
+        if val is not self._MISSING_SENTINEL:
             self[key] = callback(val) if callback else val
 
     def _set_optstrs(self, **kwargs: t.Any) -> None:
+        """
+        Convenience function for setting a collection of omittable string values.
+
+        Any values matching the class level _MISSING_SENTINEL (defaults to None) will
+          be omitted.
+        All values are passed through ``str()`` prior to assignment.
+        """
         for k, v in kwargs.items():
             self._set_value(k, v, callback=str)
 
     def _set_optstrlists(self, **kwargs: t.Iterable[t.Any] | None) -> None:
+        """
+        Convenience function for setting a collection of omittable string list values.
+
+        Any values matching the class level _MISSING_SENTINEL (defaults to None) will
+          be omitted.
+        For each list value, each element is converted to a string prior to assignment.
+        """
         for k, v in kwargs.items():
             self._set_value(k, v, callback=lambda x: list(safe_strseq_iter(x)))
 
     def _set_optbools(self, **kwargs: bool | None) -> None:
+        """
+        Convenience function for setting a collection of omittable bool values.
+
+        Any values matching the class level _MISSING_SENTINEL (defaults to None) will
+          be omitted.
+        All values are passed through ``bool()`` prior to assignment.
+        """
         for k, v in kwargs.items():
             self._set_value(k, v, callback=bool)
 
     def _set_optints(self, **kwargs: t.Any) -> None:
+        """
+        Convenience function for setting a collection of omittable int values.
+
+        Any values matching the class level _MISSING_SENTINEL (defaults to None) will
+          be omitted.
+        All values are passed through ``int()`` prior to assignment.
+        """
         for k, v in kwargs.items():
             self._set_value(k, v, callback=int)
 

@@ -4,6 +4,7 @@ import typing as t
 
 from globus_sdk import utils
 from globus_sdk.services.gcs.data._common import DatatypeCallback, ensure_datatype
+from globus_sdk.utils import MISSING, MissingType
 
 
 class EndpointDocument(utils.PayloadWrapper):
@@ -70,6 +71,8 @@ class EndpointDocument(utils.PayloadWrapper):
         ``network_use``.
     """
 
+    _MISSING_SENTINEL = MISSING
+
     DATATYPE_BASE = "endpoint"
     DATATYPE_VERSION_IMPLICATIONS: dict[str, tuple[int, int, int]] = {
         "gridftp_control_channel_port": (1, 1, 0),
@@ -86,32 +89,34 @@ class EndpointDocument(utils.PayloadWrapper):
         self,
         *,
         # data type
-        data_type: str | None = None,
+        data_type: str | MissingType = MISSING,
         # strs
-        contact_email: str | None = None,
-        contact_info: str | None = None,
-        department: str | None = None,
-        description: str | None = None,
-        display_name: str | None = None,
-        info_link: str | None = None,
+        contact_email: str | MissingType = MISSING,
+        contact_info: str | MissingType = MISSING,
+        department: str | MissingType = MISSING,
+        description: str | MissingType = MISSING,
+        display_name: str | MissingType = MISSING,
+        info_link: str | MissingType = MISSING,
         network_use: (
-            t.Literal["normal", "minimal", "aggressive", "custom"] | None
-        ) = None,
-        organization: str | None = None,
-        subscription_id: str | None = None,
+            t.Literal["normal", "minimal", "aggressive", "custom"] | MissingType
+        ) = MISSING,
+        organization: str | MissingType = MISSING,
+        # nullable strs
+        subscription_id: str | None | MissingType = MISSING,
         # str lists
-        keywords: t.Iterable[str] | None = None,
+        keywords: t.Iterable[str] | MissingType = MISSING,
         # bools
-        allow_udt: bool | None = None,
-        public: bool | None = None,
+        allow_udt: bool | MissingType = MISSING,
+        public: bool | MissingType = MISSING,
         # ints
-        gridftp_control_channel_port: int | None = None,
-        max_concurrency: int | None = None,
-        max_parallelism: int | None = None,
-        preferred_concurrency: int | None = None,
-        preferred_parallelism: int | None = None,
+        max_concurrency: int | MissingType = MISSING,
+        max_parallelism: int | MissingType = MISSING,
+        preferred_concurrency: int | MissingType = MISSING,
+        preferred_parallelism: int | MissingType = MISSING,
+        # nullable ints
+        gridftp_control_channel_port: int | None | MissingType = MISSING,
         # additional fields
-        additional_fields: dict[str, t.Any] | None = None,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ):
         super().__init__()
         self._set_optstrs(
@@ -124,9 +129,8 @@ class EndpointDocument(utils.PayloadWrapper):
             info_link=info_link,
             network_use=network_use,
             organization=organization,
-            subscription_id=subscription_id,
         )
-        self._set_optstrs(
+        self._set_optstrlists(
             keywords=keywords,
         )
         self._set_optbools(
@@ -134,13 +138,24 @@ class EndpointDocument(utils.PayloadWrapper):
             public=public,
         )
         self._set_optints(
-            gridftp_control_channel_port=gridftp_control_channel_port,
             max_concurrency=max_concurrency,
             max_parallelism=max_parallelism,
             preferred_concurrency=preferred_concurrency,
             preferred_parallelism=preferred_parallelism,
         )
 
-        if additional_fields is not None:
+        # self._set_opt<type>s() is not used for nullable types
+        self._set_value(
+            "subscription_id",
+            subscription_id,
+            callback=lambda v: str(v) if v is not None else None,
+        )
+        self._set_value(
+            "gridftp_control_channel_port",
+            gridftp_control_channel_port,
+            callback=lambda v: int(v) if v is not None else None,
+        )
+
+        if additional_fields is not MISSING:
             self.update(additional_fields)
         ensure_datatype(self)
