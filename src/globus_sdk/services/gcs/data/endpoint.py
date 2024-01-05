@@ -71,8 +71,6 @@ class EndpointDocument(utils.PayloadWrapper):
         ``network_use``.
     """
 
-    _MISSING_SENTINEL = MISSING
-
     DATATYPE_BASE = "endpoint"
     DATATYPE_VERSION_IMPLICATIONS: dict[str, tuple[int, int, int]] = {
         "gridftp_control_channel_port": (1, 1, 0),
@@ -119,43 +117,29 @@ class EndpointDocument(utils.PayloadWrapper):
         additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ):
         super().__init__()
-        self._set_optstrs(
-            DATA_TYPE=data_type,
-            contact_email=contact_email,
-            contact_info=contact_info,
-            department=department,
-            description=description,
-            display_name=display_name,
-            info_link=info_link,
-            network_use=network_use,
-            organization=organization,
+        self["DATA_TYPE"] = data_type
+        self["contact_email"] = contact_email
+        self["contact_info"] = contact_info
+        self["department"] = department
+        self["description"] = description
+        self["display_name"] = display_name
+        self["info_link"] = info_link
+        self["network_use"] = network_use
+        self["organization"] = organization
+        self["keywords"] = (
+            keywords
+            if isinstance(keywords, MissingType)
+            else list(utils.safe_strseq_iter(keywords))
         )
-        self._set_optstrlists(
-            keywords=keywords,
-        )
-        self._set_optbools(
-            allow_udt=allow_udt,
-            public=public,
-        )
-        self._set_optints(
-            max_concurrency=max_concurrency,
-            max_parallelism=max_parallelism,
-            preferred_concurrency=preferred_concurrency,
-            preferred_parallelism=preferred_parallelism,
-        )
+        self["allow_udt"] = allow_udt
+        self["public"] = public
+        self["max_concurrency"] = max_concurrency
+        self["max_parallelism"] = max_parallelism
+        self["preferred_concurrency"] = preferred_concurrency
+        self["preferred_parallelism"] = preferred_parallelism
+        self["subscription_id"] = subscription_id
+        self["gridftp_control_channel_port"] = gridftp_control_channel_port
 
-        # self._set_opt<type>s() is not used for nullable types
-        self._set_value(
-            "subscription_id",
-            subscription_id,
-            callback=lambda v: str(v) if v is not None else None,
-        )
-        self._set_value(
-            "gridftp_control_channel_port",
-            gridftp_control_channel_port,
-            callback=lambda v: int(v) if v is not None else None,
-        )
-
-        if additional_fields is not MISSING:
+        if not isinstance(additional_fields, MissingType):
             self.update(additional_fields)
         ensure_datatype(self)
