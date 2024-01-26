@@ -141,6 +141,7 @@ class AuthLoginClient(client.BaseClient):
         session_required_identities: UUIDLike | t.Iterable[UUIDLike] | None = None,
         session_required_single_domain: str | t.Iterable[str] | None = None,
         session_required_policies: UUIDLike | t.Iterable[UUIDLike] | None = None,
+        session_required_mfa: bool | None = None,
         prompt: Literal["login"] | None = None,
         query_params: dict[str, t.Any] | None = None,
     ) -> str:
@@ -155,6 +156,7 @@ class AuthLoginClient(client.BaseClient):
             which must be satisfied by identities added to the session.
         :param session_required_policies: A list of IDs for policies which must
             be satisfied by the user.
+        :param session_required_mfa: Whether MFA is required for the session.
         :param prompt:
             Control whether a user is required to log in before the authorization step.
 
@@ -186,6 +188,8 @@ class AuthLoginClient(client.BaseClient):
             query_params["session_required_policies"] = utils.commajoin(
                 session_required_policies
             )
+        if session_required_mfa is not None:
+            query_params["session_required_mfa"] = session_required_mfa
         if prompt is not None:
             query_params["prompt"] = prompt
         auth_url = self.current_oauth2_flow_manager.get_authorize_url(

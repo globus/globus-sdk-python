@@ -37,12 +37,20 @@ class AuthorizationParameterInfo(ErrorInfo):
 
     :ivar session_message: A message from the server
     :vartype session_message: str, optional
+
     :ivar session_required_identities: A list of identity IDs as strings which are being
         requested by the server
     :vartype session_required_identities: list of str, optional
+
     :ivar session_required_single_domain: A list of domains which are being requested by
         the server ("single domain" because the user should choose one)
     :vartype session_required_single_domain: list of str, optional
+
+    :ivar session_required_policies: A list of policies required for the session.
+    :vartype session_required_policies: list of str, optional
+
+    :ivar session_required_mfa: Whether MFA is required for the session.
+    :vartype session_required_mfa: bool, optional
 
     **Examples**
 
@@ -77,6 +85,8 @@ class AuthorizationParameterInfo(ErrorInfo):
         self.session_required_policies: (
             list[str] | None
         ) = self._parse_session_required_policies(data)
+
+        self.session_required_mfa = self._parse_session_required_mfa(data)
 
     def _parse_session_message(self, data: dict[str, t.Any]) -> str | None:
         session_message = data.get("session_message")
@@ -126,6 +136,14 @@ class AuthorizationParameterInfo(ErrorInfo):
             self._warn_type(
                 "session_required_policies", "list[str]|str", session_required_policies
             )
+        return None
+
+    def _parse_session_required_mfa(self, data: dict[str, t.Any]) -> bool | None:
+        session_required_mfa = data.get("session_required_mfa")
+        if isinstance(session_required_mfa, bool):
+            return session_required_mfa
+        elif session_required_mfa is not None:
+            self._warn_type("session_required_mfa", "bool", session_required_mfa)
         return None
 
     def _warn_type(self, key: str, expected: str, got: t.Any) -> None:

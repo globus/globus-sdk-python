@@ -34,6 +34,7 @@ def confidential_client(no_retry_transport):
 #   domain: str | list[str]
 #   identities: uuid | str | list[uuid] | list[str] | list[str | uuid]
 #   policies: uuid | str | list[uuid] | list[str] | list[str | uuid]
+#   mfa: True | False
 #   prompt: Literal["prompt"] | None
 #
 # The order of these options is consequential.
@@ -55,15 +56,16 @@ policy_options = (
     ["baz-id", "quux-id"],
     ["baz-id", uuid.UUID(int=5)],
 )
+mfa_options = (True, False)
 prompt_options = ("login",)
 # Seed an all-`None` option test, then use a loop to fill in the rest.
 # There must be 4 parameters so parametrized tuple unpacking works in the test.
-_ALL_SESSION_PARAM_COMBINATIONS = [(None,) * 4]
+_ALL_SESSION_PARAM_COMBINATIONS = [(None,) * 5]
 for idx, options in enumerate(
-    (domain_options, identity_options, policy_options, prompt_options)
+    (domain_options, identity_options, policy_options, mfa_options, prompt_options)
 ):
     for option in options:
-        parameters = [None] * 4
+        parameters = [None] * 5
         parameters[idx] = option
         _ALL_SESSION_PARAM_COMBINATIONS.append(tuple(parameters))
 
@@ -71,7 +73,7 @@ for idx, options in enumerate(
 @pytest.mark.parametrize("flow_type", ("native_app", "confidential_app"))
 # parametrize over both what is and what *is not* passed as a parameter
 @pytest.mark.parametrize(
-    "domain_option, identity_option, policy_option, prompt_option",
+    "domain_option, identity_option, policy_option, mfa_option, prompt_option",
     _ALL_SESSION_PARAM_COMBINATIONS,
 )
 def test_oauth2_get_authorize_url_supports_session_params(
@@ -81,6 +83,7 @@ def test_oauth2_get_authorize_url_supports_session_params(
     domain_option,
     identity_option,
     policy_option,
+    mfa_option,
     prompt_option,
 ):
     if flow_type == "native_app":
@@ -96,6 +99,7 @@ def test_oauth2_get_authorize_url_supports_session_params(
         session_required_single_domain=domain_option,
         session_required_identities=identity_option,
         session_required_policies=policy_option,
+        session_required_mfa=mfa_option,
         prompt=prompt_option,
     )
 
@@ -108,6 +112,7 @@ def test_oauth2_get_authorize_url_supports_session_params(
         "session_required_single_domain" if domain_option else None,
         "session_required_identities" if identity_option else None,
         "session_required_policies" if policy_option else None,
+        "session_required_mfa" if mfa_option is not None else None,
         "prompt" if prompt_option else None,
     }
     expected_params_keys.discard(None)
@@ -115,6 +120,7 @@ def test_oauth2_get_authorize_url_supports_session_params(
         "session_required_single_domain",
         "session_required_identities",
         "session_required_policies",
+        "session_required_mfa",
         "prompt",
     } - expected_params_keys
     parsed_params_keys = set(parsed_params.keys())
@@ -146,6 +152,10 @@ def test_oauth2_get_authorize_url_supports_session_params(
             else str(policy_option)
         )
         assert parsed_params["session_required_policies"] == [strized_option]
+
+    if mfa_option is not None:
+        strized_option = "True" if mfa_option else "False"
+        assert parsed_params["session_required_mfa"] == [strized_option]
 
     if prompt_option is not None:
         assert parsed_params["prompt"] == [prompt_option]

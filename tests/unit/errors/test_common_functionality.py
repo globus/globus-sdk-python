@@ -177,6 +177,8 @@ def test_authz_params_info_containing_session_message():
     assert err.info.authorization_parameters.session_required_identities is None
     assert err.info.authorization_parameters.session_required_single_domain is None
     assert err.info.authorization_parameters.session_required_policies is None
+    print("derk")
+    print(str(err.info.authorization_parameters))
     _strmatch_any_order(
         str(err.info.authorization_parameters),
         "AuthorizationParameterInfo(",
@@ -185,6 +187,7 @@ def test_authz_params_info_containing_session_message():
             "session_required_identities=None",
             "session_required_single_domain=None",
             "session_required_policies=None",
+            "session_required_mfa=None",
         ],
         ")",
     )
@@ -207,6 +210,7 @@ def test_authz_params_info_containing_malformed_session_message():
             "session_required_identities=None",
             "session_required_single_domain=None",
             "session_required_policies=None",
+            "session_required_mfa=None",
         ],
         ")",
     )
@@ -232,6 +236,7 @@ def test_authz_params_info_containing_session_required_identities():
             "session_required_identities=['foo', 'bar']",
             "session_required_single_domain=None",
             "session_required_policies=None",
+            "session_required_mfa=None",
         ],
         ")",
     )
@@ -254,6 +259,7 @@ def test_authz_params_info_containing_malformed_session_required_identities():
             "session_required_identities=None",
             "session_required_single_domain=None",
             "session_required_policies=None",
+            "session_required_mfa=None",
         ],
         ")",
     )
@@ -281,6 +287,7 @@ def test_authz_params_info_containing_session_required_single_domain():
             "session_required_identities=None",
             "session_required_single_domain=['foo', 'bar']",
             "session_required_policies=None",
+            "session_required_mfa=None",
         ],
         ")",
     )
@@ -303,6 +310,7 @@ def test_authz_params_info_containing_malformed_session_required_single_domain()
             "session_required_identities=None",
             "session_required_single_domain=None",
             "session_required_policies=None",
+            "session_required_mfa=None",
         ],
         ")",
     )
@@ -325,6 +333,7 @@ def test_authz_params_info_containing_session_required_policies(policies_value):
             "session_required_identities=None",
             "session_required_single_domain=None",
             "session_required_policies=['foo', 'bar']",
+            "session_required_mfa=None",
         ],
         ")",
     )
@@ -346,6 +355,27 @@ def test_authz_params_info_containing_malformed_session_required_policies():
             "session_required_identities=None",
             "session_required_single_domain=None",
             "session_required_policies=None",
+            "session_required_mfa=None",
+        ],
+        ")",
+    )
+
+
+def test_authz_params_info_containing_malformed_session_required_mfa():
+    body = {"authorization_parameters": {"session_required_mfa": True}}
+    err = construct_error(body=body, http_status=403)
+
+    assert bool(err.info.authorization_parameters) is True
+    assert err.info.authorization_parameters.session_required_mfa is True
+    _strmatch_any_order(
+        str(err.info.authorization_parameters),
+        "AuthorizationParameterInfo(",
+        [
+            "session_message=None",
+            "session_required_identities=None",
+            "session_required_single_domain=None",
+            "session_required_policies=None",
+            "session_required_mfa=True",
         ],
         ")",
     )
