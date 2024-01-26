@@ -361,12 +361,13 @@ def test_authz_params_info_containing_malformed_session_required_policies():
     )
 
 
-def test_authz_params_info_containing_malformed_session_required_mfa():
-    body = {"authorization_parameters": {"session_required_mfa": True}}
+@pytest.mark.parametrize("mfa_value", [True, False])
+def test_authz_params_info_containing_session_required_mfa(mfa_value):
+    body = {"authorization_parameters": {"session_required_mfa": mfa_value}}
     err = construct_error(body=body, http_status=403)
 
     assert bool(err.info.authorization_parameters) is True
-    assert err.info.authorization_parameters.session_required_mfa is True
+    assert err.info.authorization_parameters.session_required_mfa is mfa_value
     _strmatch_any_order(
         str(err.info.authorization_parameters),
         "AuthorizationParameterInfo(",
@@ -375,7 +376,27 @@ def test_authz_params_info_containing_malformed_session_required_mfa():
             "session_required_identities=None",
             "session_required_single_domain=None",
             "session_required_policies=None",
-            "session_required_mfa=True",
+            f"session_required_mfa={mfa_value}",
+        ],
+        ")",
+    )
+
+
+def test_authz_params_info_containing_malformed_session_required_mfa():
+    body = {"authorization_parameters": {"session_required_mfa": "foobarjohn"}}
+    err = construct_error(body=body, http_status=403)
+
+    assert bool(err.info.authorization_parameters) is True
+    assert err.info.authorization_parameters.session_required_mfa is None
+    _strmatch_any_order(
+        str(err.info.authorization_parameters),
+        "AuthorizationParameterInfo(",
+        [
+            "session_message=None",
+            "session_required_identities=None",
+            "session_required_single_domain=None",
+            "session_required_policies=None",
+            "session_required_mfa=None",
         ],
         ")",
     )

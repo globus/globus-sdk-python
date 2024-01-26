@@ -59,7 +59,7 @@ policy_options = (
 mfa_options = (True, False)
 prompt_options = ("login",)
 # Seed an all-`None` option test, then use a loop to fill in the rest.
-# There must be 4 parameters so parametrized tuple unpacking works in the test.
+# The number of parameters here must match the test parameters:
 _ALL_SESSION_PARAM_COMBINATIONS = [(None,) * 5]
 for idx, options in enumerate(
     (domain_options, identity_options, policy_options, mfa_options, prompt_options)
