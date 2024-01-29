@@ -12,6 +12,36 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-3.35.0:
+
+v3.35.0 (2024-01-29)
+--------------------
+
+Added
+~~~~~
+
+- Added a `session_required_mfa` parameter to the `AuthorizationParameterInfo` error
+  info object and `oauth2_get_authorize_url` method (:pr:`939`)
+
+Changed
+~~~~~~~
+
+- The argument specification for ``AuthClient.create_policy`` was incorrect.
+  The corrected method will emit deprecation warnings if called with positional
+  arguments, as the corrected version uses keyword-only arguments. (:pr:`936`)
+
+Deprecated
+~~~~~~~~~~
+
+- ``TransferClient.operation_symlink`` is now officially deprecated and will
+  emit a ``RemovedInV4Warning`` if used. (:pr:`942`)
+
+Fixed
+~~~~~
+
+- Included documentation in `AuthorizationParameterInfo` for `session_required_policies`
+  (:pr:`939`)
+
 .. _changelog-3.34.0:
 
 v3.34.0 (2024-01-02)
