@@ -134,6 +134,14 @@ class PayloadWrapper(PayloadWrapperBase):
     requested encoder (e.g. as a JSON request body).
     """
 
+    # XXX: DEVELOPER NOTE
+    #
+    # this class is our long-standing/legacy method of defining payload helper objects
+    # for any new cases, the `globus_sdk.payload` module should be preferred, offering a
+    # `dataclasses`-based approach for building MISSING-aware payload helpers with the
+    # ability to set callback types
+    #
+
     # use UserDict rather than subclassing dict so that our API is always consistent
     # e.g. `dict.pop` does not invoke `dict.__delitem__`. Overriding `__delitem__` on a
     # dict subclass can lead to inconsistent behavior between usages like these:

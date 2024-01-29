@@ -6,7 +6,7 @@ import uuid
 
 import requests
 
-from globus_sdk import utils
+from globus_sdk import payload, utils
 
 
 class RequestEncoder:
@@ -93,6 +93,9 @@ class RequestEncoder:
 
         Otherwise, it is returned as-is.
         """
+        if isinstance(data, payload.Payload):
+            data = data.asdict()
+
         if isinstance(data, (dict, utils.PayloadWrapper)):
             return utils.filter_missing(
                 {k: self._prepare_data(v) for k, v in data.items()}
