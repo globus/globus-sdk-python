@@ -147,7 +147,9 @@ class GCSClient(client.BaseClient):
         self,
         endpoint_data: dict[str, t.Any] | EndpointDocument,
         *,
-        include: list[t.Literal["endpoint"]] | None = None,
+        include: (
+            t.Iterable[t.Literal["endpoint"]] | t.Literal["endpoint"] | None
+        ) = None,
         query_params: dict[str, t.Any] | None = None,
     ) -> UnpackingGCSResponse:
         """
@@ -170,7 +172,7 @@ class GCSClient(client.BaseClient):
         """
         query_params = query_params or {}
         if include is not None:
-            query_params["include"] = ",".join(include)
+            query_params["include"] = utils.commajoin(include)
 
         return UnpackingGCSResponse(
             self.patch(
