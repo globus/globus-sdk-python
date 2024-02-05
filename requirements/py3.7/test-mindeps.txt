@@ -12,7 +12,7 @@ chardet==3.0.4
     # via requests
 coverage==7.2.7
     # via -r test.in
-cryptography==3.3.1
+cryptography==42.0.0
     # via -r test-mindeps.in
 exceptiongroup==1.2.0
     # via pytest
