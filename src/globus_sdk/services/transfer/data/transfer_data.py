@@ -90,8 +90,8 @@ class TransferData(utils.PayloadWrapper):
         [default: ``"ignore"``]
     :param skip_activation_check: When true, allow submission even if the endpoints
         aren't currently activated
-    :param skip_source_errors: When true, source permission denied and file
-        not found errors from the source endpoint will cause the offending
+    :param skip_source_errors: When true, permission denied, file not found, and
+        ambiguous path errors from the source endpoint will cause the offending
         path to be skipped.
         [default: ``False``]
     :param fail_on_quota_errors: When true, quota exceeded errors will cause the
