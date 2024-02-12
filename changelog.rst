@@ -12,6 +12,25 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-3.36.0:
+
+v3.36.0 (2024-02-12)
+--------------------
+
+Added
+~~~~~
+
+- Added support for GCS endpoint get & update operations (:pr:`933`)
+
+  - ``gcs_client.get_endpoint()``
+  - ``gcs_client.update_endpoint(EndpointDocument(...))``
+
+- ``TransferClient.endpoint_manager_task_list()`` now supports
+  ``filter_endpoint_use`` as a parameter. (:pr:`948`)
+
+- ``FlowsClient.create_flow`` now supports ``subscription_id`` as a parameter.
+  (:pr:`949`)
+
 .. _changelog-3.35.0:
 
 v3.35.0 (2024-01-29)
