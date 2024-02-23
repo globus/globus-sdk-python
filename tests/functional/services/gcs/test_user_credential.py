@@ -1,6 +1,6 @@
 import json
 
-from globus_sdk import UserCredentialDocument
+from globus_sdk import ConnectorTable, UserCredentialDocument
 from globus_sdk._testing import get_last_request, load_response
 
 
@@ -27,7 +27,10 @@ def test_get_user_credential(client):
     assert res.full_data["DATA_TYPE"] == "result#1.0.0"
     assert res["id"] == uc_id
     assert res["display_name"] == "posix_credential"
-    assert client.connector_id_to_name(res["connector_id"]) == "POSIX"
+
+    connector = ConnectorTable.lookup_by_id(res["connector_id"])
+    assert connector is not None
+    assert connector.name == "POSIX"
 
 
 def test_create_user_credential(client):

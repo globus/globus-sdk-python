@@ -1,4 +1,5 @@
 from .client import GCSClient
+from .connector_table import ConnectorTable, GlobusConnectServerConnector
 from .data import (
     ActiveScaleStoragePolicies,
     AzureBlobStoragePolicies,
@@ -59,4 +60,6 @@ __all__ = (
     "IterableGCSResponse",
     "UnpackingGCSResponse",
     "UserCredentialDocument",
+    "GlobusConnectServerConnector",
+    "ConnectorTable",
 )

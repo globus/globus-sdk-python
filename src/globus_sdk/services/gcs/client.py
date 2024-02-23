@@ -3,10 +3,11 @@ from __future__ import annotations
 import typing as t
 import uuid
 
-from globus_sdk import client, paging, response, scopes, utils
+from globus_sdk import client, exc, paging, response, scopes, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 
+from .connector_table import ConnectorTable
 from .data import (
     CollectionDocument,
     EndpointDocument,
@@ -97,24 +98,30 @@ class GCSClient(client.BaseClient):
     @staticmethod
     def connector_id_to_name(connector_id: UUIDLike) -> str | None:
         """
-        Helper that converts a given connector_id into a human readable
-        connector name string. Will return None if the id is not recognized.
+        .. warning::
 
-        Note that it is possible for valid connector_ids to be unrecognized
-        due to differing SDK and GCS versions.
+            This method is deprecated -- use
+            ``ConnectorTable.lookup_by_id`` instead.
+
+        Helper that converts a given connector_id into a human readable
+        connector name string.
 
         :param connector_id: The ID of the connector
         """
-        connector_dict = {
-            "7c100eae-40fe-11e9-95a3-9cb6d0d9fd63": "Box",
-            "1b6374b0-f6a4-4cf7-a26f-f262d9c6ca72": "Ceph",
-            "56366b96-ac98-11e9-abac-9cb6d0d9fd63": "Google Cloud Storage",
-            "976cf0cf-78c3-4aab-82d2-7c16adbcc281": "Google Drive",
-            "145812c8-decc-41f1-83cf-bb2a85a2a70b": "POSIX",
-            "7643e831-5f6c-4b47-a07f-8ee90f401d23": "S3",
-            "7e3f3f5e-350c-4717-891a-2f451c24b0d4": "SpectraLogic BlackPearl",
-        }
-        return connector_dict.get(str(connector_id))
+        exc.warn_deprecated(
+            "`connector_id_to_name` has been replaced with "
+            "`ConnectorTable.lookup_by_id`. Use that instead, "
+            "and retrieve the `name` attribute from the result."
+        )
+        connector_obj = ConnectorTable.lookup_by_id(connector_id)
+        if connector_obj is None:
+            return None
+        name = connector_obj.name
+        # compatibility shim due to name change in the data (which was updated to
+        # match internal sources referring to this only as "BlackPearl")
+        if name == "BlackPearl":
+            name = "Spectralogic BlackPearl"
+        return name
 
     #
     # endpoint methods

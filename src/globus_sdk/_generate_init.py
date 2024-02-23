@@ -157,6 +157,8 @@ _LAZY_IMPORT_TABLE: list[tuple[str, tuple[str, ...]]] = [
             "IrodsStoragePolicies",
             "HPSSStoragePolicies",
             "UserCredentialDocument",
+            "GlobusConnectServerConnector",
+            "ConnectorTable",
         ),
     ),
     (
