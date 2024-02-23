@@ -26,6 +26,14 @@ The primary interface for the GCS Manager API is the :class:`GCSClient` class.
 Helper Objects
 --------------
 
+.. autoclass:: ConnectorTable
+   :members:
+   :show-inheritance:
+
+.. autoclass:: GlobusConnectServerConnector
+   :members:
+   :show-inheritance:
+
 .. automodule:: globus_sdk.services.gcs.data
    :members:
    :show-inheritance:

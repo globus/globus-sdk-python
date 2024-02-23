@@ -91,6 +91,8 @@ _LAZY_IMPORT_TABLE = {
         "IrodsStoragePolicies",
         "HPSSStoragePolicies",
         "UserCredentialDocument",
+        "GlobusConnectServerConnector",
+        "ConnectorTable",
     },
     "services.flows": {
         "FlowsClient",
@@ -196,6 +198,8 @@ if t.TYPE_CHECKING:
     from .services.gcs import IrodsStoragePolicies
     from .services.gcs import HPSSStoragePolicies
     from .services.gcs import UserCredentialDocument
+    from .services.gcs import GlobusConnectServerConnector
+    from .services.gcs import ConnectorTable
     from .services.flows import FlowsClient
     from .services.flows import FlowsAPIError
     from .services.flows import IterableFlowsResponse
@@ -277,6 +281,7 @@ __all__ = (
     "CollectionDocument",
     "CollectionPolicies",
     "ConfidentialAppAuthClient",
+    "ConnectorTable",
     "DeleteData",
     "DependentScopeSpec",
     "EndpointDocument",
@@ -289,6 +294,7 @@ __all__ = (
     "GetIdentitiesResponse",
     "GlobusAPIError",
     "GlobusConnectPersonalOwnerInfo",
+    "GlobusConnectServerConnector",
     "GlobusConnectionError",
     "GlobusConnectionTimeoutError",
     "GlobusError",
