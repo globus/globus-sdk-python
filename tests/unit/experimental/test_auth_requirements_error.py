@@ -94,6 +94,11 @@ def test_create_auth_requirements_error_from_consent_error(error_dict, status):
             ),
             "session_required_single_domain": ["foo.com", "baz.org"],
         },
+        {
+            "session_message": "You need to re-authenticate",
+            "session_required_single_domain": ["foo.com", "baz.org"],
+            "prompt": "login",
+        },
     ),
 )
 def test_create_auth_requirements_error_from_authorization_error(

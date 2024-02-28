@@ -31,6 +31,10 @@ class GlobusAuthorizationParameters(_serializable.Serializable):
     :ivar required_scopes: A list of scopes for which consent is required.
     :vartype required_scopes: list of str, optional
 
+    :ivar prompt: The OIDC 'prompt' parameter, for which Globus Auth currently supports
+        the values 'login' and 'none'.
+    :vartype prompt: str, optional
+
     :ivar extra: A dictionary of additional fields that were provided. May
         be used for forward/backward compatibility.
     :vartype extra: dict
@@ -45,6 +49,7 @@ class GlobusAuthorizationParameters(_serializable.Serializable):
         session_required_single_domain: list[str] | None = None,
         session_required_mfa: bool | None = None,
         required_scopes: list[str] | None = None,
+        prompt: str | None = None,
         extra: dict[str, t.Any] | None = None,
     ):
         self.session_message = _validators.opt_str("session_message", session_message)
@@ -63,6 +68,7 @@ class GlobusAuthorizationParameters(_serializable.Serializable):
         self.required_scopes = _validators.opt_str_list(
             "required_scopes", required_scopes
         )
+        self.prompt = _validators.opt_str("prompt", prompt)
         self.extra = extra or {}
 
         # Enforce that the error contains at least one of the fields we expect
