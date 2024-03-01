@@ -1235,6 +1235,40 @@ class TransferClient(client.BaseClient):
             query_params=query_params,
         )
 
+    def operation_stat(
+        self,
+        endpoint_id: UUIDLike,
+        path: str | None = None,
+        *,
+        local_user: str | None = None,
+        query_params: dict[str, t.Any] | None = None,
+    ) -> response.GlobusHTTPResponse:
+        """
+        :param endpoint_id: The ID of the collection on which to do the stat operation
+        :param path: Path on the collection to do the stat operation on
+        :param local_user: Optional value passed to identity mapping specifying which
+            local user account to map to. Only usable with Globus Connect Server v5
+            mapped collections.
+        :param query_params: Additional passthrough query parameters
+            .. tab-item:: API Info
+
+                ``GET /operation/endpoint/<endpoint_id>/stat``
+
+                .. extdoclink:: Get File or Directory Status
+                    :ref: transfer/file_operations/#stat
+        """
+        if query_params is None:
+            query_params = {}
+        if path is not None:
+            query_params["path"] = path
+        if local_user is not None:
+            query_params["local_user"] = local_user
+
+        log.info(f"TransferClient.operation_stat({endpoint_id}, {query_params})")
+        return self.get(
+            f"operation/endpoint/{endpoint_id}/stat", query_params=query_params
+        )
+
     def operation_symlink(
         self,
         endpoint_id: UUIDLike,

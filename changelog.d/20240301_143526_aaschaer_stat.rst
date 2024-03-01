@@ -1,0 +1,4 @@
+ Added
+ ~~~~~
+
+ - Added `TransferClient,operation_stat` helper method for getting the status of a path on a collection (:pr:`NUMBER`)
