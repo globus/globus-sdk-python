@@ -1250,6 +1250,20 @@ class TransferClient(client.BaseClient):
             local user account to map to. Only usable with Globus Connect Server v5
             mapped collections.
         :param query_params: Additional passthrough query parameters
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TransferClient(...)
+                    tc.operation_stat(ep_id, "/path/to/item")
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: transfer.operation_stat
+
             .. tab-item:: API Info
 
                 ``GET /operation/endpoint/<endpoint_id>/stat``
