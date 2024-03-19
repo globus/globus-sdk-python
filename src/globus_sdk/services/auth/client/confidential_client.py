@@ -216,7 +216,7 @@ class ConfidentialAppAuthClient(AuthLoginClient):
             to access tokens. [Default: ``False``]
         :param scope: The scope or scopes of the dependent tokens which are being
             requested. Applications are recommended to provide this string to ensure
-            that they are receiving the tokens they expect. If omitted, all available 
+            that they are receiving the tokens they expect. If omitted, all available
             dependent tokens will be returned.
         :param additional_params: Additional parameters to include in the request body
 
