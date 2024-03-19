@@ -189,12 +189,12 @@ class ConfidentialAppAuthClient(AuthLoginClient):
         token: str,
         *,
         refresh_tokens: bool = False,
+        scope: str | t.Iterable[str] | utils.MissingType = utils.MISSING,
         additional_params: dict[str, t.Any] | None = None,
     ) -> OAuthDependentTokenResponse:
         """
-        Does a `Dependent Token Grant
-        <https://docs.globus.org/api/auth/reference/#dependent_token_grant_post_v2_oauth2_token>`_
-        against Globus Auth.
+        Fetch Dependent Tokens from Globus Auth.
+
         This exchanges a token given to this client for a new set of tokens
         which give it access to resource servers on which it depends.
         This grant type is intended for use by Resource Servers playing out the
@@ -211,11 +211,44 @@ class ConfidentialAppAuthClient(AuthLoginClient):
         their relationship). As long as that is the case, Service A can use
         this Grant to get those "Dependent" or "Downstream" tokens for Service B.
 
-        :param token: A Globus Access Token as a string
+        :param token: An access token as a string
         :param refresh_tokens: When True, request dependent refresh tokens in addition
             to access tokens. [Default: ``False``]
+        :param scope: The scope or scopes of the dependent tokens which are being
+            requested. Applications are recommended to provide this string to ensure
+            that they are receiving the tokens they expect.
         :param additional_params: Additional parameters to include in the request body
-        """
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                Given a token, getting a dependent token for Globus Groups might
+                look like the following:
+
+                .. code-block:: python
+
+                    ac = globus_sdk.ConfidentialAppAuthClient(CLIENT_ID, CLIENT_SECRET)
+                    dependent_token_data = ac.oauth2_get_dependent_tokens(
+                        "<token_string>",
+                        scope="urn:globus:auth:scope:groups.api.globus.org:view_my_groups_and_memberships",
+                    )
+
+                    group_token_data = dependent_token_data.by_resource_server["groups.api.globus.org"]
+                    group_token = group_token_data["access_token"]
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: auth.oauth2_get_dependent_tokens
+                    :case: groups
+
+            .. tab-item:: API Info
+
+                ``POST /v2/oauth2/token``
+
+                .. extdoclink:: Dependent Token Grant
+                    :ref: auth/reference/##dependent_token_grant_post_v2oauth2token
+        """  # noqa: E501
         log.info("Getting dependent tokens from access token")
         log.debug(f"additional_params={additional_params}")
         form_data = {
@@ -227,6 +260,8 @@ class ConfidentialAppAuthClient(AuthLoginClient):
         # back to the user than the OAuth2 spec wording
         if refresh_tokens:
             form_data["access_type"] = "offline"
+        if not isinstance(scope, utils.MissingType):
+            form_data["scope"] = " ".join(utils.safe_strseq_iter(scope))
         if additional_params:
             form_data.update(additional_params)
 
