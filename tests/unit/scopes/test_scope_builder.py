@@ -1,8 +1,6 @@
 import uuid
 
-import pytest
-
-from globus_sdk.scopes import FlowsScopes, MutableScope, ScopeBuilder
+from globus_sdk.scopes import FlowsScopes, ScopeBuilder
 
 
 def test_url_scope_string():
@@ -79,45 +77,6 @@ def test_sb_allowed_inputs_types():
     assert list_sb.do_a_thing == scope_1_urn
 
 
-def test_scope_str_and_repr_simple():
-    s = MutableScope("simple")
-    assert str(s) == "simple"
-    assert repr(s) == "MutableScope('simple')"
-
-
-def test_scope_str_and_repr_optional():
-    s = MutableScope("simple", optional=True)
-    assert str(s) == "*simple"
-    assert repr(s) == "MutableScope('simple', optional=True)"
-
-
-def test_scope_str_and_repr_with_dependencies():
-    s = MutableScope("top")
-    s.add_dependency("foo")
-    assert str(s) == "top[foo]"
-    s.add_dependency("bar")
-    assert str(s) == "top[foo bar]"
-    assert (
-        repr(s) == "MutableScope('top', "
-        "dependencies=[MutableScope('foo'), MutableScope('bar')])"
-    )
-
-
-def test_add_dependency_warns_on_optional_but_still_has_good_str_and_repr():
-    s = MutableScope("top")
-    # this should warn, the use of `optional=...` rather than adding a Scope object
-    # when optional dependencies are wanted is deprecated
-    with pytest.warns(DeprecationWarning):
-        s.add_dependency("foo", optional=True)
-
-    # confirm the str representation and repr for good measure
-    assert str(s) == "top[*foo]"
-    assert (
-        repr(s)
-        == "MutableScope('top', dependencies=[MutableScope('foo', optional=True)])"
-    )
-
-
 def test_scopebuilder_make_mutable_produces_same_strings():
     sb = ScopeBuilder(str(uuid.UUID(int=0)), known_scopes="foo", known_url_scopes="bar")
     assert str(sb.make_mutable("foo")) == sb.foo
@@ -135,9 +94,3 @@ def test_flows_scopes_creation():
         FlowsScopes.run
         == "https://auth.globus.org/scopes/eec9b274-0c81-4334-bdc2-54e90e689b9a/run"
     )
-
-
-@pytest.mark.parametrize("scope_str", ("*foo", "foo[bar]", "foo[", "foo]", "foo bar"))
-def test_scope_init_forbids_special_chars(scope_str):
-    with pytest.raises(ValueError):
-        MutableScope(scope_str)
