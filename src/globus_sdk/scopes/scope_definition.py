@@ -1,7 +1,10 @@
 """
-This defines the Scope object and the scope parser.
-Because these components are mutually dependent, it's easiest if they're kept in a
-single module.
+THIS IS A LEGACY MODULE
+
+This module defines a legacy scope object and parser called `MutableScope`.
+It is maintained for backwards compatibility.
+
+For new code, use the `globus_sdk.Scope` object.
 """
 
 from __future__ import annotations
@@ -23,7 +26,6 @@ def _iter_scope_collection(obj: ScopeCollectionType) -> t.Iterator[str]:
             yield str(item)
 
 
-# TODO: rename MutableScope to Scope
 class MutableScope:
     """
     A scope object is a representation of a scope which allows modifications to be

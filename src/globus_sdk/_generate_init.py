@@ -216,6 +216,14 @@ _LAZY_IMPORT_TABLE: list[tuple[str, tuple[str, ...]]] = [
         ),
     ),
     (
+        "scopes",
+        (
+            "Scope",
+            "ScopeParseError",
+            "ScopeCycleError",
+        ),
+    ),
+    (
         "utils",
         (
             "MISSING",
