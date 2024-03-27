@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import typing as t
 import warnings
 
 from ._parser import parse_scope_graph
@@ -143,81 +142,3 @@ class Scope:
 
     def __str__(self) -> str:
         return self.serialize()
-
-    def __contains__(self, other: t.Any) -> bool:
-        """
-        .. warning::
-
-            The ``__contains__`` method is a non-authoritative convenience for comparing
-            parsed scopes. Although the essence and intent of the check is summarized
-            below, there is no guarantee that it correctly reflects the permissions of a
-            token or tokens. The structure of the data for a given consent in Globus
-            Auth is not perfectly reflected in the parse tree.
-
-        ``in`` and ``not in`` are defined as permission coverage checks
-
-        ``scope1 in scope2`` means that a token scoped for
-        ``scope2`` has all of the permissions of a token scoped for ``scope1``.
-
-        A scope is covered by another scope if
-
-        - the top level strings match
-        - the optional-ness matches OR only the covered scope is optional
-        - the dependencies of the covered scope are all covered by dependencies of
-          the covering scope
-
-        Therefore, the following are true:
-
-        .. code-block:: pycon
-
-            >>> s = lambda x: Scope.deserialize(x)  # define this for brevity below
-            # self inclusion works, including when optional
-            >>> s("foo") in s("foo")
-            >>> s("*foo") in s("*foo")
-            # an optional scope is covered by a non-optional one, but not the reverse
-            >>> s("*foo") in s("foo")
-            >>> s("foo") not in s("*foo")
-            # dependencies have the expected meanings
-            >>> s("foo") in s("foo[bar]")
-            >>> s("foo[bar]") not in s("foo")
-            >>> s("foo[bar]") in s("foo[bar[baz]]")
-            # dependencies are not transitive and obey "optionalness" matching
-            >>> s("foo[bar]") not in s("foo[fizz[bar]]")
-            >>> s("foo[bar]") not in s("foo[*bar]")
-        """
-        # scopes can only contain other scopes
-        if not isinstance(other, Scope):
-            return False
-
-        # top-level scope must match
-        if self.scope_string != other.scope_string:
-            return False
-
-        # between self.optional and other.optional, there are four possibilities,
-        # of which three are acceptable and one is not
-        # both optional and neither optional are okay,
-        # 'self' being non-optional and 'other' being optional is okay
-        # the failing case is 'other in self' when 'self' is optional and 'other' is not
-        #
-        #    self.optional | other.optional | (other in self) is possible
-        #    --------------|----------------|----------------------------
-        #        true      |    true        |    true
-        #        false     |    false       |    true
-        #        false     |    true        |    true
-        #        true      |    false       |    false
-        #
-        # so only check for that one case
-        if self.optional and not other.optional:
-            return False
-
-        # dependencies must all be contained -- search for a contrary example
-        for other_dep in other.dependencies:
-            for dep in self.dependencies:
-                if other_dep in dep:
-                    break
-            # reminder: the else branch of a for-else means that the break was never hit
-            else:
-                return False
-
-        # all criteria were met -- True!
-        return True

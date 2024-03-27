@@ -133,6 +133,11 @@ _LAZY_IMPORT_TABLE = {
         "TransferClient",
         "TransferData",
     },
+    "scopes": {
+        "Scope",
+        "ScopeParseError",
+        "ScopeCycleError",
+    },
     "utils": {
         "MISSING",
         "MissingType",
@@ -229,6 +234,9 @@ if t.TYPE_CHECKING:
     from .services.transfer import TransferAPIError
     from .services.transfer import TransferClient
     from .services.transfer import TransferData
+    from .scopes import Scope
+    from .scopes import ScopeParseError
+    from .scopes import ScopeCycleError
     from .utils import MISSING
     from .utils import MissingType
 
@@ -338,6 +346,9 @@ __all__ = (
     "RefreshTokenAuthorizer",
     "RemovedInV4Warning",
     "S3StoragePolicies",
+    "Scope",
+    "ScopeCycleError",
+    "ScopeParseError",
     "SearchAPIError",
     "SearchClient",
     "SearchQuery",

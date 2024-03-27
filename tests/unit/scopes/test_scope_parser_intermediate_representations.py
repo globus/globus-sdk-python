@@ -1,7 +1,4 @@
-from globus_sdk.experimental.scope_parser._parser import (
-    ScopeTreeNode,
-    parse_scope_graph,
-)
+from globus_sdk.scopes._parser import ScopeTreeNode, parse_scope_graph
 
 
 def test_graph_str_single_node():

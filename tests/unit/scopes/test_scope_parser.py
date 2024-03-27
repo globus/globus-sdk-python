@@ -2,7 +2,7 @@ import time
 
 import pytest
 
-from globus_sdk.experimental.scope_parser import Scope, ScopeCycleError, ScopeParseError
+from globus_sdk import Scope, ScopeCycleError, ScopeParseError
 
 
 def test_scope_str_and_repr_simple():
@@ -208,105 +208,6 @@ def test_scope_deserialize_fails_on_multiple_top_level_scopes():
 def test_scope_init_forbids_special_chars(scope_str):
     with pytest.raises(ValueError):
         Scope(scope_str)
-
-
-def test_scope_contains_requires_scope_objects():
-    s = Scope("foo")
-    assert "foo" not in s
-
-
-@pytest.mark.parametrize(
-    "contained, containing, expect",
-    [
-        # string matching, including optional on both sides
-        ("foo", "foo", True),  # identity
-        ("*foo", "*foo", True),  # identity
-        ("foo", "bar", False),
-        ("foo", "*bar", False),
-        ("*foo", "bar", False),
-        # optional-ness is one-way when mismatched
-        ("foo", "*foo", False),
-        ("*foo", "foo", True),
-        # dependency matching is also one-way when mismatched
-        ("foo[bar]", "foo[bar]", True),  # identity
-        ("foo[bar]", "foo", False),
-        ("foo", "foo[bar]", True),
-        ("foo", "foo[bar[baz]]", True),
-        ("foo[bar]", "foo[bar[baz]]", True),
-        ("foo[bar[baz]]", "foo[bar[baz]]", True),  # identity
-        # and the combination of dependencies with optional also works
-        ("foo[*bar]", "foo[bar[baz]]", True),
-        ("foo[*bar]", "foo[*bar[baz]]", True),
-        ("foo[bar]", "foo[bar[*baz]]", True),
-        ("foo[*bar]", "foo[bar[*baz]]", True),
-    ],
-)
-def test_scope_contains_simple_cases(contained, containing, expect):
-    outer_s = Scope.deserialize(containing)
-    inner_s = Scope.deserialize(contained)
-    assert (inner_s in outer_s) == expect
-
-
-@pytest.mark.parametrize(
-    "contained, containing, expect",
-    [
-        # "simple" cases for multiple dependencies
-        ("foo[bar baz]", "foo[bar[baz] baz]", True),
-        ("foo[bar baz]", "foo[bar[baz]]", False),
-        ("foo[baz bar]", "foo[bar[baz] baz]", True),
-        ("foo[bar baz]", "foo[bar[baz] baz buzz]", True),
-        # these scenarios will mirror some "realistic" usage
-        (
-            "timer[transfer_ap[transfer]]",
-            "timer[transfer_ap[transfer[*foo/data_access]]]",
-            True,
-        ),
-        (
-            "timer[transfer_ap[transfer[*foo/data_access]]]",
-            "timer[transfer_ap[transfer[*foo/data_access *bar/data_access]]]",
-            True,
-        ),
-        (
-            "timer[transfer_ap[transfer[*bar *foo]]]",
-            "timer[transfer_ap[transfer[*foo *bar *baz]]]",
-            True,
-        ),
-        (
-            "timer[transfer_ap[transfer[*foo/data_access]]]",
-            "timer[transfer_ap[transfer]]",
-            False,
-        ),
-        (
-            "timer[transfer_ap[transfer[*foo/data_access *bar/data_access]]]",
-            "timer[transfer_ap[transfer[*foo/data_access]]]",
-            False,
-        ),
-        (
-            "timer[transfer_ap[transfer[foo/data_access]]]",
-            "timer[transfer_ap[transfer[*foo/data_access]]]",
-            False,
-        ),
-        (
-            "timer[transfer_ap[transfer[*foo/data_access]]]",
-            "timer[transfer_ap[transfer[foo/data_access]]]",
-            True,
-        ),
-        (
-            "timer[transfer_ap[*transfer[*foo/data_access]]]",
-            "timer[transfer_ap[transfer[foo/data_access]]]",
-            True,
-        ),
-        (
-            "timer[transfer_ap[transfer[*foo/data_access]]]",
-            "timer[transfer_ap[*transfer[foo/data_access]]]",
-            False,
-        ),
-    ],
-)
-def test_scope_contains_complex_usages(contained, containing, expect):
-    outer_s = Scope.deserialize(containing)
-    inner_s = Scope.deserialize(contained)
-    assert (inner_s in outer_s) == expect
 
 
 @pytest.mark.parametrize(
