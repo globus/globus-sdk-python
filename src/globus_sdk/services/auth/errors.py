@@ -38,3 +38,7 @@ class AuthAPIError(exc.GlobusAPIError):
                 self.request_id = maybe_error_id
 
         return True
+
+
+class ConsentParseError(ValueError):
+    """The error raised if scope parsing fails."""

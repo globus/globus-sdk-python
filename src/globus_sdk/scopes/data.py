@@ -59,6 +59,7 @@ AuthScopes = _AuthScopesBuilder(
         "view_authentications",
         "view_clients",
         "view_clients_and_scopes",
+        "view_consents",
         "view_identities",
         "view_identity_set",
     ],

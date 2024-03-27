@@ -19,6 +19,7 @@ from ..errors import AuthAPIError
 from ..response import (
     GetClientCredentialsResponse,
     GetClientsResponse,
+    GetConsentsResponse,
     GetIdentitiesResponse,
     GetIdentityProvidersResponse,
     GetPoliciesResponse,
@@ -1789,7 +1790,7 @@ class AuthClient(client.BaseClient):
 
                     >>> ac = globus_sdk.AuthClient(...)
                     >>> scope_id = ...
-                    >>> r = ac.delete_policy(scope_id)
+                    >>> r = ac.delete_scope(scope_id)
 
             .. tab-item:: Example Response Data
 
@@ -1803,3 +1804,31 @@ class AuthClient(client.BaseClient):
                     :ref: auth/reference/#delete_scope
         """
         return self.delete(f"/v2/api/scopes/{scope_id}")
+
+    def get_consents(self, identity_id: str) -> GetConsentsResponse:
+        """
+        Look up consents for a user. Requires the ``view_consents`` scope.
+
+        :param identity_id: The ID of the identity to look up consents for
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: pycon
+
+                    >>> ac = globus_sdk.AuthClient(...)
+                    >>> identity_id = ...
+                    >>> r = ac.get_consents(identity_id)
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: auth.get_consents
+
+            .. tab-item:: API Info
+
+                ``GET /v2/api/identities/{identity_id}/consents``
+        """
+        return GetConsentsResponse(
+            self.get(f"/v2/api/identities/{identity_id}/consents"),
+        )
