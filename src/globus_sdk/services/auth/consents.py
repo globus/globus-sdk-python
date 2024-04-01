@@ -1,3 +1,28 @@
+"""
+This module provides convenience data structures to model and interact with
+    Globus Auth consents.
+
+The resources defined herein are:
+    * ``Consent``
+        * A data object modeling a user's grant for a client to perform some scoped
+            operation on their behalf.
+        * This grant is conditional on the invocation path leading to the client's
+            attempted operation being initiated through a chain of similarly scoped
+            operations (consents) defined in the "dependency_path".
+    * ``ConsentTree``
+        * A tree composed of Consent nodes with edges modeling the dependency
+            relationships between them.
+        * A `meets_scope_requirements` method is defined to check whether a scope
+            requirement, including dependent scope requirements, is satisfied by the
+            tree.
+    * ``ConsentForest``
+        * A collection of all ConsentTrees for a user rooted under a particular client
+            (the client that initiated the request for consents).
+        * A `meets_scope_requirements` method is defined to check whether a scope
+            requirement, including dependent scope requirements, is satisfied by any
+            tree in the forest.
+"""
+
 from __future__ import annotations
 
 import json
@@ -16,21 +41,23 @@ class Consent:
     """
     Consent Data Object
 
-    This object represents:
-        1. A grant that a user has given to a client to access a scope on their behalf.
-        2. The path of upstream dependent consents leading from a "root consent" to this
-           one.
+    This object models:
+        * A grant which a user has provided for a client to perform a particular
+            scoped operation on their behalf.
+        * The consent is conditional on the invocation path leading to the client's
+            attempted operation being initiated through a chain of similarly scoped
+            operations (consents) defined in the "dependency_path".
     """
 
-    id: int
     client: UUIDLike
     scope: UUIDLike
+    scope_name: str
+    id: int
     effective_identity: UUIDLike
     # A list representing the path of consent dependencies lading from a "root consent"
     #   to this. The last element of this list will always be this consent's ID.
-    # Downstream dependency relationships may exist but are not defined here.
+    # Downstream dependency relationships may exist but will not be defined here.
     dependency_path: list[int]
-    scope_name: str
     created: datetime
     updated: datetime
     last_used: datetime
@@ -63,23 +90,30 @@ class Consent:
                 f"Raw Consent: {json.dumps(data)}."
             )
 
+    def __str__(self) -> str:
+        client = f"{str(self.client)[:8]}..."
+        return f"Consent [{self.id}]: Client [{client}] -> Scope [{self.scope_name}]"
+
 
 class ConsentForest:
     """
-    A Consent Forest is a data structure which models Consent objects, retrieved from
-        the `auth.get_consents` API endpoint, and their relationships to each other.
+    A ConsentForest is a data structure which models relationships between Consents,
+        objects describing explicit access users have granted to particular clients.
+    It exists to expose a simple interface for evaluating whether resource server grant
+        requirements, as defined by a scope object are satisfied.
 
-    The main purpose of the forest is to expose a simple interface for asking
-        whether one or more scope trees (a root scope plus dynamic dependent scopes)
-        are contained in a user's consents.
+    Consents should be retrieved from the AuthClient's `get_consents` method.
 
-    A `Consent`, on its own, describes a "grant" that a user has given to a particular
-        client to access a particular scope on their behalf.
-    A `ConsentForest` is a directed acyclic graph with nodes representing `Consents`
-        and edges representing the dependency relationship between them.
-    With these two facts in mind, the ConsentForest broadly represents the chain of
-        grants that a user has given to various clients consenting that they may
-        access various scopes on their behalf.
+    Example usage:
+    >>> auth_client = AuthClient(...)
+    >>> identity_id = ...
+    >>> forest = auth_client.get_consents(identity_id).to_forest()
+    >>>
+    >>> # Check whether the forest contains a scope relationship
+    >>> dependent_scope = GCSCollectionScopeBuilder(collection_id).data_access
+    >>> scope = f"{TransferScopes.all}[{dependent_scope}]"
+    >>> forest.contains_scopes(scope)
+
 
     The following diagram demonstrates a Consent Forest in which a user has consented
         to a client ("CLI") initiating transfers against two collections, both of which
@@ -97,65 +131,125 @@ class ConsentForest:
     ```
     """
 
-    def __init__(self, consents: t.Iterable[t.Mapping[str, t.Any]]):
-        # Raw consent nodes, indexed by their ID
-        self._consents: dict[int, Consent] = {}
-        for consent_data in consents:
-            consent = Consent.load(consent_data)
-            self._consents[consent.id] = consent
+    def __init__(self, consents: t.Iterable[t.Mapping[str, t.Any] | Consent]):
+        """
+        :param consents: An iterable of consent data objects. Typically, this will be
+            a ConsentForestResponse retrieved via `auth_client.get_consents(identity)`.
+            This iterable may contain either raw consent data as a dict or pre-loaded
+            Consents.
+        """
+        self.nodes = [
+            consent if isinstance(consent, Consent) else Consent.load(consent)
+            for consent in consents
+        ]
+        # Build an index on consent id for constant time lookups
+        self._node_by_id = {node.id: node for node in self.nodes}
 
-        # Consent edge mappings.
-        self._direct_children = {cid: set() for cid in self._consents.keys()}
-        for consent in self._consents.values():
-            if len(consent.dependency_path) > 1:
-                upstream_id = consent.dependency_path[-2]
-                self._direct_children[upstream_id].add(consent.id)
+        self.edges = self._compute_edges()
+        self.trees = self._build_trees()
 
-        # The collection of root consents in the forest where traversal should begin.
-        # These consents are indexed by their scope name rather than consent id in order
-        #   to simplify the scope tree evaluation operation.
-        roots = [c for c in self._consents.values() if len(c.dependency_path) == 1]
-        self._root_consents_by_scope = {root.scope_name: root for root in roots}
+    def _compute_edges(self) -> dict[int, set[int]]:
+        """
+        Compute the edges of the forest mapping parent -> child.
 
-    @property
-    def nodes(self) -> dict[int, Consent]:
-        return self._consents
+        A consent's parent node id is defined as the penultimate element of the
+            consent's dependency path.
+        If the dependency list is of length 1, the consent is a has no parent.
+        """
+        edges: dict[int, set[int]] = {node.id: set() for node in self.nodes}
+        for node in self.nodes:
+            if len(node.dependency_path) > 1:
+                parent_id = node.dependency_path[-2]
+                try:
+                    edges[parent_id].add(node.id)
+                except KeyError as e:
+                    raise ConsentParseError(
+                        f"Failed to compute forest edges. Missing parent node: {e}. "
+                        f"Consents: {self.nodes}."
+                    )
+        return edges
+
+    def _build_trees(self) -> list[ConsentTree]:
+        """
+        Build out the list of trees in the forest.
+
+        A distinct tree is built out for each "root nodes" (nodes with no parents).
+        """
+
+        # A node with dependency path length 1 has no parents, so it is a root.
+        roots = [node for node in self.nodes if len(node.dependency_path) == 1]
+        return [ConsentTree(root.id, self) for root in roots]
 
     def get_node(self, consent_id: int) -> Consent:
-        return self._consents[consent_id]
+        return self._node_by_id[consent_id]
 
-    @property
-    def edges(self) -> dict[int, set[int]]:
-        return self._direct_children
-
-    def contains_scopes(self, scopes: Scope | str | list[Scope | str]) -> bool:
+    def meets_scope_requirements(self, scopes: Scope | str | list[Scope | str]) -> bool:
         """
-        Check whether this consent forest contains one or more scope trees.
+        Check whether this consent meets one or more scope requirements.
 
-        A consent forest "contains a scope tree" if
-            * There exists a root consent whose scope matches the root scope string.
-            * At least one child consent (from that root) contains each dependent scope.
+        A consent forest meets a particular scope requirement if any consent tree
+            inside the forest meets the scope requirements.
+
+        :returns: True if all scope requirements are met, False otherwise.
         """
         for scope in _normalize_scope_types(scopes):
-            if (root := self._root_consents_by_scope.get(scope.scope_string)) is None:
-                return False
-
-            if not self._contains_scope(root, scope):
+            if not any(tree.meets_scope_requirements(scope) for tree in self.trees):
                 return False
         return True
 
-    def _contains_scope(self, node: Consent, scope: Scope) -> bool:
-        """
-        Check recursively whether a consent node contains the full scope
-          tree defined by a scope object.
-        """
 
+class ConsentTree:
+    """
+    A tree of Consent nodes with edges modeling the dependency relationships between
+        them.
+    """
+
+    def __init__(self, root_id: int, forest: ConsentForest):
+        self.root = forest.get_node(root_id)
+        self.nodes = [self.root]
+        self._node_by_id = {root_id: self.root}
+        self.edges: dict[int, set[int]] = {}
+
+        self._populate_connected_nodes_and_edges(forest)
+
+    def _populate_connected_nodes_and_edges(self, forest: ConsentForest) -> None:
+        """
+        Populate the nodes and edges of the tree by traversing the forest.
+
+        Nodes/Edges are included in the tree iff they are reachable from the root.
+        """
+        nodes_to_evaluate = {self.root.id}
+        while nodes_to_evaluate:
+            consent_id = nodes_to_evaluate.pop()
+            consent = forest.get_node(consent_id)
+            self.edges[consent.id] = forest.edges[consent.id]
+
+            for child_id in self.edges[consent.id]:
+                if child_id not in self._node_by_id:
+                    self.nodes.append(forest.get_node(child_id))
+                    self._node_by_id[child_id] = forest.get_node(child_id)
+                    nodes_to_evaluate.add(child_id)
+
+    def get_node(self, consent_id: int) -> Consent:
+        return self._node_by_id[consent_id]
+
+    def meets_scope_requirements(self, scope: Scope) -> bool:
+        """Check whether this consent tree meets some scope requirements."""
+        return self._meets_scope_requirements_recursive(self.root, scope)
+
+    def _meets_scope_requirements_recursive(self, node: Consent, scope: Scope) -> bool:
+        """
+        Check recursively whether a consent node meets the scope requirements defined
+            by a scope object.
+        """
         if node.scope_name != scope.scope_string:
             return False
 
         for dependent_scope in scope.dependencies:
-            for child_id in self._direct_children[node.id]:
-                if self._contains_scope(self._consents[child_id], dependent_scope):
+            for child_id in self.edges[node.id]:
+                if self._meets_scope_requirements_recursive(
+                    self.get_node(child_id), dependent_scope
+                ):
                     # We found a child containing this full dependent scope tree
                     # Move onto the next dependent scope tree
                     break
@@ -165,20 +259,26 @@ class ConsentForest:
         # We found at least one child containing each full dependent scope tree
         return True
 
-    def print_tree(self, consent_id: int, tab_depth: int = 0):
-        """
-        Print a visual representation of consent tree rooted at consent_id.
+    @property
+    def max_depth(self) -> int:
+        return self._max_depth_recursive(self.root, 1)
 
-        Example Output:
-        >>> consent_forest.print_tree(1234567)
-        >>> # - [1234567] transfer:all
-        >>> #  - [1234568] groups:view_my_groups
-        >>> #  - [1234569] <collection>:data_access
-        """
-        consent = self._consents[consent_id]
-        print(f"{' ' * tab_depth} - [{consent_id}] {consent.scope_name}")
-        for child_id in self._direct_children[consent_id]:
-            self.print_tree(child_id, tab_depth + 2)
+    def _max_depth_recursive(self, node: Consent, depth: int) -> int:
+        if len(self.edges[node.id]) == 0:
+            return depth
+        return max(
+            self._max_depth_recursive(self.get_node(child_id), depth + 1)
+            for child_id in self.edges[node.id]
+        )
+
+    def pprint(self) -> None:
+        """Pretty print a textual representation of the tree (one line per node)."""
+        self._pprint_recursive(self.root, 0)
+
+    def _pprint_recursive(self, node: Consent, tab_depth: int) -> None:
+        print(f"{' ' * tab_depth} - {node}")
+        for child_id in self.edges[node.id]:
+            self._pprint_recursive(self.get_node(child_id), tab_depth + 2)
 
 
 def _normalize_scope_types(scopes: Scope | str | list[Scope | str]) -> list[Scope]:
@@ -186,6 +286,9 @@ def _normalize_scope_types(scopes: Scope | str | list[Scope | str]) -> list[Scop
     Normalize the input scope types into a list of Scope objects.
 
     Strings are parsed into 1 or more Scopes using `Scope.parse`.
+
+    :param scopes: Some collection of 0 or more scopes as Scope or scope strings.
+    :returns: A list of Scope objects.
     """
 
     if isinstance(scopes, Scope):

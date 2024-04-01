@@ -106,14 +106,14 @@ class AuthClient(client.BaseClient):
         self,
         client_id: UUIDLike | None = None,
         environment: str | None = None,
-        base_url: str | None = None,
+        base_urls: str | None = None,
         authorizer: GlobusAuthorizer | None = None,
         app_name: str | None = None,
         transport_params: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__(
             environment=environment,
-            base_url=base_url,
+            base_url=base_urls,
             authorizer=authorizer,
             app_name=app_name,
             transport_params=transport_params,
@@ -1819,7 +1819,7 @@ class AuthClient(client.BaseClient):
 
                     >>> ac = globus_sdk.AuthClient(...)
                     >>> identity_id = ...
-                    >>> r = ac.get_consents(identity_id)
+                    >>> forest = ac.get_consents(identity_id).to_forest()
 
             .. tab-item:: Example Response Data
 

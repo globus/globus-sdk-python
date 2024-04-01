@@ -1,4 +1,5 @@
 from globus_sdk import IterableResponse
+from globus_sdk.services.auth.consents import ConsentForest
 
 
 class GetConsentsResponse(IterableResponse):
@@ -9,3 +10,12 @@ class GetConsentsResponse(IterableResponse):
     """
 
     default_iter_key = "consents"
+
+    def to_forest(self) -> ConsentForest:
+        """
+        Creates a ConsentForest from the consents in this response.
+
+        ConsentForest is a convenience class to make interacting with the
+            tree of consents simpler.
+        """
+        return ConsentForest(self)
