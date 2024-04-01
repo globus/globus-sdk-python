@@ -88,7 +88,7 @@ class Consent:
             raise ConsentParseError(
                 f"Failed to load Consent object. Missing required key: {e}. "
                 f"Raw Consent: {json.dumps(data)}."
-            )
+            ) from e
 
     def __str__(self) -> str:
         client = f"{str(self.client)[:8]}..."
@@ -166,7 +166,7 @@ class ConsentForest:
                     raise ConsentParseError(
                         f"Failed to compute forest edges. Missing parent node: {e}. "
                         f"Consents: {self.nodes}."
-                    )
+                    ) from e
         return edges
 
     def _build_trees(self) -> list[ConsentTree]:
@@ -190,6 +190,8 @@ class ConsentForest:
         A consent forest meets a particular scope requirement if any consent tree
             inside the forest meets the scope requirements.
 
+        :param scopes: A single scope, a list of scopes, or a scope string to check
+           against the forest.
         :returns: True if all scope requirements are met, False otherwise.
         """
         for scope in _normalize_scope_types(scopes):
@@ -234,7 +236,11 @@ class ConsentTree:
         return self._node_by_id[consent_id]
 
     def meets_scope_requirements(self, scope: Scope) -> bool:
-        """Check whether this consent tree meets some scope requirements."""
+        """
+        Check whether this consent tree meets a particular scope requirement.
+
+        :param scope: A Scope requirement to check against the tree.
+        """
         return self._meets_scope_requirements_recursive(self.root, scope)
 
     def _meets_scope_requirements_recursive(self, node: Consent, scope: Scope) -> bool:

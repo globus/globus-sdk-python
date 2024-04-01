@@ -28,17 +28,17 @@ Clients = SimpleNamespace(
     Two=_uuid_of("2"),
     Three=_uuid_of("3"),
 )
-TestScope = namedtuple("Scope", ["id", "name"])
+ScopeRepr = namedtuple("Scope", ["id", "name"])
 Scopes = SimpleNamespace(
-    A=TestScope(_uuid_of("A"), "A"),
-    B=TestScope(_uuid_of("B"), "B"),
-    C=TestScope(_uuid_of("C"), "C"),
-    D=TestScope(_uuid_of("D"), "D"),
+    A=ScopeRepr(_uuid_of("A"), "A"),
+    B=ScopeRepr(_uuid_of("B"), "B"),
+    C=ScopeRepr(_uuid_of("C"), "C"),
+    D=ScopeRepr(_uuid_of("D"), "D"),
 )
 
 
 @dataclass
-class TestConsent(Consent):
+class ConsentTest(Consent):
     """
     A convenience Consent data subclass with default values for most fields to make
       test case definition less verbose.
@@ -73,11 +73,11 @@ class TestConsent(Consent):
     def of(
         cls,
         client: str,
-        scope: TestScope,
+        scope: ScopeRepr,
         *,
-        parent: TestConsent | None = None,
+        parent: ConsentTest | None = None,
         **kwargs,
-    ) -> TestConsent:
+    ) -> ConsentTest:
         return cls(
             client=client,
             scope=scope.id,
@@ -88,9 +88,9 @@ class TestConsent(Consent):
 
 
 def test_consent_forest_creation():
-    root = TestConsent.of(Clients.Zero, Scopes.A)
-    node1 = TestConsent.of(Clients.One, Scopes.B, parent=root)
-    node2 = TestConsent.of(Clients.Two, Scopes.C, parent=node1)
+    root = ConsentTest.of(Clients.Zero, Scopes.A)
+    node1 = ConsentTest.of(Clients.One, Scopes.B, parent=root)
+    node2 = ConsentTest.of(Clients.Two, Scopes.C, parent=node1)
 
     forest = ConsentForest([root, node1, node2])
     assert len(forest.trees) == 1
@@ -108,9 +108,9 @@ def test_consent_forest_creation():
 
 
 def test_consent_forest_scope_requirement_evaluation():
-    root = TestConsent.of(Clients.Zero, Scopes.A)
-    node1 = TestConsent.of(Clients.One, Scopes.B, parent=root)
-    node2 = TestConsent.of(Clients.Two, Scopes.C, parent=node1)
+    root = ConsentTest.of(Clients.Zero, Scopes.A)
+    node1 = ConsentTest.of(Clients.One, Scopes.B, parent=root)
+    node2 = ConsentTest.of(Clients.Two, Scopes.C, parent=node1)
 
     forest = ConsentForest([root, node1, node2])
 
@@ -121,9 +121,9 @@ def test_consent_forest_scope_requirement_evaluation():
 
 
 def test_consent_forest_scope_requirement_with_sibling_dependent_scopes():
-    root = TestConsent.of(Clients.Zero, Scopes.A)
-    node1 = TestConsent.of(Clients.One, Scopes.B, parent=root)
-    node2 = TestConsent.of(Clients.Two, Scopes.C, parent=root)
+    root = ConsentTest.of(Clients.Zero, Scopes.A)
+    node1 = ConsentTest.of(Clients.One, Scopes.B, parent=root)
+    node2 = ConsentTest.of(Clients.Two, Scopes.C, parent=root)
 
     forest = ConsentForest([root, node1, node2])
 
@@ -149,8 +149,8 @@ def test_consent_forest_scope_requirement_with_optional_dependent_scopes(
       to give standard users a simpler verification mechanism to ask "will my request
       work with the current set of consents?".
     """
-    root = TestConsent.of(Clients.Zero, Scopes.A)
-    child = TestConsent.of(
+    root = ConsentTest.of(Clients.Zero, Scopes.A)
+    child = ConsentTest.of(
         Clients.One, Scopes.B, parent=root, atomically_revocable=atomically_revocable
     )
 
@@ -168,11 +168,11 @@ def test_consent_forest_with_disjoint_consents_with_duplicate_scopes():
 
     In this situation, A[B] and B[C] are both satisfied, but A[B[C]] is not.
     """
-    root1 = TestConsent.of(Clients.Zero, Scopes.A)
-    child1 = TestConsent.of(Clients.Zero, Scopes.B, parent=root1)
+    root1 = ConsentTest.of(Clients.Zero, Scopes.A)
+    child1 = ConsentTest.of(Clients.Zero, Scopes.B, parent=root1)
 
-    root2 = TestConsent.of(Clients.Zero, Scopes.B)
-    child2 = TestConsent.of(Clients.Zero, Scopes.C, parent=root2)
+    root2 = ConsentTest.of(Clients.Zero, Scopes.B)
+    child2 = ConsentTest.of(Clients.Zero, Scopes.C, parent=root2)
 
     forest = ConsentForest([root1, child1, root2, child2])
 
@@ -188,9 +188,9 @@ def test_consent_forest_with_missing_intermediary_nodes():
 
     Tree: A -> <B should be here but isn't> -> C
     """
-    root = TestConsent.of(Clients.Zero, Scopes.A)
-    node1 = TestConsent.of(Clients.One, Scopes.B, parent=root)
-    node2 = TestConsent.of(Clients.Two, Scopes.C, parent=node1)
+    root = ConsentTest.of(Clients.Zero, Scopes.A)
+    node1 = ConsentTest.of(Clients.One, Scopes.B, parent=root)
+    node2 = ConsentTest.of(Clients.Two, Scopes.C, parent=node1)
 
     # Only add the first and last node to the forest.
     # The last node (C) references the middle node (B) and so forest loading should
