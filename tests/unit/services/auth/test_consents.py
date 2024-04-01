@@ -1,20 +1,12 @@
 from __future__ import annotations
 
-from collections import namedtuple
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from random import randint
 from types import SimpleNamespace
 from uuid import UUID
 
 import pytest
 
-from globus_sdk._types import UUIDLike
-from globus_sdk.experimental.consents import (
-    Consent,
-    ConsentForest,
-    ConsentTreeConstructionError,
-)
+from globus_sdk.experimental.consents import ConsentForest, ConsentTreeConstructionError
+from tests.common import ConsentTest, ScopeRepr
 
 _zero_uuid = str(UUID(int=0))
 
@@ -31,63 +23,12 @@ Clients = SimpleNamespace(
     Two=_uuid_of("2"),
     Three=_uuid_of("3"),
 )
-ScopeRepr = namedtuple("Scope", ["id", "name"])
 Scopes = SimpleNamespace(
     A=ScopeRepr(_uuid_of("A"), "A"),
     B=ScopeRepr(_uuid_of("B"), "B"),
     C=ScopeRepr(_uuid_of("C"), "C"),
     D=ScopeRepr(_uuid_of("D"), "D"),
 )
-
-
-@dataclass
-class ConsentTest(Consent):
-    """
-    A convenience Consent data subclass with default values for most fields to make
-      test case definition less verbose.
-
-    Required fields: client, scope, scope_name
-    """
-
-    client: UUIDLike
-    scope: UUIDLike
-    scope_name: str
-    id: int = field(default_factory=lambda: randint(1, 10000))
-    effective_identity: UUIDLike = _uuid_of("9")
-    dependency_path: list[int] = field(default_factory=list)
-    created: datetime = field(
-        default_factory=lambda: datetime.now() - timedelta(days=1)
-    )
-    updated: datetime = field(
-        default_factory=lambda: datetime.now() - timedelta(days=1)
-    )
-    last_used: datetime = field(default_factory=datetime.now)
-    status: str = "approved"
-    allows_refresh: bool = True
-    auto_approved: bool = False
-    atomically_revocable: bool = False
-
-    def __post_init__(self):
-        # Append self to the dependency path if it's not already there
-        if not self.dependency_path or self.dependency_path[-1] != self.id:
-            self.dependency_path.append(self.id)
-
-    @classmethod
-    def of(
-        cls,
-        client: str,
-        scope: ScopeRepr,
-        *,
-        parent: ConsentTest | None = None,
-        **kwargs,
-    ) -> ConsentTest:
-        return cls(
-            client=client,
-            scope=scope.id,
-            scope_name=scope.name,
-            dependency_path=list(parent.dependency_path) if parent else [],
-            **kwargs,
-        )
 
 
 def test_consent_forest_creation():

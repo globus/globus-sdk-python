@@ -190,7 +190,9 @@ class ConsentForest:
     def get_node(self, consent_id: int) -> Consent:
         return self._node_by_id[consent_id]
 
-    def meets_scope_requirements(self, scopes: Scope | str | list[Scope | str]) -> bool:
+    def meets_scope_requirements(
+        self, scopes: Scope | str | t.Sequence[Scope | str]
+    ) -> bool:
         """
         Check whether this consent meets one or more scope requirements.
 
@@ -298,7 +300,9 @@ class ConsentTree:
         return _str
 
 
-def _normalize_scope_types(scopes: Scope | str | list[Scope | str]) -> list[Scope]:
+def _normalize_scope_types(
+    scopes: Scope | str | t.Sequence[Scope | str],
+) -> list[Scope]:
     """
     Normalize the input scope types into a list of Scope objects.
 
