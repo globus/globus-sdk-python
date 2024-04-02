@@ -71,6 +71,7 @@ class Consent:
         """
         Load a Consent object from a raw data dictionary.
 
+        :param data: A dictionary containing the raw consent data.
         :raises: ConsentParseError if the data is missing a required key.
         """
         try:
