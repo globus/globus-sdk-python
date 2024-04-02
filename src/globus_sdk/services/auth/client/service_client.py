@@ -106,14 +106,14 @@ class AuthClient(client.BaseClient):
         self,
         client_id: UUIDLike | None = None,
         environment: str | None = None,
-        base_urls: str | None = None,
+        base_url: str | None = None,
         authorizer: GlobusAuthorizer | None = None,
         app_name: str | None = None,
         transport_params: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__(
             environment=environment,
-            base_url=base_urls,
+            base_url=base_url,
             authorizer=authorizer,
             app_name=app_name,
             transport_params=transport_params,
@@ -1805,7 +1805,7 @@ class AuthClient(client.BaseClient):
         """
         return self.delete(f"/v2/api/scopes/{scope_id}")
 
-    def get_consents(self, identity_id: str) -> GetConsentsResponse:
+    def get_consents(self, identity_id: UUIDLike) -> GetConsentsResponse:
         """
         Look up consents for a user. Requires the ``view_consents`` scope.
 

@@ -54,7 +54,7 @@ class Consent:
     scope_name: str
     id: int
     effective_identity: UUIDLike
-    # A list representing the path of consent dependencies lading from a "root consent"
+    # A list representing the path of consent dependencies leading from a "root consent"
     #   to this. The last element of this list will always be this consent's ID.
     # Downstream dependency relationships may exist but will not be defined here.
     dependency_path: list[int]
@@ -154,7 +154,7 @@ class ConsentForest:
 
         A consent's parent node id is defined as the penultimate element of the
             consent's dependency path.
-        If the dependency list is of length 1, the consent is a has no parent.
+        A consent with dependency list of length 1 is a root node (has no parent).
         """
         edges: dict[int, set[int]] = {node.id: set() for node in self.nodes}
         for node in self.nodes:
