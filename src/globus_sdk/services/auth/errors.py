@@ -41,4 +41,4 @@ class AuthAPIError(exc.GlobusAPIError):
 
 
 class ConsentParseError(ValueError):
-    """The error raised if scope parsing fails."""
+    """The error raised if consent parsing/loading fails."""

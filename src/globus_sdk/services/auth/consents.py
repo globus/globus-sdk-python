@@ -68,6 +68,11 @@ class Consent:
 
     @classmethod
     def load(cls, data: t.Mapping[str, t.Any]) -> Consent:
+        """
+        Load a Consent object from a raw data dictionary.
+
+        :raises: ConsentParseError if the data is missing a required key.
+        """
         try:
             return cls(
                 id=data["id"],
@@ -105,6 +110,7 @@ class ConsentForest:
     Consents should be retrieved from the AuthClient's `get_consents` method.
 
     Example usage:
+
     >>> auth_client = AuthClient(...)
     >>> identity_id = ...
     >>> forest = auth_client.get_consents(identity_id).to_forest()
@@ -120,15 +126,14 @@ class ConsentForest:
         require a "data_access" dynamic scope.
     Contained Scope String:
         `transfer:all[<collection1>:data_access <collection2>:data_access]`
-    ```
-    [Consent A          ]    [Consent B                       ]
-    [Client: CLI        ] -> [Client: Transfer                ]
-    [Scope: transfer:all]    [Scope: <collection1>:data_access]
-            |
-            |                [Consent C                       ]
-            |--------------> [Client: Transfer                ]
-                             [Scope: <collection2>:data_access]
-    ```
+
+    >>> [Consent A          ]    [Consent B                       ]
+    >>> [Client: CLI        ] -> [Client: Transfer                ]
+    >>> [Scope: transfer:all]    [Scope: <collection1>:data_access]
+    >>>        |
+    >>>        |                [Consent C                       ]
+    >>>        |--------------> [Client: Transfer                ]
+    >>>                         [Scope: <collection2>:data_access]
     """
 
     def __init__(self, consents: t.Iterable[t.Mapping[str, t.Any] | Consent]):
@@ -204,6 +209,9 @@ class ConsentTree:
     """
     A tree of Consent nodes with edges modeling the dependency relationships between
         them.
+
+    :raises: ConsentParseError if the tree cannot be constructed due to missing
+       consent dependencies.
     """
 
     def __init__(self, root_id: int, forest: ConsentForest):
@@ -278,7 +286,7 @@ class ConsentTree:
         )
 
     def pprint(self) -> None:
-        """Pretty print a textual representation of the tree (one line per node)."""
+        """Print a textual representation of the tree to stdout (one line per node)."""
         self._pprint_recursive(self.root, 0)
 
     def _pprint_recursive(self, node: Consent, tab_depth: int) -> None:

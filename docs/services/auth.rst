@@ -52,6 +52,15 @@ batching, and other functionality.
    :exclude-members: __dict__,__weakref__
    :show-inheritance:
 
+.. autoclass:: ConsentForest
+   :members:
+
+.. autoclass:: ConsentTree
+   :members:
+
+.. autoclass:: Consent
+   :members:
+
 .. autoclass:: DependentScopeSpec
 
 Auth Responses
@@ -65,9 +74,20 @@ Auth Responses
    :members:
    :show-inheritance:
 
+.. autoclass:: GetConsentsResponse
+   :members:
+   :show-inheritance:
+
 .. autoclass:: GetIdentitiesResponse
    :members:
    :show-inheritance:
+
+Errors
+------
+
+.. autoexception:: AuthAPIError
+
+.. autoexception:: ConsentParseError
 
 OAuth2 Flow Managers
 --------------------

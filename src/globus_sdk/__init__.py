@@ -57,7 +57,12 @@ _LAZY_IMPORT_TABLE = {
         "NativeAppAuthClient",
         "ConfidentialAppAuthClient",
         "AuthAPIError",
+        "ConsentParseError",
+        "Consent",
+        "ConsentTree",
+        "ConsentForest",
         "IdentityMap",
+        "GetConsentsResponse",
         "GetIdentitiesResponse",
         "OAuthDependentTokenResponse",
         "OAuthTokenResponse",
@@ -171,7 +176,12 @@ if t.TYPE_CHECKING:
     from .services.auth import NativeAppAuthClient
     from .services.auth import ConfidentialAppAuthClient
     from .services.auth import AuthAPIError
+    from .services.auth import ConsentParseError
+    from .services.auth import Consent
+    from .services.auth import ConsentTree
+    from .services.auth import ConsentForest
     from .services.auth import IdentityMap
+    from .services.auth import GetConsentsResponse
     from .services.auth import GetIdentitiesResponse
     from .services.auth import OAuthDependentTokenResponse
     from .services.auth import OAuthTokenResponse
@@ -289,6 +299,10 @@ __all__ = (
     "CollectionDocument",
     "CollectionPolicies",
     "ConfidentialAppAuthClient",
+    "Consent",
+    "ConsentForest",
+    "ConsentParseError",
+    "ConsentTree",
     "DeleteData",
     "DependentScopeSpec",
     "EndpointDocument",
@@ -298,6 +312,7 @@ __all__ = (
     "GCSAPIError",
     "GCSClient",
     "GCSRoleDocument",
+    "GetConsentsResponse",
     "GetIdentitiesResponse",
     "GlobusAPIError",
     "GlobusConnectPersonalOwnerInfo",
