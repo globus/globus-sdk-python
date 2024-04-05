@@ -31,5 +31,5 @@ class LoginFlowManager(metaclass=abc.ABCMeta):
 
         :param auth_parameters: ``GlobusAuthorizationParameters`` passed through
             to the authentication flow to control how the user will authenticate.
-        :param refresh_tokens: Whether or not refresh tokens will be requested.
+        :param refresh_tokens: Control whether refresh tokens will be requested.
         """
