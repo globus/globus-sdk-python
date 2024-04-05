@@ -1,14 +1,24 @@
 from __future__ import annotations
 
+import sys
 import typing as t
+
+if sys.version_info >= (3, 8):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
 
 from . import _serializable, _validators
 
 
 class GlobusAuthorizationParameters(_serializable.Serializable):
     """
-    Represents authorization parameters that can be used to instruct a client
-    which additional authorizations are needed in order to complete a request.
+    Data class containing authorization parameters that can be passed during
+    an authentication flow to control how the user will authenticate.
+
+    When used with a GlobusAuthRequirementsError this represents the additional
+    authorization parameters needed in order to complete a request that had
+    insufficient authorization state.
 
     :ivar session_message: A message to be displayed to the user.
     :vartype session_message: str, optional
@@ -49,7 +59,7 @@ class GlobusAuthorizationParameters(_serializable.Serializable):
         session_required_single_domain: list[str] | None = None,
         session_required_mfa: bool | None = None,
         required_scopes: list[str] | None = None,
-        prompt: str | None = None,
+        prompt: Literal["login"] | None = None,
         extra: dict[str, t.Any] | None = None,
     ):
         self.session_message = _validators.opt_str("session_message", session_message)
@@ -68,7 +78,10 @@ class GlobusAuthorizationParameters(_serializable.Serializable):
         self.required_scopes = _validators.opt_str_list(
             "required_scopes", required_scopes
         )
-        self.prompt = _validators.opt_str("prompt", prompt)
+        if prompt in [None, "login"]:
+            self.prompt = prompt
+        else:
+            raise _validators.ValidationError("'prompt' must be 'login' or null")
         self.extra = extra or {}
 
         # Enforce that the error contains at least one of the fields we expect

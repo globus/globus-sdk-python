@@ -110,7 +110,7 @@ class LegacyAuthorizationParameters(_serializable.Serializable):
         session_required_policies: str | list[str] | None = None,
         session_required_single_domain: str | list[str] | None = None,
         session_required_mfa: bool | None = None,
-        prompt: str | None = None,
+        prompt: Literal["login"] | None = None,
         extra: dict[str, t.Any] | None = None,
     ):
         self.session_message = _validators.opt_str("session_message", session_message)
@@ -126,7 +126,10 @@ class LegacyAuthorizationParameters(_serializable.Serializable):
         self.session_required_mfa = _validators.opt_bool(
             "session_required_mfa", session_required_mfa
         )
-        self.prompt = _validators.opt_str("prompt", prompt)
+        if prompt in [None, "login"]:
+            self.prompt = prompt
+        else:
+            raise _validators.ValidationError("'prompt' must be 'login' or null")
         self.extra = extra or {}
 
         # Enforce that the error contains at least one of the fields we expect
