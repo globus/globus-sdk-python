@@ -2,7 +2,8 @@ from globus_sdk import AuthLoginClient, OAuthTokenResponse
 from globus_sdk.experimental.auth_requirements_error import (
     GlobusAuthorizationParameters,
 )
-from globus_sdk.experimental.login_flow_manager import LoginFlowManager
+
+from .login_flow_manager import LoginFlowManager
 
 
 class CommandLineLoginFlowManager(LoginFlowManager):
@@ -15,12 +16,15 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         self,
         login_client: AuthLoginClient,
         *,
-        login_prompt: str = "Please authenticate with Globus here",
-        code_prompt: str = "Enter the resulting Authorization Code here",
+        login_prompt: str = "Please authenticate with Globus here:",
+        code_prompt: str = "Enter the resulting Authorization Code here:",
     ):
         """
         :param login_client: The ``AuthLoginClient`` that will be making the Globus
-            Auth API calls needed for the authentication flow.
+            Auth API calls needed for the authentication flow. Note that this
+            must either be a NativeAppAuthClient or a templated
+            ConfidentialAppAuthClient, standard ConfidentialAppAuthClients cannot
+            use the web auth-code flow.
         :param login_prompt: The string that will be output to the command line
             prompting the user to authenticate.
         :param code_prompt: The string that will be output to the command line
@@ -55,7 +59,7 @@ class CommandLineLoginFlowManager(LoginFlowManager):
 
         # create authorization url and prompt user to follow it to login
         print(
-            "{0}:\n{1}\n{2}\n{1}\n".format(
+            "{0}\n{1}\n{2}\n{1}\n".format(
                 self.login_prompt,
                 "-" * len(self.login_prompt),
                 self.login_client.oauth2_get_authorize_url(
@@ -73,7 +77,7 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         )
 
         # ask user to copy and paste auth code
-        auth_code = input(self.code_prompt).strip()
+        auth_code = input(f"{self.code_prompt}\n").strip()
 
         # get and return tokens
         return self.login_client.oauth2_exchange_code_for_tokens(auth_code)
