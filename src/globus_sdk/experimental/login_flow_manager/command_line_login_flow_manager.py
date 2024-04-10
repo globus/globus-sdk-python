@@ -10,6 +10,15 @@ class CommandLineLoginFlowManager(LoginFlowManager):
     """
     A ``CommandLineLoginFlowManager`` is a ``LoginFlowManager`` that uses the command
     line for interacting with the user during its interactive login flows.
+
+    Example usage:
+
+    >>> login_client = globus_sdk.NativeAppAuthClient(...)
+    >>> login_flow_manager = CommandLineLoginFlowManager(login_client)
+    >>> scopes = [globus_sdk.scopes.TransferScopes.all]
+    >>> auth_params = GlobusAuthorizationParameters(required_scopes=scopes)
+    >>> tokens = login_flow_manager.run_login_flow(auth_params)
+
     """
 
     def __init__(
