@@ -1,12 +1,6 @@
 from __future__ import annotations
 
-import sys
 import typing as t
-
-if sys.version_info >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
 
 from . import _serializable, _validators
 
@@ -59,7 +53,7 @@ class GlobusAuthorizationParameters(_serializable.Serializable):
         session_required_single_domain: list[str] | None = None,
         session_required_mfa: bool | None = None,
         required_scopes: list[str] | None = None,
-        prompt: Literal["login"] | None = None,
+        prompt: str | None = None,
         extra: dict[str, t.Any] | None = None,
     ):
         self.session_message = _validators.opt_str("session_message", session_message)
@@ -78,10 +72,7 @@ class GlobusAuthorizationParameters(_serializable.Serializable):
         self.required_scopes = _validators.opt_str_list(
             "required_scopes", required_scopes
         )
-        if prompt in [None, "login"]:
-            self.prompt = prompt
-        else:
-            raise _validators.ValidationError("'prompt' must be 'login' or null")
+        self.prompt = _validators.opt_str("prompt", prompt)
         self.extra = extra or {}
 
         # Enforce that the error contains at least one of the fields we expect

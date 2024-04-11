@@ -79,7 +79,7 @@ class CommandLineLoginFlowManager(LoginFlowManager):
                     ),
                     session_required_policies=auth_parameters.session_required_policies,
                     session_required_mfa=auth_parameters.session_required_mfa,
-                    prompt=auth_parameters.prompt,
+                    prompt=auth_parameters.prompt,  # type: ignore
                 ),
             )
         )
