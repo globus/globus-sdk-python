@@ -25,6 +25,7 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         self,
         login_client: AuthLoginClient,
         *,
+        refresh_tokens: bool = False,
         login_prompt: str = "Please authenticate with Globus here:",
         code_prompt: str = "Enter the resulting Authorization Code here:",
     ):
@@ -34,6 +35,7 @@ class CommandLineLoginFlowManager(LoginFlowManager):
             must either be a NativeAppAuthClient or a templated
             ConfidentialAppAuthClient, standard ConfidentialAppAuthClients cannot
             use the web auth-code flow.
+        :param refresh_tokens: Control whether refresh tokens will be requested.
         :param login_prompt: The string that will be output to the command line
             prompting the user to authenticate.
         :param code_prompt: The string that will be output to the command line
@@ -41,20 +43,17 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         """
         self.login_prompt = login_prompt
         self.code_prompt = code_prompt
-        super().__init__(login_client)
+        super().__init__(login_client, refresh_tokens=refresh_tokens)
 
     def run_login_flow(
         self,
         auth_parameters: GlobusAuthorizationParameters,
-        *,
-        refresh_tokens: bool = False,
     ) -> OAuthTokenResponse:
         """
         Run an interactive login flow on the command line to get tokens for the user.
 
         :param auth_parameters: ``GlobusAuthorizationParameters`` passed through
             to the authentication flow to control how the user will authenticate.
-        :param refresh_tokens: Whether or not refresh tokens will be requested.
         """
 
         # type is ignored here as AuthLoginClient does not provide a signature for
@@ -62,7 +61,7 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         # NativeAppAuthClient and ConfidentialAppAuthClient
         self.login_client.oauth2_start_flow(  # type: ignore
             redirect_uri=self.login_client.base_url + "v2/web/auth-code",
-            refresh_tokens=refresh_tokens,
+            refresh_tokens=self.refresh_tokens,
             requested_scopes=auth_parameters.required_scopes,
         )
 

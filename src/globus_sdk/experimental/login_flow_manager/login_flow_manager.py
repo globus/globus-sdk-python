@@ -16,20 +16,23 @@ class LoginFlowManager(metaclass=abc.ABCMeta):
     def __init__(
         self,
         login_client: AuthLoginClient,
+        *,
+        refresh_tokens: bool = False,
     ):
         self.login_client = login_client
+        self.refresh_tokens = refresh_tokens
+        """
+        :param refresh_tokens: Control whether refresh tokens will be requested.
+        """
 
     @abc.abstractmethod
     def run_login_flow(
         self,
         auth_parameters: GlobusAuthorizationParameters,
-        *,
-        refresh_tokens: bool = False,
     ) -> OAuthTokenResponse:
         """
         Run an interactive login flow to get tokens for the user.
 
         :param auth_parameters: ``GlobusAuthorizationParameters`` passed through
             to the authentication flow to control how the user will authenticate.
-        :param refresh_tokens: Control whether refresh tokens will be requested.
         """
