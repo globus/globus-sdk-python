@@ -96,8 +96,8 @@ class Consent:
             ) from e
 
     def __str__(self) -> str:
-        client = f"{str(self.client)[:8]}..."
-        return f"Consent [{self.id}]: Client [{client}] -> Scope [{self.scope_name}]"
+        client_id = str(self.client)
+        return f"Consent [{self.id}]: Client [{client_id}] -> Scope [{self.scope_name}]"
 
 
 class ConsentForest:
