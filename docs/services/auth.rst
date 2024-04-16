@@ -89,6 +89,8 @@ Errors
 
 .. autoexception:: ConsentParseError
 
+.. autoexception:: ConsentTreeConstructionError
+
 OAuth2 Flow Managers
 --------------------
 

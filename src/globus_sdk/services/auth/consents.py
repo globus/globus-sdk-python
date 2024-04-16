@@ -25,7 +25,6 @@ The resources defined herein are:
 
 from __future__ import annotations
 
-import json
 import typing as t
 from dataclasses import dataclass
 from datetime import datetime
@@ -33,7 +32,7 @@ from datetime import datetime
 from globus_sdk import Scope
 from globus_sdk._types import UUIDLike
 
-from .errors import ConsentParseError
+from .errors import ConsentParseError, ConsentTreeConstructionError
 
 
 @dataclass
@@ -92,8 +91,8 @@ class Consent:
             )
         except KeyError as e:
             raise ConsentParseError(
-                f"Failed to load Consent object. Missing required key: {e}. "
-                f"Raw Consent: {json.dumps(data)}."
+                f"Failed to load Consent object. Missing required key: {e}.",
+                raw_consent=dict(data),
             ) from e
 
     def __str__(self) -> str:
@@ -128,13 +127,13 @@ class ConsentForest:
     Contained Scope String:
         `transfer:all[<collection1>:data_access <collection2>:data_access]`
 
-    >>> [Consent A          ]    [Consent B                       ]
-    >>> [Client: CLI        ] -> [Client: Transfer                ]
-    >>> [Scope: transfer:all]    [Scope: <collection1>:data_access]
-    >>>        |
-    >>>        |                [Consent C                       ]
-    >>>        |--------------> [Client: Transfer                ]
-    >>>                         [Scope: <collection2>:data_access]
+        [Consent A          ]    [Consent B                       ]
+        [Client: CLI        ] -> [Client: Transfer                ]
+        [Scope: transfer:all]    [Scope: <collection1>:data_access]
+               |
+               |                [Consent C                       ]
+               |--------------> [Client: Transfer                ]
+                                [Scope: <collection2>:data_access]
     """
 
     def __init__(self, consents: t.Iterable[t.Mapping[str, t.Any] | Consent]):
@@ -169,9 +168,9 @@ class ConsentForest:
                 try:
                     edges[parent_id].add(node.id)
                 except KeyError as e:
-                    raise ConsentParseError(
-                        f"Failed to compute forest edges. Missing parent node: {e}. "
-                        f"Consents: {self.nodes}."
+                    raise ConsentTreeConstructionError(
+                        f"Failed to compute forest edges. Missing parent node: {e}.",
+                        consents=self.nodes,
                     ) from e
         return edges
 
@@ -286,14 +285,15 @@ class ConsentTree:
             for child_id in self.edges[node.id]
         )
 
-    def pprint(self) -> None:
-        """Print a textual representation of the tree to stdout (one line per node)."""
-        self._pprint_recursive(self.root, 0)
+    def __str__(self):
+        """Returns a textual representation of the tree to stdout (one line per node)"""
+        return self._str_recursive(self.root, 0)
 
-    def _pprint_recursive(self, node: Consent, tab_depth: int) -> None:
-        print(f"{' ' * tab_depth} - {node}")
+    def _str_recursive(self, node: Consent, tab_depth: int) -> str:
+        _str = f"{' ' * tab_depth} - {node}"
         for child_id in self.edges[node.id]:
-            self._pprint_recursive(self.get_node(child_id), tab_depth + 2)
+            _str += "\n" + self._str_recursive(self.get_node(child_id), tab_depth + 2)
+        return _str
 
 
 def _normalize_scope_types(scopes: Scope | str | list[Scope | str]) -> list[Scope]:

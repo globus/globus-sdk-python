@@ -6,7 +6,7 @@ from .client import (
 )
 from .consents import Consent, ConsentForest, ConsentTree
 from .data import DependentScopeSpec
-from .errors import AuthAPIError, ConsentParseError
+from .errors import AuthAPIError, ConsentParseError, ConsentTreeConstructionError
 from .flow_managers import (
     GlobusAuthorizationCodeFlowManager,
     GlobusNativeAppFlowManager,
@@ -28,6 +28,7 @@ __all__ = (
     # errors
     "AuthAPIError",
     "ConsentParseError",
+    "ConsentTreeConstructionError",
     # high-level helpers
     "Consent",
     "ConsentTree",
