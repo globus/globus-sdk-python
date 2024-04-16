@@ -1,9 +1,14 @@
+from unittest.mock import Mock, patch
+
 from globus_sdk import ConfidentialAppAuthClient, NativeAppAuthClient
 from globus_sdk._testing import load_response
 from globus_sdk.experimental.auth_requirements_error import (
     GlobusAuthorizationParameters,
 )
-from globus_sdk.experimental.login_flow_manager import CommandLineLoginFlowManager
+from globus_sdk.experimental.login_flow_manager import (
+    CommandLineLoginFlowManager,
+    LocalServerLoginFlowManager,
+)
 
 
 def _mock_input(s):
@@ -71,3 +76,66 @@ def test_command_line_login_flower_manager_confidential(monkeypatch, capsys):
     assert "https://auth.globus.org/v2/oauth2/authorize" in captured_output
     assert "client_id=mock_client_id" in captured_output
     assert "&session_required_single_domain=org.edu" in captured_output
+
+
+class MockRedirectServer:
+    def __init__(self, *args, **kwargs):
+        self.socket = Mock()
+        self.socket.getsockname.return_value = ("", 0)
+
+    def serve_forever(self):
+        pass
+
+    def shutdown(self):
+        pass
+
+    def wait_for_code(self):
+        return "auth_code"
+
+
+@patch(
+    "globus_sdk.experimental.login_flow_manager.local_server_login_flow_manager.RedirectHTTPServer",  # noqa E501
+    new=MockRedirectServer,
+)
+def test_local_server_login_flower_manager_native():
+    """
+    test LocalServerLoginManager with a NativeAppAuthClient
+    """
+    login_client = NativeAppAuthClient("mock_client_id")
+    load_response(login_client.oauth2_exchange_code_for_tokens)
+    login_flow_manager = LocalServerLoginFlowManager(
+        login_client,
+    )
+    auth_params = GlobusAuthorizationParameters(
+        required_scopes=["urn:globus:auth:scope:transfer.api.globus.org:all"],
+    )
+    token_res = login_flow_manager.run_login_flow(auth_params)
+    assert (
+        token_res.by_resource_server["transfer.api.globus.org"]["access_token"]
+        == "transfer_access_token"
+    )
+
+
+@patch(
+    "globus_sdk.experimental.login_flow_manager.local_server_login_flow_manager.RedirectHTTPServer",  # noqa E501
+    new=MockRedirectServer,
+)
+def test_local_server_login_flower_manager_confidential():
+    """
+    test LocalServerLoginManager with a ConfidentialAppAuthClient
+    """
+    login_client = ConfidentialAppAuthClient(
+        client_id="mock_client_id", client_secret="mock_client_secret"
+    )
+    load_response(login_client.oauth2_exchange_code_for_tokens)
+    login_flow_manager = LocalServerLoginFlowManager(
+        login_client,
+    )
+    auth_params = GlobusAuthorizationParameters(
+        required_scopes=["urn:globus:auth:scope:transfer.api.globus.org:all"],
+    )
+    token_res = login_flow_manager.run_login_flow(auth_params)
+    assert (
+        token_res.by_resource_server["transfer.api.globus.org"]["access_token"]
+        == "transfer_access_token"
+    )
