@@ -1805,11 +1805,18 @@ class AuthClient(client.BaseClient):
         """
         return self.delete(f"/v2/api/scopes/{scope_id}")
 
-    def get_consents(self, identity_id: UUIDLike) -> GetConsentsResponse:
+    def get_consents(
+        self, identity_id: UUIDLike, *, all: bool = False
+    ) -> GetConsentsResponse:
         """
-        Look up consents for a user. Requires the ``view_consents`` scope.
+        Look up consents for a user.
+
+        If requesting "all" consents, the view_consents scope is required.
 
         :param identity_id: The ID of the identity to look up consents for
+        :param all: If true, return all consents, including those that have
+            been issued to other clients. If false, return only consents rooted at this
+            client id for the requested identity. Most clients should pass False.
 
         .. tab-set::
 
@@ -1830,5 +1837,7 @@ class AuthClient(client.BaseClient):
                 ``GET /v2/api/identities/{identity_id}/consents``
         """
         return GetConsentsResponse(
-            self.get(f"/v2/api/identities/{identity_id}/consents"),
+            self.get(
+                f"/v2/api/identities/{identity_id}/consents", query_params={"all": all}
+            )
         )
