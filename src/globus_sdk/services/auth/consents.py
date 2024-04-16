@@ -127,13 +127,15 @@ class ConsentForest:
     Contained Scope String:
         `transfer:all[<collection1>:data_access <collection2>:data_access]`
 
+    .. code-block:: rst
+
         [Consent A          ]    [Consent B                       ]
         [Client: CLI        ] -> [Client: Transfer                ]
         [Scope: transfer:all]    [Scope: <collection1>:data_access]
-               |
-               |                [Consent C                       ]
-               |--------------> [Client: Transfer                ]
-                                [Scope: <collection2>:data_access]
+                |
+                |                [Consent C                       ]
+                |--------------> [Client: Transfer                ]
+                                 [Scope: <collection2>:data_access]
     """
 
     def __init__(self, consents: t.Iterable[t.Mapping[str, t.Any] | Consent]):
@@ -285,7 +287,7 @@ class ConsentTree:
             for child_id in self.edges[node.id]
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Returns a textual representation of the tree to stdout (one line per node)"""
         return self._str_recursive(self.root, 0)
 

@@ -9,7 +9,7 @@ from uuid import UUID
 
 import pytest
 
-from globus_sdk import Consent, ConsentForest, ConsentParseError
+from globus_sdk import Consent, ConsentForest, ConsentTreeConstructionError
 from globus_sdk._types import UUIDLike
 
 _zero_uuid = str(UUID(int=0))
@@ -194,5 +194,7 @@ def test_consent_forest_with_missing_intermediary_nodes():
     # Only add the first and last node to the forest.
     # The last node (C) references the middle node (B) and so forest loading should
     #   fail.
-    with pytest.raises(ConsentParseError, match=rf"Missing parent node: {node1.id}"):
+    with pytest.raises(
+        ConsentTreeConstructionError, match=rf"Missing parent node: {node1.id}"
+    ):
         ConsentForest([root, node2])

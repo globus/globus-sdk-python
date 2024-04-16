@@ -1806,7 +1806,11 @@ class AuthClient(client.BaseClient):
         return self.delete(f"/v2/api/scopes/{scope_id}")
 
     def get_consents(
-        self, identity_id: UUIDLike, *, all: bool = False
+        self,
+        identity_id: UUIDLike,
+        *,
+        # pylint: disable=redefined-builtin
+        all: bool = False,
     ) -> GetConsentsResponse:
         """
         Look up consents for a user.
