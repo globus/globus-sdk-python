@@ -57,11 +57,6 @@ _LAZY_IMPORT_TABLE = {
         "NativeAppAuthClient",
         "ConfidentialAppAuthClient",
         "AuthAPIError",
-        "ConsentParseError",
-        "ConsentTreeConstructionError",
-        "Consent",
-        "ConsentTree",
-        "ConsentForest",
         "IdentityMap",
         "GetConsentsResponse",
         "GetIdentitiesResponse",
@@ -177,11 +172,6 @@ if t.TYPE_CHECKING:
     from .services.auth import NativeAppAuthClient
     from .services.auth import ConfidentialAppAuthClient
     from .services.auth import AuthAPIError
-    from .services.auth import ConsentParseError
-    from .services.auth import ConsentTreeConstructionError
-    from .services.auth import Consent
-    from .services.auth import ConsentTree
-    from .services.auth import ConsentForest
     from .services.auth import IdentityMap
     from .services.auth import GetConsentsResponse
     from .services.auth import GetIdentitiesResponse
@@ -301,11 +291,6 @@ __all__ = (
     "CollectionDocument",
     "CollectionPolicies",
     "ConfidentialAppAuthClient",
-    "Consent",
-    "ConsentForest",
-    "ConsentParseError",
-    "ConsentTree",
-    "ConsentTreeConstructionError",
     "DeleteData",
     "DependentScopeSpec",
     "EndpointDocument",

@@ -9,8 +9,12 @@ from uuid import UUID
 
 import pytest
 
-from globus_sdk import Consent, ConsentForest, ConsentTreeConstructionError
 from globus_sdk._types import UUIDLike
+from globus_sdk.experimental.consents import (
+    Consent,
+    ConsentForest,
+    ConsentTreeConstructionError,
+)
 
 _zero_uuid = str(UUID(int=0))
 

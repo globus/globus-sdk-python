@@ -1,5 +1,5 @@
 from globus_sdk import IterableResponse
-from globus_sdk.services.auth.consents import ConsentForest
+from globus_sdk.experimental.consents import ConsentForest
 
 
 class GetConsentsResponse(IterableResponse):
@@ -17,5 +17,9 @@ class GetConsentsResponse(IterableResponse):
 
         ConsentForest is a convenience class to make interacting with the
             tree of consents simpler.
+
+        Note:
+            This interface relies on the experimental Consents data model which is
+                subject to change.
         """
         return ConsentForest(self)

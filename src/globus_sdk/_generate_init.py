@@ -117,12 +117,7 @@ _LAZY_IMPORT_TABLE: list[tuple[str, tuple[str, ...]]] = [
             "ConfidentialAppAuthClient",
             # errors
             "AuthAPIError",
-            "ConsentParseError",
-            "ConsentTreeConstructionError",
             # high-level helpers
-            "Consent",
-            "ConsentTree",
-            "ConsentForest",
             "IdentityMap",
             # responses
             "GetConsentsResponse",

@@ -32,7 +32,7 @@ from datetime import datetime
 from globus_sdk import Scope
 from globus_sdk._types import UUIDLike
 
-from .errors import ConsentParseError, ConsentTreeConstructionError
+from ._errors import ConsentParseError, ConsentTreeConstructionError
 
 
 @dataclass

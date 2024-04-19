@@ -4,9 +4,8 @@ from .client import (
     ConfidentialAppAuthClient,
     NativeAppAuthClient,
 )
-from .consents import Consent, ConsentForest, ConsentTree
 from .data import DependentScopeSpec
-from .errors import AuthAPIError, ConsentParseError, ConsentTreeConstructionError
+from .errors import AuthAPIError
 from .flow_managers import (
     GlobusAuthorizationCodeFlowManager,
     GlobusNativeAppFlowManager,
@@ -27,12 +26,7 @@ __all__ = (
     "ConfidentialAppAuthClient",
     # errors
     "AuthAPIError",
-    "ConsentParseError",
-    "ConsentTreeConstructionError",
     # high-level helpers
-    "Consent",
-    "ConsentTree",
-    "ConsentForest",
     "DependentScopeSpec",
     "IdentityMap",
     # flow managers
