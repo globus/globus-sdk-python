@@ -1,0 +1,5 @@
+Added
+~~~~~
+
+- Added support to ``FlowsClient`` for the ``validate_flow`` operation of the
+  Globus Flows service. (:pr:`NUMBER`)

@@ -470,6 +470,58 @@ class FlowsClient(client.BaseClient):
 
         return self.delete(f"/flows/{flow_id}", query_params=query_params)
 
+    def validate_flow(
+        self,
+        definition: dict[str, t.Any],
+        input_schema: dict[str, t.Any] | MissingType = MISSING,
+    ) -> GlobusHTTPResponse:
+        """
+        Validate a Flow
+
+        :param definition: JSON object specifying flow states and execution order. For
+            a more detailed explanation of the flow definition, see
+            `Authoring Flows <https://docs.globus.org/api/flows/authoring-flows>`_
+        :param input_schema: A JSON Schema to which flow run input must conform
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    from globus_sdk import FlowsClient
+
+                    ...
+                    flows = FlowsClient(...)
+                    flows.validate_flow(
+                        definition={
+                            "StartAt": "the-one-true-state",
+                            "States": {"the-one-true-state": {"Type": "Pass", "End": True}},
+                        },
+                        input_schema={
+                            "type": "object",
+                            "properties": {
+                                "input-a": {"type": "string"},
+                                "input-b": {"type": "number"},
+                                "input-c": {"type": "boolean"},
+                            },
+                        },
+                    )
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: flows.validate_flow
+
+            .. tab-item:: API Info
+
+                .. extdoclink:: Validate Flow
+                    :service: flows
+                    :ref: Flows/paths/~1flows~1validate/post
+        """  # noqa E501
+
+        data = {"definition": definition, "input_schema": input_schema}
+        return self.post("/flows/validate", data=data)
+
     @paging.has_paginator(paging.MarkerPaginator, items_key="runs")
     def list_runs(
         self,
