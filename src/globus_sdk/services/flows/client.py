@@ -46,14 +46,14 @@ class FlowsClient(client.BaseClient):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
         """
-        Create a Flow
+        Create a flow
 
         :param title: A non-unique, human-friendly name used for displaying the
             flow to end users. (1 - 128 characters)
         :param definition: JSON object specifying flows states and execution order. For
             a more detailed explanation of the flow definition, see
             `Authoring Flows <https://docs.globus.org/api/flows/authoring-flows>`_
-        :param input_schema: A JSON Schema to which Flow Invocation input must conform
+        :param input_schema: A JSON Schema to which flow run input must conform
         :param subtitle: A concise summary of the flow’s purpose. (0 - 128 characters)
         :param description: A detailed description of the flow's purpose for end user
             display. (0 - 4096 characters)
@@ -75,7 +75,7 @@ class FlowsClient(client.BaseClient):
 
 
         :param flow_starters: A set of Principal URN values, or the value
-            "all_authenticated_users", indicating entities who can initiate a *Run* of
+            "all_authenticated_users", indicating entities who can initiate a *run* of
             the flow
 
             .. dropdown:: Example Values
@@ -174,9 +174,9 @@ class FlowsClient(client.BaseClient):
         *,
         query_params: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
-        """Retrieve a Flow by ID
+        """Retrieve a flow by ID
 
-        :param flow_id: The ID of the Flow to fetch
+        :param flow_id: The ID of the flow to fetch
         :param query_params: Any additional parameters to be passed through
             as query params.
 
@@ -205,10 +205,10 @@ class FlowsClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableFlowsResponse:
         """
-        List deployed Flows
+        List deployed flows
 
         :param filter_role: A role name specifying the minimum permissions required for
-            a Flow to be included in the response.
+            a flow to be included in the response.
         :param filter_fulltext: A string to use in a full-text search to filter results
         :param orderby: A criterion for ordering flows in the listing
         :param marker: A marker for pagination
@@ -329,18 +329,18 @@ class FlowsClient(client.BaseClient):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
         """
-        Update a Flow
+        Update a flow
 
         Only the parameter `flow_id` is required.
         Any fields omitted from the request will be unchanged
 
-        :param flow_id: The ID of the Flow to fetch
+        :param flow_id: The ID of the flow to fetch
         :param title: A non-unique, human-friendly name used for displaying the
             flow to end users. (1 - 128 characters)
         :param definition: JSON object specifying flows states and execution order. For
             a more detailed explanation of the flow definition, see
             `Authoring Flows <https://docs.globus.org/api/flows/authoring-flows>`_
-        :param input_schema: A JSON Schema to which Flow Invocation input must conform
+        :param input_schema: A JSON Schema to which flow run input must conform
         :param subtitle: A concise summary of the flow’s purpose. (0 - 128 characters)
         :param description: A detailed description of the flow's purpose for end user
             display. (0 - 4096 characters)
@@ -363,7 +363,7 @@ class FlowsClient(client.BaseClient):
                     ]
 
         :param flow_starters: A set of Principal URN values, or the value
-            "all_authenticated_users", indicating entities who can initiate a *Run* of
+            "all_authenticated_users", indicating entities who can initiate a *run* of
             the flow
 
             .. dropdown:: Example Values
@@ -450,7 +450,7 @@ class FlowsClient(client.BaseClient):
         *,
         query_params: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
-        """Delete a Flow
+        """Delete a flow
 
         :param flow_id: The ID of the flow to delete
         :param query_params: Any additional parameters to be passed through
@@ -476,7 +476,7 @@ class FlowsClient(client.BaseClient):
         input_schema: dict[str, t.Any] | MissingType = MISSING,
     ) -> GlobusHTTPResponse:
         """
-        Validate a Flow
+        Validate a flow
 
         :param definition: JSON object specifying flow states and execution order. For
             a more detailed explanation of the flow definition, see
@@ -533,7 +533,7 @@ class FlowsClient(client.BaseClient):
         """
         List all runs.
 
-        :param filter_flow_id: One or more Flow IDs used to filter the results
+        :param filter_flow_id: One or more flow IDs used to filter the results
         :param marker: A pagination marker, used to get the next page of results.
         :param query_params: Any additional parameters to be passed through
 
@@ -627,7 +627,7 @@ class FlowsClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
         """
-        Retrieve information about a particular Run of a Flow
+        Retrieve information about a particular run of a flow
 
         :param run_id: The ID of the run to get
         :param include_flow_description: If set to true, the lookup will attempt to
@@ -827,7 +827,7 @@ class FlowsClient(client.BaseClient):
 
 class SpecificFlowClient(client.BaseClient):
     r"""
-    Client for interacting with a specific Globus Flow through the Flows API.
+    Client for interacting with a specific flow through the Globus Flows API.
 
     Unlike other client types, this must be provided with a specific flow id. All other
         arguments are the same as those for :class:`~globus_sdk.BaseClient`.
