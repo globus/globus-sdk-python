@@ -33,6 +33,8 @@ dependencies = [
     # depend on the latest version of typing-extensions on python versions which do
     # not have all of the typing features we use
     'typing_extensions>=4.0; python_version<"3.10"',
+    # python versions older than 3.9 don't have importlib.resources
+    'importlib_resources>=5.12.0; python_version<"3.9"',
 ]
 dynamic = ["version"]
 
