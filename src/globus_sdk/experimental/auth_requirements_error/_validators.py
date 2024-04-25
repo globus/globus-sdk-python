@@ -19,6 +19,12 @@ def str_(name: str, value: t.Any) -> str:
     raise ValidationError(f"'{name}' must be a string")
 
 
+def int_(name: str, value: t.Any) -> int:
+    if isinstance(value, int):
+        return value
+    raise ValidationError(f"'{name}' must be an int")
+
+
 def opt_str(name: str, value: t.Any) -> str | None:
     if _guards.is_optional(value, str):
         return value
