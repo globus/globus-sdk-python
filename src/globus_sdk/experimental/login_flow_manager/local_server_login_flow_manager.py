@@ -72,8 +72,8 @@ class LocalServerLoginFlowManager(LoginFlowManager):
             to the authentication flow to control how the user will authenticate.
         """
         with self.start_local_server() as server:
-            _, port = server.socket.getsockname()
-            redirect_uri = f"http://localhost:{port}"
+            host, port = server.socket.getsockname()
+            redirect_uri = f"http://{host}:{port}"
 
             # type is ignored here as AuthLoginClient does not provide a signature for
             # oauth2_start_flow since it has different positional arguments between
