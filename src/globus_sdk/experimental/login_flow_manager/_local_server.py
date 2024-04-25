@@ -7,9 +7,11 @@ These classes generally shouldn't need to be used directly.
 
 from __future__ import annotations
 
+import os
 import queue
 import socket
 import sys
+import time
 import typing as t
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from string import Template
@@ -21,6 +23,8 @@ else:  # Python < 3.9
     import importlib_resources
 
 from globus_sdk.experimental import html_files
+
+_IS_WINDOWS = os.name == "nt"
 
 DEFAULT_HTML_TEMPLATE = Template(
     importlib_resources.files(html_files)
@@ -66,12 +70,20 @@ class RedirectHTTPServer(HTTPServer):
         self._auth_code_queue.put_nowait(code)
 
     def wait_for_code(self) -> str | BaseException:
-        # timeout is set as a workaround for handling control-c interrupt on Windows
-        # https://docs.python.org/3/library/queue.html#queue.Queue.get
-        try:
-            return self._auth_code_queue.get(block=True, timeout=3600)
-        except queue.Empty as exc:
-            raise LocalServerError("Login timed out. Please try again.") from exc
+        # Windows needs special handling as blocking prevents ctrl-c interrupts
+        if _IS_WINDOWS:
+            deadline = time.time() + 3600
+            while time.time() < deadline:
+                try:
+                    return self._auth_code_queue.get()
+                except queue.Empty:
+                    time.sleep(1)
+            raise LocalServerError("Login timed out. Please try again.")
+        else:
+            try:
+                return self._auth_code_queue.get(block=True, timeout=3600)
+            except queue.Empty as exc:
+                raise LocalServerError("Login timed out. Please try again.") from exc
 
 
 class RedirectHandler(BaseHTTPRequestHandler):
