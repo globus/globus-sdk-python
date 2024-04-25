@@ -81,7 +81,7 @@ class RedirectHTTPServer(HTTPServer):
         else:
             try:
                 return self._auth_code_queue.get(block=True, timeout=3600)
-            except queue.Empty as exc:
+            except queue.Empty:
                 pass
         raise LocalServerError("Login timed out. Please try again.")
 
