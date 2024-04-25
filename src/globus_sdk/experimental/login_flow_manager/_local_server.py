@@ -78,12 +78,12 @@ class RedirectHTTPServer(HTTPServer):
                     return self._auth_code_queue.get()
                 except queue.Empty:
                     time.sleep(1)
-            raise LocalServerError("Login timed out. Please try again.")
         else:
             try:
                 return self._auth_code_queue.get(block=True, timeout=3600)
             except queue.Empty as exc:
-                raise LocalServerError("Login timed out. Please try again.") from exc
+                pass
+        raise LocalServerError("Login timed out. Please try again.")
 
 
 class RedirectHandler(BaseHTTPRequestHandler):
