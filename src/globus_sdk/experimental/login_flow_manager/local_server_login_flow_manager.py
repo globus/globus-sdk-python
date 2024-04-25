@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import threading
 import typing as t
 import webbrowser
@@ -18,6 +19,53 @@ from ._local_server import (
     RedirectHTTPServer,
 )
 from .login_flow_manager import LoginFlowManager
+
+# a list of text-only browsers which are not allowed for use because they don't work
+# with Globus Auth login flows and seize control of the terminal
+#
+# see the webbrowser library for a list of names:
+#   https://github.com/python/cpython/blob/69cdeeb93e0830004a495ed854022425b93b3f3e/Lib/webbrowser.py#L489-L502
+BROWSER_BLACKLIST = ["lynx", "www-browser", "links", "elinks", "w3m"]
+
+
+class LocalServerLoginFlowError(BaseException):
+    """
+    Error class for errors raised due to inability to run a local server login flow
+    due to known failure conditions such as remote sessions or text-only browsers.
+    Catching this should be sufficient to detect cases where one should fallback
+    to a CommandLineLoginFlowManager
+    """
+
+
+def _check_remote_session() -> None:
+    """
+    Try to check if this is being run during a remote session, if so
+    raise LocalServerLoginFlowError
+    """
+    if bool(os.environ.get("SSH_TTY", os.environ.get("SSH_CONNECTION"))):
+        raise LocalServerLoginFlowError(
+            "Cannot use LocalServerLoginFlowManager in a remote session"
+        )
+
+
+def _open_webbrowser(url: str) -> None:
+    """
+    Get a default browser and open given url
+    If browser is known to be text-only, or opening fails, raise
+    LocalServerLoginFlowError
+    """
+    try:
+        browser = webbrowser.get()
+        if browser.name in BROWSER_BLACKLIST:
+            raise LocalServerLoginFlowError(
+                "Cannot use LocalServerLoginFlowManager with "
+                f"text-only browser '{browser.name}'"
+            )
+
+        if not browser.open(url, new=1):
+            raise LocalServerLoginFlowError("Failed to open browser '{browser.name}'")
+    except webbrowser.Error as exc:
+        raise LocalServerLoginFlowError("Failed to open browser") from exc
 
 
 class LocalServerLoginFlowManager(LoginFlowManager):
@@ -71,6 +119,8 @@ class LocalServerLoginFlowManager(LoginFlowManager):
         :param auth_parameters: ``GlobusAuthorizationParameters`` passed through
             to the authentication flow to control how the user will authenticate.
         """
+        _check_remote_session()
+
         with self.start_local_server() as server:
             host, port = server.socket.getsockname()
             redirect_uri = f"http://{host}:{port}"
@@ -94,7 +144,7 @@ class LocalServerLoginFlowManager(LoginFlowManager):
                 session_required_mfa=auth_parameters.session_required_mfa,
                 prompt=auth_parameters.prompt,  # type: ignore
             )
-            webbrowser.open(url, new=1)
+            _open_webbrowser(url)
 
             # get auth code from server
             auth_code = server.wait_for_code()

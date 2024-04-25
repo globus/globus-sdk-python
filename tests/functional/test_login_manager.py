@@ -94,6 +94,10 @@ class MockRedirectServer:
 
 
 @patch(
+    "globus_sdk.experimental.login_flow_manager.local_server_login_flow_manager._open_webbrowser",  # noqa E501
+    new=lambda url: None,
+)
+@patch(
     "globus_sdk.experimental.login_flow_manager.local_server_login_flow_manager.RedirectHTTPServer",  # noqa E501
     new=MockRedirectServer,
 )
@@ -116,6 +120,10 @@ def test_local_server_login_flower_manager_native():
     )
 
 
+@patch(
+    "globus_sdk.experimental.login_flow_manager.local_server_login_flow_manager._open_webbrowser",  # noqa E501
+    new=lambda url: None,
+)
 @patch(
     "globus_sdk.experimental.login_flow_manager.local_server_login_flow_manager.RedirectHTTPServer",  # noqa E501
     new=MockRedirectServer,
