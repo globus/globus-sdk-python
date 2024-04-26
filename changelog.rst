@@ -12,6 +12,25 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-3.41.0:
+
+v3.41.0 (2024-04-26)
+--------------------
+
+Added
+~~~~~
+
+- Added a new AuthClient method ``get_consents`` and supporting local data objects.
+  These allows a client to poll and interact with the current Globus Auth consent state
+  of a particular identity rooted at their client. (:pr:`971`)
+
+- Added ``LoginFlowManager`` and ``CommandLineLoginFLowManager`` to experimental (:pr:`972`)
+
+- Added ``LocalServerLoginFlowManager`` to experimental (:pr:`977`)
+
+- Added support to ``FlowsClient`` for the ``validate_flow`` operation of the
+  Globus Flows service. (:pr:`979`)
+
 .. _changelog-3.40.0:
 
 v3.40.0 (2024-04-15)
