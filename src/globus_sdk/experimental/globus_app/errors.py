@@ -14,6 +14,10 @@ class TokenValidationError(Exception):
     pass
 
 
+class MissingTokensError(Exception):
+    pass
+
+
 class IdentityMismatchError(TokenValidationError):
     def __init__(self, message: str, stored_id: UUIDLike, new_id: UUIDLike):
         super().__init__(message)
