@@ -10,40 +10,40 @@ import pytest
 import globus_sdk
 from globus_sdk import MISSING, MissingType, OAuthTokenResponse, Scope
 from globus_sdk.experimental.consents import ConsentForest
-from globus_sdk.experimental.globus_app import ValidatingStorageAdapter
+from globus_sdk.experimental.globus_app import ValidatingTokenStorage
 from globus_sdk.experimental.globus_app.errors import (
     IdentityMismatchError,
     MissingIdentityError,
     UnmetScopeRequirementsError,
 )
-from globus_sdk.tokenstorage import MemoryAdapter
+from globus_sdk.experimental.tokenstorage_v2 import MemoryTokenStorage
 from tests.common import make_consent_forest
 
 
-def test_validating_storage_adapter_evaluates_identity_requirements(
+def test_validating_token_storage_evaluates_identity_requirements(
     make_token_response,
 ):
     id_a, id_b = str(uuid.uuid4()), str(uuid.uuid4())
-    adapter = ValidatingStorageAdapter(MemoryAdapter(), {})
+    adapter = ValidatingTokenStorage(MemoryTokenStorage(), {})
 
     # Seed the adapter with an initial identity.
     assert adapter.identity_id is None
-    adapter.store(make_token_response(identity_id=id_a))
+    adapter.store_response(make_token_response(identity_id=id_a))
     assert adapter.identity_id == id_a
 
     # We should be able to store a token with the same identity.
-    adapter.store(make_token_response(identity_id=id_a))
+    adapter.store_response(make_token_response(identity_id=id_a))
 
     # We should not be able to store a token with a different identity.
     with pytest.raises(IdentityMismatchError):
-        adapter.store(make_token_response(identity_id=id_b))
+        adapter.store_response(make_token_response(identity_id=id_b))
 
 
-def test_validating_storage_adapter_evaluates_root_scope_requirements(
+def test_validating_token_storage_evaluates_root_scope_requirements(
     make_token_response,
 ):
-    adapter = ValidatingStorageAdapter(
-        MemoryAdapter(), {"rs1": [Scope.deserialize("scope1")]}
+    adapter = ValidatingTokenStorage(
+        MemoryTokenStorage(), {"rs1": [Scope.deserialize("scope1")]}
     )
     identity_id = str(uuid.uuid4())
     valid_token_response = make_token_response(
@@ -53,21 +53,22 @@ def test_validating_storage_adapter_evaluates_root_scope_requirements(
         scopes={"rs1": "scope2"}, identity_id=identity_id
     )
 
-    adapter.store(valid_token_response)
+    adapter.store_response(valid_token_response)
     with pytest.raises(UnmetScopeRequirementsError):
-        adapter.store(invalid_token_response)
+        adapter.store_response(invalid_token_response)
 
     assert (
-        adapter.get_token_data("rs1") == valid_token_response.by_resource_server["rs1"]
+        adapter.get_token_data("rs1").access_token
+        == valid_token_response.by_resource_server["rs1"]["access_token"]
     )
 
 
-def test_validating_storage_adapter_evaluates_dependent_scope_requirements(
+def test_validating_token_storage_evaluates_dependent_scope_requirements(
     make_token_response,
     consent_client,
 ):
-    adapter = ValidatingStorageAdapter(
-        MemoryAdapter(),
+    adapter = ValidatingTokenStorage(
+        MemoryTokenStorage(),
         {"rs1": [Scope.deserialize("scope[subscope]")]},
         consent_client=consent_client,
     )
@@ -75,44 +76,47 @@ def test_validating_storage_adapter_evaluates_dependent_scope_requirements(
 
     consent_client.mocked_forest = make_consent_forest("scope[different_subscope]")
     with pytest.raises(UnmetScopeRequirementsError):
-        adapter.store(token_response)
+        adapter.store_response(token_response)
 
     consent_client.mocked_forest = make_consent_forest("scope[subscope]")
-    adapter.store(token_response)
+    adapter.store_response(token_response)
 
-    assert adapter.get_token_data("rs1") == token_response.by_resource_server["rs1"]
+    assert (
+        adapter.get_token_data("rs1").access_token
+        == token_response.by_resource_server["rs1"]["access_token"]
+    )
 
 
-def test_validating_storage_adapter_fails_non_identifiable_responses(
+def test_validating_token_storage_fails_non_identifiable_responses(
     make_token_response,
 ):
-    adapter = ValidatingStorageAdapter(MemoryAdapter(), {})
+    adapter = ValidatingTokenStorage(MemoryTokenStorage(), {})
     token_response = make_token_response(identity_id=None)
 
     with pytest.raises(MissingIdentityError):
-        adapter.store(token_response)
+        adapter.store_response(token_response)
 
 
-def test_validating_storage_adapter_loads_identity_info_from_storage(
+def test_validating_token_storage_loads_identity_info_from_storage(
     make_token_response,
 ):
     # Create an in memory storage adapter
-    storage = MemoryAdapter()
-    adapter = ValidatingStorageAdapter(storage, {})
+    storage = MemoryTokenStorage()
+    adapter = ValidatingTokenStorage(storage, {})
 
     # Store an identifiable token response
     identity_id = str(uuid.uuid4())
     token_response = make_token_response(identity_id=identity_id)
-    adapter.store(token_response)
+    adapter.store_response(token_response)
 
     # Create a net new adapter, pointing at the same storage.
-    new_adapter = ValidatingStorageAdapter(storage, {})
+    new_adapter = ValidatingTokenStorage(storage, {})
     # Verify that the new adapter loads the identity info from storage.
     assert new_adapter.identity_id == identity_id
 
 
-def test_validating_storage_adapter_returns_none_when_no_token_data():
-    adapter = ValidatingStorageAdapter(MemoryAdapter(), {})
+def test_validating_token_storage_returns_none_when_no_token_data():
+    adapter = ValidatingTokenStorage(MemoryTokenStorage(), {})
 
     assert adapter.get_token_data("rs1") is None
 

@@ -1,37 +1,57 @@
 from __future__ import annotations
 
 import time
-import typing as t
 
-from globus_sdk import AuthClient, OAuthTokenResponse, Scope
+from globus_sdk import AuthClient, Scope
 from globus_sdk.experimental.consents import ConsentForest
-from globus_sdk.tokenstorage import StorageAdapter
+from globus_sdk.experimental.tokenstorage_v2 import TokenData, TokenStorage
 
 from ..._types import UUIDLike
-from ._identifiable_oauth_token_response import (
-    IdentifiedOAuthTokenResponse,
-    expand_id_token,
-)
 from .errors import (
     ExpiredTokenError,
     IdentityMismatchError,
+    MissingIdentityError,
     UnmetScopeRequirementsError,
 )
 
 
-class ValidatingStorageAdapter(StorageAdapter):
+def _get_identity_id_from_token_data_by_resource_server(
+    token_data_by_resource_server: dict[str, TokenData]
+) -> str | None:
     """
-    A special version of a StorageAdapter which wraps another storage adapter and
+    Get the identity_id attribute from all TokenData objects by resource server
+    Sanity check that they are all the same, and then return that identity_id or None
+    """
+    token_data_identity_ids: set[str] = set()
+
+    for token_data in token_data_by_resource_server.values():
+        if token_data.identity_id:
+            token_data_identity_ids.add(token_data.identity_id)
+
+    if len(token_data_identity_ids) == 0:
+        return None
+    elif len(token_data_identity_ids) == 1:
+        return token_data_identity_ids.pop()
+    else:
+        raise ValueError(
+            "token_data_by_resource_server contained TokenData objects with "
+            f"different identity_id values: {token_data_identity_ids}"
+        )
+
+
+class ValidatingTokenStorage(TokenStorage):
+    """
+    A special version of TokenStorage which wraps another TokenStorage and
         validates that tokens meet certain requirements when storing/retrieving them.
 
-    The adapter is not concerned with the actual storage location of tokens but rather
-        validating that they meet certain requirements:
+    ValidatingTokenStorage is not concerned with the actual storage location of tokens
+        but rather validating that they meet certain requirements:
         1) Identity Requirements
             a) Identity info is present in the token data (this requires that the
                 token data was retrieved with the "openid" scope in addition to any
                 other scope requirements).
             b) The identity info in the token data matches the identity info stored
-                previously in the adapter.
+                previously.
         2) Scope Requirements
             b) Each newly polled resource server's token meets the root scope
                 requirements for that resource server.
@@ -40,56 +60,67 @@ class ValidatingStorageAdapter(StorageAdapter):
 
     def __init__(
         self,
-        storage_adapter: StorageAdapter,
+        token_storage: TokenStorage,
         scope_requirements: dict[str, list[Scope]],
         *,
         consent_client: AuthClient | None = None,
     ):
         """
-        :param storage_adapter: The storage adapter being wrapped.
+        :param token_storage: The token storage being wrapped.
         :param scope_requirements: A collection of resource-server keyed scope
             requirements to validate on token storage/retrieval.
         :param consent_client: An AuthClient to be used for consent polling. If omitted,
             dependent scope requirements are ignored during validation.
         """
-        self._storage_adapter = storage_adapter
+        self._token_storage = token_storage
         self.scope_requirements = scope_requirements
         self._consent_client = consent_client
 
         self.identity_id = self._lookup_stored_identity_id()
         self._cached_consent_forest = self._poll_and_cache_consents()
 
+        super().__init__(namespace=token_storage.namespace)
+
     def _lookup_stored_identity_id(self) -> UUIDLike | None:
         """
         Attempts to extract an identity id from stored token data using the internal
-            storage adapter.
+            token storage.
 
-        :returns: An identity id if one can be extracted from the internal storage
-            adapter, otherwise None
+        :returns: An identity id if one can be extracted from the internal token
+            storage, otherwise None
         """
-        auth_token_data = self._storage_adapter.get_token_data("auth.globus.org")
-        if auth_token_data is None or "identity_id" not in auth_token_data:
-            # Either:
-            #  (1) No auth token data is present in the storage adapter or
-            #  (2) No identity token is present in the auth token data.
-            return None
-        return t.cast(str, auth_token_data["identity_id"])
+        token_data_by_resource_server = (
+            self._token_storage.get_token_data_by_resource_server()
+        )
+        return _get_identity_id_from_token_data_by_resource_server(
+            token_data_by_resource_server
+        )
 
-    def store(self, token_response: OAuthTokenResponse) -> None:
+    def store_token_data_by_resource_server(
+        self, token_data_by_resource_server: dict[str, TokenData]
+    ) -> None:
+
+        self._validate_token_data_by_resource_server(token_data_by_resource_server)
+        self._token_storage.store_token_data_by_resource_server(
+            token_data_by_resource_server
+        )
+
+    def get_token_data_by_resource_server(self) -> dict[str, TokenData]:
         """
-        :param token_response: A OAuthTokenResponse resulting from a Globus Auth flow.
-        :raises: :exc:`TokenValidationError` if the token has expired does not meet
-            the attached scope requirements, or is associated with a different identity
-            than was previously used with this adapter.
+        :returns: A dict of TokenData objects indexed by their resource server
+        :raises: :exc:`TokenValidationError` if any of the token data have expired or
+            do not meet the attached scope requirements.
         """
+        token_data_by_resource_server = (
+            self._token_storage.get_token_data_by_resource_server()
+        )
 
-        # Extract id_token info, raising an error if it's not present.
-        identified_token_response = expand_id_token(token_response)
+        for resource_server, token_data in token_data_by_resource_server.items():
+            self._validate_token_meets_scope_requirements(resource_server, token_data)
 
-        self._validate_response(identified_token_response)
-        self._storage_adapter.store(identified_token_response)
+        return token_data_by_resource_server
 
-    def get_token_data(self, resource_server: str) -> dict[str, t.Any] | None:
+    def get_token_data(self, resource_server: str) -> TokenData | None:
         """
         :param resource_server: A resource server with cached token data.
         :returns: The token data for the given resource server, or None if no token data
@@ -97,7 +128,7 @@ class ValidatingStorageAdapter(StorageAdapter):
         :raises: :exc:`TokenValidationError` if the token has expired or does not meet
             the attached scope requirements.
         """
-        token_data = self._storage_adapter.get_token_data(resource_server)
+        token_data = self._token_storage.get_token_data(resource_server)
         if token_data is None:
             return None
 
@@ -105,18 +136,30 @@ class ValidatingStorageAdapter(StorageAdapter):
 
         return token_data
 
-    def _validate_response(self, token_response: IdentifiedOAuthTokenResponse) -> None:
-        self._validate_response_meets_identity_requirements(token_response)
-        self._validate_response_meets_scope_requirements(token_response)
+    def remove_token_data(self, resource_server: str) -> bool:
+        """
+        :param resource_server: The resource server string to remove token data for
+        """
+        return self._token_storage.remove_token_data(resource_server)
 
-    def _validate_token(self, resource_server: str, token: dict[str, t.Any]) -> None:
-        if token["expires_at_seconds"] < time.time():
-            raise ExpiredTokenError(token["expires_at_seconds"])
+    def _validate_token_data_by_resource_server(
+        self, token_data_by_resource_server: dict[str, TokenData]
+    ) -> None:
+        self._validate_token_data_by_resource_server_meets_identity_requirements(
+            token_data_by_resource_server
+        )
+        self._validate_token_data_by_resource_server_meets_scope_requirements(
+            token_data_by_resource_server
+        )
 
-        self._validate_token_meets_scope_requirements(resource_server, token)
+    def _validate_token_data(self, resource_server: str, token_data: TokenData) -> None:
+        if token_data.expires_at_seconds < time.time():
+            raise ExpiredTokenError(token_data.expires_at_seconds)
 
-    def _validate_response_meets_identity_requirements(
-        self, token_response: IdentifiedOAuthTokenResponse
+        self._validate_token_meets_scope_requirements(resource_server, token_data)
+
+    def _validate_token_data_by_resource_server_meets_identity_requirements(
+        self, token_data_by_resource_server: dict[str, TokenData]
     ) -> None:
         """
         Validate that the identity info in the token data matches the stored identity
@@ -125,34 +168,47 @@ class ValidatingStorageAdapter(StorageAdapter):
         Side Effect
         ===========
         If no identity info was previously stored, the attached identity is considered
-            authoritative and stored on the adapter instance.
+            authoritative and stored on the token storage instance.
 
         :raises: :exc:`IdentityMismatchError` if the identity info in the token data
             does not match the stored identity info.
+        :raises :exc:`MissingIdentityError` if the token data did not have identity
+            information (generally due to missing the openid scope)
         """
+        token_data_identity_id = _get_identity_id_from_token_data_by_resource_server(
+            token_data_by_resource_server
+        )
+
+        if token_data_identity_id is None:
+            raise MissingIdentityError(
+                "Token grant response doesn't contain an id_token. This normally "
+                "occurs if the auth flow didn't include 'openid' alongside other "
+                "scopes."
+            )
+
         if self.identity_id is None:
-            self.identity_id = token_response.identity_id
+            self.identity_id = token_data_identity_id
             return
 
-        if token_response.identity_id != self.identity_id:
+        if token_data_identity_id != self.identity_id:
             raise IdentityMismatchError(
                 "Detected a change in identity associated with the token data.",
                 stored_id=self.identity_id,
-                new_id=token_response.identity_id,
+                new_id=token_data_identity_id,
             )
 
-    def _validate_response_meets_scope_requirements(
-        self, token_response: IdentifiedOAuthTokenResponse
+    def _validate_token_data_by_resource_server_meets_scope_requirements(
+        self, token_data_by_resource_server: dict[str, TokenData]
     ) -> None:
-        for resource_server, token_data in token_response.by_resource_server.items():
-            self._validate_token(resource_server, token_data)
+        for resource_server, token_data in token_data_by_resource_server.items():
+            self._validate_token_data(resource_server, token_data)
 
     def _validate_token_meets_scope_requirements(
-        self, resource_server: str, token: dict[str, t.Any]
+        self, resource_server: str, token_data: TokenData
     ) -> None:
         """
-        Given a particular resource server/token, evaluate whether the token + user's
-            consent forest meet the attached scope requirements.
+        Given a particular resource server/token data, evaluate whether the token +
+            user's consent forest meet the attached scope requirements.
 
         Note: If consent_client was omitted, only root scope requirements are validated.
 
@@ -166,7 +222,7 @@ class ValidatingStorageAdapter(StorageAdapter):
             return
 
         # 1. Does the token meet root scope requirements?
-        root_scopes = token["scope"].split(" ")
+        root_scopes = token_data.scope.split(" ")
         if not all(scope.scope_string in root_scopes for scope in required_scopes):
             raise UnmetScopeRequirementsError(
                 "Unmet root scope requirements",
