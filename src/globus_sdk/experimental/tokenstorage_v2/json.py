@@ -131,7 +131,7 @@ class JSONTokenStorage(FileTokenStorage):
         # see: https://www.python.org/dev/peps/pep-0589/
         ret = {}
         dicts_by_resource_server = t.cast(
-            t.Dict[str, t.Any], self._load()["data"].get(self.namespace)
+            t.Dict[str, t.Any], self._load()["data"].get(self.namespace, {})
         )
         for resource_server, token_data_dict in dicts_by_resource_server.items():
             ret[resource_server] = TokenData.from_dict(token_data_dict)
