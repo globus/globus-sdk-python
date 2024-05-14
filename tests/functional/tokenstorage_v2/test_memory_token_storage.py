@@ -1,4 +1,4 @@
-from globus_sdk.experimental.tokenstorage_v2 import MemoryTokenStorage
+from globus_sdk.experimental.tokenstorage import MemoryTokenStorage
 
 
 def test_store_and_get_token_data_by_resource_server(
@@ -16,9 +16,9 @@ def test_store_and_get_token_data_by_resource_server(
         )
 
 
-def test_store_response_with_namespace(mock_response):
+def test_store_token_response_with_namespace(mock_response):
     adapter = MemoryTokenStorage(namespace="foo")
-    adapter.store_response(mock_response)
+    adapter.store_token_response(mock_response)
 
     assert (
         adapter._tokens["foo"]["resource_server_1"]["access_token"] == "access_token_1"
@@ -30,7 +30,7 @@ def test_store_response_with_namespace(mock_response):
 
 def test_get_token_data(mock_response):
     adapter = MemoryTokenStorage()
-    adapter.store_response(mock_response)
+    adapter.store_token_response(mock_response)
 
     assert adapter.get_token_data("resource_server_1").access_token == "access_token_1"
     assert adapter.get_token_data("resource_server_2").access_token == "access_token_2"
@@ -38,7 +38,7 @@ def test_get_token_data(mock_response):
 
 def test_remove_token_data(mock_response):
     adapter = MemoryTokenStorage()
-    adapter.store_response(mock_response)
+    adapter.store_token_response(mock_response)
 
     # remove rs1, confirm only rs2 is still available
     remove_result = adapter.remove_token_data("resource_server_1")

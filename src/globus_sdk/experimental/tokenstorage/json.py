@@ -4,7 +4,7 @@ import json
 import pathlib
 import typing as t
 
-from globus_sdk.experimental.tokenstorage_v2.base import FileTokenStorage
+from globus_sdk.experimental.tokenstorage.base import FileTokenStorage
 from globus_sdk.version import __version__
 
 from .token_data import TokenData

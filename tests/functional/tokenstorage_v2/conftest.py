@@ -5,7 +5,7 @@ from unittest import mock
 
 import pytest
 
-from globus_sdk.experimental.tokenstorage_v2 import TokenData
+from globus_sdk.experimental.tokenstorage import TokenData
 
 
 @pytest.fixture

@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from globus_sdk.experimental.tokenstorage_v2 import SQLiteTokenStorage
+from globus_sdk.experimental.tokenstorage import SQLiteTokenStorage
 from globus_sdk.tokenstorage import SQLiteAdapter
 
 
@@ -86,7 +86,7 @@ def test_store_and_get_token_data_by_resource_server(
 def test_multiple_adapters_store_and_retrieve(mock_response, db_filename, make_adapter):
     adapter1 = make_adapter(db_filename)
     adapter2 = make_adapter(db_filename)
-    adapter1.store_response(mock_response)
+    adapter1.store_token_response(mock_response)
 
     assert adapter2.get_token_data("resource_server_1").access_token == "access_token_1"
     assert adapter2.get_token_data("resource_server_2").access_token == "access_token_2"
@@ -97,7 +97,7 @@ def test_multiple_adapters_store_and_retrieve_different_namespaces(
 ):
     adapter1 = make_adapter(db_filename, namespace="foo")
     adapter2 = make_adapter(db_filename, namespace="bar")
-    adapter1.store_response(mock_response)
+    adapter1.store_token_response(mock_response)
 
     data = adapter2.get_token_data_by_resource_server()
     assert data == {}
@@ -116,7 +116,7 @@ def test_load_missing_token_data(make_adapter):
 
 def test_remove_tokens(mock_response, make_adapter):
     adapter = make_adapter(MEMORY_DBNAME)
-    adapter.store_response(mock_response)
+    adapter.store_token_response(mock_response)
 
     removed = adapter.remove_token_data("resource_server_1")
     assert removed
@@ -152,13 +152,13 @@ def test_iter_namespaces(mock_response, db_filename, make_adapter):
         assert list(adapter.iter_namespaces()) == []
         assert list(adapter.iter_namespaces(include_config_namespaces=True)) == []
 
-    foo_adapter.store_response(mock_response)
+    foo_adapter.store_token_response(mock_response)
 
     for adapter in [foo_adapter, bar_adapter, baz_adapter]:
         assert list(adapter.iter_namespaces()) == ["foo"]
         assert list(adapter.iter_namespaces(include_config_namespaces=True)) == ["foo"]
 
-    bar_adapter.store_response(mock_response)
+    bar_adapter.store_token_response(mock_response)
 
     for adapter in [foo_adapter, bar_adapter, baz_adapter]:
         assert set(adapter.iter_namespaces()) == {"foo", "bar"}

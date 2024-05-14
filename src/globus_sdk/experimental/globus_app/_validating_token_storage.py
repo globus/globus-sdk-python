@@ -4,7 +4,7 @@ import time
 
 from globus_sdk import AuthClient, Scope
 from globus_sdk.experimental.consents import ConsentForest
-from globus_sdk.experimental.tokenstorage_v2 import TokenData, TokenStorage
+from globus_sdk.experimental.tokenstorage import TokenData, TokenStorage
 
 from ..._types import UUIDLike
 from .errors import (
@@ -53,9 +53,9 @@ class ValidatingTokenStorage(TokenStorage):
             b) The identity info in the token data matches the identity info stored
                 previously.
         2) Scope Requirements
-            b) Each newly polled resource server's token meets the root scope
+            a) Each newly polled resource server's token meets the root scope
                 requirements for that resource server.
-            c) Polled consents meets all dependent scope requirements.
+            b) Polled consents meets all dependent scope requirements.
     """
 
     def __init__(

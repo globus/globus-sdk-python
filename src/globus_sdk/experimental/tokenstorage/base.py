@@ -19,9 +19,6 @@ class TokenStorage(metaclass=abc.ABCMeta):
     response data passed to the storage adapter are stored indexed by
     *resource_server*. If you have a more complex use-case in which this scheme will be
     insufficient, you should encode that in your choice of ``namespace`` values.
-
-    If you have a more complex use-case in which this scheme will be
-    insufficient, you should encode that in your choice of ``namespace`` values.
     """
 
     def __init__(self, namespace: str = "DEFAULT") -> None:
@@ -74,7 +71,7 @@ class TokenStorage(metaclass=abc.ABCMeta):
         :param resource_server: The resource server string to remove token data for
         """
 
-    def store_response(self, token_response: OAuthTokenResponse) -> None:
+    def store_token_response(self, token_response: OAuthTokenResponse) -> None:
         """
         Wrapper around ``store_token_data_by_resource_server`` that accepts an
         ``OAuthTokenResponse``.

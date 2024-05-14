@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typing as t
 
-from globus_sdk.experimental.tokenstorage_v2.base import TokenStorage
+from globus_sdk.experimental.tokenstorage.base import TokenStorage
 
 from .token_data import TokenData
 

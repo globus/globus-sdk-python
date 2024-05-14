@@ -3,7 +3,7 @@ import os
 
 import pytest
 
-from globus_sdk.experimental.tokenstorage_v2 import JSONTokenStorage
+from globus_sdk.experimental.tokenstorage import JSONTokenStorage
 from globus_sdk.tokenstorage import SimpleJSONFileAdapter
 from globus_sdk.version import __version__
 
@@ -42,10 +42,10 @@ def test_store_and_get_token_data_by_resource_server(
         )
 
 
-def test_store_response_with_namespace(filename, mock_response):
+def test_store_token_response_with_namespace(filename, mock_response):
     adapter = JSONTokenStorage(filename, namespace="foo")
     assert not adapter.file_exists()
-    adapter.store_response(mock_response)
+    adapter.store_token_response(mock_response)
 
     with open(filename) as f:
         data = json.load(f)
@@ -57,7 +57,7 @@ def test_store_response_with_namespace(filename, mock_response):
 def test_get_token_data(filename, mock_response):
     adapter = JSONTokenStorage(filename)
     assert not adapter.file_exists()
-    adapter.store_response(mock_response)
+    adapter.store_token_response(mock_response)
 
     assert adapter.get_token_data("resource_server_1").access_token == "access_token_1"
 
@@ -65,7 +65,7 @@ def test_get_token_data(filename, mock_response):
 def test_remove_token_data(filename, mock_response):
     adapter = JSONTokenStorage(filename)
     assert not adapter.file_exists()
-    adapter.store_response(mock_response)
+    adapter.store_token_response(mock_response)
 
     # remove rs1, confirm only rs2 is still available
     remove_result = adapter.remove_token_data("resource_server_1")
@@ -83,7 +83,7 @@ def test_remove_token_data(filename, mock_response):
 def test_store_perms(filename, mock_response):
     adapter = JSONTokenStorage(filename)
     assert not adapter.file_exists()
-    adapter.store_response(mock_response)
+    adapter.store_token_response(mock_response)
 
     # mode|0600 should be 0600 -- meaning that those are the maximal
     # permissions given
@@ -103,7 +103,7 @@ def test_migrate_from_simple(filename, mock_response):
     )
 
     # confirm version is overwritten on next store
-    new_adapter.store_response(mock_response)
+    new_adapter.store_token_response(mock_response)
     with open(filename) as f:
         data = json.load(f)
     assert data["format_version"] == "2.0"
