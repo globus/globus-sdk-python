@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import abc
+import typing as t
 
 from globus_sdk import AuthLoginClient, ConfidentialAppAuthClient
 from globus_sdk.authorizers import (
@@ -15,8 +16,13 @@ from globus_sdk.services.auth import OAuthTokenResponse
 from ._validating_token_storage import ValidatingTokenStorage
 from .errors import MissingTokensError
 
+GA = t.TypeVar("GA", bound=GlobusAuthorizer)
 
-class AuthorizerFactory(metaclass=abc.ABCMeta):
+
+class AuthorizerFactory(
+    t.Generic[GA],
+    metaclass=abc.ABCMeta,
+):
     """
     An ``AuthorizerFactory`` is an interface for getting some class of
     ``GlobusAuthorizer`` from a ``ValidatingTokenStorage`` that meets the
@@ -33,7 +39,7 @@ class AuthorizerFactory(metaclass=abc.ABCMeta):
         constructed authorizers will meet and accessing underlying token storage
         """
         self.token_storage = token_storage
-        self._authorizer_cache: dict[str, GlobusAuthorizer] = {}
+        self._authorizer_cache: dict[str, GA] = {}
 
     def _get_token_data_or_error(self, resource_server: str) -> TokenData:
         token_data = self.token_storage.get_token_data(resource_server)
@@ -42,10 +48,15 @@ class AuthorizerFactory(metaclass=abc.ABCMeta):
 
         return token_data
 
-    def store_token_response(self, token_res: OAuthTokenResponse) -> None:
+    def store_token_response_and_clear_cache(
+        self, token_res: OAuthTokenResponse
+    ) -> None:
         """
         Store a token response in the underlying ``ValidatingTokenStorage``
         and clear the authorizer cache.
+
+        This should not be called when a ``RenewingAuthorizer`` created by this factory
+        gets new tokens for itself as there is no need to clear the cache.
 
         :param token_res: An ``OAuthTokenResponse`` containing token data to be stored
             in the underlying ``ValidatingTokenStorage``.
@@ -53,7 +64,7 @@ class AuthorizerFactory(metaclass=abc.ABCMeta):
         self.token_storage.store_token_response(token_res)
         self._authorizer_cache = {}
 
-    def get_authorizer(self, resource_server: str) -> GlobusAuthorizer:
+    def get_authorizer(self, resource_server: str) -> GA:
         """
         Either retrieve a cached authorizer for the given resource server or construct
         a new one if none is cached.
@@ -72,7 +83,7 @@ class AuthorizerFactory(metaclass=abc.ABCMeta):
         return new_authorizer
 
     @abc.abstractmethod
-    def _make_authorizer(self, resource_server: str) -> GlobusAuthorizer:
+    def _make_authorizer(self, resource_server: str) -> GA:
         """
         Construct the ``GlobusAuthorizer`` class specific to this ``AuthorizerFactory``
 
@@ -81,7 +92,7 @@ class AuthorizerFactory(metaclass=abc.ABCMeta):
         """
 
 
-class AccessTokenAuthorizerFactory(AuthorizerFactory):
+class AccessTokenAuthorizerFactory(AuthorizerFactory[AccessTokenAuthorizer]):
     """
     An ``AuthorizerFactory`` that constructs ``AccessTokenAuthorizer``.
     """
@@ -100,7 +111,7 @@ class AccessTokenAuthorizerFactory(AuthorizerFactory):
         return AccessTokenAuthorizer(token_data.access_token)
 
 
-class RefreshTokenAuthorizerFactory(AuthorizerFactory):
+class RefreshTokenAuthorizerFactory(AuthorizerFactory[RefreshTokenAuthorizer]):
     """
     An ``AuthorizerFactory`` that constructs ``RefreshTokenAuthorizer``.
     """
@@ -143,7 +154,9 @@ class RefreshTokenAuthorizerFactory(AuthorizerFactory):
         )
 
 
-class ClientCredentialsAuthorizerFactory(AuthorizerFactory):
+class ClientCredentialsAuthorizerFactory(
+    AuthorizerFactory[ClientCredentialsAuthorizer]
+):
     """
     An ``AuthorizerFactory`` that constructs ``ClientCredentialsAuthorizer``.
     """

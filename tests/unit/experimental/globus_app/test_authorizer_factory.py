@@ -60,9 +60,9 @@ def test_access_token_authorizer_factory():
     authorizer2 = factory.get_authorizer("rs1")
     assert authorizer is authorizer2
 
-    # manually calling store clears cache
+    # calling store_token_response_and_clear_cache then get gets a new authorizer
     new_data = make_mock_token_response(token_number=2)
-    factory.store_token_response(new_data)
+    factory.store_token_response_and_clear_cache(new_data)
     assert factory._authorizer_cache == {}
     authorizer = factory.get_authorizer("rs1")
     assert authorizer.get_authorization_header() == "Bearer rs1_access_token_2"
@@ -107,8 +107,8 @@ def test_refresh_token_authorizer_factory():
     assert authorizer2.get_authorization_header() == "Bearer rs1_access_token_2"
     assert mock_auth_login_client.oauth2_refresh_token.call_count == 1
 
-    # manually calling store clears cache
-    factory.store_token_response(initial_response)
+    # calling store_token_response_and_clear_cache then get gets a new authorizer
+    factory.store_token_response_and_clear_cache(initial_response)
     authorizer3 = factory.get_authorizer("rs1")
     assert authorizer3 is not authorizer1
     assert authorizer3.get_authorization_header() == "Bearer rs1_access_token_1"
@@ -187,8 +187,8 @@ def test_client_credentials_authorizer_factory():
     assert authorizer2.get_authorization_header() == "Bearer rs1_access_token_2"
     assert mock_confidential_client.oauth2_client_credentials_tokens.call_count == 1
 
-    # manually calling store clears cache
-    factory.store_token_response(initial_response)
+    # calling store_token_response_and_clear_cache then get gets a new authorizer
+    factory.store_token_response_and_clear_cache(initial_response)
     authorizer3 = factory.get_authorizer("rs1")
     assert authorizer3 is not authorizer1
     assert authorizer3.get_authorization_header() == "Bearer rs1_access_token_1"
