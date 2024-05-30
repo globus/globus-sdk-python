@@ -5,6 +5,7 @@ from .authorizer_factory import (
     ClientCredentialsAuthorizerFactory,
     RefreshTokenAuthorizerFactory,
 )
+from .globus_app import ClientApp, GlobusApp, GlobusAppConfig, UserApp
 
 __all__ = [
     "ValidatingTokenStorage",
@@ -12,4 +13,8 @@ __all__ = [
     "AccessTokenAuthorizerFactory",
     "RefreshTokenAuthorizerFactory",
     "ClientCredentialsAuthorizerFactory",
+    "GlobusApp",
+    "UserApp",
+    "ClientApp",
+    "GlobusAppConfig",
 ]
