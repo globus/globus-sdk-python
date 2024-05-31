@@ -5,11 +5,15 @@ import typing as t
 import urllib.parse
 
 from globus_sdk import config, exc, utils
+from globus_sdk._types import ScopeCollectionType
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.paging import PaginatorTable
 from globus_sdk.response import GlobusHTTPResponse
-from globus_sdk.scopes import ScopeBuilder
+from globus_sdk.scopes import Scope, ScopeBuilder, scopes_to_str
 from globus_sdk.transport import RequestsTransport
+
+if t.TYPE_CHECKING:
+    from globus_sdk.experimental.globus_app import GlobusApp
 
 log = logging.getLogger(__name__)
 
@@ -20,10 +24,16 @@ class BaseClient:
     r"""
     Abstract base class for clients with error handling for Globus APIs.
 
-    :param authorizer: A ``GlobusAuthorizer`` which will generate Authorization headers
+    :param app: A ``GlobusApp`` which will be used for generating Authorizors and
+        storing and validating tokens. Passing an app will automatically include
+        a client's default scopes in the app's scope requirements. Mutually exclusive
+        with ``authorizer`` and ``app_name``.
+    :param authorizer: A ``GlobusAuthorizer`` which will generate Authorization headers.
+        Mutually exclusive with ``app``.
     :param app_name: Optional "nice name" for the application. Has no bearing on the
         semantics of client actions. It is just passed as part of the User-Agent
-        string, and may be useful when debugging issues with the Globus Team
+        string, and may be useful when debugging issues with the Globus Team.
+        Mutually exclusive with ``app``.
     :param base_url: The URL for the service. Most client types initialize this value
         intelligently by default. Set it when inheriting from BaseClient or
         communicating through a proxy.
@@ -52,6 +62,7 @@ class BaseClient:
         *,
         environment: str | None = None,
         base_url: str | None = None,
+        app: GlobusApp | None = None,
         authorizer: GlobusAuthorizer | None = None,
         app_name: str | None = None,
         transport_params: dict[str, t.Any] | None = None,
@@ -91,15 +102,85 @@ class BaseClient:
         self.transport = self.transport_class(**(transport_params or {}))
         log.debug(f"initialized transport of type {type(self.transport)}")
 
+        if app and (authorizer or app_name):
+            raise exc.GlobusSDKUsageError(
+                f"A {type(self).__name__} cannot accept both an 'app' and an 'app_name'"
+                " or 'authorizer' as these values come from the 'app' instead."
+            )
+
+        self._app = app
         self.authorizer = authorizer
 
-        # set application name if given
+        # set application name if available from app or app_name
         self._app_name = None
         if app_name is not None:
             self.app_name = app_name
+        if app is not None:
+            self.app_name = app.app_name
 
         # setup paginated methods
         self.paginated = PaginatorTable(self)
+
+        self._finalize_app()
+
+    @property
+    def default_scope_requirements(self) -> list[Scope]:
+        """
+        Scopes that will automatically be added to this client's app's
+        scope_requirements during _finalize_app.
+
+        For clients with static scope requirements this can just be a static
+        value. Clients with dynamic requirements should use @property and must
+        return sane results while the Base Client is being initialized.
+        """
+        raise NotImplementedError
+
+    def _finalize_app(self) -> None:
+        if self._app:
+            if self.resource_server is None:
+                raise ValueError(
+                    "Unable to use an 'app' with a client with no "
+                    "'resource_server' defined."
+                )
+
+            self._app.add_scope_requirements(
+                {self.resource_server: self.default_scope_requirements}
+            )
+
+    def add_app_scope(self, scope_collection: ScopeCollectionType) -> None:
+        """
+        Add a given scope collection to this client's ``GlobusApp`` scope requirements
+        for this client's ``resource_server``. This allows defining additional scope
+        requirements beyond the client's ``default_scope_requirements``.
+
+        Raises ``GlobusSDKUsageError`` if this client was not initialized with a
+            ``GlobusApp``.
+
+        :param scope_collection: A scope or scopes of ``ScopeCollectionType`` to be
+            added to the app's required scopes.
+
+        .. tab-set::
+
+        .. tab-item:: Example Usage
+
+            .. code-block:: python
+
+                app = UserApp("myapp", ...)
+                client = AuthClient(app=app)
+                client.add_app_scope(globus_sdk.scopes.AuthScopes.manage_projects)
+
+        """
+        if not self._app:
+            raise exc.GlobusSDKUsageError(
+                "Cannot 'add_app_scope' on a client that does not have an 'app'."
+            )
+        if self.resource_server is None:
+            raise ValueError(
+                "Unable to use an 'app' with a client with no "
+                "'resource_server' defined."
+            )
+        scopes = Scope.parse(scopes_to_str(scope_collection))
+        self._app.add_scope_requirements({self.resource_server: scopes})
 
     @property
     def app_name(self) -> str | None:
@@ -118,6 +199,8 @@ class BaseClient:
 
         This information is pulled from the ``scopes`` attribute of the client class.
         If the client does not have associated scopes, this value will be ``None``.
+
+        This must return sane results while the Base Client is being initialized.
         """
         if self_or_cls.scopes is None:
             return None
@@ -273,6 +356,11 @@ class BaseClient:
                 path = path[len(self.base_path) :]
             url = utils.slash_join(self.base_url, urllib.parse.quote(path))
 
+        # either use given authorizer or get one from app
+        authorizer = self.authorizer
+        if self._app and self.resource_server:
+            authorizer = self._app.get_authorizer(self.resource_server)
+
         # make the request
         log.debug("request will hit URL: %s", url)
         r = self.transport.request(
@@ -282,7 +370,7 @@ class BaseClient:
             query_params=query_params,
             headers=rheaders,
             encoding=encoding,
-            authorizer=self.authorizer,
+            authorizer=authorizer,
             allow_redirects=allow_redirects,
             stream=stream,
         )

@@ -6,8 +6,11 @@ from unittest import mock
 import pytest
 
 import globus_sdk
-import globus_sdk.scopes
 from globus_sdk._testing import RegisteredResponse, get_last_request
+from globus_sdk.authorizers import NullAuthorizer
+from globus_sdk.experimental.globus_app import UserApp
+from globus_sdk.experimental.globus_app.errors import MissingTokensError
+from globus_sdk.scopes import Scope, TransferScopes
 
 
 @pytest.fixture
@@ -21,7 +24,8 @@ def base_client_class(no_retry_transport):
         base_path = "/v0.10/"
         service_name = "transfer"
         transport_class = no_retry_transport
-        scopes = globus_sdk.scopes.TransferScopes
+        scopes = TransferScopes
+        default_scope_requirements = [Scope(TransferScopes.all)]
 
     return CustomClient
 
@@ -171,17 +175,12 @@ def test_handle_url_unsafe_chars(base_client):
 
 def test_access_resource_server_property_via_instance(base_client):
     # get works (and returns accurate info)
-    assert (
-        base_client.resource_server == globus_sdk.scopes.TransferScopes.resource_server
-    )
+    assert base_client.resource_server == TransferScopes.resource_server
 
 
 def test_access_resource_server_property_via_class(base_client_class):
     # get works (and returns accurate info)
-    assert (
-        base_client_class.resource_server
-        == globus_sdk.scopes.TransferScopes.resource_server
-    )
+    assert base_client_class.resource_server == TransferScopes.resource_server
 
 
 @pytest.mark.parametrize("leading_slash", (True, False))
@@ -209,3 +208,52 @@ def test_base_path_matching_prefix(
     # confirm that a "GET" works
     res = base_client.get(req_path)
     assert res["x"] == "y"
+
+
+def test_app_integration(base_client_class):
+    app = UserApp("SDK Test", client_id="client_id")
+    c = base_client_class(app=app)
+
+    # confirm app_name set
+    assert c.app_name == "SDK Test"
+
+    # confirm default_required_scopes were automatically added
+    assert [str(s) for s in app._scope_requirements[c.resource_server]] == [
+        TransferScopes.all
+    ]
+
+    # confirm attempt at getting an authorizer from app
+    RegisteredResponse(
+        service="transfer", path="foo", method="get", json={"x": "y"}
+    ).add()
+    with pytest.raises(MissingTokensError) as ex:
+        c.get("foo")
+    assert str(ex.value) == "No token data for transfer.api.globus.org"
+
+
+def test_add_app_scope(base_client_class):
+    app = UserApp("SDK Test", client_id="client_id")
+    c = base_client_class(app=app)
+
+    c.add_app_scope("foo")
+    str_list = [str(s) for s in app._scope_requirements[c.resource_server]]
+    assert len(str_list) == 2
+    assert TransferScopes.all in str_list
+    assert "foo" in str_list
+
+
+def test_app_mutually_exclusive(base_client_class):
+    app = UserApp("SDK Test", client_id="client_id")
+    expected = (
+        "A CustomClient cannot accept both an 'app' and an 'app_name' or 'authorizer' "
+        "as these values come from the 'app' instead."
+    )
+
+    with pytest.raises(globus_sdk.exc.GlobusSDKUsageError) as ex:
+        base_client_class(app=app, app_name="Other app name")
+    assert str(ex.value) == expected
+
+    authorizer = NullAuthorizer()
+    with pytest.raises(globus_sdk.exc.GlobusSDKUsageError) as ex:
+        base_client_class(app=app, authorizer=authorizer)
+    assert str(ex.value) == expected
