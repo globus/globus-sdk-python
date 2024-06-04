@@ -266,13 +266,14 @@ class UserApp(GlobusApp):
 
     .. tab-set::
 
-        .. tab-item:: Future Example Usage
+        .. tab-item:: Example Usage
 
             .. code-block:: python
 
                 app = UserApp("myapp", client_id=NATIVE_APP_CLIENT_ID)
                 client = TransferClient(app=app)
-                res = client.operation_ls(COLLECTION_ID)
+                app.run_login_flow()
+                res = client.endpoint_search("Tutorial Collection")
 
     """
 
@@ -381,13 +382,14 @@ class ClientApp(GlobusApp):
 
     .. tab-set::
 
-        .. tab-item:: Future Example Usage
+        .. tab-item:: Example Usage
 
             .. code-block:: python
 
                 app = UserApp("myapp", CLIENT_ID, CLIENT_SECRET)
                 client = TransferClient(app=app)
-                res = client.operation_ls(COLLECTION_ID)
+                app.run_login_flow()
+                res = client.endpoint_search("Tutorial Collection")
 
     """
 
