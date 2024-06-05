@@ -3,7 +3,6 @@ from __future__ import annotations
 import abc
 import os
 import sys
-import typing as t
 
 from globus_sdk import (
     AuthClient,
@@ -97,6 +96,9 @@ class GlobusApp(metaclass=abc.ABCMeta):
     scope requirements and providing the client an authorizer.
     """
 
+    _login_client: AuthLoginClient
+    _authorizer_factory: AuthorizerFactory[GlobusAuthorizer]
+
     def __init__(
         self,
         app_name: str,
@@ -120,7 +122,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
             # default config
             self.config = GlobusAppConfig()
 
-        self._login_client = self._make_login_client()
+        self._initialize_login_client()
 
         # get our initial scope requirements make sure we at least have "openid"
         # to get identity information for token validation
@@ -152,21 +154,19 @@ class GlobusApp(metaclass=abc.ABCMeta):
             scope_requirements=self._scope_requirements,
         )
 
-        # make our authorizer factory
-        self._authorizer_factory: AuthorizerFactory[GlobusAuthorizer] = (
-            self._make_authorizer_factory()
-        )
+        # initialize our authorizer factory
+        self._initialize_authorizer_factory()
 
     @abc.abstractmethod
-    def _make_login_client(self) -> AuthLoginClient:
+    def _initialize_login_client(self) -> None:
         """
-        Returns an AuthLoginClient to be used for making authorization requests.
+        Initializes self._login_client to be used for making authorization requests.
         """
 
     @abc.abstractmethod
-    def _make_authorizer_factory(self) -> AuthorizerFactory[GlobusAuthorizer]:
+    def _initialize_authorizer_factory(self) -> None:
         """
-        Returns an AuthorizerFactory to be used for generating authorizers to
+        Initializes self._authorizer_factory to be used for generating authorizers to
         authorize requests.
         """
 
@@ -261,6 +261,11 @@ class UserApp(GlobusApp):
 
     """
 
+    _login_client: NativeAppAuthClient | ConfidentialAppAuthClient
+    _authorizer_factory: (  # type:ignore
+        AccessTokenAuthorizerFactory | RefreshTokenAuthorizerFactory
+    )
+
     def __init__(
         self,
         app_name: str,
@@ -303,31 +308,27 @@ class UserApp(GlobusApp):
                 refresh_tokens=self.config.refresh_tokens,
             )
 
-    def _make_login_client(
-        self,
-    ) -> NativeAppAuthClient | ConfidentialAppAuthClient:
+    def _initialize_login_client(self) -> None:
         if self.client_secret:
-            return ConfidentialAppAuthClient(
+            self._login_client = ConfidentialAppAuthClient(
                 app_name=self.app_name,
                 client_id=self.client_id,
                 client_secret=self.client_secret,
             )
         else:
-            return NativeAppAuthClient(
+            self._login_client = NativeAppAuthClient(
                 app_name=self.app_name,
                 client_id=self.client_id,
             )
 
-    def _make_authorizer_factory(  # type: ignore
-        self,
-    ) -> AccessTokenAuthorizerFactory | RefreshTokenAuthorizerFactory:
+    def _initialize_authorizer_factory(self) -> None:
         if self.config.refresh_tokens:
-            return RefreshTokenAuthorizerFactory(
+            self._authorizer_factory = RefreshTokenAuthorizerFactory(
                 token_storage=self._validating_token_storage,
                 auth_login_client=self._login_client,
             )
         else:
-            return AccessTokenAuthorizerFactory(
+            self._authorizer_factory = AccessTokenAuthorizerFactory(
                 token_storage=self._validating_token_storage,
             )
 
@@ -366,6 +367,9 @@ class ClientApp(GlobusApp):
 
     """
 
+    _login_client: ConfidentialAppAuthClient
+    _authorizer_factory: ClientCredentialsAuthorizerFactory  # type:ignore
+
     def __init__(
         self,
         app_name: str,
@@ -393,19 +397,17 @@ class ClientApp(GlobusApp):
         self.client_secret = client_secret
         super().__init__(app_name, scope_requirements=scope_requirements, config=config)
 
-    def _make_login_client(self) -> ConfidentialAppAuthClient:
-        return ConfidentialAppAuthClient(
+    def _initialize_login_client(self) -> None:
+        self._login_client = ConfidentialAppAuthClient(
             client_id=self.client_id,
             client_secret=self.client_secret,
             app_name=self.app_name,
         )
 
-    def _make_authorizer_factory(  # type: ignore
-        self,
-    ) -> ClientCredentialsAuthorizerFactory:
-        return ClientCredentialsAuthorizerFactory(
+    def _initialize_authorizer_factory(self) -> None:
+        self._authorizer_factory = ClientCredentialsAuthorizerFactory(
             token_storage=self._validating_token_storage,
-            confidential_client=t.cast(ConfidentialAppAuthClient, self._login_client),
+            confidential_client=self._login_client,
         )
 
     def run_login_flow(
@@ -421,7 +423,7 @@ class ClientApp(GlobusApp):
             only the required_scopes parameter is used.
         """
         auth_params = self._auth_params_with_required_scopes(auth_params)
-        token_response = t.cast(
-            ConfidentialAppAuthClient, self._login_client
-        ).oauth2_client_credentials_tokens(requested_scopes=auth_params.required_scopes)
+        token_response = self._login_client.oauth2_client_credentials_tokens(
+            requested_scopes=auth_params.required_scopes
+        )
         self._authorizer_factory.store_token_response_and_clear_cache(token_response)
