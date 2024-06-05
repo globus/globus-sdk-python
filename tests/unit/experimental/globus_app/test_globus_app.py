@@ -129,12 +129,20 @@ def test_add_scope_requirements():
     user_app.add_scope_requirements(
         {"auth.globus.org": [Scope("openid"), Scope("email"), Scope("profile")]}
     )
-    expected = ["openid", "email", "profile"]
-    assert [s.serialize() for s in user_app._scope_requirements[auth_rs]] == expected
-    assert [
-        s.serialize()
-        for s in user_app._validating_token_storage.scope_requirements[auth_rs]
-    ] == expected
+    expected = ["email", "openid", "profile"]
+    assert (
+        sorted([s.serialize() for s in user_app._scope_requirements[auth_rs]])
+        == expected
+    )
+    assert (
+        sorted(
+            [
+                s.serialize()
+                for s in user_app._validating_token_storage.scope_requirements[auth_rs]
+            ]
+        )
+        == expected
+    )
 
     # adding a requirement with a dependency
     user_app.add_scope_requirements(
@@ -151,12 +159,12 @@ def test_add_scope_requirements():
     user_app.add_scope_requirements(
         {"foo": [Scope("foo:all").add_dependency(Scope("baz:all"))]}
     )
-    expected = ["foo:all[bar:all baz:all]"]
-    assert [s.serialize() for s in user_app._scope_requirements["foo"]] == expected
+    expected = [["foo:all[bar:all baz:all]"], ["foo:all[baz:all bar:all]"]]
+    assert [s.serialize() for s in user_app._scope_requirements["foo"]] in expected
     assert [
         s.serialize()
         for s in user_app._validating_token_storage.scope_requirements["foo"]
-    ] == expected
+    ] in expected
 
 
 def test_user_app_get_authorizer():

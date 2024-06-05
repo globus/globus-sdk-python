@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import warnings
-from functools import reduce
 
 from ._parser import parse_scope_graph
 
@@ -76,35 +75,16 @@ class Scope:
     @staticmethod
     def merge_scopes(scopes_a: list[Scope], scopes_b: list[Scope]) -> list[Scope]:
         """
-        Given two lists of Scopes, return a merged list with one of each base
-        scope_string across both lists that will be required if it was required in
-        either list and has one of each dependency across both lists
+        Given two lists of Scopes, merge them into one list of Scopes by parsing
+        them as one combined scope string.
 
         :param scopes_a: list of Scopes to be merged with scopes_b
         :param scopes_b: list of Scopes to be merged with scopes_a
         """
         # dict of base scope_string: list of scopes with that base scope_string
-        scope_data: dict[str, list[Scope]] = {}
-
-        # collect all scopes with the same base scope_string
-        for scope in scopes_a + scopes_b:
-            if scope.scope_string in scope_data:
-                scope_data[scope.scope_string].append(scope)
-            else:
-                scope_data[scope.scope_string] = [scope]
-
-        # merge the scopes
-        ret: list[Scope] = []
-        for scope_string, scopes in scope_data.items():
-            combined_scope = Scope(scope_string)
-            combined_scope.optional = reduce(
-                lambda x, y: x and y, [s.optional for s in scopes]
-            )
-            combined_scope.dependencies = reduce(
-                Scope.merge_scopes, [s.dependencies for s in scopes]
-            )
-            ret.append(combined_scope)
-        return ret
+        return Scope.parse(
+            " ".join([str(s) for s in scopes_a] + [str(s) for s in scopes_b])
+        )
 
     @classmethod
     def deserialize(cls, scope_string: str) -> Scope:
