@@ -10,7 +10,7 @@ from globus_sdk import _guards, client, exc, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer, NullAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
-from globus_sdk.scopes import AuthScopes
+from globus_sdk.scopes import AuthScopes, Scope
 
 from .._common import get_jwk_data, pem_decode_jwk_data
 from ..errors import AuthAPIError
@@ -70,6 +70,13 @@ class AuthLoginClient(client.BaseClient):
         log.info(
             "Finished initializing AuthLoginClient. "
             f"client_id='{client_id}', type(authorizer)={type(authorizer)}"
+        )
+
+    @property
+    def default_scope_requirements(self) -> list[Scope]:
+        raise exc.GlobusSDKUsageError(
+            "AuthLoginClients do not have default_scope_requirements, "
+            "use AuthClient instead."
         )
 
     # FYI: this get_openid_configuration method is duplicated in AuthClient
