@@ -6,7 +6,7 @@ import typing as t
 from globus_sdk import client, paging, response, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.exc.warnings import warn_deprecated
-from globus_sdk.scopes import SearchScopes
+from globus_sdk.scopes import Scope, SearchScopes
 
 from .data import SearchQuery, SearchScrollQuery
 from .errors import SearchAPIError
@@ -34,6 +34,10 @@ class SearchClient(client.BaseClient):
     #
     # Index Management
     #
+
+    @property
+    def default_scope_requirements(self) -> list[Scope]:
+        return [Scope(SearchScopes.search)]
 
     def create_index(
         self, display_name: str, description: str

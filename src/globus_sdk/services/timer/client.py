@@ -5,7 +5,7 @@ import typing as t
 
 from globus_sdk import client, exc, response
 from globus_sdk._types import UUIDLike
-from globus_sdk.scopes import TimerScopes
+from globus_sdk.scopes import Scope, TimerScopes
 
 from .data import TimerJob, TransferTimer
 from .errors import TimerAPIError
@@ -23,6 +23,7 @@ class TimerClient(client.BaseClient):
     error_class = TimerAPIError
     service_name = "timer"
     scopes = TimerScopes
+    default_scope_requirements = [Scope(TimerScopes.timer)]
 
     def list_jobs(
         self, *, query_params: dict[str, t.Any] | None = None

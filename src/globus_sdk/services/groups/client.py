@@ -4,7 +4,7 @@ import typing as t
 
 from globus_sdk import client, response, utils
 from globus_sdk._types import UUIDLike
-from globus_sdk.scopes import GroupsScopes
+from globus_sdk.scopes import GroupsScopes, Scope
 
 from .data import BatchMembershipActions, GroupPolicies
 from .errors import GroupsAPIError
@@ -26,6 +26,10 @@ class GroupsClient(client.BaseClient):
     error_class = GroupsAPIError
     service_name = "groups"
     scopes = GroupsScopes
+
+    @property
+    def default_scope_requirements(self) -> list[Scope]:
+        return [Scope(GroupsScopes.view_my_groups_and_memberships)]
 
     def get_my_groups(
         self, *, query_params: dict[str, t.Any] | None = None

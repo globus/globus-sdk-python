@@ -3,10 +3,11 @@ from __future__ import annotations
 import logging
 import typing as t
 
-from globus_sdk import GlobusHTTPResponse, client, paging, scopes, utils
+from globus_sdk import GlobusHTTPResponse, client, paging, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
-from globus_sdk.scopes import ScopeBuilder
+from globus_sdk.experimental.globus_app import GlobusApp
+from globus_sdk.scopes import FlowsScopes, Scope, ScopeBuilder
 from globus_sdk.utils import MISSING, MissingType
 
 from .errors import FlowsAPIError
@@ -29,7 +30,11 @@ class FlowsClient(client.BaseClient):
 
     error_class = FlowsAPIError
     service_name = "flows"
-    scopes = scopes.FlowsScopes
+    scopes = FlowsScopes
+    default_scope_requirements = [
+        Scope(FlowsScopes.view_flows),
+        Scope(FlowsScopes.run_status),
+    ]
 
     def create_flow(
         self,
@@ -846,22 +851,28 @@ class SpecificFlowClient(client.BaseClient):
         flow_id: UUIDLike,
         *,
         environment: str | None = None,
+        app: GlobusApp | None = None,
         authorizer: GlobusAuthorizer | None = None,
         app_name: str | None = None,
         transport_params: dict[str, t.Any] | None = None,
     ):
-        super().__init__(
-            environment=environment,
-            authorizer=authorizer,
-            app_name=app_name,
-            transport_params=transport_params,
-        )
         self._flow_id = flow_id
         user_scope_value = f"flow_{str(flow_id).replace('-', '_')}_user"
         self.scopes = ScopeBuilder(
             resource_server=str(self._flow_id),
             known_url_scopes=[("user", user_scope_value)],
         )
+        super().__init__(
+            app=app,
+            environment=environment,
+            authorizer=authorizer,
+            app_name=app_name,
+            transport_params=transport_params,
+        )
+
+    @property
+    def default_scope_requirements(self) -> list[Scope]:
+        return [Scope(self.scopes.user)]
 
     def run_flow(
         self,

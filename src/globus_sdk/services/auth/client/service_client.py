@@ -11,7 +11,10 @@ from globus_sdk import client, exc, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.response import GlobusHTTPResponse, IterableResponse
-from globus_sdk.scopes import AuthScopes
+from globus_sdk.scopes import AuthScopes, Scope
+
+if t.TYPE_CHECKING:
+    from globus_sdk.experimental.globus_app import GlobusApp
 
 from .._common import get_jwk_data, pem_decode_jwk_data
 from ..data import DependentScopeSpec
@@ -101,12 +104,18 @@ class AuthClient(client.BaseClient):
     service_name = "auth"
     error_class = AuthAPIError
     scopes = AuthScopes
+    default_scope_requirements = [
+        Scope(AuthScopes.openid),
+        Scope(AuthScopes.profile),
+        Scope(AuthScopes.email),
+    ]
 
     def __init__(
         self,
         client_id: UUIDLike | None = None,
         environment: str | None = None,
         base_url: str | None = None,
+        app: GlobusApp | None = None,
         authorizer: GlobusAuthorizer | None = None,
         app_name: str | None = None,
         transport_params: dict[str, t.Any] | None = None,
@@ -114,6 +123,7 @@ class AuthClient(client.BaseClient):
         super().__init__(
             environment=environment,
             base_url=base_url,
+            app=app,
             authorizer=authorizer,
             app_name=app_name,
             transport_params=transport_params,
