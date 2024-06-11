@@ -191,8 +191,8 @@ class BaseClient:
         self._app_name = self.transport.user_agent = value
 
     @utils.classproperty
-    def resource_server(  # pylint: disable=missing-any-param-doc
-        self_or_cls,
+    def resource_server(  # pylint: disable=missing-param-doc
+        self_or_cls: BaseClient | type[BaseClient],
     ) -> str | None:
         """
         The resource_server name for the API and scopes associated with this client.
@@ -212,6 +212,7 @@ class BaseClient:
         *,
         query_params: dict[str, t.Any] | None = None,
         headers: dict[str, str] | None = None,
+        ignore_authorizer: bool = False,
     ) -> GlobusHTTPResponse:
         """
         Make a GET request to the specified path.
@@ -219,7 +220,13 @@ class BaseClient:
         See :py:meth:`~.BaseClient.request` for details on the various parameters.
         """
         log.debug(f"GET to {path} with query_params {query_params}")
-        return self.request("GET", path, query_params=query_params, headers=headers)
+        return self.request(
+            "GET",
+            path,
+            query_params=query_params,
+            headers=headers,
+            ignore_authorizer=ignore_authorizer,
+        )
 
     def post(  # pylint: disable=missing-param-doc
         self,
@@ -229,6 +236,7 @@ class BaseClient:
         data: _DataParamType = None,
         headers: dict[str, str] | None = None,
         encoding: str | None = None,
+        ignore_authorizer: bool = False,
     ) -> GlobusHTTPResponse:
         """
         Make a POST request to the specified path.
@@ -243,6 +251,7 @@ class BaseClient:
             data=data,
             headers=headers,
             encoding=encoding,
+            ignore_authorizer=ignore_authorizer,
         )
 
     def delete(  # pylint: disable=missing-param-doc
@@ -251,6 +260,7 @@ class BaseClient:
         *,
         query_params: dict[str, t.Any] | None = None,
         headers: dict[str, str] | None = None,
+        ignore_authorizer: bool = False,
     ) -> GlobusHTTPResponse:
         """
         Make a DELETE request to the specified path.
@@ -258,7 +268,13 @@ class BaseClient:
         See :py:meth:`~.BaseClient.request` for details on the various parameters.
         """
         log.debug(f"DELETE to {path} with query_params {query_params}")
-        return self.request("DELETE", path, query_params=query_params, headers=headers)
+        return self.request(
+            "DELETE",
+            path,
+            query_params=query_params,
+            headers=headers,
+            ignore_authorizer=ignore_authorizer,
+        )
 
     def put(  # pylint: disable=missing-param-doc
         self,
@@ -268,6 +284,7 @@ class BaseClient:
         data: _DataParamType = None,
         headers: dict[str, str] | None = None,
         encoding: str | None = None,
+        ignore_authorizer: bool = False,
     ) -> GlobusHTTPResponse:
         """
         Make a PUT request to the specified path.
@@ -282,6 +299,7 @@ class BaseClient:
             data=data,
             headers=headers,
             encoding=encoding,
+            ignore_authorizer=ignore_authorizer,
         )
 
     def patch(  # pylint: disable=missing-param-doc
@@ -292,6 +310,7 @@ class BaseClient:
         data: _DataParamType = None,
         headers: dict[str, str] | None = None,
         encoding: str | None = None,
+        ignore_authorizer: bool = False,
     ) -> GlobusHTTPResponse:
         """
         Make a PATCH request to the specified path.
@@ -306,6 +325,7 @@ class BaseClient:
             data=data,
             headers=headers,
             encoding=encoding,
+            ignore_authorizer=ignore_authorizer,
         )
 
     def request(
@@ -319,6 +339,7 @@ class BaseClient:
         encoding: str | None = None,
         allow_redirects: bool = True,
         stream: bool = False,
+        ignore_authorizer: bool = False,
     ) -> GlobusHTTPResponse:
         """
         Send an HTTP request
@@ -336,6 +357,8 @@ class BaseClient:
             automatically. Defaults to ``True``
         :param stream: Do not immediately download the response content. Defaults to
             ``False``
+        :param ignore_authorizer: Do not use an authorizer to generate an Authorization
+            header for this request. Defaults to ``False``.
 
         :raises GlobusAPIError: a `GlobusAPIError` will be raised if the response to the
             request is received and has a status code in the 4xx or 5xx categories
@@ -356,10 +379,14 @@ class BaseClient:
                 path = path[len(self.base_path) :]
             url = utils.slash_join(self.base_url, urllib.parse.quote(path))
 
+        # if we aren't ignoring authorizers for this request
         # either use given authorizer or get one from app
-        authorizer = self.authorizer
-        if self._app and self.resource_server:
-            authorizer = self._app.get_authorizer(self.resource_server)
+        if ignore_authorizer:
+            authorizer = None
+        else:
+            authorizer = self.authorizer
+            if self._app and self.resource_server:
+                authorizer = self._app.get_authorizer(self.resource_server)
 
         # make the request
         log.debug("request will hit URL: %s", url)

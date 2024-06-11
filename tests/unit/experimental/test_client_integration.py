@@ -1,4 +1,5 @@
 import globus_sdk
+from globus_sdk._testing import load_response
 from globus_sdk.experimental.globus_app import UserApp
 
 
@@ -81,4 +82,17 @@ def test_specific_flow_client_default_scopes():
 
     assert [str(s) for s in app._scope_requirements["flow_id"]] == [
         "https://auth.globus.org/scopes/flow_id/flow_flow_id_user"
+    ]
+
+
+def test_gcs_client_default_scopes():
+    meta = load_response(globus_sdk.GCSClient.get_gcs_info).metadata
+    endpoint_client_id = meta["endpoint_client_id"]
+    domain_name = meta["domain_name"]
+
+    app = UserApp("test-app", client_id="client_id")
+    globus_sdk.GCSClient(domain_name, app=app)
+
+    assert [str(s) for s in app._scope_requirements[endpoint_client_id]] == [
+        f"urn:globus:auth:scope:{endpoint_client_id}:manage_collections"
     ]

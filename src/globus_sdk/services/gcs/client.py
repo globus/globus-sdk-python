@@ -6,6 +6,8 @@ import uuid
 from globus_sdk import client, exc, paging, response, scopes, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
+from globus_sdk.experimental.globus_app import GlobusApp
+from globus_sdk.scopes import Scope
 
 from .connector_table import ConnectorTable
 from .data import (
@@ -45,6 +47,7 @@ class GCSClient(client.BaseClient):
         self,
         gcs_address: str,
         *,
+        app: GlobusApp | None = None,
         environment: str | None = None,
         authorizer: GlobusAuthorizer | None = None,
         app_name: str | None = None,
@@ -59,9 +62,12 @@ class GCSClient(client.BaseClient):
             # if it doesn't, add it
             gcs_address = utils.slash_join(gcs_address, "/api/")
 
+        self._endpoint_client_id: str | None = None
+
         super().__init__(
             base_url=gcs_address,
             environment=environment,
+            app=app,
             authorizer=authorizer,
             app_name=app_name,
             transport_params=transport_params,
@@ -123,9 +129,78 @@ class GCSClient(client.BaseClient):
             name = "Spectralogic BlackPearl"
         return name
 
+    @property
+    def default_scope_requirements(self) -> list[Scope]:
+        return [
+            Scope(
+                GCSClient.get_gcs_endpoint_scopes(
+                    self.endpoint_client_id
+                ).manage_collections
+            )
+        ]
+
+    @utils.classproperty
+    def resource_server(  # pylint: disable=missing-param-doc
+        self_or_cls: client.BaseClient | type[client.BaseClient],
+    ) -> str | None:
+        """
+        The resource server for a GCS endpoint is the ID of its GCS Manager Client.
+
+        This will return None if called as a classmethod as an instantiated
+        ``GCSClient`` is required to look up the client ID from the endpoint.
+        """
+        if not isinstance(self_or_cls, GCSClient):
+            return None
+
+        return self_or_cls.endpoint_client_id
+
+    @property
+    def endpoint_client_id(self) -> str:
+        """
+        The UUID of the GCS Manager client of the endpoint this client is configured
+        for. This will be equal to the ``endpoint_id`` in most cases, but when they
+        differ the ``client_id`` is the canonical value for the endpoint's resource
+        server and scopes.
+        """
+        if self._endpoint_client_id:
+            return self._endpoint_client_id
+
+        else:
+            data = self.get_gcs_info()
+            try:
+                endpoint_id = str(data["client_id"])
+            except KeyError:
+                print(data)
+            self._endpoint_client_id = endpoint_id
+            return endpoint_id
+
     #
     # endpoint methods
     #
+
+    def get_gcs_info(
+        self, query_params: dict[str, t.Any] | None = None
+    ) -> UnpackingGCSResponse:
+        """
+        Get information about the GCS Manager service this client is configured for.
+        This call is made unauthenticated.
+
+        :param query_params: Additional passthrough query parameters
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``GET /info``
+
+                .. extdoclink:: Get Endpoint
+                    :ref: openapi/#getInfo
+                    :service: gcs
+        """
+        return UnpackingGCSResponse(
+            self.get("/info", query_params=query_params, ignore_authorizer=True),
+            "info",
+        )
 
     def get_endpoint(
         self, query_params: dict[str, t.Any] | None = None

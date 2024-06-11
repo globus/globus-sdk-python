@@ -1,4 +1,5 @@
 from globus_sdk import GCSClient
+from globus_sdk._testing import load_response
 
 
 def test_client_address_handling():
@@ -26,6 +27,11 @@ def test_client_address_handling():
     assert c1.base_url.startswith(c6.base_url)
 
 
-def test_gcs_client_has_no_resource_server():
-    c = GCSClient("foo.data.globus.org")
-    assert c.resource_server is None
+def test_gcs_client_resource_server_and_endpoint_client_id():
+    meta = load_response(GCSClient.get_gcs_info).metadata
+    endpoint_client_id = meta["endpoint_client_id"]
+    domain_name = meta["domain_name"]
+
+    c = GCSClient(domain_name)
+    assert c.endpoint_client_id == endpoint_client_id
+    assert c.resource_server == endpoint_client_id
