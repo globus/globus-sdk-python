@@ -75,18 +75,6 @@ class GlobusAuthorizationParameters(_serializable.Serializable):
         self.prompt = _validators.opt_str("prompt", prompt)
         self.extra = extra or {}
 
-        # Enforce that the error contains at least one of the fields we expect
-        requires_at_least_one = [
-            name for name in self._supported_fields() if name != "session_message"
-        ]
-        if all(
-            getattr(self, field_name) is None for field_name in requires_at_least_one
-        ):
-            raise _validators.ValidationError(
-                "Must include at least one supported authorization parameter: "
-                + ", ".join(requires_at_least_one)
-            )
-
 
 class GlobusAuthRequirementsError(_serializable.Serializable):
     """

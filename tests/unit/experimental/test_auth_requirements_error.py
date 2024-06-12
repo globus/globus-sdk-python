@@ -453,11 +453,7 @@ def test_error_from_dict_insufficient_input(target_class, data, expect_message):
         _variants.LegacyAuthorizationParameters,
     ],
 )
-def test_authorization_parameters_from_dict_insufficient_input(target_class):
+def test_authorization_parameters_from_empty_dict(target_class):
     """ """
-    with pytest.raises(ValueError) as exc_info:
-        target_class.from_dict({})
-
-    assert "Must include at least one supported authorization parameter" in str(
-        exc_info.value
-    )
+    authorization_params = target_class.from_dict({})
+    assert authorization_params.to_dict() == {}

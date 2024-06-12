@@ -132,18 +132,6 @@ class LegacyAuthorizationParameters(_serializable.Serializable):
             raise _validators.ValidationError("'prompt' must be 'login' or null")
         self.extra = extra or {}
 
-        # Enforce that the error contains at least one of the fields we expect
-        requires_at_least_one = [
-            name for name in self._supported_fields() if name != "session_message"
-        ]
-        if all(
-            getattr(self, field_name) is None for field_name in requires_at_least_one
-        ):
-            raise _validators.ValidationError(
-                "Must include at least one supported authorization parameter: "
-                + ", ".join(requires_at_least_one)
-            )
-
     def to_authorization_parameters(
         self,
     ) -> GlobusAuthorizationParameters:
