@@ -17,12 +17,12 @@ class LoginFlowManager(metaclass=abc.ABCMeta):
         self,
         login_client: AuthLoginClient,
         *,
-        refresh_tokens: bool = False,
+        request_refresh_tokens: bool = False,
     ):
         self.login_client = login_client
-        self.refresh_tokens = refresh_tokens
+        self.request_refresh_tokens = request_refresh_tokens
         """
-        :param refresh_tokens: Control whether refresh tokens will be requested.
+        :param request_refresh_tokens: Control whether refresh tokens will be requested.
         """
 
     @abc.abstractmethod

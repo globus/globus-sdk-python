@@ -2,6 +2,8 @@ import os
 import time
 from unittest import mock
 
+import pytest
+
 from globus_sdk import (
     AccessTokenAuthorizer,
     ClientCredentialsAuthorizer,
@@ -10,6 +12,7 @@ from globus_sdk import (
     RefreshTokenAuthorizer,
 )
 from globus_sdk._testing import load_response
+from globus_sdk.exc import GlobusSDKUsageError
 from globus_sdk.experimental.globus_app import (
     AccessTokenAuthorizerFactory,
     ClientApp,
@@ -60,6 +63,32 @@ def test_user_app_native():
     assert isinstance(user_app._login_flow_manager, CommandLineLoginFlowManager)
 
 
+def test_user_app_login_client():
+    mock_client = mock.Mock()
+    user_app = UserApp("test-app", login_client=mock_client)
+
+    assert user_app.app_name == "test-app"
+    assert user_app._login_client == mock_client
+
+
+def test_user_app_no_client_or_id():
+    with pytest.raises(GlobusSDKUsageError) as exc:
+        UserApp("test-app")
+    assert str(exc.value) == "One of either client_id or login_client is required."
+
+
+def test_user_app_both_client_and_id():
+    client_id = "mock_client_id"
+    mock_client = mock.Mock()
+
+    with pytest.raises(GlobusSDKUsageError) as exc:
+        UserApp("test-app", login_client=mock_client, client_id=client_id)
+    assert (
+        str(exc.value)
+        == "login_client is mutually exclusive with client_id and client_secret."
+    )
+
+
 def test_user_app_default_token_storage():
     client_id = "mock_client_id"
     user_app = UserApp("test-app", client_id=client_id)
@@ -68,11 +97,11 @@ def test_user_app_default_token_storage():
     assert isinstance(token_storage, JSONTokenStorage)
     if os.name == "nt":
         # on the windows-latest run this was
-        # C:\Users\runneradmin\AppData\Roaming\globus\test-app\tokens.json
-        assert "\\globus\\test-app\\tokens.json" in token_storage.filename
+        # C:\Users\runneradmin\AppData\Roaming\globus\app\test-app\tokens.json
+        assert "\\globus\\app\\test-app\\tokens.json" in token_storage.filename
     else:
         assert token_storage.filename == os.path.expanduser(
-            "~/.globus/test-app/tokens.json"
+            "~/.globus/app/test-app/tokens.json"
         )
 
 
@@ -90,7 +119,7 @@ def test_user_app_templated():
 
 def test_user_app_refresh():
     client_id = "mock_client_id"
-    config = GlobusAppConfig(refresh_tokens=True)
+    config = GlobusAppConfig(request_refresh_tokens=True)
     user_app = UserApp("test-app", client_id=client_id, config=config)
 
     assert user_app.app_name == "test-app"
@@ -112,59 +141,54 @@ def test_client_app():
     )
 
 
-def test_add_scope_requirements():
+def test_client_app_no_secret():
+    client_id = "mock_client_id"
+
+    with pytest.raises(GlobusSDKUsageError) as exc:
+        ClientApp("test-app", client_id=client_id)
+    assert (
+        str(exc.value)
+        == "Either login_client or both client_id and client_secret are required"
+    )
+
+
+def test_add_scope_requirements_and_auth_params_with_required_scopes():
     client_id = "mock_client_id"
     user_app = UserApp("test-app", client_id=client_id)
-    auth_rs = "auth.globus.org"
 
     # default without adding requirements is just auth's openid scope
-    expected = ["openid"]
-    assert [s.serialize() for s in user_app._scope_requirements[auth_rs]] == expected
-    assert [
-        s.serialize()
-        for s in user_app._validating_token_storage.scope_requirements[auth_rs]
-    ] == expected
+    params = user_app._auth_params_with_required_scopes()
+    assert params.required_scopes == ["openid"]
 
     # re-adding openid alongside other auth scopes, openid shouldn't be duplicated
     user_app.add_scope_requirements(
         {"auth.globus.org": [Scope("openid"), Scope("email"), Scope("profile")]}
     )
-    expected = ["email", "openid", "profile"]
-    assert (
-        sorted([s.serialize() for s in user_app._scope_requirements[auth_rs]])
-        == expected
-    )
-    assert (
-        sorted(
-            [
-                s.serialize()
-                for s in user_app._validating_token_storage.scope_requirements[auth_rs]
-            ]
-        )
-        == expected
-    )
+    params = user_app._auth_params_with_required_scopes()
+    assert sorted(params.required_scopes) == ["email", "openid", "profile"]
 
     # adding a requirement with a dependency
     user_app.add_scope_requirements(
         {"foo": [Scope("foo:all").add_dependency(Scope("bar:all"))]}
     )
-    expected = ["foo:all[bar:all]"]
-    assert [s.serialize() for s in user_app._scope_requirements["foo"]] == expected
-    assert [
-        s.serialize()
-        for s in user_app._validating_token_storage.scope_requirements["foo"]
-    ] == expected
+    params = user_app._auth_params_with_required_scopes()
+    assert sorted(params.required_scopes) == [
+        "email",
+        "foo:all[bar:all]",
+        "openid",
+        "profile",
+    ]
 
     # re-adding a requirement with a new dependency, dependencies should be combined
     user_app.add_scope_requirements(
         {"foo": [Scope("foo:all").add_dependency(Scope("baz:all"))]}
     )
-    expected = [["foo:all[bar:all baz:all]"], ["foo:all[baz:all bar:all]"]]
-    assert [s.serialize() for s in user_app._scope_requirements["foo"]] in expected
-    assert [
-        s.serialize()
-        for s in user_app._validating_token_storage.scope_requirements["foo"]
-    ] in expected
+    params = user_app._auth_params_with_required_scopes()
+    # order of dependencies is not guaranteed
+    assert sorted(params.required_scopes) in (
+        ["email", "foo:all[bar:all baz:all]", "openid", "profile"],
+        ["email", "foo:all[baz:all bar:all]", "openid", "profile"],
+    )
 
 
 def test_user_app_get_authorizer():
@@ -183,7 +207,7 @@ def test_user_app_get_authorizer_refresh():
     client_id = "mock_client_id"
     memory_storage = MemoryTokenStorage()
     memory_storage.store_token_data_by_resource_server(_mock_token_data_by_rs)
-    config = GlobusAppConfig(token_storage=memory_storage, refresh_tokens=True)
+    config = GlobusAppConfig(token_storage=memory_storage, request_refresh_tokens=True)
     user_app = UserApp("test-app", client_id=client_id, config=config)
 
     authorizer = user_app.get_authorizer("auth.globus.org")

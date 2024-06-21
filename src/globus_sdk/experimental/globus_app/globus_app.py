@@ -3,6 +3,7 @@ from __future__ import annotations
 import abc
 import os
 import sys
+from dataclasses import dataclass
 
 from globus_sdk import (
     AuthClient,
@@ -13,6 +14,7 @@ from globus_sdk import (
 )
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
+from globus_sdk.exc import GlobusSDKUsageError
 from globus_sdk.experimental.auth_requirements_error import (
     GlobusAuthorizationParameters,
 )
@@ -37,10 +39,10 @@ def _default_filename(app_name: str) -> str:
     construct the filename for the default JSONTokenStorage to use
 
     on Windows, this is typically
-        ~\AppData\Local\globus\{app_name}/tokens.json
+        ~\AppData\Local\globus\app\{app_name}/tokens.json
 
     on Linux and macOS, we use
-        ~/.globus/{app_name}/tokens.json
+        ~/.globus/app/{app_name}/tokens.json
     """
     if sys.platform == "win32":
         # try to get the app data dir, preferring the local appdata
@@ -48,37 +50,31 @@ def _default_filename(app_name: str) -> str:
         if not datadir:
             home = os.path.expanduser("~")
             datadir = os.path.join(home, "AppData", "Local")
-        return os.path.join(datadir, "globus", app_name, "tokens.json")
+        return os.path.join(datadir, "globus", "app", app_name, "tokens.json")
     else:
-        return os.path.expanduser(f"~/.globus/{app_name}/tokens.json")
+        return os.path.expanduser(f"~/.globus/app/{app_name}/tokens.json")
 
 
+@dataclass(frozen=True)
 class GlobusAppConfig:
     """
     Various configuration options for controlling the behavior of a ``GlobusApp``.
+
+    :param login_flow_manager: an optional ``LoginFlowManager`` instance or class.
+        An instance will be used directly when driving app login flows. A class will
+        be initialized with the app's ``login_client`` and this config's
+        ``request_refresh_tokens``.
+        If not given the default behavior will depend on the type of ``GlobusApp``.
+    :param token_storage: a ``TokenStorage`` instance or class that will
+        be used for storing token data. If not passed a ``JSONTokenStorage``
+        will be used.
+    :param request_refresh_tokens: If True, the ``GlobusApp`` will request refresh
+        tokens for long lived access.
     """
 
-    def __init__(
-        self,
-        *,
-        login_flow_manager: LoginFlowManager | None = None,
-        token_storage: TokenStorage | None = None,
-        refresh_tokens: bool = False,
-    ):
-        """
-        :param login_flow_manager: a ``LoginFlowManager`` that will be used when
-            driving login flows with a ``UserApp``. If not passed a
-            ``CommandLineLoginFLowManager`` will be used. A ``ClientApp`` will
-            error if this value is not None.
-        :param token_storage: a ``TokenStorage`` instance or class that will
-            be used for storing token data. If not passed a ``JSONTokenStorage``
-            will be used.
-        :param refresh_tokens: If True, the ``GlobusApp`` will request refresh tokens
-            for long lived access.
-        """
-        self.refresh_tokens = refresh_tokens
-        self.login_flow_manager = login_flow_manager
-        self.token_storage = token_storage
+    login_flow_manager: LoginFlowManager | type[LoginFlowManager] | None = None
+    token_storage: TokenStorage | None = None
+    request_refresh_tokens: bool = False
 
 
 class GlobusApp(metaclass=abc.ABCMeta):
@@ -103,6 +99,9 @@ class GlobusApp(metaclass=abc.ABCMeta):
         self,
         app_name: str,
         *,
+        login_client: AuthLoginClient | None = None,
+        client_id: UUIDLike | None = None,
+        client_secret: str | None = None,
         scope_requirements: dict[str, list[Scope]] | None = None,
         config: GlobusAppConfig | None = None,
     ):
@@ -110,6 +109,15 @@ class GlobusApp(metaclass=abc.ABCMeta):
         :param app_name: A string to identify this app. Used for default tokenstorage
             location and in the future will be used to set user-agent when this app is
             attached to a service client
+        :param login_client: An ``AuthLoginCLient`` that will be used for running
+            authentication flows. Different classes of ``GlobusApp`` may require
+            specific classes of ``AuthLoginClient``. ``Mutually exclusive with
+            ``client_id`` and ``client_secret``.
+        :client_id: A client UUID used to construct an ``AuthLoginCLient`` for running
+            authentication flows. The type of ``AuthLoginCLient`` will depend on the
+            type of ``GlobusApp``. Mutually exclusive with ``login_client``.
+        :client_secret: The value of the client secret for ``client_id`` if it uses
+            secrets. Mutually exclusive with ``login_client``.
         :param scope_requirements: A dict of lists of required scopes indexed by
             their resource server.
         :config: A ``GlobusAppConfig`` used to control various behaviors of this app.
@@ -122,7 +130,18 @@ class GlobusApp(metaclass=abc.ABCMeta):
             # default config
             self.config = GlobusAppConfig()
 
-        self._initialize_login_client()
+        if login_client and (client_id or client_secret):
+            raise GlobusSDKUsageError(
+                "login_client is mutually exclusive with client_id and client_secret."
+            )
+
+        self.client_id: UUIDLike | None
+        if login_client:
+            self._login_client = login_client
+            self.client_id = login_client.client_id
+        else:
+            self.client_id = client_id
+            self._initialize_login_client(client_secret)
 
         # get our initial scope requirements make sure we at least have "openid"
         # to get identity information for token validation
@@ -132,12 +151,10 @@ class GlobusApp(metaclass=abc.ABCMeta):
             if auth_rs not in scope_requirements:
                 scope_requirements[auth_rs] = [openid_scope]
             else:
-                scope_requirements[auth_rs] = Scope.merge_scopes(
-                    scope_requirements[auth_rs], [openid_scope]
-                )
-            self._scope_requirements = scope_requirements
+                scope_requirements[auth_rs].append(openid_scope)
+            self.scope_requirements = scope_requirements
         else:
-            self._scope_requirements = {auth_rs: [openid_scope]}
+            self.scope_requirements = {auth_rs: [openid_scope]}
 
         # either get config's TokenStorage, or make the default JSONTokenStorage
         if self.config.token_storage:
@@ -151,14 +168,14 @@ class GlobusApp(metaclass=abc.ABCMeta):
         # our initial scope requirements
         self._validating_token_storage = ValidatingTokenStorage(
             token_storage=self._token_storage,
-            scope_requirements=self._scope_requirements,
+            scope_requirements=self.scope_requirements,
         )
 
         # initialize our authorizer factory
         self._initialize_authorizer_factory()
 
     @abc.abstractmethod
-    def _initialize_login_client(self) -> None:
+    def _initialize_login_client(self, client_secret: str | None) -> None:
         """
         Initializes self._login_client to be used for making authorization requests.
         """
@@ -191,23 +208,21 @@ class GlobusApp(metaclass=abc.ABCMeta):
         or combine this app's required scopes with given auth_params.
         """
         required_scopes = []
-        for scope_list in self._scope_requirements.values():
+        for scope_list in self.scope_requirements.values():
             required_scopes.extend(scope_list)
 
-        if auth_params:
-            if auth_params.required_scopes:
-                combined_scopes = Scope.merge_scopes(
-                    required_scopes, [Scope(s) for s in auth_params.required_scopes]
-                )
-                auth_params.required_scopes = [str(s) for s in combined_scopes]
-            else:
-                auth_params.required_scopes = [str(s) for s in required_scopes]
-            return auth_params
+        if not auth_params:
+            auth_params = GlobusAuthorizationParameters()
 
-        else:
-            return GlobusAuthorizationParameters(
-                required_scopes=[str(s) for s in required_scopes]
-            )
+        # merge scopes for deduplication to minimize url request length
+        # this is useful even if there weren't any auth_param scope requirements
+        # as the app's scope_requirements can have duplicates
+        combined_scopes = Scope.merge_scopes(
+            required_scopes, [Scope(s) for s in auth_params.required_scopes or []]
+        )
+        auth_params.required_scopes = [str(s) for s in combined_scopes]
+
+        return auth_params
 
     def get_authorizer(self, resource_server: str) -> GlobusAuthorizer:
         """
@@ -223,31 +238,33 @@ class GlobusApp(metaclass=abc.ABCMeta):
         self, scope_requirements: dict[str, list[Scope]]
     ) -> None:
         """
-        Add given scope requirements to the app's scope requirements.
+        Add given scope requirements to the app's scope requirements. Any duplicate
+        requirements will be deduplicated later at authorization url creation time.
 
         :param scope_requirements: a dict of Scopes indexed by resource server
             that will be added to this app's scope requirements
         """
         for resource_server, scopes in scope_requirements.items():
-            if resource_server not in self._scope_requirements:
-                self._scope_requirements[resource_server] = scopes
-
+            if resource_server not in self.scope_requirements:
+                self.scope_requirements[resource_server] = scopes
             else:
-                self._scope_requirements[resource_server] = Scope.merge_scopes(
-                    self._scope_requirements[resource_server], scopes
-                )
-
-        # update the app's ValidatingTokenStorage's scope requirements to enforce the
-        # updated scope requirements
-        self._validating_token_storage.scope_requirements = self._scope_requirements
+                self.scope_requirements[resource_server].extend(scopes)
 
 
 class UserApp(GlobusApp):
     """
     A ``GlobusApp`` for login methods that require an interactive flow with a user.
 
-    Can either use a native application client by only giving ``client_id`` or a
-    templated client by giving both ``client_id`` and ``client_secret``.
+    ``UserApp`s are most commonly used with native application clients by passing a
+    ``NativeAppAuthClient`` as ``login_client`` or the native application's
+    ``client_id``.
+
+    If using a templated client, either pass a ``ConfidentialAppAuthClient``
+    as `login_client`` or the templated client's ``client_id`` and ``client_secret``.
+    This will not work for standard confidential clients.
+
+    By default a ``UserApp`` will create a ``CommandLineLoginFlowManager`` for
+    running login flows, which can be overridden through ``config``.
 
     .. tab-set::
 
@@ -270,50 +287,52 @@ class UserApp(GlobusApp):
         self,
         app_name: str,
         *,
-        scope_requirements: dict[str, list[Scope]] | None = None,
+        login_client: AuthLoginClient | None = None,
         client_id: UUIDLike | None = None,
         client_secret: str | None = None,
+        scope_requirements: dict[str, list[Scope]] | None = None,
         config: GlobusAppConfig | None = None,
     ):
-        """
-        :param app_name: A string to identify this app. Used for default tokenstorage
-            location and in the future will be used to set user-agent when this app is
-            attached to a service client
-        :param scope_requirements: A dict of lists of required scopes indexed by
-            their resource server.
-        :param client_id: A UUID for the Globus client this app will use. This value
-            is currently required in all cases.
-        :param client_secret: If using a templated client, the value of its client
-            secret. If omitted or passed as None the app is assumed to be a native
-            app.
-        :config: A ``GlobusAppConfig`` used to control various behaviors of this app.
-        """
+        super().__init__(
+            app_name,
+            login_client=login_client,
+            client_id=client_id,
+            client_secret=client_secret,
+            scope_requirements=scope_requirements,
+            config=config,
+        )
 
-        # in the future we might use an environment variable if this is passed as None,
-        # but for now client_id is required
-        if client_id is None:
-            raise ValueError("client_id is required")
-
-        self.client_id = client_id
-        self.client_secret = client_secret
-        super().__init__(app_name, scope_requirements=scope_requirements, config=config)
-
-        # either get config's LoginFlowManager
-        # or make a default CommandLineLoginFlowManager
+        # get or instantiate config's login_flow_manager
         if self.config.login_flow_manager:
-            self._login_flow_manager = self.config.login_flow_manager
+            if isinstance(self.config.login_flow_manager, LoginFlowManager):
+                self._login_flow_manager = self.config.login_flow_manager
+            elif isinstance(self.config.login_flow_manager, type(LoginFlowManager)):
+                self._login_flow_manager = self.config.login_flow_manager(
+                    self._login_client,
+                    request_refresh_tokens=self.config.request_refresh_tokens,
+                )
+            else:
+                raise TypeError(
+                    "login_flow_manager must be a LoginFlowManager instance or class"
+                )
+        # or make a default CommandLineLoginFlowManager
         else:
             self._login_flow_manager = CommandLineLoginFlowManager(
                 self._login_client,
-                refresh_tokens=self.config.refresh_tokens,
+                request_refresh_tokens=self.config.request_refresh_tokens,
             )
 
-    def _initialize_login_client(self) -> None:
-        if self.client_secret:
+    def _initialize_login_client(self, client_secret: str | None) -> None:
+        if self.client_id is None:
+            raise GlobusSDKUsageError(
+                "One of either client_id or login_client is required."
+            )
+
+        if client_secret:
             self._login_client = ConfidentialAppAuthClient(
                 app_name=self.app_name,
                 client_id=self.client_id,
-                client_secret=self.client_secret,
+                client_secret=client_secret,
             )
         else:
             self._login_client = NativeAppAuthClient(
@@ -322,7 +341,7 @@ class UserApp(GlobusApp):
             )
 
     def _initialize_authorizer_factory(self) -> None:
-        if self.config.refresh_tokens:
+        if self.config.request_refresh_tokens:
             self._authorizer_factory = RefreshTokenAuthorizerFactory(
                 token_storage=self._validating_token_storage,
                 auth_login_client=self._login_client,
@@ -355,6 +374,13 @@ class ClientApp(GlobusApp):
     A ``GlobusApp`` using client credentials - useful for service accounts and
     automation use cases.
 
+    ``ClientApp``s are always used with confidential clients either by passing
+    a ``ConfidentialAppAuthClient`` as ``login_client`` or providing the client's
+    ``client_id`` and ``client_secret`` pair.
+
+    ``ClientApp``s do not use a ``LoginFlowManager`` and will raise an error
+    if given one through ``config``.
+
     .. tab-set::
 
         .. tab-item:: Future Example Usage
@@ -373,34 +399,39 @@ class ClientApp(GlobusApp):
     def __init__(
         self,
         app_name: str,
-        client_id: UUIDLike,
-        client_secret: str,
         *,
+        login_client: AuthLoginClient | None = None,
+        client_id: UUIDLike | None = None,
+        client_secret: str | None = None,
         scope_requirements: dict[str, list[Scope]] | None = None,
         config: GlobusAppConfig | None = None,
     ):
-        """
-        :param app_name: A string to identify this app. Used for default tokenstorage
-            location and in the future will be used to set user-agent when this app is
-            attached to a service client
-        :param scope_requirements: A dict of lists of required scopes indexed by
-            their resource server.
-        :param client_id: A UUID for the Globus client this app will use. This value
-            is currently required in all cases.
-        :param client_secret: The client secret for the
-        :config: A ``GlobusAppConfig`` used to control various behaviors of this app.
-        """
         if config and config.login_flow_manager is not None:
             raise ValueError("a ClientApp cannot use a login_flow_manager")
 
-        self.client_id = client_id
-        self.client_secret = client_secret
-        super().__init__(app_name, scope_requirements=scope_requirements, config=config)
+        if login_client and not isinstance(login_client, ConfidentialAppAuthClient):
+            raise GlobusSDKUsageError(
+                "A ClientApp must use a ConfidentialAppAuthClient for its login_client"
+            )
 
-    def _initialize_login_client(self) -> None:
+        super().__init__(
+            app_name,
+            login_client=login_client,
+            client_id=client_id,
+            client_secret=client_secret,
+            scope_requirements=scope_requirements,
+            config=config,
+        )
+
+    def _initialize_login_client(self, client_secret: str | None) -> None:
+        if not (self.client_id and client_secret):
+            raise GlobusSDKUsageError(
+                "Either login_client or both client_id and client_secret are required"
+            )
+
         self._login_client = ConfidentialAppAuthClient(
             client_id=self.client_id,
-            client_secret=self.client_secret,
+            client_secret=client_secret,
             app_name=self.app_name,
         )
 

@@ -25,7 +25,7 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         self,
         login_client: AuthLoginClient,
         *,
-        refresh_tokens: bool = False,
+        request_refresh_tokens: bool = False,
         login_prompt: str = "Please authenticate with Globus here:",
         code_prompt: str = "Enter the resulting Authorization Code here:",
     ):
@@ -35,7 +35,7 @@ class CommandLineLoginFlowManager(LoginFlowManager):
             must either be a NativeAppAuthClient or a templated
             ConfidentialAppAuthClient, standard ConfidentialAppAuthClients cannot
             use the web auth-code flow.
-        :param refresh_tokens: Control whether refresh tokens will be requested.
+        :param request_refresh_tokens: Control whether refresh tokens will be requested.
         :param login_prompt: The string that will be output to the command line
             prompting the user to authenticate.
         :param code_prompt: The string that will be output to the command line
@@ -43,7 +43,7 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         """
         self.login_prompt = login_prompt
         self.code_prompt = code_prompt
-        super().__init__(login_client, refresh_tokens=refresh_tokens)
+        super().__init__(login_client, request_refresh_tokens=request_refresh_tokens)
 
     def run_login_flow(
         self,
@@ -61,7 +61,7 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         # NativeAppAuthClient and ConfidentialAppAuthClient
         self.login_client.oauth2_start_flow(  # type: ignore
             redirect_uri=self.login_client.base_url + "v2/web/auth-code",
-            refresh_tokens=self.refresh_tokens,
+            refresh_tokens=self.request_refresh_tokens,
             requested_scopes=auth_parameters.required_scopes,
         )
 

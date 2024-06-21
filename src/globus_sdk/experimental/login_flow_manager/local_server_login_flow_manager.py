@@ -88,7 +88,7 @@ class LocalServerLoginFlowManager(LoginFlowManager):
         self,
         login_client: AuthLoginClient,
         *,
-        refresh_tokens: bool = False,
+        request_refresh_tokens: bool = False,
         server_address: tuple[str, int] = ("127.0.0.1", 0),
         html_template: Template = DEFAULT_HTML_TEMPLATE,
     ):
@@ -98,7 +98,7 @@ class LocalServerLoginFlowManager(LoginFlowManager):
             must either be a NativeAppAuthClient or a templated
             ConfidentialAppAuthClient, standard ConfidentialAppAuthClients cannot
             use the web auth-code flow.
-        :param refresh_tokens: Control whether refresh tokens will be requested.
+        :param request_refresh_tokens: Control whether refresh tokens will be requested.
         :param html_template: Optional HTML Template to be populated with the values
             login_result and post_login_message and displayed to the user.
         :param server_address: Optional tuple of the form (host, port) to specify an
@@ -106,7 +106,7 @@ class LocalServerLoginFlowManager(LoginFlowManager):
         """
         self.server_address = server_address
         self.html_template = html_template
-        super().__init__(login_client, refresh_tokens=refresh_tokens)
+        super().__init__(login_client, request_refresh_tokens=request_refresh_tokens)
 
     def run_login_flow(
         self,
@@ -130,7 +130,7 @@ class LocalServerLoginFlowManager(LoginFlowManager):
             # NativeAppAuthClient and ConfidentialAppAuthClient
             self.login_client.oauth2_start_flow(  # type: ignore
                 redirect_uri=redirect_uri,
-                refresh_tokens=self.refresh_tokens,
+                refresh_tokens=self.request_refresh_tokens,
                 requested_scopes=auth_parameters.required_scopes,
             )
 
