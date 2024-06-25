@@ -103,7 +103,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         client_id: UUIDLike | None = None,
         client_secret: str | None = None,
         scope_requirements: dict[str, list[Scope]] | None = None,
-        config: GlobusAppConfig | None = None,
+        config: GlobusAppConfig = GlobusAppConfig(),  # noqa: B008
     ):
         """
         :param app_name: A string to identify this app. Used for default tokenstorage
@@ -123,12 +123,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         :config: A ``GlobusAppConfig`` used to control various behaviors of this app.
         """
         self.app_name = app_name
-
-        if config:
-            self.config = config
-        else:
-            # default config
-            self.config = GlobusAppConfig()
+        self.config = config
 
         if login_client and (client_id or client_secret):
             raise GlobusSDKUsageError(
@@ -291,7 +286,7 @@ class UserApp(GlobusApp):
         client_id: UUIDLike | None = None,
         client_secret: str | None = None,
         scope_requirements: dict[str, list[Scope]] | None = None,
-        config: GlobusAppConfig | None = None,
+        config: GlobusAppConfig = GlobusAppConfig(),  # noqa: B008
     ):
         super().__init__(
             app_name,
@@ -400,11 +395,11 @@ class ClientApp(GlobusApp):
         self,
         app_name: str,
         *,
-        login_client: AuthLoginClient | None = None,
+        login_client: ConfidentialAppAuthClient | None = None,
         client_id: UUIDLike | None = None,
         client_secret: str | None = None,
         scope_requirements: dict[str, list[Scope]] | None = None,
-        config: GlobusAppConfig | None = None,
+        config: GlobusAppConfig = GlobusAppConfig(),  # noqa: B008
     ):
         if config and config.login_flow_manager is not None:
             raise ValueError("a ClientApp cannot use a login_flow_manager")
