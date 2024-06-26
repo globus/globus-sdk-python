@@ -77,6 +77,9 @@ class GlobusAppConfig:
     request_refresh_tokens: bool = False
 
 
+_DEFAULT_CONFIG = GlobusAppConfig()
+
+
 class GlobusApp(metaclass=abc.ABCMeta):
     """
     ``GlobusApp` is an abstract base class providing an interface for simplifying
@@ -103,7 +106,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         client_id: UUIDLike | None = None,
         client_secret: str | None = None,
         scope_requirements: dict[str, list[Scope]] | None = None,
-        config: GlobusAppConfig = GlobusAppConfig(),  # noqa: B008
+        config: GlobusAppConfig = _DEFAULT_CONFIG,
     ):
         """
         :param app_name: A string to identify this app. Used for default tokenstorage
@@ -286,7 +289,7 @@ class UserApp(GlobusApp):
         client_id: UUIDLike | None = None,
         client_secret: str | None = None,
         scope_requirements: dict[str, list[Scope]] | None = None,
-        config: GlobusAppConfig = GlobusAppConfig(),  # noqa: B008
+        config: GlobusAppConfig = _DEFAULT_CONFIG,
     ):
         super().__init__(
             app_name,
@@ -399,7 +402,7 @@ class ClientApp(GlobusApp):
         client_id: UUIDLike | None = None,
         client_secret: str | None = None,
         scope_requirements: dict[str, list[Scope]] | None = None,
-        config: GlobusAppConfig = GlobusAppConfig(),  # noqa: B008
+        config: GlobusAppConfig = _DEFAULT_CONFIG,
     ):
         if config and config.login_flow_manager is not None:
             raise ValueError("a ClientApp cannot use a login_flow_manager")
