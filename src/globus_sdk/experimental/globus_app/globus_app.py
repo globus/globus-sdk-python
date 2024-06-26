@@ -244,7 +244,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         """
         for resource_server, scopes in scope_requirements.items():
             if resource_server not in self.scope_requirements:
-                self.scope_requirements[resource_server] = scopes
+                self.scope_requirements[resource_server] = scopes[:]
             else:
                 self.scope_requirements[resource_server].extend(scopes)
 

@@ -218,7 +218,7 @@ def test_app_integration(base_client_class):
     assert c.app_name == "SDK Test"
 
     # confirm default_required_scopes were automatically added
-    assert [str(s) for s in app._scope_requirements[c.resource_server]] == [
+    assert [str(s) for s in app.scope_requirements[c.resource_server]] == [
         TransferScopes.all
     ]
 
@@ -236,7 +236,7 @@ def test_add_app_scope(base_client_class):
     c = base_client_class(app=app)
 
     c.add_app_scope("foo")
-    str_list = [str(s) for s in app._scope_requirements[c.resource_server]]
+    str_list = [str(s) for s in app.scope_requirements[c.resource_server]]
     assert len(str_list) == 2
     assert TransferScopes.all in str_list
     assert "foo" in str_list
