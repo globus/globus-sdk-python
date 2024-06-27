@@ -22,6 +22,19 @@ def test_transfer_client_add_app_data_access_scope():
     assert expected in str_list
 
 
+def test_transfer_client_add_app_data_access_scope_chaining():
+    app = UserApp("test-app", client_id="client_id")
+    globus_sdk.TransferClient(app=app).add_app_data_access_scope(
+        "collection_id_1"
+    ).add_app_data_access_scope("collection_id_2")
+
+    str_list = [str(s) for s in app.scope_requirements["transfer.api.globus.org"]]
+    expected_1 = "urn:globus:auth:scope:transfer.api.globus.org:all[*https://auth.globus.org/scopes/collection_id_1/data_access]"  # noqa
+    expected_2 = "urn:globus:auth:scope:transfer.api.globus.org:all[*https://auth.globus.org/scopes/collection_id_2/data_access]"  # noqa
+    assert expected_1 in str_list
+    assert expected_2 in str_list
+
+
 def test_auth_client_default_scopes():
     app = UserApp("test-app", client_id="client_id")
     globus_sdk.AuthClient(app=app)

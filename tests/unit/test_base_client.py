@@ -250,6 +250,16 @@ def test_add_app_scope(base_client_class):
     assert "foo" in str_list
 
 
+def test_add_app_scope_chaining(base_client_class):
+    app = UserApp("SDK Test", client_id="client_id")
+    c = base_client_class(app=app).add_app_scope("foo").add_app_scope("bar")
+    str_list = [str(s) for s in app.scope_requirements[c.resource_server]]
+    assert len(str_list) == 3
+    assert TransferScopes.all in str_list
+    assert "foo" in str_list
+    assert "bar" in str_list
+
+
 def test_app_mutually_exclusive(base_client_class):
     app = UserApp("SDK Test", client_id="client_id")
     expected = "A CustomClient cannot use both an 'app' and an 'authorizer'."

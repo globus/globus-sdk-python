@@ -161,11 +161,13 @@ class BaseClient:
 
             self._app.add_scope_requirements({self.resource_server: scope_requirements})
 
-    def add_app_scope(self, scope_collection: ScopeCollectionType) -> None:
+    def add_app_scope(self, scope_collection: ScopeCollectionType) -> BaseClient:
         """
         Add a given scope collection to this client's ``GlobusApp`` scope requirements
         for this client's ``resource_server``. This allows defining additional scope
         requirements beyond the client's ``default_scope_requirements``.
+
+        Returns ``self`` for chaining.
 
         Raises ``GlobusSDKUsageError`` if this client was not initialized with a
             ``GlobusApp``.
@@ -180,8 +182,11 @@ class BaseClient:
             .. code-block:: python
 
                 app = UserApp("myapp", ...)
-                client = AuthClient(app=app)
-                client.add_app_scope(globus_sdk.scopes.AuthScopes.manage_projects)
+                flows_client = (
+                    FlowsClient(app=app)
+                    .add_app_scope(FlowsScopes.manage_flows)
+                    .add_app_scope(FlowsScopes.run_manage)
+                )
 
         """
         if not self._app:
@@ -195,6 +200,8 @@ class BaseClient:
             )
         scopes = Scope.parse(scopes_to_str(scope_collection))
         self._app.add_scope_requirements({self.resource_server: scopes})
+
+        return self
 
     @property
     def app_name(self) -> str | None:
@@ -226,7 +233,7 @@ class BaseClient:
         *,
         query_params: dict[str, t.Any] | None = None,
         headers: dict[str, str] | None = None,
-        ignore_authorizer: bool = False,
+        automatic_authorization: bool = True,
     ) -> GlobusHTTPResponse:
         """
         Make a GET request to the specified path.
@@ -239,7 +246,7 @@ class BaseClient:
             path,
             query_params=query_params,
             headers=headers,
-            ignore_authorizer=ignore_authorizer,
+            automatic_authorization=automatic_authorization,
         )
 
     def post(  # pylint: disable=missing-param-doc
@@ -250,7 +257,7 @@ class BaseClient:
         data: _DataParamType = None,
         headers: dict[str, str] | None = None,
         encoding: str | None = None,
-        ignore_authorizer: bool = False,
+        automatic_authorization: bool = True,
     ) -> GlobusHTTPResponse:
         """
         Make a POST request to the specified path.
@@ -265,7 +272,7 @@ class BaseClient:
             data=data,
             headers=headers,
             encoding=encoding,
-            ignore_authorizer=ignore_authorizer,
+            automatic_authorization=automatic_authorization,
         )
 
     def delete(  # pylint: disable=missing-param-doc
@@ -274,7 +281,7 @@ class BaseClient:
         *,
         query_params: dict[str, t.Any] | None = None,
         headers: dict[str, str] | None = None,
-        ignore_authorizer: bool = False,
+        automatic_authorization: bool = True,
     ) -> GlobusHTTPResponse:
         """
         Make a DELETE request to the specified path.
@@ -287,7 +294,7 @@ class BaseClient:
             path,
             query_params=query_params,
             headers=headers,
-            ignore_authorizer=ignore_authorizer,
+            automatic_authorization=automatic_authorization,
         )
 
     def put(  # pylint: disable=missing-param-doc
@@ -298,7 +305,7 @@ class BaseClient:
         data: _DataParamType = None,
         headers: dict[str, str] | None = None,
         encoding: str | None = None,
-        ignore_authorizer: bool = False,
+        automatic_authorization: bool = True,
     ) -> GlobusHTTPResponse:
         """
         Make a PUT request to the specified path.
@@ -313,7 +320,7 @@ class BaseClient:
             data=data,
             headers=headers,
             encoding=encoding,
-            ignore_authorizer=ignore_authorizer,
+            automatic_authorization=automatic_authorization,
         )
 
     def patch(  # pylint: disable=missing-param-doc
@@ -324,7 +331,7 @@ class BaseClient:
         data: _DataParamType = None,
         headers: dict[str, str] | None = None,
         encoding: str | None = None,
-        ignore_authorizer: bool = False,
+        automatic_authorization: bool = True,
     ) -> GlobusHTTPResponse:
         """
         Make a PATCH request to the specified path.
@@ -339,7 +346,7 @@ class BaseClient:
             data=data,
             headers=headers,
             encoding=encoding,
-            ignore_authorizer=ignore_authorizer,
+            automatic_authorization=automatic_authorization,
         )
 
     def request(
@@ -353,7 +360,7 @@ class BaseClient:
         encoding: str | None = None,
         allow_redirects: bool = True,
         stream: bool = False,
-        ignore_authorizer: bool = False,
+        automatic_authorization: bool = True,
     ) -> GlobusHTTPResponse:
         """
         Send an HTTP request
@@ -361,7 +368,8 @@ class BaseClient:
         :param method: HTTP request method, as an all caps string
         :param path: Path for the request, with or without leading slash
         :param query_params: Parameters to be encoded as a query string
-        :param headers: HTTP headers to add to the request
+        :param headers: HTTP headers to add to the request. Authorization headers may
+            be overwritten unless ``automatic_authorization`` is False.
         :param data: Data to send as the request body. May pass through encoding.
         :param encoding: A way to encode request data. "json", "form", and "text"
             are all valid values. Custom encodings can be used only if they are
@@ -371,8 +379,8 @@ class BaseClient:
             automatically. Defaults to ``True``
         :param stream: Do not immediately download the response content. Defaults to
             ``False``
-        :param ignore_authorizer: Do not use an authorizer to generate an Authorization
-            header for this request. Defaults to ``False``.
+        :param automatic_authorization: Use this client's ``app`` or ``authorizer``
+            to automatically generate an Authorization header.
 
         :raises GlobusAPIError: a `GlobusAPIError` will be raised if the response to the
             request is received and has a status code in the 4xx or 5xx categories
@@ -393,14 +401,13 @@ class BaseClient:
                 path = path[len(self.base_path) :]
             url = utils.slash_join(self.base_url, urllib.parse.quote(path))
 
-        # if we aren't ignoring authorizers for this request
         # either use given authorizer or get one from app
-        if ignore_authorizer:
-            authorizer = None
-        else:
+        if automatic_authorization:
             authorizer = self.authorizer
             if self._app and self.resource_server:
                 authorizer = self._app.get_authorizer(self.resource_server)
+        else:
+            authorizer = None
 
         # make the request
         log.debug("request will hit URL: %s", url)

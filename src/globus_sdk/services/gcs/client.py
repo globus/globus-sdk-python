@@ -200,7 +200,7 @@ class GCSClient(client.BaseClient):
                     :service: gcs
         """
         return UnpackingGCSResponse(
-            self.get("/info", query_params=query_params, ignore_authorizer=True),
+            self.get("/info", query_params=query_params, automatic_authorization=False),
             "info",
         )
 
