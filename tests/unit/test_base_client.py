@@ -231,6 +231,14 @@ def test_app_integration(base_client_class):
     assert str(ex.value) == "No token data for transfer.api.globus.org"
 
 
+def test_app_scopes(base_client_class):
+    app = UserApp("SDK Test", client_id="client_id")
+    c = base_client_class(app=app, app_scopes=[Scope("foo")])
+
+    # confirm app_scopes were added and default_required_scopes were not
+    assert [str(s) for s in app.scope_requirements[c.resource_server]] == ["foo"]
+
+
 def test_add_app_scope(base_client_class):
     app = UserApp("SDK Test", client_id="client_id")
     c = base_client_class(app=app)
@@ -244,16 +252,15 @@ def test_add_app_scope(base_client_class):
 
 def test_app_mutually_exclusive(base_client_class):
     app = UserApp("SDK Test", client_id="client_id")
-    expected = (
-        "A CustomClient cannot accept both an 'app' and an 'app_name' or 'authorizer' "
-        "as these values come from the 'app' instead."
-    )
-
-    with pytest.raises(globus_sdk.exc.GlobusSDKUsageError) as ex:
-        base_client_class(app=app, app_name="Other app name")
-    assert str(ex.value) == expected
+    expected = "A CustomClient cannot use both an 'app' and an 'authorizer'."
 
     authorizer = NullAuthorizer()
     with pytest.raises(globus_sdk.exc.GlobusSDKUsageError) as ex:
         base_client_class(app=app, authorizer=authorizer)
     assert str(ex.value) == expected
+
+
+def test_app_name_override(base_client_class):
+    app = UserApp("SDK Test", client_id="client_id")
+    c = base_client_class(app=app, app_name="foo")
+    assert c.app_name == "foo"

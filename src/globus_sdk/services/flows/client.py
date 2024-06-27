@@ -852,6 +852,7 @@ class SpecificFlowClient(client.BaseClient):
         *,
         environment: str | None = None,
         app: GlobusApp | None = None,
+        app_scopes: list[Scope] | None = None,
         authorizer: GlobusAuthorizer | None = None,
         app_name: str | None = None,
         transport_params: dict[str, t.Any] | None = None,
@@ -864,6 +865,7 @@ class SpecificFlowClient(client.BaseClient):
         )
         super().__init__(
             app=app,
+            app_scopes=app_scopes,
             environment=environment,
             authorizer=authorizer,
             app_name=app_name,

@@ -24,16 +24,19 @@ class BaseClient:
     r"""
     Abstract base class for clients with error handling for Globus APIs.
 
-    :param app: A ``GlobusApp`` which will be used for generating Authorizors and
-        storing and validating tokens. Passing an app will automatically include
-        a client's default scopes in the app's scope requirements. Mutually exclusive
-        with ``authorizer`` and ``app_name``.
+    :param app: A ``GlobusApp`` which will be used for handling authorization and
+        storing and validating tokens. Passing an ``app`` will automatically include
+        a client's default scopes in the ``app``'s scope requirements unless specific
+        ``app_scopes`` are given. If ``app_name`` is not given, the ``app``'s
+        ``app_name`` will be used. Mutually exclusive with ``authorizer``.
+    :param app_scopes: Optional list of ``Scope`` objects to be added to ``app``'s
+        scope requirements instead of ``default_scope_requirements``. Requires ``app``.
     :param authorizer: A ``GlobusAuthorizer`` which will generate Authorization headers.
         Mutually exclusive with ``app``.
     :param app_name: Optional "nice name" for the application. Has no bearing on the
         semantics of client actions. It is just passed as part of the User-Agent
         string, and may be useful when debugging issues with the Globus Team.
-        Mutually exclusive with ``app``.
+        If both``app`` and ``app_name`` are given, this value takes priority.
     :param base_url: The URL for the service. Most client types initialize this value
         intelligently by default. Set it when inheriting from BaseClient or
         communicating through a proxy.
@@ -63,6 +66,7 @@ class BaseClient:
         environment: str | None = None,
         base_url: str | None = None,
         app: GlobusApp | None = None,
+        app_scopes: list[Scope] | None = None,
         authorizer: GlobusAuthorizer | None = None,
         app_name: str | None = None,
         transport_params: dict[str, t.Any] | None = None,
@@ -102,20 +106,27 @@ class BaseClient:
         self.transport = self.transport_class(**(transport_params or {}))
         log.debug(f"initialized transport of type {type(self.transport)}")
 
-        if app and (authorizer or app_name):
+        if app and authorizer:
             raise exc.GlobusSDKUsageError(
-                f"A {type(self).__name__} cannot accept both an 'app' and an 'app_name'"
-                " or 'authorizer' as these values come from the 'app' instead."
+                f"A {type(self).__name__} cannot use both an 'app' and an 'authorizer'."
             )
 
         self._app = app
         self.authorizer = authorizer
 
-        # set application name if available from app or app_name
+        if app_scopes and not app:
+            raise exc.GlobusSDKUsageError(
+                f"A {type(self).__name__} must have an 'app' to use 'app_scopes'."
+            )
+
+        self.app_scopes = app_scopes
+
+        # set application name if available from app_name or app with app_name
+        # taking precedence if both are present
         self._app_name = None
         if app_name is not None:
             self.app_name = app_name
-        if app is not None:
+        elif app is not None:
             self.app_name = app.app_name
 
         # setup paginated methods
@@ -143,9 +154,12 @@ class BaseClient:
                     "'resource_server' defined."
                 )
 
-            self._app.add_scope_requirements(
-                {self.resource_server: self.default_scope_requirements}
-            )
+            if self.app_scopes:
+                scope_requirements = self.app_scopes
+            else:
+                scope_requirements = self.default_scope_requirements
+
+            self._app.add_scope_requirements({self.resource_server: scope_requirements})
 
     def add_app_scope(self, scope_collection: ScopeCollectionType) -> None:
         """
