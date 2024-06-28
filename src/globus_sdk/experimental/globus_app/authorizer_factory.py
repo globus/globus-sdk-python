@@ -99,7 +99,7 @@ class AccessTokenAuthorizerFactory(AuthorizerFactory[AccessTokenAuthorizer]):
         super().store_token_response_and_clear_cache(token_res)
         self._cached_authorizer_expiration = {}
 
-    def get_authorizer(self, resource_server: str) -> GA:
+    def get_authorizer(self, resource_server: str) -> AccessTokenAuthorizer:
         if resource_server in self._cached_authorizer_expiration:
             if self._cached_authorizer_expiration[resource_server] < time.time():
                 del self._cached_authorizer_expiration[resource_server]
