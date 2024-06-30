@@ -8,7 +8,7 @@ from ..._types import UUIDLike
 from .errors import (
     IdentityMismatchError,
     MissingIdentityError,
-    MissingTokensError,
+    MissingTokenError,
     UnmetScopeRequirementsError,
 )
 
@@ -101,12 +101,21 @@ class ValidatingTokenStorage(TokenStorage):
         :param token_data_by_resource_server: A dict of TokenData objects indexed by
             their resource server
 
-        :raises: :exc:`IdentityValidationError` to signal a problem with the identity
-            info aspect of the token data.
-        :raises :exc:`TokenValidationError` to signal a problem with token data.
+        :raises: :exc:`MissingIdentityError` if the token data does not contain
+            identity information.
+        :raises: :exc:`IdentityMismatchError` if the identity info in the token data
+            does not match the stored identity info.
+        :raises: :exc:`UnmetScopeRequirementsError` if the token data does not meet the
+            attached scope requirements.
         """
+        self._validate_token_data_by_resource_server_meets_identity_requirements(
+            token_data_by_resource_server
+        )
+        for resource_server, token_data in token_data_by_resource_server.items():
+            self._validate_token_data_meets_scope_requirements(
+                resource_server, token_data
+            )
 
-        self._validate_token_data_by_resource_server(token_data_by_resource_server)
         self._token_storage.store_token_data_by_resource_server(
             token_data_by_resource_server
         )
@@ -114,29 +123,31 @@ class ValidatingTokenStorage(TokenStorage):
     def get_token_data_by_resource_server(self) -> dict[str, TokenData]:
         """
         :returns: A dict of TokenData objects indexed by their resource server
-        :raises: :exc:`TokenValidationError` to signal a problem with stored token data.
+        :raises: :exc:`UnmetScopeRequirementsError` if any token data does not meet the
+            attached scope requirements.
         """
-        token_data_by_resource_server = (
-            self._token_storage.get_token_data_by_resource_server()
-        )
+        by_resource_server = self._token_storage.get_token_data_by_resource_server()
 
-        for resource_server, token_data in token_data_by_resource_server.items():
+        for resource_server, token_data in by_resource_server.items():
             self._validate_token_data_meets_scope_requirements(
                 resource_server, token_data
             )
 
-        return token_data_by_resource_server
+        return by_resource_server
 
     def get_token_data(self, resource_server: str) -> TokenData:
         """
         :param resource_server: A resource server with cached token data.
         :returns: The token data for the given resource server.
-        :raises: :exc:`TokenValidationError` to signal a problem with stored token data.
+        :raises: :exc:`MissingTokenError` if the underlying ``TokenStorage`` does not
+            have any token data for the given resource server.
+        :raises: :exc:`UnmetScopeRequirementsError` if the stored token data does not
+            meet the scope requirements for the given resource server.
         """
         token_data = self._token_storage.get_token_data(resource_server)
         if token_data is None:
             msg = f"No token data for {resource_server}"
-            raise MissingTokensError(msg, resource_server=resource_server)
+            raise MissingTokenError(msg, resource_server=resource_server)
 
         self._validate_token_data_meets_scope_requirements(resource_server, token_data)
 
@@ -147,16 +158,6 @@ class ValidatingTokenStorage(TokenStorage):
         :param resource_server: The resource server string to remove token data for
         """
         return self._token_storage.remove_token_data(resource_server)
-
-    def _validate_token_data_by_resource_server(
-        self, token_data_by_resource_server: dict[str, TokenData]
-    ) -> None:
-        self._validate_token_data_by_resource_server_meets_identity_requirements(
-            token_data_by_resource_server
-        )
-        self._validate_token_data_by_resource_server_meets_scope_requirements(
-            token_data_by_resource_server
-        )
 
     def _validate_token_data_by_resource_server_meets_identity_requirements(
         self, token_data_by_resource_server: dict[str, TokenData]
@@ -195,14 +196,6 @@ class ValidatingTokenStorage(TokenStorage):
                 "Detected a change in identity associated with the token data.",
                 stored_id=self.identity_id,
                 new_id=token_data_identity_id,
-            )
-
-    def _validate_token_data_by_resource_server_meets_scope_requirements(
-        self, token_data_by_resource_server: dict[str, TokenData]
-    ) -> None:
-        for resource_server, token_data in token_data_by_resource_server.items():
-            self._validate_token_data_meets_scope_requirements(
-                resource_server, token_data
             )
 
     def _validate_token_data_meets_scope_requirements(

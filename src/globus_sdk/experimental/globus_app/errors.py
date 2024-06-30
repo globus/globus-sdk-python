@@ -30,7 +30,7 @@ class IdentityMismatchError(IdentityValidationError):
         self.new_id = new_id
 
 
-class MissingTokensError(TokenValidationError):
+class MissingTokenError(TokenValidationError):
     """No token stored for a given resource server."""
 
     def __init__(self, message: str, resource_server: str):
@@ -42,7 +42,7 @@ class ExpiredTokenError(TokenValidationError):
     """The token stored for a given resource server has expired."""
 
     def __init__(self, expires_at_seconds: int):
-        expiration = datetime.utcfromtimestamp(expires_at_seconds)
+        expiration = datetime.fromtimestamp(expires_at_seconds)
         super().__init__(f"Token expired at {expiration.isoformat()}")
         self.expiration = expiration
 

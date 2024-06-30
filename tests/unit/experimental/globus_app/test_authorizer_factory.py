@@ -10,7 +10,7 @@ from globus_sdk.experimental.globus_app import (
 )
 from globus_sdk.experimental.globus_app.errors import (
     ExpiredTokenError,
-    MissingTokensError,
+    MissingTokenError,
 )
 from globus_sdk.experimental.tokenstorage import TokenData
 
@@ -38,7 +38,7 @@ class MockValidatingTokenStorage:
     def get_token_data(self, resource_server):
         if resource_server not in self.token_data:
             msg = f"No token data for {resource_server}"
-            raise MissingTokensError(msg, resource_server=resource_server)
+            raise MissingTokenError(msg, resource_server=resource_server)
 
         return TokenData.from_dict(self.token_data[resource_server])
 
@@ -77,7 +77,7 @@ def test_access_token_authorizer_factory_no_tokens():
     mock_token_storage.store_token_response(initial_response)
     factory = AccessTokenAuthorizerFactory(token_storage=mock_token_storage)
 
-    with pytest.raises(MissingTokensError) as exc:
+    with pytest.raises(MissingTokenError) as exc:
         factory.get_authorizer("rs2")
     assert str(exc.value) == "No token data for rs2"
 
@@ -169,7 +169,7 @@ def test_refresh_token_authorizer_factory_no_refresh_token():
         auth_login_client=mock.Mock(),
     )
 
-    with pytest.raises(MissingTokensError) as exc:
+    with pytest.raises(MissingTokenError) as exc:
         factory.get_authorizer("rs1")
     assert str(exc.value) == "No refresh_token for rs1"
 
