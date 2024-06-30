@@ -236,7 +236,8 @@ class ValidatingTokenStorage(TokenStorage):
             return
 
         # 2b. Poll for fresh consents and try again.
-        if (forest := self._poll_and_cache_consents()) is not None:
+        forest = self._poll_and_cache_consents()
+        if forest is not None:
             if not forest.meets_scope_requirements(required_scopes):
                 raise UnmetScopeRequirementsError(
                     "Unmet dependent scope requirements",
