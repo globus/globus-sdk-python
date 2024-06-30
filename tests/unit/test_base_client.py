@@ -8,8 +8,11 @@ import pytest
 import globus_sdk
 from globus_sdk._testing import RegisteredResponse, get_last_request
 from globus_sdk.authorizers import NullAuthorizer
-from globus_sdk.experimental.globus_app import UserApp
-from globus_sdk.experimental.globus_app.errors import MissingTokensError
+from globus_sdk.experimental.globus_app import GlobusApp, GlobusAppConfig, UserApp
+from globus_sdk.experimental.globus_app.errors import (
+    MissingTokenError,
+    TokenValidationError,
+)
 from globus_sdk.scopes import Scope, TransferScopes
 
 
@@ -211,7 +214,12 @@ def test_base_path_matching_prefix(
 
 
 def test_app_integration(base_client_class):
-    app = UserApp("SDK Test", client_id="client_id")
+    def _reraise_token_error(_: GlobusApp, error: TokenValidationError):
+        raise error
+
+    config = GlobusAppConfig(token_validation_error_handler=_reraise_token_error)
+    app = UserApp("SDK Test", client_id="client_id", config=config)
+
     c = base_client_class(app=app)
 
     # confirm app_name set
@@ -226,7 +234,7 @@ def test_app_integration(base_client_class):
     RegisteredResponse(
         service="transfer", path="foo", method="get", json={"x": "y"}
     ).add()
-    with pytest.raises(MissingTokensError) as ex:
+    with pytest.raises(MissingTokenError) as ex:
         c.get("foo")
     assert str(ex.value) == "No token data for transfer.api.globus.org"
 
