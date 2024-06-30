@@ -3,7 +3,6 @@ from __future__ import annotations
 import abc
 import os
 import sys
-import typing as t
 from dataclasses import dataclass
 
 from globus_sdk import (
@@ -35,6 +34,11 @@ from .authorizer_factory import (
 )
 from .errors import IdentityMismatchError, TokenValidationError
 
+if sys.version_info < (3, 8):
+    from typing_extensions import Protocol
+else:
+    from typing import Protocol
+
 
 def _default_filename(app_name: str) -> str:
     r"""
@@ -57,7 +61,7 @@ def _default_filename(app_name: str) -> str:
         return os.path.expanduser(f"~/.globus/app/{app_name}/tokens.json")
 
 
-class TokenValidationErrorHandler(t.Protocol):
+class TokenValidationErrorHandler(Protocol):
     def __call__(self, app: GlobusApp, error: TokenValidationError) -> None: ...
 
 
