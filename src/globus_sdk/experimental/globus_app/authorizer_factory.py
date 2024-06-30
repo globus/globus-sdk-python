@@ -167,11 +167,10 @@ class RefreshTokenAuthorizerFactory(AuthorizerFactory[RefreshTokenAuthorizer]):
         """
         Construct a ``RefreshTokenAuthorizer`` for the given resource server.
 
-        Raises ``MissingTokensError`` if the underlying ``TokenStorage`` does not
-        have a refresh token for the given resource server.
-
         :param resource_server: The resource server the authorizer will produce
             authentication for
+        :raises: :exc:`MissingTokenError` if the stored token data for the given
+            resource server does not have a refresh token
         """
         token_data = self.token_storage.get_token_data(resource_server)
         if token_data.refresh_token is None:
