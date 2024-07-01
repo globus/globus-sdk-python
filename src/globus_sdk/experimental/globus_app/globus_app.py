@@ -32,6 +32,12 @@ from .authorizer_factory import (
     ClientCredentialsAuthorizerFactory,
     RefreshTokenAuthorizerFactory,
 )
+from .errors import IdentityMismatchError, TokenValidationError
+
+if sys.version_info < (3, 8):
+    from typing_extensions import Protocol
+else:
+    from typing import Protocol
 
 
 def _default_filename(app_name: str) -> str:
@@ -55,6 +61,26 @@ def _default_filename(app_name: str) -> str:
         return os.path.expanduser(f"~/.globus/app/{app_name}/tokens.json")
 
 
+class TokenValidationErrorHandler(Protocol):
+    def __call__(self, app: GlobusApp, error: TokenValidationError) -> None: ...
+
+
+def resolve_by_login_flow(app: GlobusApp, error: TokenValidationError) -> None:
+    """
+    An error handler for GlobusApp token access errors that will retry the
+    login flow if the error is a TokenValidationError.
+
+    :param app: The GlobusApp instance which encountered an error.
+    :param error: The encountered token validation error.
+    """
+    if isinstance(error, IdentityMismatchError):
+        # An identity mismatch error indicates incorrect use of the app. Not something
+        #   that can be resolved by running a login flow.
+        raise error
+
+    app.run_login_flow()
+
+
 @dataclass(frozen=True)
 class GlobusAppConfig:
     """
@@ -69,12 +95,18 @@ class GlobusAppConfig:
         be used for storing token data. If not passed a ``JSONTokenStorage``
         will be used.
     :param request_refresh_tokens: If True, the ``GlobusApp`` will request refresh
-        tokens for long lived access.
+        tokens for long-lived access.
+    :param token_validation_error_handler: A callable that will be called when a
+        token validation error is encountered. The default behavior is to retry the
+        login flow automatically.
     """
 
     login_flow_manager: LoginFlowManager | type[LoginFlowManager] | None = None
     token_storage: TokenStorage | None = None
     request_refresh_tokens: bool = False
+    token_validation_error_handler: TokenValidationErrorHandler | None = (
+        resolve_by_login_flow
+    )
 
 
 _DEFAULT_CONFIG = GlobusAppConfig()
@@ -230,7 +262,14 @@ class GlobusApp(metaclass=abc.ABCMeta):
         :param resource_server: the resource server the Authorizer will provide
             authorization headers for
         """
-        return self._authorizer_factory.get_authorizer(resource_server)
+        try:
+            return self._authorizer_factory.get_authorizer(resource_server)
+        except TokenValidationError as e:
+            if self.config.token_validation_error_handler:
+                # Dispatch to the configured error handler if one is set then retry.
+                self.config.token_validation_error_handler(self, e)
+                return self.get_authorizer(resource_server)
+            raise e
 
     def add_scope_requirements(
         self, scope_requirements: dict[str, list[Scope]]

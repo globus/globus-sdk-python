@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import abc
+import time
 import typing as t
 
 from globus_sdk import AuthLoginClient, ConfidentialAppAuthClient
@@ -10,11 +11,10 @@ from globus_sdk.authorizers import (
     GlobusAuthorizer,
     RefreshTokenAuthorizer,
 )
-from globus_sdk.experimental.tokenstorage import TokenData
 from globus_sdk.services.auth import OAuthTokenResponse
 
 from ._validating_token_storage import ValidatingTokenStorage
-from .errors import MissingTokensError
+from .errors import ExpiredTokenError, MissingTokenError
 
 GA = t.TypeVar("GA", bound=GlobusAuthorizer)
 
@@ -41,13 +41,6 @@ class AuthorizerFactory(
         self.token_storage = token_storage
         self._authorizer_cache: dict[str, GA] = {}
 
-    def _get_token_data_or_error(self, resource_server: str) -> TokenData:
-        token_data = self.token_storage.get_token_data(resource_server)
-        if token_data is None:
-            raise MissingTokensError(f"No token data for {resource_server}")
-
-        return token_data
-
     def store_token_response_and_clear_cache(
         self, token_res: OAuthTokenResponse
     ) -> None:
@@ -69,11 +62,14 @@ class AuthorizerFactory(
         Either retrieve a cached authorizer for the given resource server or construct
         a new one if none is cached.
 
-        Raises ``MissingTokensError`` if the underlying ``TokenStorage`` does not
-        have the needed tokens to create the authorizer.
-
         :param resource_server: The resource server the authorizer will produce
             authentication for
+
+        :raises: :exc:`MissingTokenError` if the underlying ``TokenStorage`` does not
+            have any token data for the given resource server.
+        :raises: :exc:`UnmetScopeRequirementsError` if the stored token data does not
+            meet the scope requirements for the given resource server.
+        :returns: A ``GlobusAuthorizer`` for the given resource server
         """
         if resource_server in self._authorizer_cache:
             return self._authorizer_cache[resource_server]
@@ -97,17 +93,53 @@ class AccessTokenAuthorizerFactory(AuthorizerFactory[AccessTokenAuthorizer]):
     An ``AuthorizerFactory`` that constructs ``AccessTokenAuthorizer``.
     """
 
+    def __init__(self, token_storage: ValidatingTokenStorage):
+        super().__init__(token_storage)
+        self._cached_authorizer_expiration: dict[str, int] = {}
+
+    def store_token_response_and_clear_cache(
+        self, token_res: OAuthTokenResponse
+    ) -> None:
+        super().store_token_response_and_clear_cache(token_res)
+        self._cached_authorizer_expiration = {}
+
+    def get_authorizer(self, resource_server: str) -> AccessTokenAuthorizer:
+        """
+        Either retrieve a cached authorizer for the given resource server or construct
+        a new one if none is cached.
+
+        :param resource_server: The resource server the authorizer will produce
+            authentication for
+
+        :raises: :exc:`MissingTokenError` if the underlying ``TokenStorage`` does not
+            have any token data for the given resource server.
+        :raises: :exc:`UnmetScopeRequirementsError` if the stored token data does not
+            meet the scope requirements for the given resource server.
+        :raises: :exc:`ExpiredTokenError` if the stored access token for the given
+            resource server has expired.
+        :returns: An ``AccessTokenAuthorizer`` for the given resource server
+        """
+
+        if resource_server in self._cached_authorizer_expiration:
+            if self._cached_authorizer_expiration[resource_server] < time.time():
+                del self._cached_authorizer_expiration[resource_server]
+                del self._authorizer_cache[resource_server]
+
+        return super().get_authorizer(resource_server)
+
     def _make_authorizer(self, resource_server: str) -> AccessTokenAuthorizer:
         """
         Construct an ``AccessTokenAuthorizer`` for the given resource server.
 
-        Raises ``MissingTokensError`` if the underlying ``TokenStorage`` does not
-        have token data for the given resource server.
-
         :param resource_server: The resource server the authorizer will produce
             authentication for
+        :raises: :exc:`ExpiredTokenError` if the stored access token for the given
+            resource server has expired
         """
-        token_data = self._get_token_data_or_error(resource_server)
+        token_data = self.token_storage.get_token_data(resource_server)
+        if token_data.expires_at_seconds < time.time():
+            raise ExpiredTokenError(token_data.expires_at_seconds)
+
         return AccessTokenAuthorizer(token_data.access_token)
 
 
@@ -135,15 +167,15 @@ class RefreshTokenAuthorizerFactory(AuthorizerFactory[RefreshTokenAuthorizer]):
         """
         Construct a ``RefreshTokenAuthorizer`` for the given resource server.
 
-        Raises ``MissingTokensError`` if the underlying ``TokenStorage`` does not
-        have a refresh token for the given resource server.
-
         :param resource_server: The resource server the authorizer will produce
             authentication for
+        :raises: :exc:`MissingTokenError` if the stored token data for the given
+            resource server does not have a refresh token
         """
-        token_data = self._get_token_data_or_error(resource_server)
+        token_data = self.token_storage.get_token_data(resource_server)
         if token_data.refresh_token is None:
-            raise MissingTokensError(f"No refresh_token for {resource_server}")
+            msg = f"No refresh_token for {resource_server}"
+            raise MissingTokenError(msg, resource_server=resource_server)
 
         return RefreshTokenAuthorizer(
             refresh_token=token_data.refresh_token,
@@ -159,6 +191,10 @@ class ClientCredentialsAuthorizerFactory(
 ):
     """
     An ``AuthorizerFactory`` that constructs ``ClientCredentialsAuthorizer``.
+
+    ClientCredentialAuthorizers are a special flavor of RenewingAuthorizers which
+      use the client credentials grant type and a refresh token to keep up-to-date
+      access tokens for a resource server.
     """
 
     def __init__(
@@ -191,16 +227,19 @@ class ClientCredentialsAuthorizerFactory(
             ``ClientCredentialsAuthorizerFactory`` must have scope requirements defined
             for this resource server.
         """
-        token_data = self.token_storage.get_token_data(resource_server)
-        access_token = token_data.access_token if token_data else None
-        expires_at = token_data.expires_at_seconds if token_data else None
-
         scopes = self.token_storage.scope_requirements.get(resource_server)
         if scopes is None:
             raise ValueError(
                 "ValidatingTokenStorage has no scope_requirements for "
                 f"resource_server {resource_server}"
             )
+
+        try:
+            token_data = self.token_storage.get_token_data(resource_server)
+            access_token = token_data.access_token
+            expires_at = token_data.expires_at_seconds
+        except MissingTokenError:
+            access_token, expires_at = None, None
 
         return ClientCredentialsAuthorizer(
             confidential_client=self.confidential_client,

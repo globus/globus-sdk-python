@@ -8,7 +8,10 @@ from globus_sdk.experimental.globus_app import (
     ClientCredentialsAuthorizerFactory,
     RefreshTokenAuthorizerFactory,
 )
-from globus_sdk.experimental.globus_app.errors import MissingTokensError
+from globus_sdk.experimental.globus_app.errors import (
+    ExpiredTokenError,
+    MissingTokenError,
+)
 from globus_sdk.experimental.tokenstorage import TokenData
 
 
@@ -33,11 +36,11 @@ class MockValidatingTokenStorage:
         self.scope_requirements = {"rs1": "rs1:all"}
 
     def get_token_data(self, resource_server):
-        dict_data = self.token_data.get(resource_server)
-        if dict_data:
-            return TokenData.from_dict(dict_data)
-        else:
-            return None
+        if resource_server not in self.token_data:
+            msg = f"No token data for {resource_server}"
+            raise MissingTokenError(msg, resource_server=resource_server)
+
+        return TokenData.from_dict(self.token_data[resource_server])
 
     def store_token_response(self, mock_token_response):
         self.token_data = mock_token_response.by_resource_server
@@ -74,9 +77,23 @@ def test_access_token_authorizer_factory_no_tokens():
     mock_token_storage.store_token_response(initial_response)
     factory = AccessTokenAuthorizerFactory(token_storage=mock_token_storage)
 
-    with pytest.raises(MissingTokensError) as exc:
+    with pytest.raises(MissingTokenError) as exc:
         factory.get_authorizer("rs2")
     assert str(exc.value) == "No token data for rs2"
+
+
+def test_access_token_authorizer_factory_expired_access_token():
+    initial_response = make_mock_token_response()
+    initial_response.by_resource_server["rs1"]["expires_at_seconds"] = int(
+        time.time() - 3600
+    )
+
+    mock_token_storage = MockValidatingTokenStorage()
+    mock_token_storage.store_token_response(initial_response)
+    factory = AccessTokenAuthorizerFactory(token_storage=mock_token_storage)
+
+    with pytest.raises(ExpiredTokenError):
+        factory.get_authorizer("rs1")
 
 
 def test_refresh_token_authorizer_factory():
@@ -152,7 +169,7 @@ def test_refresh_token_authorizer_factory_no_refresh_token():
         auth_login_client=mock.Mock(),
     )
 
-    with pytest.raises(MissingTokensError) as exc:
+    with pytest.raises(MissingTokenError) as exc:
         factory.get_authorizer("rs1")
     assert str(exc.value) == "No refresh_token for rs1"
 

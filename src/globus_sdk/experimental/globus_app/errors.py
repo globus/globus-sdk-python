@@ -6,33 +6,52 @@ from globus_sdk import Scope
 from globus_sdk._types import UUIDLike
 
 
-class MissingIdentityError(ValueError):
-    pass
-
-
 class TokenValidationError(Exception):
-    pass
+    """A class of errors raised when a token fails validation."""
 
 
-class MissingTokensError(Exception):
-    pass
+class IdentityValidationError(TokenValidationError):
+    """
+    A class of errors raised when a token response's identity is indeterminate or
+    incorrect.
+    """
 
 
-class IdentityMismatchError(TokenValidationError):
+class MissingIdentityError(IdentityValidationError):
+    """No identity info contained in a token response."""
+
+
+class IdentityMismatchError(IdentityValidationError):
+    """The identity in a token response did not match the expected identity."""
+
     def __init__(self, message: str, stored_id: UUIDLike, new_id: UUIDLike):
         super().__init__(message)
         self.stored_id = stored_id
         self.new_id = new_id
 
 
+class MissingTokenError(TokenValidationError):
+    """No token stored for a given resource server."""
+
+    def __init__(self, message: str, resource_server: str):
+        super().__init__(message)
+        self.resource_server = resource_server
+
+
 class ExpiredTokenError(TokenValidationError):
+    """The token stored for a given resource server has expired."""
+
     def __init__(self, expires_at_seconds: int):
-        expiration = datetime.utcfromtimestamp(expires_at_seconds)
+        expiration = datetime.fromtimestamp(expires_at_seconds)
         super().__init__(f"Token expired at {expiration.isoformat()}")
         self.expiration = expiration
 
 
 class UnmetScopeRequirementsError(TokenValidationError):
+    """The token stored for a given resource server is missing required scopes."""
+
     def __init__(self, message: str, scope_requirements: dict[str, list[Scope]]):
         super().__init__(message)
+        # The full set of scope requirements which were evaluated.
+        #   Notably this is not exclusively the unmet scope requirements.
         self.scope_requirements = scope_requirements

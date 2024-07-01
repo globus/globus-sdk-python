@@ -1,16 +1,14 @@
 from __future__ import annotations
 
-import time
-
 from globus_sdk import AuthClient, Scope
 from globus_sdk.experimental.consents import ConsentForest
 from globus_sdk.experimental.tokenstorage import TokenData, TokenStorage
 
 from ..._types import UUIDLike
 from .errors import (
-    ExpiredTokenError,
     IdentityMismatchError,
     MissingIdentityError,
+    MissingTokenError,
     UnmetScopeRequirementsError,
 )
 
@@ -99,8 +97,25 @@ class ValidatingTokenStorage(TokenStorage):
     def store_token_data_by_resource_server(
         self, token_data_by_resource_server: dict[str, TokenData]
     ) -> None:
+        """
+        :param token_data_by_resource_server: A dict of TokenData objects indexed by
+            their resource server
 
-        self._validate_token_data_by_resource_server(token_data_by_resource_server)
+        :raises: :exc:`MissingIdentityError` if the token data does not contain
+            identity information.
+        :raises: :exc:`IdentityMismatchError` if the identity info in the token data
+            does not match the stored identity info.
+        :raises: :exc:`UnmetScopeRequirementsError` if the token data does not meet the
+            attached scope requirements.
+        """
+        self._validate_token_data_by_resource_server_meets_identity_requirements(
+            token_data_by_resource_server
+        )
+        for resource_server, token_data in token_data_by_resource_server.items():
+            self._validate_token_data_meets_scope_requirements(
+                resource_server, token_data
+            )
+
         self._token_storage.store_token_data_by_resource_server(
             token_data_by_resource_server
         )
@@ -108,31 +123,33 @@ class ValidatingTokenStorage(TokenStorage):
     def get_token_data_by_resource_server(self) -> dict[str, TokenData]:
         """
         :returns: A dict of TokenData objects indexed by their resource server
-        :raises: :exc:`TokenValidationError` if any of the token data have expired or
-            do not meet the attached scope requirements.
+        :raises: :exc:`UnmetScopeRequirementsError` if any token data does not meet the
+            attached scope requirements.
         """
-        token_data_by_resource_server = (
-            self._token_storage.get_token_data_by_resource_server()
-        )
+        by_resource_server = self._token_storage.get_token_data_by_resource_server()
 
-        for resource_server, token_data in token_data_by_resource_server.items():
-            self._validate_token_meets_scope_requirements(resource_server, token_data)
+        for resource_server, token_data in by_resource_server.items():
+            self._validate_token_data_meets_scope_requirements(
+                resource_server, token_data
+            )
 
-        return token_data_by_resource_server
+        return by_resource_server
 
-    def get_token_data(self, resource_server: str) -> TokenData | None:
+    def get_token_data(self, resource_server: str) -> TokenData:
         """
         :param resource_server: A resource server with cached token data.
-        :returns: The token data for the given resource server, or None if no token data
-            is present in the attached storage adapter.
-        :raises: :exc:`TokenValidationError` if the token has expired or does not meet
-            the attached scope requirements.
+        :returns: The token data for the given resource server.
+        :raises: :exc:`MissingTokenError` if the underlying ``TokenStorage`` does not
+            have any token data for the given resource server.
+        :raises: :exc:`UnmetScopeRequirementsError` if the stored token data does not
+            meet the scope requirements for the given resource server.
         """
         token_data = self._token_storage.get_token_data(resource_server)
         if token_data is None:
-            return None
+            msg = f"No token data for {resource_server}"
+            raise MissingTokenError(msg, resource_server=resource_server)
 
-        self._validate_token_meets_scope_requirements(resource_server, token_data)
+        self._validate_token_data_meets_scope_requirements(resource_server, token_data)
 
         return token_data
 
@@ -141,22 +158,6 @@ class ValidatingTokenStorage(TokenStorage):
         :param resource_server: The resource server string to remove token data for
         """
         return self._token_storage.remove_token_data(resource_server)
-
-    def _validate_token_data_by_resource_server(
-        self, token_data_by_resource_server: dict[str, TokenData]
-    ) -> None:
-        self._validate_token_data_by_resource_server_meets_identity_requirements(
-            token_data_by_resource_server
-        )
-        self._validate_token_data_by_resource_server_meets_scope_requirements(
-            token_data_by_resource_server
-        )
-
-    def _validate_token_data(self, resource_server: str, token_data: TokenData) -> None:
-        if token_data.expires_at_seconds < time.time():
-            raise ExpiredTokenError(token_data.expires_at_seconds)
-
-        self._validate_token_meets_scope_requirements(resource_server, token_data)
 
     def _validate_token_data_by_resource_server_meets_identity_requirements(
         self, token_data_by_resource_server: dict[str, TokenData]
@@ -197,13 +198,7 @@ class ValidatingTokenStorage(TokenStorage):
                 new_id=token_data_identity_id,
             )
 
-    def _validate_token_data_by_resource_server_meets_scope_requirements(
-        self, token_data_by_resource_server: dict[str, TokenData]
-    ) -> None:
-        for resource_server, token_data in token_data_by_resource_server.items():
-            self._validate_token_data(resource_server, token_data)
-
-    def _validate_token_meets_scope_requirements(
+    def _validate_token_data_meets_scope_requirements(
         self, resource_server: str, token_data: TokenData
     ) -> None:
         """
@@ -214,6 +209,7 @@ class ValidatingTokenStorage(TokenStorage):
 
         :raises: :exc:`UnmetScopeRequirements` if token/consent data does not meet the
             attached root or dependent scope requirements for the resource server.
+        :returns: None if all scope requirements are met (or indeterminable).
         """
         required_scopes = self.scope_requirements.get(resource_server)
 
@@ -225,29 +221,24 @@ class ValidatingTokenStorage(TokenStorage):
         root_scopes = token_data.scope.split(" ")
         if not all(scope.scope_string in root_scopes for scope in required_scopes):
             raise UnmetScopeRequirementsError(
-                "Unmet root scope requirements",
+                "Unmet scope requirements",
                 scope_requirements=self.scope_requirements,
             )
 
-        # Short circuit - No dependent scopes or ability to poll consents, don't
-        #    validate them.
-        if self._consent_client is None or not any(
-            scope.dependencies for scope in required_scopes
-        ):
+        # Short circuit - No dependent scopes; don't validate them.
+        if not any(scope.dependencies for scope in required_scopes):
             return
 
         # 2. Does the consent forest meet all dependent scope requirements?
         # 2a. Try with the cached consent forest first.
         forest = self._cached_consent_forest
-        if forest is None or not forest.meets_scope_requirements(required_scopes):
-            # 2b. Poll for fresh consents and try again.
-            forest = self._poll_and_cache_consents()
-            if forest is None:
-                raise UnmetScopeRequirementsError(
-                    "Failed to poll for consents",
-                    scope_requirements=self.scope_requirements,
-                )
-            elif not forest.meets_scope_requirements(required_scopes):
+        if forest is not None and forest.meets_scope_requirements(required_scopes):
+            return
+
+        # 2b. Poll for fresh consents and try again.
+        forest = self._poll_and_cache_consents()
+        if forest is not None:
+            if not forest.meets_scope_requirements(required_scopes):
                 raise UnmetScopeRequirementsError(
                     "Unmet dependent scope requirements",
                     scope_requirements=self.scope_requirements,

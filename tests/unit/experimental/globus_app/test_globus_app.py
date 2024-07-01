@@ -13,6 +13,9 @@ from globus_sdk import (
 )
 from globus_sdk._testing import load_response
 from globus_sdk.exc import GlobusSDKUsageError
+from globus_sdk.experimental.auth_requirements_error import (
+    GlobusAuthorizationParameters,
+)
 from globus_sdk.experimental.globus_app import (
     AccessTokenAuthorizerFactory,
     ClientApp,
@@ -21,7 +24,10 @@ from globus_sdk.experimental.globus_app import (
     RefreshTokenAuthorizerFactory,
     UserApp,
 )
-from globus_sdk.experimental.login_flow_manager import CommandLineLoginFlowManager
+from globus_sdk.experimental.login_flow_manager import (
+    CommandLineLoginFlowManager,
+    LoginFlowManager,
+)
 from globus_sdk.experimental.tokenstorage import (
     JSONTokenStorage,
     MemoryTokenStorage,
@@ -30,17 +36,19 @@ from globus_sdk.experimental.tokenstorage import (
 from globus_sdk.scopes import Scope
 from globus_sdk.services.auth import OAuthTokenResponse
 
-_mock_token_data_by_rs = {
-    "auth.globus.org": TokenData(
-        resource_server="auth.globus.org",
-        identity_id="mock_identity_id",
-        scope="openid",
-        access_token="mock_access_token",
-        refresh_token="mock_refresh_token",
-        expires_at_seconds=int(time.time() + 300),
-        token_type="Bearer",
-    )
-}
+
+def _mock_token_data_by_rs():
+    return {
+        "auth.globus.org": TokenData(
+            resource_server="auth.globus.org",
+            identity_id="mock_identity_id",
+            scope="openid",
+            access_token="mock_access_token",
+            refresh_token="mock_refresh_token",
+            expires_at_seconds=int(time.time() + 300),
+            token_type="Bearer",
+        )
+    }
 
 
 def _mock_input(s):
@@ -194,7 +202,7 @@ def test_add_scope_requirements_and_auth_params_with_required_scopes():
 def test_user_app_get_authorizer():
     client_id = "mock_client_id"
     memory_storage = MemoryTokenStorage()
-    memory_storage.store_token_data_by_resource_server(_mock_token_data_by_rs)
+    memory_storage.store_token_data_by_resource_server(_mock_token_data_by_rs())
     config = GlobusAppConfig(token_storage=memory_storage)
     user_app = UserApp("test-app", client_id=client_id, config=config)
 
@@ -206,7 +214,7 @@ def test_user_app_get_authorizer():
 def test_user_app_get_authorizer_refresh():
     client_id = "mock_client_id"
     memory_storage = MemoryTokenStorage()
-    memory_storage.store_token_data_by_resource_server(_mock_token_data_by_rs)
+    memory_storage.store_token_data_by_resource_server(_mock_token_data_by_rs())
     config = GlobusAppConfig(token_storage=memory_storage, request_refresh_tokens=True)
     user_app = UserApp("test-app", client_id=client_id, config=config)
 
@@ -215,11 +223,53 @@ def test_user_app_get_authorizer_refresh():
     assert authorizer.refresh_token == "mock_refresh_token"
 
 
+class CustomExitException(Exception):
+    pass
+
+
+class RaisingLoginFlowManagerCounter(LoginFlowManager):
+    """
+    A login flow manager which increments a public counter and raises an exception on
+    each login attempt.
+    """
+
+    def __init__(self):
+        super().__init__(None)
+        self.counter = 0
+
+    def run_login_flow(
+        self, auth_parameters: GlobusAuthorizationParameters
+    ) -> OAuthTokenResponse:
+        self.counter += 1
+        raise CustomExitException("mock login attempt")
+
+
+def test_user_app_expired_authorizer_triggers_login():
+    # Set up token data with an expired access token and no refresh token
+    client_id = "mock_client_id"
+    memory_storage = MemoryTokenStorage()
+    token_data = _mock_token_data_by_rs()
+    token_data["auth.globus.org"].expires_at_seconds = int(time.time() - 3600)
+    token_data["auth.globus.org"].refresh_token = None
+    memory_storage.store_token_data_by_resource_server(token_data)
+
+    login_flow_manager = RaisingLoginFlowManagerCounter()
+    config = GlobusAppConfig(
+        token_storage=memory_storage, login_flow_manager=login_flow_manager
+    )
+    user_app = UserApp("test-app", client_id=client_id, config=config)
+
+    with pytest.raises(CustomExitException):
+        user_app.get_authorizer("auth.globus.org")
+
+    assert login_flow_manager.counter == 1
+
+
 def test_client_app_get_authorizer():
     client_id = "mock_client_id"
     client_secret = "mock_client_secret"
     memory_storage = MemoryTokenStorage()
-    memory_storage.store_token_data_by_resource_server(_mock_token_data_by_rs)
+    memory_storage.store_token_data_by_resource_server(_mock_token_data_by_rs())
     config = GlobusAppConfig(token_storage=memory_storage)
     client_app = ClientApp(
         "test-app", client_id=client_id, client_secret=client_secret, config=config

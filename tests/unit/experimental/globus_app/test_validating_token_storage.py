@@ -14,6 +14,7 @@ from globus_sdk.experimental.globus_app import ValidatingTokenStorage
 from globus_sdk.experimental.globus_app.errors import (
     IdentityMismatchError,
     MissingIdentityError,
+    MissingTokenError,
     UnmetScopeRequirementsError,
 )
 from globus_sdk.experimental.tokenstorage import MemoryTokenStorage
@@ -115,10 +116,11 @@ def test_validating_token_storage_loads_identity_info_from_storage(
     assert new_adapter.identity_id == identity_id
 
 
-def test_validating_token_storage_returns_none_when_no_token_data():
+def test_validating_token_storage_raises_error_when_no_token_data():
     adapter = ValidatingTokenStorage(MemoryTokenStorage(), {})
 
-    assert adapter.get_token_data("rs1") is None
+    with pytest.raises(MissingTokenError):
+        adapter.get_token_data("rs1")
 
 
 @pytest.fixture
