@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import pathlib
 import typing as t
 
@@ -40,7 +41,14 @@ class JSONTokenStorage(FileTokenStorage):
         :param namespace: A user-supplied namespace for partitioning token data
         """
         self.filename = str(filename)
+        self._ensure_containing_dir_exists()
         super().__init__(namespace=namespace)
+
+    def _ensure_containing_dir_exists(self) -> None:
+        """
+        Ensure that the directory containing the given filename exists.
+        """
+        os.makedirs(os.path.dirname(self.filename), exist_ok=True)
 
     def _invalid(self, msg: str) -> t.NoReturn:
         raise ValueError(
