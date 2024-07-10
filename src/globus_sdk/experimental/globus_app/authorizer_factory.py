@@ -55,7 +55,21 @@ class AuthorizerFactory(
             in the underlying ``ValidatingTokenStorage``.
         """
         self.token_storage.store_token_response(token_res)
-        self._authorizer_cache = {}
+        self.clear_cache()
+
+    def clear_cache(self, *resource_servers: str) -> None:
+        """
+        Clear the authorizer cache for the given resource servers.
+        If no resource servers are given, clear the entire cache.
+
+        :param resource_servers: The resource servers for which to clear the cache
+        """
+        if not resource_servers:
+            self._authorizer_cache = {}
+        else:
+            for resource_server in resource_servers:
+                if resource_server in self._authorizer_cache:
+                    del self._authorizer_cache[resource_server]
 
     def get_authorizer(self, resource_server: str) -> GA:
         """
@@ -102,6 +116,16 @@ class AccessTokenAuthorizerFactory(AuthorizerFactory[AccessTokenAuthorizer]):
     ) -> None:
         super().store_token_response_and_clear_cache(token_res)
         self._cached_authorizer_expiration = {}
+
+    def clear_cache(self, *resource_servers: str) -> None:
+        if not resource_servers:
+            self._cached_authorizer_expiration = {}
+        else:
+            for resource_server in resource_servers:
+                if resource_server in self._cached_authorizer_expiration:
+                    del self._cached_authorizer_expiration[resource_server]
+
+        super().clear_cache(*resource_servers)
 
     def get_authorizer(self, resource_server: str) -> AccessTokenAuthorizer:
         """

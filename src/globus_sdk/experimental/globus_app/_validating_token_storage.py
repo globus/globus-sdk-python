@@ -94,6 +94,14 @@ class ValidatingTokenStorage(TokenStorage):
             token_data_by_resource_server
         )
 
+    def set_consent_client(self, consent_client: AuthClient) -> None:
+        """
+        Set the consent client to be used for consent polling.
+
+        :param consent_client: An AuthClient to be used for consent polling.
+        """
+        self._consent_client = consent_client
+
     def store_token_data_by_resource_server(
         self, token_data_by_resource_server: dict[str, TokenData]
     ) -> None:

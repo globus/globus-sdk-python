@@ -113,6 +113,13 @@ def test_user_app_default_token_storage():
         )
 
 
+def test_user_app_creates_consent_client():
+    client_id = "mock_client_id"
+    user_app = UserApp("test-app", client_id=client_id)
+
+    assert user_app._validating_token_storage._consent_client is not None
+
+
 def test_user_app_templated():
     client_id = "mock_client_id"
     client_secret = "mock_client_secret"
@@ -209,6 +216,29 @@ def test_user_app_get_authorizer():
     authorizer = user_app.get_authorizer("auth.globus.org")
     assert isinstance(authorizer, AccessTokenAuthorizer)
     assert authorizer.access_token == "mock_access_token"
+
+
+def test_user_app_get_authorizer_clears_cache_when_adding_scope_requirements():
+    client_id = "mock_client_id"
+    memory_storage = MemoryTokenStorage()
+    memory_storage.store_token_data_by_resource_server(_mock_token_data_by_rs())
+    config = GlobusAppConfig(token_storage=memory_storage)
+    user_app = UserApp("test-app", client_id=client_id, config=config)
+
+    initial_authorizer = user_app.get_authorizer("auth.globus.org")
+    assert isinstance(initial_authorizer, AccessTokenAuthorizer)
+    assert initial_authorizer.access_token == "mock_access_token"
+
+    # We should've cached the authorizer from the first call
+    assert user_app.get_authorizer("auth.globus.org") == initial_authorizer
+
+    user_app.add_scope_requirements({"auth.globus.org": [Scope("openid")]})
+
+    # The cache should've been cleared
+    updated_authorizer = user_app.get_authorizer("auth.globus.org")
+    assert initial_authorizer != updated_authorizer
+    assert isinstance(updated_authorizer, AccessTokenAuthorizer)
+    assert updated_authorizer.access_token == "mock_access_token"
 
 
 def test_user_app_get_authorizer_refresh():

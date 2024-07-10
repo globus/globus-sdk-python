@@ -173,18 +173,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
             self.client_id = client_id
             self._initialize_login_client(client_secret)
 
-        # get our initial scope requirements make sure we at least have "openid"
-        # to get identity information for token validation
-        auth_rs = str(AuthClient.resource_server)
-        openid_scope = Scope(AuthScopes.openid)
-        if scope_requirements:
-            if auth_rs not in scope_requirements:
-                scope_requirements[auth_rs] = [openid_scope]
-            else:
-                scope_requirements[auth_rs].append(openid_scope)
-            self.scope_requirements = scope_requirements
-        else:
-            self.scope_requirements = {auth_rs: [openid_scope]}
+        self._scope_requirements = scope_requirements or {}
 
         # either get config's TokenStorage, or make the default JSONTokenStorage
         if self.config.token_storage:
@@ -198,11 +187,18 @@ class GlobusApp(metaclass=abc.ABCMeta):
         # our initial scope requirements
         self._validating_token_storage = ValidatingTokenStorage(
             token_storage=self._token_storage,
-            scope_requirements=self.scope_requirements,
+            scope_requirements=self._scope_requirements,
         )
 
         # initialize our authorizer factory
         self._initialize_authorizer_factory()
+
+        # create a consent client for token validation
+        # reducing the scope requirements to barebones openid (user identification)
+        # additionally, this will ensure that openid scope requirement is always
+        # registered (it's required for token identity validation).
+        consent_client = AuthClient(app=self, app_scopes=[Scope(AuthScopes.openid)])
+        self._validating_token_storage.set_consent_client(consent_client)
 
     @abc.abstractmethod
     def _initialize_login_client(self, client_secret: str | None) -> None:
@@ -238,7 +234,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         or combine this app's required scopes with given auth_params.
         """
         required_scopes = []
-        for scope_list in self.scope_requirements.values():
+        for scope_list in self._scope_requirements.values():
             required_scopes.extend(scope_list)
 
         if not auth_params:
@@ -282,10 +278,21 @@ class GlobusApp(metaclass=abc.ABCMeta):
             that will be added to this app's scope requirements
         """
         for resource_server, scopes in scope_requirements.items():
-            if resource_server not in self.scope_requirements:
-                self.scope_requirements[resource_server] = scopes[:]
+            if resource_server not in self._scope_requirements:
+                self._scope_requirements[resource_server] = scopes[:]
             else:
-                self.scope_requirements[resource_server].extend(scopes)
+                self._scope_requirements[resource_server].extend(scopes)
+
+        self._authorizer_factory.clear_cache(*scope_requirements.keys())
+
+    def get_scope_requirements(self, resource_server: str) -> tuple[Scope, ...]:
+        """
+        Get an immutable copy of the collection scope requirements currently defined
+        on a resource server.
+
+        :param resource_server: the resource server to get scope requirements for
+        """
+        return tuple(self._scope_requirements.get(resource_server, []))
 
 
 class UserApp(GlobusApp):
