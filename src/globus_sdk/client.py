@@ -75,6 +75,8 @@ class BaseClient:
         # the env var -- and in the special case of `production` translate to
         # `default`, regardless of the source of that value
         # logs the environment when it isn't `default`
+        if environment is None and app is not None:
+            environment = app.config.environment
         self.environment = config.get_environment_name(environment)
 
         if self.service_name == "_base":

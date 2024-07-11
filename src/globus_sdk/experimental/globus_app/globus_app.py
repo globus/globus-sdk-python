@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import abc
+import dataclasses
 import os
 import sys
 from dataclasses import dataclass
@@ -11,6 +12,7 @@ from globus_sdk import (
     ConfidentialAppAuthClient,
     NativeAppAuthClient,
     Scope,
+    config,
 )
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
@@ -40,7 +42,7 @@ else:
     from typing import Protocol
 
 
-def _default_filename(app_name: str) -> str:
+def _default_filename(app_name: str, environment: str) -> str:
     r"""
     construct the filename for the default JSONTokenStorage to use
 
@@ -50,15 +52,20 @@ def _default_filename(app_name: str) -> str:
     on Linux and macOS, we use
         ~/.globus/app/{app_name}/tokens.json
     """
+    environment_prefix = f"{environment}-"
+    if environment == "production":
+        environment_prefix = ""
+    filename = f"{environment_prefix}tokens.json"
+
     if sys.platform == "win32":
         # try to get the app data dir, preferring the local appdata
         datadir = os.getenv("LOCALAPPDATA", os.getenv("APPDATA"))
         if not datadir:
             home = os.path.expanduser("~")
             datadir = os.path.join(home, "AppData", "Local")
-        return os.path.join(datadir, "globus", "app", app_name, "tokens.json")
+        return os.path.join(datadir, "globus", "app", app_name, filename)
     else:
-        return os.path.expanduser(f"~/.globus/app/{app_name}/tokens.json")
+        return os.path.expanduser(f"~/.globus/app/{app_name}/{filename}")
 
 
 class TokenValidationErrorHandler(Protocol):
@@ -99,6 +106,8 @@ class GlobusAppConfig:
     :param token_validation_error_handler: A callable that will be called when a
         token validation error is encountered. The default behavior is to retry the
         login flow automatically.
+    :param environment: The globus environment being targeted by this app. This is
+        predominately for internal use and can be ignored in most cases.
     """
 
     login_flow_manager: LoginFlowManager | type[LoginFlowManager] | None = None
@@ -107,6 +116,7 @@ class GlobusAppConfig:
     token_validation_error_handler: TokenValidationErrorHandler | None = (
         resolve_by_login_flow
     )
+    environment: str = dataclasses.field(default_factory=config.get_environment_name)
 
 
 _DEFAULT_CONFIG = GlobusAppConfig()
@@ -180,7 +190,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
             self._token_storage = self.config.token_storage
         else:
             self._token_storage = JSONTokenStorage(
-                filename=_default_filename(self.app_name)
+                filename=_default_filename(self.app_name, self.config.environment)
             )
 
         # construct ValidatingTokenStorage around the TokenStorage and
