@@ -71,11 +71,11 @@ class BaseClient:
         app_name: str | None = None,
         transport_params: dict[str, t.Any] | None = None,
     ):
-        # Environment determining logic (fallthrough):
-        #   1. If an environment was explicitly passed, use it
-        #   2. If an app was passed, use the app's config environment
-        #   3. If the environment variable `GLOBUS_SDK_ENVIRONMENT` is set, use it
-        #   4. Use the default environment (production)
+        # Environment selection precedence order:
+        #   1. Through the client's `environment` init param
+        #   2. Through the `app`'s `config.environment`
+        #   3. Through the environment variable `GLOBUS_SDK_ENVIRONMENT`
+        #   4. The default environment (production)
         if environment is not None:
             self.environment = environment
         elif app:
