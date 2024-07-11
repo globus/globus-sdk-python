@@ -12,8 +12,8 @@ from globus_sdk import (
     ConfidentialAppAuthClient,
     NativeAppAuthClient,
     Scope,
-    config,
 )
+from globus_sdk import config as sdk_config
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.exc import GlobusSDKUsageError
@@ -116,7 +116,9 @@ class GlobusAppConfig:
     token_validation_error_handler: TokenValidationErrorHandler | None = (
         resolve_by_login_flow
     )
-    environment: str = dataclasses.field(default_factory=config.get_environment_name)
+    environment: str = dataclasses.field(
+        default_factory=sdk_config.get_environment_name
+    )
 
 
 _DEFAULT_CONFIG = GlobusAppConfig()
