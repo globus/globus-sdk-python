@@ -230,15 +230,17 @@ def test_user_app_get_authorizer_clears_cache_when_adding_scope_requirements():
     assert initial_authorizer.access_token == "mock_access_token"
 
     # We should've cached the authorizer from the first call
-    assert user_app.get_authorizer("auth.globus.org") == initial_authorizer
+    assert user_app.get_authorizer("auth.globus.org") is initial_authorizer
 
     user_app.add_scope_requirements({"auth.globus.org": [Scope("openid")]})
 
     # The cache should've been cleared
     updated_authorizer = user_app.get_authorizer("auth.globus.org")
-    assert initial_authorizer != updated_authorizer
+    assert initial_authorizer is not updated_authorizer
     assert isinstance(updated_authorizer, AccessTokenAuthorizer)
     assert updated_authorizer.access_token == "mock_access_token"
+
+    assert user_app.get_authorizer("auth.globus.org") is updated_authorizer
 
 
 def test_user_app_get_authorizer_refresh():
