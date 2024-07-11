@@ -71,17 +71,22 @@ class BaseClient:
         app_name: str | None = None,
         transport_params: dict[str, t.Any] | None = None,
     ):
-        # Environment selection precedence order:
-        #   1. Through the client's `environment` init param
-        #   2. Through the `app`'s `config.environment`
-        #   3. Through the environment variable `GLOBUS_SDK_ENVIRONMENT`
-        #   4. The default environment (production)
-        if environment is not None:
-            self.environment = environment
-        elif app:
+        # Determine the client's environment.
+        if app is not None:
+            # If we're using a GlobusApp, the client's environment must either match the
+            # app's or be omitted.
+            if environment is not None and environment != app.config.environment:
+                raise exc.GlobusSDKUsageError(
+                    f"[Environment Mismatch] {type(self).__name__}'s environment "
+                    f"({environment}) does not match the GlobusApp's configured"
+                    f"environment ({app.config.environment})."
+                )
+
             self.environment = app.config.environment
         else:
-            self.environment = config.get_environment_name()
+            # Otherwise, figure out the environment from the provided kwarg or the
+            # GLOBUS_SDK_ENVIRONMENT environment variable.
+            self.environment = config.get_environment_name(environment)
 
         if self.service_name == "_base":
             # service_name=="_base" means that either there was no inheritance (direct

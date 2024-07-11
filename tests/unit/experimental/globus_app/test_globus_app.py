@@ -72,7 +72,7 @@ def test_user_app_native():
 
 
 def test_user_app_login_client():
-    mock_client = mock.Mock()
+    mock_client = mock.Mock(environment="production")
     user_app = UserApp("test-app", login_client=mock_client)
 
     assert user_app.app_name == "test-app"
@@ -91,10 +91,20 @@ def test_user_app_both_client_and_id():
 
     with pytest.raises(GlobusSDKUsageError) as exc:
         UserApp("test-app", login_client=mock_client, client_id=client_id)
-    assert (
-        str(exc.value)
-        == "login_client is mutually exclusive with client_id and client_secret."
-    )
+
+    expected = "login_client is mutually exclusive with client_id and client_secret."
+    assert str(exc.value) == expected
+
+
+def test_user_app_login_client_environment_mismatch():
+    mock_client = mock.Mock(environment="sandbox")
+
+    with pytest.raises(GlobusSDKUsageError) as exc:
+        config = GlobusAppConfig(environment="preview")
+        UserApp("test-app", login_client=mock_client, config=config)
+
+    expected = "[Environment Mismatch] The login_client's environment (sandbox) does not match the GlobusApp's configured environment (preview)."  # noqa
+    assert str(exc.value) == expected
 
 
 def test_user_app_default_token_storage():

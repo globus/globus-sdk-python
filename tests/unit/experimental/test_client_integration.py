@@ -1,6 +1,7 @@
 import pytest
 
 import globus_sdk
+from globus_sdk import GlobusSDKUsageError
 from globus_sdk._testing import load_response
 from globus_sdk.experimental.globus_app import GlobusApp, GlobusAppConfig, UserApp
 from globus_sdk.experimental.tokenstorage import MemoryTokenStorage
@@ -21,13 +22,15 @@ def test_client_inherits_environment_from_globus_app():
     assert client.environment == "sandbox"
 
 
-def test_client_environment_param_overrides_globus_app_environment():
+def test_client_environment_does_not_match_the_globus_app_environment():
     config = GlobusAppConfig(token_storage=MemoryTokenStorage(), environment="sandbox")
     app = UserApp("test-app", client_id="client_id", config=config)
 
-    client = globus_sdk.AuthClient(app=app, environment="preview")
+    with pytest.raises(GlobusSDKUsageError) as exc:
+        globus_sdk.AuthClient(app=app, environment="preview")
 
-    assert client.environment == "preview"
+    expected = "[Environment Mismatch] AuthClient's environment (preview) does not match the GlobusApp's configuredenvironment (sandbox)."  # noqa
+    assert str(exc.value) == expected
 
 
 def test_transfer_client_default_scopes(app):

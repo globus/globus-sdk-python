@@ -172,10 +172,18 @@ class GlobusApp(metaclass=abc.ABCMeta):
         self.app_name = app_name
         self.config = config
 
-        if login_client and (client_id or client_secret):
-            raise GlobusSDKUsageError(
-                "login_client is mutually exclusive with client_id and client_secret."
-            )
+        if login_client:
+            if client_id or client_secret:
+                raise GlobusSDKUsageError(
+                    "login_client is mutually exclusive with client_id and "
+                    "client_secret."
+                )
+            if login_client.environment != self.config.environment:
+                raise GlobusSDKUsageError(
+                    f"[Environment Mismatch] The login_client's environment "
+                    f"({login_client.environment}) does not match the GlobusApp's "
+                    f"configured environment ({self.config.environment})."
+                )
 
         self.client_id: UUIDLike | None
         if login_client:
@@ -276,7 +284,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
             if self.config.token_validation_error_handler:
                 # Dispatch to the configured error handler if one is set then retry.
                 self.config.token_validation_error_handler(self, e)
-                return self.get_authorizer(resource_server)
+                return self._authorizer_factory.get_authorizer(resource_server)
             raise e
 
     def add_scope_requirements(
@@ -390,11 +398,13 @@ class UserApp(GlobusApp):
                 app_name=self.app_name,
                 client_id=self.client_id,
                 client_secret=client_secret,
+                environment=self.config.environment,
             )
         else:
             self._login_client = NativeAppAuthClient(
                 app_name=self.app_name,
                 client_id=self.client_id,
+                environment=self.config.environment,
             )
 
     def _initialize_authorizer_factory(self) -> None:
@@ -491,6 +501,7 @@ class ClientApp(GlobusApp):
             client_id=self.client_id,
             client_secret=client_secret,
             app_name=self.app_name,
+            environment=self.config.environment,
         )
 
     def _initialize_authorizer_factory(self) -> None:
