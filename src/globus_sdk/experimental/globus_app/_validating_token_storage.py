@@ -121,7 +121,7 @@ class ValidatingTokenStorage(TokenStorage):
         )
         for resource_server, token_data in token_data_by_resource_server.items():
             self._validate_token_data_meets_scope_requirements(
-                resource_server, token_data
+                resource_server, token_data, eval_dependent=False
             )
 
         self._token_storage.store_token_data_by_resource_server(
@@ -207,7 +207,7 @@ class ValidatingTokenStorage(TokenStorage):
             )
 
     def _validate_token_data_meets_scope_requirements(
-        self, resource_server: str, token_data: TokenData
+        self, resource_server: str, token_data: TokenData, eval_dependent: bool = True
     ) -> None:
         """
         Given a particular resource server/token data, evaluate whether the token +
@@ -215,6 +215,9 @@ class ValidatingTokenStorage(TokenStorage):
 
         Note: If consent_client was omitted, only root scope requirements are validated.
 
+        :param resource_server: The resource server string to validate against.
+        :param token_data: The token data to validate against.
+        :param eval_dependent: Whether to evaluate dependent scope requirements.
         :raises: :exc:`UnmetScopeRequirements` if token/consent data does not meet the
             attached root or dependent scope requirements for the resource server.
         :returns: None if all scope requirements are met (or indeterminable).
@@ -234,7 +237,9 @@ class ValidatingTokenStorage(TokenStorage):
             )
 
         # Short circuit - No dependent scopes; don't validate them.
-        if not any(scope.dependencies for scope in required_scopes):
+        if not eval_dependent or not any(
+            scope.dependencies for scope in required_scopes
+        ):
             return
 
         # 2. Does the consent forest meet all dependent scope requirements?

@@ -74,10 +74,11 @@ def test_validating_token_storage_evaluates_dependent_scope_requirements(
         consent_client=consent_client,
     )
     token_response = make_token_response(scopes={"rs1": "scope"})
+    adapter.store_token_response(token_response)
 
     consent_client.mocked_forest = make_consent_forest("scope[different_subscope]")
     with pytest.raises(UnmetScopeRequirementsError):
-        adapter.store_token_response(token_response)
+        adapter.get_token_data("rs1")
 
     consent_client.mocked_forest = make_consent_forest("scope[subscope]")
     adapter.store_token_response(token_response)
