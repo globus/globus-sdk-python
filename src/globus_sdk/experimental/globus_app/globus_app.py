@@ -106,7 +106,7 @@ class GlobusAppConfig:
     :param token_validation_error_handler: A callable that will be called when a
         token validation error is encountered. The default behavior is to retry the
         login flow automatically.
-    :param environment: The globus environment being targeted by this app. This is
+    :param environment: The Globus environment being targeted by this app. This is
         predominately for internal use and can be ignored in most cases.
     """
 
