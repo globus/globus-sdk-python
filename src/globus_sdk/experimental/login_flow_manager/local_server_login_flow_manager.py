@@ -58,12 +58,12 @@ def _open_webbrowser(url: str) -> None:
         browser = webbrowser.get()
         if hasattr(browser, "name"):
             browser_name = browser.name
-        elif isinstance(browser, webbrowser.MacOSXOSAScript):
+        elif hasattr(browser, "_name"):
             # MacOSXOSAScript only supports a public name attribute in py311 and later.
             # https://github.com/python/cpython/issues/82828
-            browser_name = browser._name  # type: ignore[attr-defined]
+            browser_name = browser._name
         else:
-            raise LocalServerLoginFlowError("Failed to determine browser name.")
+            raise LocalServerLoginFlowError("Unable to determine local browser name.")
 
         if browser_name in BROWSER_BLACKLIST:
             raise LocalServerLoginFlowError(
