@@ -45,6 +45,8 @@ Table of Contents
 
     testing/index
     experimental/index
+    experimental/examples/index
+
 
 .. toctree::
     :caption: Additional Info
