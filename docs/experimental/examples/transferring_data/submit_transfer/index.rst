@@ -2,16 +2,33 @@
 Initiating a Transfer
 =====================
 
-Moving data within the Globus Ecosystem can be performed by submitting a `Transfer Task`
-to the Globus Transfer service.
+Moving data within the Globus Ecosystem is performed by submitting a ``Transfer Task``
+against the Globus Transfer service.
 
-The below example demonstrates how to submit that task using a ``TransferClient``.
+The below examples demonstrate how to do that using a globus sdk ``TransferClient``.
+They are split into two categories:
+
+#. :ref:`transferring-between-known-collections` - both source and destination
+   collections are known in advance and are likely be hardcoded into your script.
+
+#. :ref:`transferring-between-unknown-collections` - either the source or
+   destination collection will not be known in advance but rather determined at
+   runtime and will be determined at runtime (e.g. by script argument).
+
+The examples are differentiated because certain collections require a special scope
+("data_access") to be attached to the transfer request. If both collections are known
+this can be done proactively after determining whether the collections will require it.
+If, however, one or more collections are unknown
+
+
+.. _transferring-between-known-collections:
+
+Transferring data between two known collections
+-----------------------------------------------
 
 .. note::
-    The below example is for moving data between two publicly hosted "tutorial"
-    collections.
-    You should replace these collection ids and path values with your own collection
-    ids and paths.
+    The script references two globus hosted "tutorial" collections. Replace these ids &
+    paths with your own collection ids and paths to move your own data.
 
 .. note::
     Some collections require you to attach a "data_access" scope to your transfer
@@ -22,33 +39,36 @@ The below example demonstrates how to submit that task using a ``TransferClient`
     A collection requires "data_access" if it is (1) a mapped collection and (2) is
     not high assurance.
 
-    If you're still not able to determine, an alternative reactive script is included
-    below.
-
-.. literalinclude:: submit_transfer.py
-    :caption: ``submit_transfer.py`` [:download:`download <submit_transfer.py>`]
+.. literalinclude:: submit_transfer_collections_known.py
+    :caption: ``submit_transfer_collections_known.py`` [:download:`download <submit_transfer_collections_known.py>`]
     :language: python
 
 
-Reactively solving ConsentRequired errors
-------------------------------------------
+.. _transferring-between-unknown-collections:
 
-Some collections require you to attach a "data_access" scope to your transfer
-request.
+Transferring data where at least one collection is unknown
+----------------------------------------------------------
 
-This can be typically be done proactively: if you know which collections you or your
-users will interacting with, you can evaluate whether they require this scope (they are
-non-High Assurance mapped collections), and attach it through the client if so.
+In the case where your script does not know the full set of collections that it will
+be interacting with, you may need to reactively solve the ``ConsentRequired`` errors
+instead of proactively attaching the "data_access" scope.
 
-Sometimes however you do not know in advance the full range of collections that your
-script will be interacting with. This script demonstrates how to reactively solve the
-``ConsentRequired`` errors which are raised when a collection requires a "data_access"
-scope but the client did not attach one.
+This script demonstrates how to do that by:
+
+#. Attempting to submit the transfer without any "data_access" scopes.
+#. Intercepting any raised ConsentRequired errors if the request fails.
+#. Attaching any scope requirements detailed in the error.
+#. Retrying the transfer which implicitly puts your user through a consent flow to
+   resolve their auth state.
 
 .. note::
-    Given that this script is reactive, it can involve two user login interactions
-    where the above script only involves one.
+    The script references two globus hosted "tutorial" collections. Replace these ids &
+    paths with your own collection ids and paths to move your own data.
 
-.. literalinclude:: submit_transfer_reactive_consent_required.py
-    :caption: ``submit_transfer_reactive_consent_required.py`` [:download:`download <submit_transfer_reactive_consent_required.py>`]
+.. note::
+    Given that this script reactively fixes auth states, it can involve two user login
+    interactions instead of the one required by the above proactive approach.
+
+.. literalinclude:: submit_transfer_collections_unknown.py
+    :caption: ``submit_transfer_collections_unknown.py`` [:download:`download <submit_transfer_collections_unknown.py>`]
     :language: python
