@@ -56,7 +56,7 @@ instead of proactively attaching the "data_access" scope.
 This script demonstrates how to do that by:
 
 #. Attempting to submit the transfer without any "data_access" scopes.
-#. Intercepting any raised ConsentRequired errors if the request fails.
+#. Intercepting any raised ``ConsentRequired`` errors if the request fails.
 #. Attaching any scope requirements detailed in the error.
 #. Retrying the transfer which implicitly puts your user through a consent flow to
    resolve their auth state.
