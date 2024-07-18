@@ -1,5 +1,5 @@
 
-Performing Three Legged OAuth in Flask
+Performing Three-Legged OAuth in Flask
 ========================================
 
 TODO
