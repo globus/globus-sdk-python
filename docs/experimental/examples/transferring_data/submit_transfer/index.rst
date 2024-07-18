@@ -12,8 +12,7 @@ They are split into two categories:
    collections are known in advance and are likely be hardcoded into your script.
 
 #. :ref:`transferring-between-unknown-collections` - either the source or
-   destination collection will not be known in advance but rather determined at
-   runtime and will be determined at runtime (e.g. by script argument).
+   destination collection will be determined at runtime (e.g. by script argument).
 
 The examples are differentiated because certain collections require a special scope
 ("data_access") to be attached to the transfer request. If both collections are known
