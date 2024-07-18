@@ -14,10 +14,15 @@ They are split into two categories:
 #. :ref:`transferring-between-unknown-collections` - either the source or
    destination collection will be determined at runtime (e.g. by script argument).
 
-The examples are differentiated because certain collections require a special scope
-("data_access") to be attached to the transfer request. If both collections are known
-this can be done proactively after determining whether the collections will require it.
-If, however, one or more collections are unknown
+We differentiate these examples because certain collections have special auth
+requirements which must either be defined up front or fixed reactively if omitted.
+Certain collections (mapped non-high assurance ones) require that a special scope
+("data_access") to be attached to the transfer request to grant Transfer access to that
+collection's data.
+If both collections are known this can be done proactively with a call to
+the ``add_app_data_access_scope`` method. If, however, one or more collections are
+unknown, the script must reactively solve the ``ConsentRequired`` error that is raised
+when the transfer is submitted.
 
 
 .. _transferring-between-known-collections:
