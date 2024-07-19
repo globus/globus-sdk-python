@@ -115,7 +115,7 @@ Use it like so:
     scopes = "urn:globus:auth:scope:transfer.api.globus.org:all"
     cc_authorizer = globus_sdk.ClientCredentialsAuthorizer(confidential_client, scopes)
     # create a new client
-    transfer_client = globus_sdk.TransferClient(authorizer=cc_authorizer)
+    tc = globus_sdk.TransferClient(authorizer=cc_authorizer)
 
     # usage is still the same
     print("Endpoints Belonging to {}@clients.auth.globus.org:".format(CLIENT_ID))
