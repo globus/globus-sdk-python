@@ -14,7 +14,7 @@ inherit the same authorization timeout requirements as their parent Mapped Colle
 Once created, they can be shared to other users/entities, in effect giving another
 entity access, through you, to some underlying data.
 
-.. Note::
+.. Warning::
 
     While guest collections don't implicitly inherit their parent mapped collection's
     authorization timeout in some cases they do or alternatively may be disabled
@@ -30,7 +30,7 @@ entity access, through you, to some underlying data.
     The scripts reference a globus hosted "tutorial" mapped collection. This is just
     to provide as simple of a functioning example out of the box as possible.
 
-    For actual application, replace the ids with the actual relevant collection and
+    For actual application, replace the IDs with the relevant collection and
     storage gateway IDs.
 
 
@@ -50,11 +50,11 @@ entity access, through you, to some underlying data.
 
     .. tab-item:: Client-owned Collection
 
-        This script demonstrates how to create a guest collection owned by a client (
-        e.g. a service account).
+        This script demonstrates how to create a guest collection owned by a client
+        (i.e. a service account).
 
         It will automatically request and use client access tokens based on the supplied
-        client id and secret.
+        client ID and secret.
 
         .. literalinclude:: create_guest_collection_client_owned.py
             :caption: ``create_guest_collection_client_owned.py`` [:download:`download <create_guest_collection_client_owned.py>`]

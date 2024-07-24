@@ -55,15 +55,15 @@ def ensure_user_credential(gcs_client):
     Ensure that the client has a user credential on the client.
     This is the mapping between Globus Auth (OAuth2) and the local system's permissions.
     """
+    # Depending on the endpoint & storage gateway, this request document may need to
+    # include more complex information such as a local username.
+    # Consult with the endpoint owner for more detailed info on user mappings and
+    # other specific requirements.
+    req = globus_sdk.UserCredentialDocument(storage_gateway_id=STORAGE_GATEWAY_ID)
     try:
-        # Depending on the endpoint & storage gateway, this request document may need to
-        # include more complex information such as a local username.
-        # Consult with the endpoint owner for more detailed info on user mappings and
-        # other specific requirements.
-        req = globus_sdk.UserCredentialDocument(storage_gateway_id=STORAGE_GATEWAY_ID)
         gcs_client.create_user_credential(req)
     except globus_sdk.GCSAPIError as err:
-        # If a User Credential already exists; no need to create it.
+        # A user credential already exists, no need to create it.
         if err.http_status != 409:
             raise
 
