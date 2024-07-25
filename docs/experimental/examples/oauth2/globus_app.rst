@@ -21,11 +21,11 @@ tokens to bound clients as requested.
 There are two flavors of GlobusApp:
 
 *   :py:class:`~UserApp`, a GlobusApp for interactions between an end user and Globus
-    services. Facilitates interactions *on behalf of a user*.
+    services. Operations are performed as a *user identity*.
 
 *   :py:class:`~ClientApp`, a GlobusApp for interactions between a client
-    (i.e. service account) and Globus services. Facilitates interactions
-    *as the script itself*.
+    (i.e. service account) and Globus services. Operations are performed as a
+    *client identity*.
 
 Setup
 -----
@@ -55,9 +55,10 @@ instantiation only requires two parameters:
 
     ..  Note::
 
-        Both UserApps and ClientApps require a client to operate. In a UserApp those
-        interactions are done on behalf of a user but the client is still the actor
-        requesting them.
+        Both UserApps and ClientApps require a client.
+
+        In a UserApp, the client sends requests representing a user identity; whereas in
+        a ClientApp, the requests represent the client identity itself.
 
 
 Once instantiated, a GlobusApp can be passed to any service client using the init
