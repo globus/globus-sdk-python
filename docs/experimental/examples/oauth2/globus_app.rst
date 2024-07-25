@@ -166,9 +166,10 @@ MFA token or rendering with a specific message:
 Manually Defining Scope Requirements
 ------------------------------------
 
-Globus service client classes all maintain internal list of default scope requirements
-to be attached to any bound app. These scopes represent an approximation of a
-"standard set" for each service. This list however is not sufficient for all use cases.
+Globus service client classes all maintain an internal list of default scope
+requirements to be attached to any bound app. These scopes represent an approximation of
+a "standard set" for each service. This list however is not sufficient for all use
+cases.
 
 For example, the FlowsClient defines its default scopes as ``flows:view_flows`` and
 ``flows:run_status`` (read-only access). These scopes will not be sufficient for a
@@ -193,7 +194,7 @@ This can be done in one of two ways:
 
     ..  code-block:: python
 
-        from globus_sdk import Scope, FlowsClient
+        from globus_sdk import FlowsClient
 
         flows_client = FlowsClient(app=my_app)
         flows_client.add_app_scope(FlowsClient.scopes.manage_flows)
