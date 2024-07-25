@@ -367,6 +367,8 @@ class UserApp(GlobusApp):
         )
 
         if client_secret or isinstance(self._login_client, ConfidentialAppAuthClient):
+            # UserApps need more information to be accepted to properly support
+            # Confidential Clients. Raise an error to avoid a confusing failure later.
             raise GlobusSDKUsageError(
                 "UserApps don't currently support Confidential Clients"
             )
