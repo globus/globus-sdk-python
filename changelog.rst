@@ -12,6 +12,48 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-3.43.0:
+
+v3.43.0 (2024-07-25)
+--------------------
+
+Added
+~~~~~
+
+- The ``TransferClient.task_list`` method now supports ``orderby`` as a
+  parameter. (:pr:`1011`)
+
+Changed
+~~~~~~~
+
+-   The ``SQLiteTokenStorage`` component in ``globus_sdk.experimental`` has been
+    changed in several ways to improve its interface. (:pr:`1004`)
+
+-   ``:memory:`` is no longer accepted as a database name. Attempts to use it
+    will trigger errors directing users to use ``MemoryTokenStorage`` instead.
+
+-   Parent directories for a target file are automatically created, and this
+    behavior is inherited from the ``FileTokenStorage`` base class. (This was
+    previously a feature only of the ``JSONTokenStorage``.)
+
+-   The ``config_storage`` table has been removed from the generated database
+    schema, the schema version number has been incremented to ``2``, and
+    methods and parameters related to manipulation of ``config_storage`` have
+    been removed.
+
+Documentation
+~~~~~~~~~~~~~
+
+-   Added a new experimental "Updated Examples" section which rewrites and reorders
+    many examples to aid in discovery. (:pr:`1008`)
+
+-   ``GlobusApp``, ``UserApp`, and ``ClientApp`` class reference docs. (:pr:`1013`)
+
+-   Added a narrative example titled ``Using a GlobusApp`` detailing the basics of
+    constructing and using a GlobusApp. (:pr:`1013`)
+
+-   Remove unwritten example updates from toctree. (:pr:`1014`)
+
 .. _changelog-3.42.0:
 
 v3.42.0 (2024-07-15)
