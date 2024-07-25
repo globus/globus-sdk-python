@@ -134,7 +134,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
     validation through its ``ValidatingTokenStorage``, and provides up-to-date
     authorizers from its ``AuthorizerFactory`` through ``get_authorizer``.
 
-    A ``GlobusApp`` is accepted as an initialization parameter to any SDK-hosted Globus
+    A ``GlobusApp`` is accepted as an initialization parameter to any SDK-provided
     service client, automatically handling the client's default scope requirements and
     providing the client with an authorizer.
     """
@@ -319,7 +319,7 @@ class UserApp(GlobusApp):
     """
     A ``GlobusApp`` for login methods that require an interactive flow with a user.
 
-    ``UserApp`` s are most commonly used with native application clients by passing a
+    ``UserApp``\\s are most commonly used with native application clients by passing a
     ``NativeAppAuthClient`` as ``login_client`` or the native application's
     ``client_id``.
 
@@ -440,11 +440,11 @@ class ClientApp(GlobusApp):
     A ``GlobusApp`` using client credentials - useful for service accounts and
     automation use cases.
 
-    ``ClientApp`` s are always used with confidential clients either by passing
+    ``ClientApp``\\s are always used with confidential clients either by passing
     a ``ConfidentialAppAuthClient`` as ``login_client`` or providing the client's
     ``client_id`` and ``client_secret`` pair.
 
-    ``ClientApp`` s do not use a ``LoginFlowManager`` and will raise an error
+    ``ClientApp``\\s do not use a ``LoginFlowManager`` and will raise an error
     if given one through ``config``.
 
     .. tab-set::

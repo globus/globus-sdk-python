@@ -9,14 +9,14 @@ Using a GlobusApp
 Programmatic communication with Globus services relies on the authorization of requests.
 Management and resolution of this authorization can become an arduous task, especially
 when a script needs to interact with different services each carrying an individual set
-of complex auth requirements. To assist with this task, this library provides a utility
-construct called a GlobusApp.
+of complex authentication and authorization requirements. To assist with this task, this
+library provides a utility construct called a GlobusApp.
 
-A :py:class:`~GlobusApp` is a distinct object which will manage auth requirements
-(i.e. **scopes**) identified by their associated service (i.e. **resource server**).
-In addition to storing these requirements, a GlobusApp provides a mechanism to resolve
-unmet ones through browser and api-based auth flows, supplying the resulting tokens to
-bound clients as requested.
+A :py:class:`~GlobusApp` is a distinct object which will manage Globus Auth requirements
+(i.e., **scopes**) identified by their associated service (i.e., **resource server**).
+In addition to storing them, a GlobusApp provides a mechanism to resolve unmet
+requirements through browser- and API-based authorization flows, supplying the resulting
+tokens to bound clients as requested.
 
 There are two flavors of GlobusApp:
 
@@ -30,10 +30,10 @@ There are two flavors of GlobusApp:
 Setup
 -----
 
-A GlobusApp is heavily configurable object. For common scripting usage however,
+A GlobusApp is a heavily configurable object. For common scripting usage however,
 instantiation only requires two parameters:
 
-#.  **App Name** - A human readable slug to identify your app in http requests and token
+#.  **App Name** - A human readable slug to identify your app in HTTP requests and token
     caches.
 
 #.  **Client Info** - either a *Native Client's* ID or a *Confidential Client's* ID and
@@ -42,7 +42,7 @@ instantiation only requires two parameters:
     *   There are important distinctions to consider when choosing your client type; see
         `Developing an Application Using Globus Auth <https://docs.globus.org/api/auth/developer-guide/#developing-apps>`_.
 
-        For a simplified heuristic however:
+        A simplified heuristic to help choose the client type however is:
 
         *   Use a *Confidential Client* when your client needs to own cloud resources
             itself and will be used in a trusted environment where you can securely
@@ -50,32 +50,32 @@ instantiation only requires two parameters:
 
         *   Use a *Native Client* when your client will be facilitating interactions
             between a user and a service, particularly if it is bundled within a
-            script or cli tool to be distributed to end-user's machines.
+            script or cli tool to be distributed to end-users' machines.
 
 
-..  Note::
+    ..  Note::
 
-    Even in the context of a UserApp, client info is required to interact with a
-    service. Those interactions will be performed on behalf of a user instead of the
-    client itself, but the client is necessary to facilitate the interaction.
+        Both UserApps and ClientApps require a client to operate. In a UserApp those
+        interactions are done on behalf of a user but the client is still the actor
+        requesting them.
 
 
-Once instantiated, an app can be passed to any service client using the init
-``app`` kwarg (e.g. ``TransferClient(app=my_app)``). Doing this will bind the app to the
-client, registering a default set of scopes requirements for the service client's
-resource server and configuring the app as the service client's auth provider.
+Once instantiated, a GlobusApp can be passed to any service client using the init
+``app`` keyword argument (e.g. ``TransferClient(app=my_app)``). Doing this will bind the
+app to the client, registering a default set of scopes requirements for the service
+client's resource server and configuring the app as the service client's auth provider.
 
 
 ..  tab-set::
 
     ..  tab-item:: UserApp
 
-        Construct a UserApp then bind it to a transfer client and a flows client.
+        Construct a UserApp then bind it to a Transfer client and a Flows client.
 
         ..  Note::
 
-            ``UserApp.__init__(...)`` also accepts a `client_secret` kwarg which must be
-            supplied for confidential clients.
+            ``UserApp.__init__(...)`` also accepts a `client_secret` keyword argument
+            which must be supplied for confidential clients.
 
         ..  code-block:: python
 
@@ -91,12 +91,12 @@ resource server and configuring the app as the service client's auth provider.
 
     .. tab-item:: ClientApp
 
-        Construct a ClientApp then bind it to a transfer client and flows_client.
+        Construct a ClientApp, then bind it to a Transfer client and a Flows client.
 
         ..  Note::
 
-            ``ClientApp.__init__(...)`` does not allow omission of the `client_secret`
-            kwarg as native clients are not allowed.
+            ``ClientApp.__init__(...)`` requires the `client_secret` keyword argument.
+            Native clients, which lack secrets, are not allowed.
 
         ..  code-block:: python
 
@@ -114,8 +114,8 @@ resource server and configuring the app as the service client's auth provider.
 Usage
 -----
 
-From this point, the app manages scope validation, token caching, and authorizer
-supply for any the clients it is bound to.
+From this point, the app manages scope validation, token caching and routing for any
+bound clients.
 
 In the above example, listing a client's or user's flows becomes as simple as:
 
@@ -123,11 +123,12 @@ In the above example, listing a client's or user's flows becomes as simple as:
 
     flows = flows_client.list_flows()["flows"]
 
-If cached tokens are missing, expired, or otherwise insufficient (e.g. the first time
+If cached tokens are missing, expired, or otherwise insufficient (e.g., the first time
 you run the script), the app will automatically initiate an auth flow to acquire new
-tokens. For a UserApp, this will print out a URL to terminal with a prompt instructing a
-the user to follow the link and enter the code they're given back into the terminal. For
-a ClientApp, the app will retrieve tokens programmatically through an Auth API.
+tokens. With a UserApp, the app will print a URL to the terminal with a prompt
+instructing a the user to follow the link and enter the code they're given back into the
+terminal. With a ClientApp, the app will retrieve tokens programmatically through a
+Globus Auth API.
 
 Once this auth flow has finished, the app will cache tokens for future use and
 invocation of your requested method will proceed as expected.
@@ -137,14 +138,14 @@ Manually Running Login Flows
 ----------------------------
 
 While your app will automatically initiate and oversee auth flows as detected, sometimes
-the programmer knows timing better. To manually trigger a login flow, call
-``GlobusApp.run_login_flow(...)``. This will initiate a flow requesting new tokens
-based on the app's currently defined scope requirements, caching the resulting tokens
-for future use.
+an author may want to explicitly control when an authorization occurs. To manually
+trigger a login flow, call ``GlobusApp.run_login_flow(...)``. This will initiate an auth
+flow requesting new tokens based on the app's currently defined scope requirements, and
+caching the resulting tokens for future use.
 
 This method accepts a single optional parameter, ``auth_params``, where a caller
 may specify additional session-based auth parameters such as requiring the use of an
-mfa token or rendering with a specific message:
+MFA token or rendering with a specific message:
 
 
 ..  code-block:: python
@@ -164,10 +165,9 @@ mfa token or rendering with a specific message:
 Manually Defining Scope Requirements
 ------------------------------------
 
-Globus service clients all maintain as a part of their class definition a list of
-default scope requirements to be attached to any bound app. These scopes represent our
-best approximation of a "standard set" for this service; unfortunately however,
-this list will note be sufficient for all use cases.
+Globus service client classes all maintain internal list of default scope requirements
+to be attached to any bound app. These scopes represent an approximation of a
+"standard set" for each service. This list however is not sufficient for all use cases.
 
 For example, the FlowsClient defines its default scopes as ``flows:view_flows`` and
 ``flows:run_status`` (read-only access). These scopes will not be sufficient for a
@@ -185,7 +185,7 @@ This can be done in one of two ways:
         FlowsClient(app=my_app, app_scopes=[Scope(FlowsClient.scopes.manage_flows)])
 
     This approach results in an app which only requires the ``flows:manage_flows``
-    scope. Neither default scope (``flows:view_flows`` and ``flows:run_status``) are
+    scope. The default scopes (``flows:view_flows`` and ``flows:run_status``) are not
     registered.
 
 #.  Through a service client's ``add_app_scope`` method.
@@ -195,7 +195,7 @@ This can be done in one of two ways:
         from globus_sdk import Scope, FlowsClient
 
         flows_client = FlowsClient(app=my_app)
-        flows_client.add_app_scope(Scope(FlowsClient.scopes.manage_flows))
+        flows_client.add_app_scope(FlowsClient.scopes.manage_flows)
 
     This approach will add the ``flows:manage_flows`` scope to the app's existing set of
     scopes. Since ``app_scopes`` was omitted in the client initialization, the default
