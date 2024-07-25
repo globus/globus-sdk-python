@@ -17,6 +17,4 @@ existing examples section.
 
     transferring_data/index
     endpoints_and_collections/index
-    flows/index
-    projects/index
     oauth2/index
