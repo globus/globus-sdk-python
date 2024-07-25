@@ -75,8 +75,8 @@ client's resource server and configuring the app as the service client's auth pr
 
         ..  Note::
 
-            ``UserApp.__init__(...)`` also accepts a `client_secret` keyword argument
-            which must be supplied for confidential clients.
+            ``UserApp.__init__(...)`` currently only supports Native clients.
+            Confidential client support is forthcoming.
 
         ..  code-block:: python
 

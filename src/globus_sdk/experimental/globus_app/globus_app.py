@@ -366,6 +366,11 @@ class UserApp(GlobusApp):
             config=config,
         )
 
+        if client_secret or isinstance(self._login_client, ConfidentialAppAuthClient):
+            raise GlobusSDKUsageError(
+                "UserApps don't currently support Confidential Clients"
+            )
+
         # get or instantiate config's login_flow_manager
         if self.config.login_flow_manager:
             if isinstance(self.config.login_flow_manager, LoginFlowManager):
