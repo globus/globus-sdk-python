@@ -103,6 +103,7 @@ FlowsScopes = _FlowsScopeBuilder(
     "flows.globus.org",
     "eec9b274-0c81-4334-bdc2-54e90e689b9a",
     known_url_scopes=[
+        "all",
         "manage_flows",
         "view_flows",
         "run",
