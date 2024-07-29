@@ -33,8 +33,8 @@ Setup
 A GlobusApp is a heavily configurable object. For common scripting usage however,
 instantiation only requires two parameters:
 
-#.  **App Name** - A human readable slug to identify your app in HTTP requests and token
-    caches.
+#.  **App Name** - A human readable name to identify your app in HTTP requests and token
+    caching (e.g., "My Cool Weathervane").
 
 #.  **Client Info** - either a *Native Client's* ID or a *Confidential Client's* ID and
     secret pair.

@@ -87,6 +87,7 @@ def test_user_app_login_client():
 
     assert user_app.app_name == "test-app"
     assert user_app._login_client == mock_client
+    assert user_app.client_id == "mock-client_id"
 
 
 def test_user_app_no_client_or_id():
