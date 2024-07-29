@@ -25,9 +25,11 @@ class MemoryTokenStorage(TokenStorage):
     @classmethod
     def for_globus_app(
         cls,
+        # pylint: disable=unused-argument
         client_id: UUIDLike,
         app_name: str,
         config: GlobusAppConfig,
+        # pylint: enable=unused-argument
         namespace: str,
     ) -> MemoryTokenStorage:
         return cls(namespace=namespace)
