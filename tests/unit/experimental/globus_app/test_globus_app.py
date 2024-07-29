@@ -89,20 +89,18 @@ def test_user_app_login_client():
 
 
 def test_user_app_no_client_or_id():
-    with pytest.raises(GlobusSDKUsageError) as exc:
+    msg = (
+        "Could not to set up a globus login client. One of client_id or "
+        "login_client is required."
+    )
+    with pytest.raises(GlobusSDKUsageError, match=msg):
         UserApp("test-app")
-    assert str(exc.value) == "One of either client_id or login_client is required."
 
 
 def test_user_app_both_client_and_id():
-    client_id = "mock_client_id"
-    mock_client = mock.Mock()
-
-    with pytest.raises(GlobusSDKUsageError) as exc:
-        UserApp("test-app", login_client=mock_client, client_id=client_id)
-
-    expected = "login_client is mutually exclusive with client_id and client_secret."
-    assert str(exc.value) == expected
+    msg = "Mutually exclusive parameters: client_id and login_client."
+    with pytest.raises(GlobusSDKUsageError, match=msg):
+        UserApp("test-app", login_client=mock.Mock(), client_id="client_id")
 
 
 def test_user_app_login_client_environment_mismatch():
@@ -214,12 +212,9 @@ def test_client_app():
 def test_client_app_no_secret():
     client_id = "mock_client_id"
 
-    with pytest.raises(GlobusSDKUsageError) as exc:
+    msg = "A ClientApp requires a client_secret to initialize its own login client"
+    with pytest.raises(GlobusSDKUsageError, match=msg):
         ClientApp("test-app", client_id=client_id)
-    assert (
-        str(exc.value)
-        == "Either login_client or both client_id and client_secret are required"
-    )
 
 
 def test_add_scope_requirements_and_auth_params_with_required_scopes():

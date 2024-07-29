@@ -196,26 +196,13 @@ class GlobusApp(metaclass=abc.ABCMeta):
         self.app_name = app_name
         self.config = config
 
-        if login_client:
-            if client_id or client_secret:
-                raise GlobusSDKUsageError(
-                    "login_client is mutually exclusive with client_id and "
-                    "client_secret."
-                )
-            if login_client.environment != self.config.environment:
-                raise GlobusSDKUsageError(
-                    f"[Environment Mismatch] The login_client's environment "
-                    f"({login_client.environment}) does not match the GlobusApp's "
-                    f"configured environment ({self.config.environment})."
-                )
-
-        self.client_id: UUIDLike | None
-        if login_client:
-            self._login_client = login_client
-            self.client_id = login_client.client_id
-        else:
-            self.client_id = client_id
-            self._initialize_login_client(client_secret)
+        self.client_id, self._login_client = self._determine_client_info(
+            app_name=app_name,
+            config=config,
+            client_id=client_id,
+            client_secret=client_secret,
+            login_client=login_client,
+        )
 
         self._scope_requirements = self._setup_scope_requirements(scope_requirements)
 
@@ -255,10 +242,66 @@ class GlobusApp(metaclass=abc.ABCMeta):
             for resource_server, scopes in scope_requirements.items()
         }
 
-    @abc.abstractmethod
-    def _initialize_login_client(self, client_secret: str | None) -> None:
+    def _determine_client_info(
+        self,
+        app_name: str,
+        config: GlobusAppConfig,
+        login_client: AuthLoginClient | None,
+        client_id: UUIDLike | None,
+        client_secret: str | None,
+    ) -> tuple[UUIDLike, AuthLoginClient]:
         """
-        Initializes self._login_client to be used for making authorization requests.
+        Extracts a client_id and login_client from GlobusApp initialization parameters.
+
+        Depending on which parameters were provided, this method will either:
+            1.  Create a new login client from the supplied credentials.
+                *   The actual initialization is performed by the subclass using the
+                    abstract method: _initialize_login_client``.
+            2.  Extract the client_id from a supplied login_client.
+
+        :returns: tuple of client_id and login_client
+        """
+        if login_client and client_id:
+            msg = "Mutually exclusive parameters: client_id and login_client."
+            raise GlobusSDKUsageError(msg)
+
+        if login_client:
+            # User provided an explicit login client, extract the client_id.
+            if login_client.client_id is None:
+                msg = "An explicit login_client must have a discoverable client_id."
+                raise GlobusSDKUsageError(msg)
+            if login_client.environment != config.environment:
+                raise GlobusSDKUsageError(
+                    "[Environment Mismatch] The login_client's environment "
+                    f"({login_client.environment}) does not match the GlobusApp's "
+                    f"configured environment ({config.environment})."
+                )
+
+            return login_client.client_id, login_client
+
+        elif client_id:
+            # User provided an explicit client_id, construct a login client
+            login_client = self._initialize_login_client(
+                app_name, config, client_id, client_secret
+            )
+            return client_id, login_client
+
+        else:
+            raise GlobusSDKUsageError(
+                "Could not to set up a globus login client. One of client_id or "
+                "login_client is required."
+            )
+
+    @abc.abstractmethod
+    def _initialize_login_client(
+        self,
+        app_name: str,
+        config: GlobusAppConfig,
+        client_id: UUIDLike,
+        client_secret: str | None,
+    ) -> AuthLoginClient:
+        """
+        Initializes and returns an AuthLoginClient to be used in authorization requests.
         """
 
     @abc.abstractmethod
@@ -428,24 +471,25 @@ class UserApp(GlobusApp):
 
         return provider.for_globus_app(app_name, login_client, config)
 
-    def _initialize_login_client(self, client_secret: str | None) -> None:
-        if self.client_id is None:
-            raise GlobusSDKUsageError(
-                "One of either client_id or login_client is required."
-            )
-
+    def _initialize_login_client(
+        self,
+        app_name: str,
+        config: GlobusAppConfig,
+        client_id: UUIDLike,
+        client_secret: str | None,
+    ) -> AuthLoginClient:
         if client_secret:
-            self._login_client = ConfidentialAppAuthClient(
-                app_name=self.app_name,
-                client_id=self.client_id,
+            return ConfidentialAppAuthClient(
+                app_name=app_name,
+                client_id=client_id,
                 client_secret=client_secret,
-                environment=self.config.environment,
+                environment=config.environment,
             )
         else:
-            self._login_client = NativeAppAuthClient(
-                app_name=self.app_name,
-                client_id=self.client_id,
-                environment=self.config.environment,
+            return NativeAppAuthClient(
+                app_name=app_name,
+                client_id=client_id,
+                environment=config.environment,
             )
 
     def _initialize_authorizer_factory(self) -> None:
@@ -531,17 +575,24 @@ class ClientApp(GlobusApp):
             config=config,
         )
 
-    def _initialize_login_client(self, client_secret: str | None) -> None:
-        if not (self.client_id and client_secret):
+    def _initialize_login_client(
+        self,
+        app_name: str,
+        config: GlobusAppConfig,
+        client_id: UUIDLike,
+        client_secret: str | None,
+    ) -> AuthLoginClient:
+        if not client_secret:
             raise GlobusSDKUsageError(
-                "Either login_client or both client_id and client_secret are required"
+                "A ClientApp requires a client_secret to initialize its own login "
+                "client."
             )
 
-        self._login_client = ConfidentialAppAuthClient(
-            client_id=self.client_id,
+        return ConfidentialAppAuthClient(
+            client_id=client_id,
             client_secret=client_secret,
-            app_name=self.app_name,
-            environment=self.config.environment,
+            app_name=app_name,
+            environment=config.environment,
         )
 
     def _initialize_authorizer_factory(self) -> None:
