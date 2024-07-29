@@ -6,6 +6,10 @@ from globus_sdk.experimental.tokenstorage.base import TokenStorage
 
 from .token_data import TokenData
 
+if t.TYPE_CHECKING:
+    from globus_sdk._types import UUIDLike
+    from globus_sdk.experimental.globus_app import GlobusAppConfig
+
 
 class MemoryTokenStorage(TokenStorage):
     """
@@ -17,6 +21,16 @@ class MemoryTokenStorage(TokenStorage):
     def __init__(self, *, namespace: str = "DEFAULT") -> None:
         self._tokens: dict[str, dict[str, t.Any]] = {}
         super().__init__(namespace=namespace)
+
+    @classmethod
+    def for_globus_app(
+        cls,
+        client_id: UUIDLike,
+        app_name: str,
+        config: GlobusAppConfig,
+        namespace: str,
+    ) -> MemoryTokenStorage:
+        return cls(namespace=namespace)
 
     def store_token_data_by_resource_server(
         self, token_data_by_resource_server: dict[str, TokenData]

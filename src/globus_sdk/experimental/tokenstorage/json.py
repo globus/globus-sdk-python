@@ -33,6 +33,8 @@ class JSONTokenStorage(FileTokenStorage):
     # the supported versions (data not in these versions causes an error)
     supported_versions = ("1.0", "2.0")
 
+    file_format = "json"
+
     def _invalid(self, msg: str) -> t.NoReturn:
         raise ValueError(
             f"{msg} while loading from '{self.filename}' for JSON Token Storage"

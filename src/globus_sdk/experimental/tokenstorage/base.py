@@ -4,11 +4,16 @@ import abc
 import contextlib
 import os
 import pathlib
+import sys
 import typing as t
 
 from globus_sdk.services.auth import OAuthTokenResponse
 
+from ..._types import UUIDLike
 from .token_data import TokenData
+
+if t.TYPE_CHECKING:
+    from globus_sdk.experimental.globus_app import GlobusAppConfig
 
 
 class TokenStorage(metaclass=abc.ABCMeta):
@@ -108,6 +113,9 @@ class FileTokenStorage(TokenStorage, metaclass=abc.ABCMeta):
     files.
     """
 
+    # File suffix associated with files of this type (e.g., "csv")
+    file_format: str = "_UNSET_"  # must be overridden by subclasses
+
     def __init__(self, filename: pathlib.Path | str, *, namespace: str = "DEFAULT"):
         """
         :param filename: the name of the file to write to and read from
@@ -116,6 +124,30 @@ class FileTokenStorage(TokenStorage, metaclass=abc.ABCMeta):
         self.filename = str(filename)
         self._ensure_containing_dir_exists()
         super().__init__(namespace=namespace)
+
+    def __init_subclass__(cls, **kwargs: t.Any):
+        if cls.file_format == "_UNSET_":
+            raise TypeError(f"{cls.__name__} must set a 'file_format' class attribute")
+
+    @classmethod
+    def for_globus_app(
+        cls,
+        client_id: UUIDLike,
+        app_name: str,
+        config: GlobusAppConfig,
+        namespace: str,
+    ) -> TokenStorage:
+        """
+        Initialize a TokenStorage instance for a GlobusApp, using the supplied
+        info to determine the file location.
+
+        :param client_id: The client ID of the Globus App.
+        :param app_name: The name of the Globus App.
+        :param config: The GlobusAppConfig object for the Globus App.
+        :param namespace: A user-supplied namespace for partitioning token data.
+        """
+        filename = _default_globus_app_filename(client_id, app_name, config.environment)
+        return cls(filename=f"{filename}.{cls.file_format}", namespace=namespace)
 
     def _ensure_containing_dir_exists(self) -> None:
         """
@@ -148,3 +180,47 @@ class FileTokenStorage(TokenStorage, metaclass=abc.ABCMeta):
             yield
         finally:
             os.umask(old_umask)
+
+
+def _default_globus_app_filename(
+    client_id: UUIDLike, app_name: str, environment: str
+) -> str:
+    r"""
+    Construct a default TokenStorage filename for a globus app.
+    The filename will have no file format suffix.
+
+    On Windows, this will be:
+        ``~\AppData\Local\globus\app\{client_id}\{app_name}\tokens``
+
+    On Linux and macOS, we use:
+        ``~/.globus/app/{client_id}/{app_name}/tokens``
+    """
+    environment_prefix = f"{environment}-"
+    if environment == "production":
+        environment_prefix = ""
+    filename = f"{environment_prefix}tokens"
+    app_name = _slugify_app_name(app_name)
+
+    if sys.platform == "win32":
+        # try to get the app data dir, preferring the local appdata
+        datadir = os.getenv("LOCALAPPDATA", os.getenv("APPDATA"))
+        if not datadir:
+            home = os.path.expanduser("~")
+            datadir = os.path.join(home, "AppData", "Local")
+        return os.path.join(
+            datadir, "globus", "app", str(client_id), app_name, filename
+        )
+    else:
+        return os.path.expanduser(
+            f"~/.globus/app/{str(client_id)}/{app_name}/{filename}"
+        )
+
+
+def _slugify_app_name(app_name: str) -> str:
+    """
+    Slugify a globus app name for use in a file path.
+
+    This "slugification" will replace spaces with hyphens and lowercase the string so:
+      "My App" -> "my-app"
+    """
+    return app_name.replace(" ", "-").lower()

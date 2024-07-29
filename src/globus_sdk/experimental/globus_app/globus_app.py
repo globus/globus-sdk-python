@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import abc
 import dataclasses
-import os
 import sys
 import typing as t
 from dataclasses import dataclass
@@ -26,7 +25,12 @@ from globus_sdk.experimental.login_flow_manager import (
     LocalServerLoginFlowManager,
     LoginFlowManager,
 )
-from globus_sdk.experimental.tokenstorage import JSONTokenStorage, TokenStorage
+from globus_sdk.experimental.tokenstorage import (
+    JSONTokenStorage,
+    MemoryTokenStorage,
+    SQLiteTokenStorage,
+    TokenStorage,
+)
 from globus_sdk.scopes import AuthScopes, scopes_to_scope_list
 
 from ._validating_token_storage import ValidatingTokenStorage
@@ -44,30 +48,12 @@ else:
     from typing import Protocol, runtime_checkable
 
 
-def _default_filename(app_name: str, environment: str) -> str:
-    r"""
-    construct the filename for the default JSONTokenStorage to use
-
-    on Windows, this is typically
-        ~\AppData\Local\globus\app\{app_name}/tokens.json
-
-    on Linux and macOS, we use
-        ~/.globus/app/{app_name}/tokens.json
-    """
-    environment_prefix = f"{environment}-"
-    if environment == "production":
-        environment_prefix = ""
-    filename = f"{environment_prefix}tokens.json"
-
-    if sys.platform == "win32":
-        # try to get the app data dir, preferring the local appdata
-        datadir = os.getenv("LOCALAPPDATA", os.getenv("APPDATA"))
-        if not datadir:
-            home = os.path.expanduser("~")
-            datadir = os.path.join(home, "AppData", "Local")
-        return os.path.join(datadir, "globus", "app", app_name, filename)
-    else:
-        return os.path.expanduser(f"~/.globus/app/{app_name}/{filename}")
+@runtime_checkable
+class TokenStorageProvidable(Protocol):
+    @classmethod
+    def for_globus_app(
+        cls, client_id: UUIDLike, app_name: str, config: GlobusAppConfig, namespace: str
+    ) -> TokenStorage: ...
 
 
 @runtime_checkable
@@ -104,13 +90,20 @@ KNOWN_LOGIN_FLOW_MANAGERS: dict[KnownLoginFlowManager, LoginFlowManagerProvider]
     "local-server": LocalServerLoginFlowManager,
 }
 
+KnownTokenStorage = t.Literal["json", "sqlite", "memory"]
+KNOWN_TOKEN_STORAGES: dict[KnownTokenStorage, t.Type[TokenStorageProvidable]] = {
+    "json": JSONTokenStorage,
+    "sqlite": SQLiteTokenStorage,
+    "memory": MemoryTokenStorage,
+}
+
 
 @dataclass(frozen=True)
 class GlobusAppConfig:
     """
     Various configuration options for controlling the behavior of a ``GlobusApp``.
 
-    :param login_flow_manager: An optional ``LoginFlowManager`` instance, or provider,
+    :param login_flow_manager: An optional ``LoginFlowManager`` instance, provider,
         or identifier ("command-line" or "local-server").
         For a ``UserApp``, defaults to "command-line".
         For a ``ClientApp``, this value is not supported.
@@ -120,9 +113,9 @@ class GlobusAppConfig:
         For a confidential client, this value is required.
     :param request_refresh_tokens: If True, the ``GlobusApp`` will request refresh
         tokens for long-lived access.
-    :param token_storage: a ``TokenStorage`` instance or class that will
-        be used for storing token data. If not passed a ``JSONTokenStorage``
-        will be used.
+    :param token_storage: A ``TokenStorage`` instance, provider, or identifier
+        ("json", "sqlite", or "memory").
+        Default: "json"
     :param token_validation_error_handler: A callable that will be called when a
         token validation error is encountered. The default behavior is to retry the
         login flow automatically.
@@ -132,10 +125,10 @@ class GlobusAppConfig:
 
     login_flow_manager: (
         KnownLoginFlowManager | LoginFlowManagerProvider | LoginFlowManager | None
-    ) = None  # noqa: E501
+    ) = None
     login_redirect_uri: str | None = None
+    token_storage: KnownTokenStorage | TokenStorageProvidable | TokenStorage = "json"
     request_refresh_tokens: bool = False
-    token_storage: TokenStorage | None = None
     token_validation_error_handler: TokenValidationErrorHandler | None = (
         resolve_by_login_flow
     )
@@ -167,7 +160,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        app_name: str,
+        app_name: str = "DEFAULT",
         *,
         login_client: AuthLoginClient | None = None,
         client_id: UUIDLike | None = None,
@@ -196,23 +189,20 @@ class GlobusApp(metaclass=abc.ABCMeta):
         self.app_name = app_name
         self.config = config
 
-        self.client_id, self._login_client = self._determine_client_info(
-            app_name=app_name,
-            config=config,
+        self.client_id, self._login_client = self._resolve_client_info(
+            app_name=self.app_name,
+            config=self.config,
             client_id=client_id,
             client_secret=client_secret,
             login_client=login_client,
         )
 
         self._scope_requirements = self._setup_scope_requirements(scope_requirements)
-
-        # either get config's TokenStorage, or make the default JSONTokenStorage
-        if self.config.token_storage:
-            self._token_storage = self.config.token_storage
-        else:
-            self._token_storage = JSONTokenStorage(
-                filename=_default_filename(self.app_name, self.config.environment)
-            )
+        self._token_storage = self._resolve_token_storage(
+            app_name=self.app_name,
+            client_id=self.client_id,
+            config=self.config,
+        )
 
         # construct ValidatingTokenStorage around the TokenStorage and
         # our initial scope requirements
@@ -242,7 +232,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
             for resource_server, scopes in scope_requirements.items()
         }
 
-    def _determine_client_info(
+    def _resolve_client_info(
         self,
         app_name: str,
         config: GlobusAppConfig,
@@ -251,7 +241,8 @@ class GlobusApp(metaclass=abc.ABCMeta):
         client_secret: str | None,
     ) -> tuple[UUIDLike, AuthLoginClient]:
         """
-        Extracts a client_id and login_client from GlobusApp initialization parameters.
+        Extracts a client_id and login_client from GlobusApp initialization parameters,
+        validating that the parameters were provided correctly.
 
         Depending on which parameters were provided, this method will either:
             1.  Create a new login client from the supplied credentials.
@@ -260,6 +251,8 @@ class GlobusApp(metaclass=abc.ABCMeta):
             2.  Extract the client_id from a supplied login_client.
 
         :returns: tuple of client_id and login_client
+        :raises: GlobusSDKUsageError if a single client ID or login client could not be
+            definitively resolved.
         """
         if login_client and client_id:
             msg = "Mutually exclusive parameters: client_id and login_client."
@@ -268,7 +261,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         if login_client:
             # User provided an explicit login client, extract the client_id.
             if login_client.client_id is None:
-                msg = "An explicit login_client must have a discoverable client_id."
+                msg = "A GlobusApp login_client must have a discoverable client_id."
                 raise GlobusSDKUsageError(msg)
             if login_client.environment != config.environment:
                 raise GlobusSDKUsageError(
@@ -303,6 +296,38 @@ class GlobusApp(metaclass=abc.ABCMeta):
         """
         Initializes and returns an AuthLoginClient to be used in authorization requests.
         """
+
+    def _resolve_token_storage(
+        self, app_name: str, client_id: UUIDLike, config: GlobusAppConfig
+    ) -> TokenStorage:
+        """
+        Resolve the raw token storage to be used by the app.
+
+        This may be:
+            1.  A TokenStorage instance provided by the user, which we use directly.
+            2.  A TokenStorageProvidable, which we use to get a TokenStorage.
+            3.  A string value, which we map onto supported TokenStorage types.
+
+        :returns: TokenStorage instance to be used by the app.
+        :raises: GlobusSDKUsageError if the provided token_storage value is unsupported.
+        """
+        token_storage = config.token_storage
+        # TODO - make namespace configurable
+        namespace = "DEFAULT"
+        if isinstance(token_storage, TokenStorage):
+            return token_storage
+
+        elif isinstance(token_storage, TokenStorageProvidable):
+            return token_storage.for_globus_app(client_id, app_name, config, namespace)
+
+        elif token_storage in KNOWN_TOKEN_STORAGES:
+            providable = KNOWN_TOKEN_STORAGES[token_storage]
+            return providable.for_globus_app(client_id, app_name, config, namespace)
+
+        raise GlobusSDKUsageError(
+            f"Unsupported token_storage value: {token_storage}. Must be a "
+            f"TokenStorage, TokenStorageProvidable, or a supported string value."
+        )
 
     @abc.abstractmethod
     def _initialize_authorizer_factory(self) -> None:
@@ -425,7 +450,7 @@ class UserApp(GlobusApp):
 
     def __init__(
         self,
-        app_name: str,
+        app_name: str = "DEFAULT",
         *,
         login_client: AuthLoginClient | None = None,
         client_id: UUIDLike | None = None,
@@ -550,7 +575,7 @@ class ClientApp(GlobusApp):
 
     def __init__(
         self,
-        app_name: str,
+        app_name: str = "DEFAULT",
         *,
         login_client: ConfidentialAppAuthClient | None = None,
         client_id: UUIDLike | None = None,

@@ -35,6 +35,7 @@ from globus_sdk.experimental.login_flow_manager import (
 from globus_sdk.experimental.tokenstorage import (
     JSONTokenStorage,
     MemoryTokenStorage,
+    SQLiteTokenStorage,
     TokenData,
 )
 from globus_sdk.scopes import AuthScopes, Scope
@@ -120,14 +121,39 @@ def test_user_app_default_token_storage():
 
     token_storage = user_app._authorizer_factory.token_storage._token_storage
     assert isinstance(token_storage, JSONTokenStorage)
+
     if os.name == "nt":
         # on the windows-latest run this was
-        # C:\Users\runneradmin\AppData\Roaming\globus\app\test-app\tokens.json
-        assert "\\globus\\app\\test-app\\tokens.json" in token_storage.filename
+        # C:\Users\runneradmin\AppData\Roaming\globus\app\mock_client_id\test-app\tokens.json
+        expected = "\\globus\\app\\mock_client_id\\test-app\\tokens.json"
+        assert expected in token_storage.filename
     else:
-        assert token_storage.filename == os.path.expanduser(
-            "~/.globus/app/test-app/tokens.json"
-        )
+        expected = "~/.globus/app/mock_client_id/test-app/tokens.json"
+        assert token_storage.filename == os.path.expanduser(expected)
+
+
+class CustomMemoryTokenStorage(MemoryTokenStorage):
+    pass
+
+
+@pytest.mark.parametrize(
+    "token_storage_value, token_storage_class",
+    (
+        # Named token storage types
+        ("json", JSONTokenStorage),
+        ("sqlite", SQLiteTokenStorage),
+        ("memory", MemoryTokenStorage),
+        # Custom token storage class (instantiated or class)
+        (CustomMemoryTokenStorage(), CustomMemoryTokenStorage),
+        (CustomMemoryTokenStorage, CustomMemoryTokenStorage),
+    ),
+)
+def test_user_app_token_storage_configuration(token_storage_value, token_storage_class):
+    client_id = "mock_client_id"
+    config = GlobusAppConfig(token_storage=token_storage_value)
+
+    user_app = UserApp("test-app", client_id=client_id, config=config)
+    assert isinstance(user_app._token_storage, token_storage_class)
 
 
 def test_user_app_creates_consent_client():

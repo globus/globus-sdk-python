@@ -27,6 +27,8 @@ class SQLiteTokenStorage(FileTokenStorage):
     documentation for SQLite-specific parameters.
     """
 
+    file_format = "db"
+
     def __init__(
         self,
         filename: pathlib.Path | str,
