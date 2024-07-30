@@ -58,8 +58,11 @@ def test_command_line_login_flower_manager_confidential(monkeypatch, capsys):
     )
     load_response(login_client.oauth2_exchange_code_for_tokens)
     monkeypatch.setattr("builtins.input", _mock_input)
+    redirect_uri = "https://example.com/callback"
 
-    login_flow_manager = CommandLineLoginFlowManager(login_client)
+    login_flow_manager = CommandLineLoginFlowManager(
+        login_client, redirect_uri=redirect_uri
+    )
     auth_params = GlobusAuthorizationParameters(
         required_scopes=["urn:globus:auth:scope:transfer.api.globus.org:all"],
         session_required_single_domain=["org.edu"],
@@ -93,14 +96,14 @@ class MockRedirectServer:
         return "auth_code"
 
 
-@patch(
-    "globus_sdk.experimental.login_flow_manager.local_server_login_flow_manager._open_webbrowser",  # noqa E501
-    new=lambda url: None,
+_LOCAL_SERVER_MODULE = (
+    "globus_sdk.experimental.login_flow_manager.local_server_login_flow_manager."
+    "local_server_login_flow_manager"
 )
-@patch(
-    "globus_sdk.experimental.login_flow_manager.local_server_login_flow_manager.RedirectHTTPServer",  # noqa E501
-    new=MockRedirectServer,
-)
+
+
+@patch(f"{_LOCAL_SERVER_MODULE}._open_webbrowser", new=lambda url: None)
+@patch(f"{_LOCAL_SERVER_MODULE}.RedirectHTTPServer", new=MockRedirectServer)
 def test_local_server_login_flower_manager_native():
     """
     test LocalServerLoginManager with a NativeAppAuthClient
@@ -120,14 +123,8 @@ def test_local_server_login_flower_manager_native():
     )
 
 
-@patch(
-    "globus_sdk.experimental.login_flow_manager.local_server_login_flow_manager._open_webbrowser",  # noqa E501
-    new=lambda url: None,
-)
-@patch(
-    "globus_sdk.experimental.login_flow_manager.local_server_login_flow_manager.RedirectHTTPServer",  # noqa E501
-    new=MockRedirectServer,
-)
+@patch(f"{_LOCAL_SERVER_MODULE}._open_webbrowser", new=lambda url: None)
+@patch(f"{_LOCAL_SERVER_MODULE}.RedirectHTTPServer", new=MockRedirectServer)
 def test_local_server_login_flower_manager_confidential():
     """
     test LocalServerLoginManager with a ConfidentialAppAuthClient
