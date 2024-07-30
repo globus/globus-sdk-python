@@ -1,1 +1,1 @@
-include src/globus_sdk/experimental/html_files/*
+include src/globus_sdk/experimental/login_flow_manager/local_server_login_flow_manager/html_files/*

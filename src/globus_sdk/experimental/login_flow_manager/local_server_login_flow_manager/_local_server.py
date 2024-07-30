@@ -22,7 +22,7 @@ if sys.version_info >= (3, 9):
 else:  # Python < 3.9
     import importlib_resources
 
-from ..local_server_login_flow_manager import html_files
+import globus_sdk.experimental.login_flow_manager.local_server_login_flow_manager.html_files as html_files  # noqa: E501
 
 _IS_WINDOWS = os.name == "nt"
 
