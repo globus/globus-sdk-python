@@ -4,6 +4,7 @@ import abc
 import dataclasses
 import os
 import sys
+import typing as t
 from dataclasses import dataclass
 
 from globus_sdk import (
@@ -22,6 +23,7 @@ from globus_sdk.experimental.auth_requirements_error import (
 )
 from globus_sdk.experimental.login_flow_manager import (
     CommandLineLoginFlowManager,
+    LocalServerLoginFlowManager,
     LoginFlowManager,
 )
 from globus_sdk.experimental.tokenstorage import JSONTokenStorage, TokenStorage
@@ -37,9 +39,9 @@ from .authorizer_factory import (
 from .errors import IdentityMismatchError, TokenValidationError
 
 if sys.version_info < (3, 8):
-    from typing_extensions import Protocol
+    from typing_extensions import Protocol, runtime_checkable
 else:
-    from typing import Protocol
+    from typing import Protocol, runtime_checkable
 
 
 def _default_filename(app_name: str, environment: str) -> str:
@@ -68,6 +70,14 @@ def _default_filename(app_name: str, environment: str) -> str:
         return os.path.expanduser(f"~/.globus/app/{app_name}/{filename}")
 
 
+@runtime_checkable
+class LoginFlowManagerProvider(Protocol):
+    @classmethod
+    def for_globus_app(
+        cls, app_name: str, login_client: AuthLoginClient, config: GlobusAppConfig
+    ) -> LoginFlowManager: ...
+
+
 class TokenValidationErrorHandler(Protocol):
     def __call__(self, app: GlobusApp, error: TokenValidationError) -> None: ...
 
@@ -88,21 +98,36 @@ def resolve_by_login_flow(app: GlobusApp, error: TokenValidationError) -> None:
     app.run_login_flow()
 
 
+KnownLoginFlowManager = t.Literal["command-line", "local-server"]
+_KnownLoginFlowManagers = dict[KnownLoginFlowManager, LoginFlowManagerProvider]
+KNOWN_LOGIN_FLOW_MANAGERS: _KnownLoginFlowManagers = {
+    "command-line": CommandLineLoginFlowManager,
+    "local-server": LocalServerLoginFlowManager,
+}
+
+LoginFlowManagerTypes = (
+    KnownLoginFlowManager | LoginFlowManagerProvider | LoginFlowManager
+)
+
+
 @dataclass(frozen=True)
 class GlobusAppConfig:
     """
     Various configuration options for controlling the behavior of a ``GlobusApp``.
 
-    :param login_flow_manager: an optional ``LoginFlowManager`` instance or class.
-        An instance will be used directly when driving app login flows. A class will
-        be initialized with the app's ``login_client`` and this config's
-        ``request_refresh_tokens``.
-        If not given the default behavior will depend on the type of ``GlobusApp``.
+    :param login_flow_manager: An optional ``LoginFlowManager`` instance, or provider,
+        or identifier ("command-line" or "local-server").
+        For a ``UserApp``, defaults to "command-line".
+        For a ``ClientApp``, this value is not supported.
+    :param login_redirect_uri: The redirect URI to use for login flows.
+        For a "local-server" login flow manager, this value is not supported.
+        For a native client, this value defaults to a globus-hosted helper page.
+        For a confidential client, this value is required.
+    :param request_refresh_tokens: If True, the ``GlobusApp`` will request refresh
+        tokens for long-lived access.
     :param token_storage: a ``TokenStorage`` instance or class that will
         be used for storing token data. If not passed a ``JSONTokenStorage``
         will be used.
-    :param request_refresh_tokens: If True, the ``GlobusApp`` will request refresh
-        tokens for long-lived access.
     :param token_validation_error_handler: A callable that will be called when a
         token validation error is encountered. The default behavior is to retry the
         login flow automatically.
@@ -110,9 +135,10 @@ class GlobusAppConfig:
         predominately for internal use and can be ignored in most cases.
     """
 
-    login_flow_manager: LoginFlowManager | type[LoginFlowManager] | None = None
-    token_storage: TokenStorage | None = None
+    login_flow_manager: LoginFlowManagerTypes | None = None
+    login_redirect_uri: str | None = None
     request_refresh_tokens: bool = False
+    token_storage: TokenStorage | None = None
     token_validation_error_handler: TokenValidationErrorHandler | None = (
         resolve_by_login_flow
     )
@@ -366,32 +392,34 @@ class UserApp(GlobusApp):
             config=config,
         )
 
-        if client_secret or isinstance(self._login_client, ConfidentialAppAuthClient):
-            # UserApps need more information to be accepted to properly support
-            # Confidential Clients. Raise an error to avoid a confusing failure later.
+        self._login_flow_manager = self._resolve_login_flow_manager(
+            app_name=self.app_name,
+            login_client=self._login_client,
+            config=config,
+        )
+
+    def _resolve_login_flow_manager(
+        self, app_name: str, login_client: AuthLoginClient, config: GlobusAppConfig
+    ) -> LoginFlowManager:
+        login_flow_manager = config.login_flow_manager
+        if isinstance(login_flow_manager, LoginFlowManager):
+            return login_flow_manager
+
+        elif isinstance(login_flow_manager, LoginFlowManagerProvider):
+            provider = login_flow_manager
+        elif login_flow_manager is None:
+            provider = CommandLineLoginFlowManager
+        elif login_flow_manager in KNOWN_LOGIN_FLOW_MANAGERS:
+            provider = KNOWN_LOGIN_FLOW_MANAGERS[login_flow_manager]
+        else:
+            allowed_keys = ", ".join(repr(k) for k in KNOWN_LOGIN_FLOW_MANAGERS.keys())
             raise GlobusSDKUsageError(
-                "UserApps don't currently support Confidential Clients"
+                f"Unsupported login_flow_manager value: {login_flow_manager!r}. "
+                f"Expected {allowed_keys}, a <LoginFlowManagerProvider>, or a "
+                f"<LoginFlowManager>."
             )
 
-        # get or instantiate config's login_flow_manager
-        if self.config.login_flow_manager:
-            if isinstance(self.config.login_flow_manager, LoginFlowManager):
-                self._login_flow_manager = self.config.login_flow_manager
-            elif isinstance(self.config.login_flow_manager, type(LoginFlowManager)):
-                self._login_flow_manager = self.config.login_flow_manager(
-                    self._login_client,
-                    request_refresh_tokens=self.config.request_refresh_tokens,
-                )
-            else:
-                raise TypeError(
-                    "login_flow_manager must be a LoginFlowManager instance or class"
-                )
-        # or make a default CommandLineLoginFlowManager
-        else:
-            self._login_flow_manager = CommandLineLoginFlowManager(
-                self._login_client,
-                request_refresh_tokens=self.config.request_refresh_tokens,
-            )
+        return provider.for_globus_app(app_name, login_client, config)
 
     def _initialize_login_client(self, client_secret: str | None) -> None:
         if self.client_id is None:
@@ -479,8 +507,8 @@ class ClientApp(GlobusApp):
         scope_requirements: dict[str, list[Scope]] | None = None,
         config: GlobusAppConfig = _DEFAULT_CONFIG,
     ):
-        if config and config.login_flow_manager is not None:
-            raise ValueError("a ClientApp cannot use a login_flow_manager")
+        if config.login_flow_manager is not None:
+            raise GlobusSDKUsageError("A ClientApp cannot use a login_flow_manager")
 
         if login_client and not isinstance(login_client, ConfidentialAppAuthClient):
             raise GlobusSDKUsageError(

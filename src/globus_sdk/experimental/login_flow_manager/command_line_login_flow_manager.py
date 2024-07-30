@@ -1,9 +1,22 @@
-from globus_sdk import AuthLoginClient, OAuthTokenResponse
+from __future__ import annotations
+
+import textwrap
+import typing as t
+
+from globus_sdk import (
+    AuthLoginClient,
+    ConfidentialAppAuthClient,
+    GlobusSDKUsageError,
+    OAuthTokenResponse,
+)
 from globus_sdk.experimental.auth_requirements_error import (
     GlobusAuthorizationParameters,
 )
 
 from .login_flow_manager import LoginFlowManager
+
+if t.TYPE_CHECKING:
+    from globus_sdk.experimental.globus_app import GlobusAppConfig
 
 
 class CommandLineLoginFlowManager(LoginFlowManager):
@@ -25,7 +38,9 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         self,
         login_client: AuthLoginClient,
         *,
+        redirect_uri: str | None = None,
         request_refresh_tokens: bool = False,
+        native_prefill_named_grant: str | None = None,
         login_prompt: str = "Please authenticate with Globus here:",
         code_prompt: str = "Enter the resulting Authorization Code here:",
     ):
@@ -35,15 +50,55 @@ class CommandLineLoginFlowManager(LoginFlowManager):
             must either be a NativeAppAuthClient or a templated
             ConfidentialAppAuthClient, standard ConfidentialAppAuthClients cannot
             use the web auth-code flow.
+        :param redirect_uri: The redirect URI to use for the login flow. Defaults to
+            a globus-hosted helper web auth-code URI for NativeAppAuthClients.
         :param request_refresh_tokens: Control whether refresh tokens will be requested.
+        :param native_prefill_named_grant: The named grant label to prefill on the
+            consent page when using a NativeAppAuthClient.
         :param login_prompt: The string that will be output to the command line
             prompting the user to authenticate.
         :param code_prompt: The string that will be output to the command line
             prompting the user to enter their authorization code.
         """
+        super().__init__(
+            login_client,
+            request_refresh_tokens=request_refresh_tokens,
+            native_prefill_named_grant=native_prefill_named_grant,
+        )
         self.login_prompt = login_prompt
         self.code_prompt = code_prompt
-        super().__init__(login_client, request_refresh_tokens=request_refresh_tokens)
+
+        if redirect_uri is None:
+            # Confidential clients must always define their own custom redirect uri.
+            if isinstance(login_client, ConfidentialAppAuthClient):
+                msg = "Use of a Confidential client requires an explicit redirect_uri."
+                raise GlobusSDKUsageError(msg)
+
+            # Native clients may infer the globus-provided helper page if omitted.
+            redirect_uri = login_client.base_url + "v2/web/auth-code"
+        self.redirect_uri = redirect_uri
+
+    @classmethod
+    def for_globus_app(
+        cls, app_name: str, login_client: AuthLoginClient, config: GlobusAppConfig
+    ) -> CommandLineLoginFlowManager:
+        """
+        Create a ``CommandLineLoginFlowManager`` for a given ``GlobusAppConfig``.
+
+        :param app_name: The name of the app to use for prefilling the named grant in
+            native auth flows.
+        :param login_client: The ``AuthLoginClient`` to use to drive Globus Auth flows.
+        :param config: A ``GlobusAppConfig`` to configure the login flow.
+        :returns: A ``LocalServerLoginFlowManager`` instance.
+        :raises: GlobusSDKUsageError if a custom redirect_uri is omitted but a
+            ConfidentialAppAuthClient is used.
+        """
+        return cls(
+            login_client,
+            redirect_uri=config.login_redirect_uri,
+            request_refresh_tokens=config.request_refresh_tokens,
+            native_prefill_named_grant=app_name,
+        )
 
     def run_login_flow(
         self,
@@ -55,37 +110,23 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         :param auth_parameters: ``GlobusAuthorizationParameters`` passed through
             to the authentication flow to control how the user will authenticate.
         """
+        authorize_url = self._get_authorize_url(auth_parameters, self.redirect_uri)
+        auth_code = self._print_and_prompt(authorize_url)
 
-        # type is ignored here as AuthLoginClient does not provide a signature for
-        # oauth2_start_flow since it has different positional arguments between
-        # NativeAppAuthClient and ConfidentialAppAuthClient
-        self.login_client.oauth2_start_flow(  # type: ignore
-            redirect_uri=self.login_client.base_url + "v2/web/auth-code",
-            refresh_tokens=self.request_refresh_tokens,
-            requested_scopes=auth_parameters.required_scopes,
-        )
+        return self.login_client.oauth2_exchange_code_for_tokens(auth_code)
 
-        # create authorization url and prompt user to follow it to login
+    def _print_and_prompt(self, authorize_url: str) -> str:
+        # Prompt the user to authenticate
         print(
-            "{0}\n{1}\n{2}\n{1}\n".format(
-                self.login_prompt,
-                "-" * len(self.login_prompt),
-                self.login_client.oauth2_get_authorize_url(
-                    session_required_identities=(
-                        auth_parameters.session_required_identities
-                    ),
-                    session_required_single_domain=(
-                        auth_parameters.session_required_single_domain
-                    ),
-                    session_required_policies=auth_parameters.session_required_policies,
-                    session_required_mfa=auth_parameters.session_required_mfa,
-                    prompt=auth_parameters.prompt,  # type: ignore
-                ),
+            textwrap.dedent(
+                f"""
+                {self.login_prompt}
+                {"-" * len(self.login_prompt)}
+                {authorize_url}
+                {"-" * len(self.login_prompt)}
+                """
             )
         )
 
-        # ask user to copy and paste auth code
-        auth_code = input(f"{self.code_prompt}\n").strip()
-
-        # get and return tokens
-        return self.login_client.oauth2_exchange_code_for_tokens(auth_code)
+        # Request they to enter the auth code
+        return input(f"{self.code_prompt}\n").strip()

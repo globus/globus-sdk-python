@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import time
 from unittest import mock
@@ -6,6 +8,7 @@ import pytest
 
 from globus_sdk import (
     AccessTokenAuthorizer,
+    AuthLoginClient,
     ClientCredentialsAuthorizer,
     ConfidentialAppAuthClient,
     NativeAppAuthClient,
@@ -26,6 +29,7 @@ from globus_sdk.experimental.globus_app import (
 )
 from globus_sdk.experimental.login_flow_manager import (
     CommandLineLoginFlowManager,
+    LocalServerLoginFlowManager,
     LoginFlowManager,
 )
 from globus_sdk.experimental.tokenstorage import (
@@ -72,7 +76,12 @@ def test_user_app_native():
 
 
 def test_user_app_login_client():
-    mock_client = mock.Mock(environment="production")
+    mock_client = mock.Mock(
+        spec=NativeAppAuthClient,
+        client_id="mock-client_id",
+        base_url="https://auth.globus.org",
+        environment="production",
+    )
     user_app = UserApp("test-app", login_client=mock_client)
 
     assert user_app.app_name == "test-app"
@@ -130,11 +139,46 @@ def test_user_app_creates_consent_client():
     assert user_app._validating_token_storage._consent_client is not None
 
 
-@pytest.mark.xfail(reason="UserApp does not yet support confidential clients")
+class MockLoginFlowManager(LoginFlowManager):
+    def __init__(self, login_client: AuthLoginClient | None = None):
+        login_client = login_client or mock.Mock(spec=NativeAppAuthClient)
+        super().__init__(login_client)
+
+    @classmethod
+    def for_globus_app(
+        cls, app_name: str, login_client: AuthLoginClient, config: GlobusAppConfig
+    ) -> MockLoginFlowManager:
+        return cls(login_client)
+
+    def run_login_flow(self, auth_parameters: GlobusAuthorizationParameters):
+        return mock.Mock()
+
+
+@pytest.mark.parametrize(
+    "value,login_flow_manager_class",
+    (
+        (None, CommandLineLoginFlowManager),
+        ("command-line", CommandLineLoginFlowManager),
+        ("local-server", LocalServerLoginFlowManager),
+        (MockLoginFlowManager(), MockLoginFlowManager),
+        (MockLoginFlowManager, MockLoginFlowManager),
+    ),
+)
+def test_user_app_login_flow_manager_configuration(value, login_flow_manager_class):
+    client_id = "mock_client_id"
+    config = GlobusAppConfig(login_flow_manager=value)
+    user_app = UserApp("test-app", client_id=client_id, config=config)
+
+    assert isinstance(user_app._login_flow_manager, login_flow_manager_class)
+
+
 def test_user_app_templated():
     client_id = "mock_client_id"
     client_secret = "mock_client_secret"
-    user_app = UserApp("test-app", client_id=client_id, client_secret=client_secret)
+    config = GlobusAppConfig(login_redirect_uri="https://example.com")
+    user_app = UserApp(
+        "test-app", client_id=client_id, client_secret=client_secret, config=config
+    )
 
     assert user_app.app_name == "test-app"
     assert isinstance(user_app._login_client, ConfidentialAppAuthClient)
@@ -277,7 +321,7 @@ class RaisingLoginFlowManagerCounter(LoginFlowManager):
     """
 
     def __init__(self):
-        super().__init__(None)
+        super().__init__(mock.Mock(spec=NativeAppAuthClient))
         self.counter = 0
 
     def run_login_flow(

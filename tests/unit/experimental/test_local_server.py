@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from globus_sdk.experimental.login_flow_manager._local_server import (
+from globus_sdk.experimental.login_flow_manager.local_server_login_flow_manager._local_server import (  # noqa: E501
     DEFAULT_HTML_TEMPLATE,
     LocalServerError,
     RedirectHandler,

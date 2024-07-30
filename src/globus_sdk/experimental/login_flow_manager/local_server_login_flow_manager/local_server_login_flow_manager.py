@@ -7,9 +7,12 @@ import webbrowser
 from contextlib import contextmanager
 from string import Template
 
-from globus_sdk import AuthLoginClient, OAuthTokenResponse
+from globus_sdk import AuthLoginClient, GlobusSDKUsageError, OAuthTokenResponse
 from globus_sdk.experimental.auth_requirements_error import (
     GlobusAuthorizationParameters,
+)
+from globus_sdk.experimental.login_flow_manager.login_flow_manager import (
+    LoginFlowManager,
 )
 
 from ._local_server import (
@@ -18,7 +21,9 @@ from ._local_server import (
     RedirectHandler,
     RedirectHTTPServer,
 )
-from .login_flow_manager import LoginFlowManager
+
+if t.TYPE_CHECKING:
+    from globus_sdk.experimental.globus_app import GlobusAppConfig
 
 # a list of text-only browsers which are not allowed for use because they don't work
 # with Globus Auth login flows and seize control of the terminal
@@ -98,6 +103,7 @@ class LocalServerLoginFlowManager(LoginFlowManager):
         login_client: AuthLoginClient,
         *,
         request_refresh_tokens: bool = False,
+        native_prefill_named_grant: str | None = None,
         server_address: tuple[str, int] = ("127.0.0.1", 0),
         html_template: Template = DEFAULT_HTML_TEMPLATE,
     ):
@@ -108,14 +114,45 @@ class LocalServerLoginFlowManager(LoginFlowManager):
             ConfidentialAppAuthClient, standard ConfidentialAppAuthClients cannot
             use the web auth-code flow.
         :param request_refresh_tokens: Control whether refresh tokens will be requested.
+        :param native_prefill_named_grant: The named grant label to prefill on the
+            consent page when using a NativeAppAuthClient.
         :param html_template: Optional HTML Template to be populated with the values
             login_result and post_login_message and displayed to the user.
         :param server_address: Optional tuple of the form (host, port) to specify an
             address to run the local server at.
         """
+        super().__init__(
+            login_client,
+            request_refresh_tokens=request_refresh_tokens,
+            native_prefill_named_grant=native_prefill_named_grant,
+        )
         self.server_address = server_address
         self.html_template = html_template
-        super().__init__(login_client, request_refresh_tokens=request_refresh_tokens)
+
+    @classmethod
+    def for_globus_app(
+        cls, app_name: str, login_client: AuthLoginClient, config: GlobusAppConfig
+    ) -> LocalServerLoginFlowManager:
+        """
+        Create a ``LocalServerLoginFlowManager`` for a given ``GlobusAppConfig``.
+
+        :param app_name: The name of the app to use for prefilling the named grant,.
+        :param login_client: The ``AuthLoginClient`` to use to drive Globus Auth flows.
+        :param config: A ``GlobusAppConfig`` to configure the login flow.
+        :returns: A ``LocalServerLoginFlowManager`` instance.
+        :raises: GlobusSDKUsageError if a custom redirect_uri is defined in config.
+        """
+        if config.login_redirect_uri:
+            # A "local server" relies on the user being redirected back to the server
+            # running on the local machine, so it can't use a custom redirect uri.
+            msg = "Cannot define a custom redirect_uri for LocalServerLoginFlowManager."
+            raise GlobusSDKUsageError(msg)
+
+        return cls(
+            login_client,
+            request_refresh_tokens=config.request_refresh_tokens,
+            native_prefill_named_grant=app_name,
+        )
 
     def run_login_flow(
         self,
@@ -130,44 +167,26 @@ class LocalServerLoginFlowManager(LoginFlowManager):
         """
         _check_remote_session()
 
-        with self.start_local_server() as server:
+        with self.background_local_server() as server:
             host, port = server.socket.getsockname()
             redirect_uri = f"http://{host}:{port}"
 
-            # type is ignored here as AuthLoginClient does not provide a signature for
-            # oauth2_start_flow since it has different positional arguments between
-            # NativeAppAuthClient and ConfidentialAppAuthClient
-            self.login_client.oauth2_start_flow(  # type: ignore
-                redirect_uri=redirect_uri,
-                refresh_tokens=self.request_refresh_tokens,
-                requested_scopes=auth_parameters.required_scopes,
-            )
-
             # open authorize url in web-browser for user to authenticate
-            url = self.login_client.oauth2_get_authorize_url(
-                session_required_identities=auth_parameters.session_required_identities,
-                session_required_single_domain=(
-                    auth_parameters.session_required_single_domain
-                ),
-                session_required_policies=auth_parameters.session_required_policies,
-                session_required_mfa=auth_parameters.session_required_mfa,
-                prompt=auth_parameters.prompt,  # type: ignore
-            )
-            _open_webbrowser(url)
+            authorize_url = self._get_authorize_url(auth_parameters, redirect_uri)
+            _open_webbrowser(authorize_url)
 
             # get auth code from server
             auth_code = server.wait_for_code()
 
         if isinstance(auth_code, BaseException):
-            raise LocalServerError(
-                f"Authorization failed with unexpected error:\n{auth_code}"
-            )
+            msg = f"Authorization failed with unexpected error:\n{auth_code}."
+            raise LocalServerError(msg)
 
         # get and return tokens
         return self.login_client.oauth2_exchange_code_for_tokens(auth_code)
 
     @contextmanager
-    def start_local_server(self) -> t.Iterator[RedirectHTTPServer]:
+    def background_local_server(self) -> t.Iterator[RedirectHTTPServer]:
         """
         Starts a RedirectHTTPServer in a thread as a context manager.
         """
