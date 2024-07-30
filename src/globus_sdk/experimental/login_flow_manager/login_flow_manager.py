@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 
 from globus_sdk import (
@@ -33,8 +35,8 @@ class LoginFlowManager(metaclass=abc.ABCMeta):
             flow. This value will be ignored if the login_client is not a
             NativeAppAuthClient.
         """
-        if not isinstance(
-            login_client, NativeAppAuthClient | ConfidentialAppAuthClient
+        if not isinstance(login_client, NativeAppAuthClient) and not isinstance(
+            login_client, ConfidentialAppAuthClient
         ):
             raise GlobusSDKUsageError(
                 f"{type(self).__name__} requires a NativeAppAuthClient or "

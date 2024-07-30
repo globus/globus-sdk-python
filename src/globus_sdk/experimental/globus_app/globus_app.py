@@ -99,15 +99,10 @@ def resolve_by_login_flow(app: GlobusApp, error: TokenValidationError) -> None:
 
 
 KnownLoginFlowManager = t.Literal["command-line", "local-server"]
-_KnownLoginFlowManagers = dict[KnownLoginFlowManager, LoginFlowManagerProvider]
-KNOWN_LOGIN_FLOW_MANAGERS: _KnownLoginFlowManagers = {
+KNOWN_LOGIN_FLOW_MANAGERS: dict[KnownLoginFlowManager, LoginFlowManagerProvider] = {
     "command-line": CommandLineLoginFlowManager,
     "local-server": LocalServerLoginFlowManager,
 }
-
-LoginFlowManagerTypes = (
-    KnownLoginFlowManager | LoginFlowManagerProvider | LoginFlowManager
-)
 
 
 @dataclass(frozen=True)
@@ -135,7 +130,9 @@ class GlobusAppConfig:
         predominately for internal use and can be ignored in most cases.
     """
 
-    login_flow_manager: LoginFlowManagerTypes | None = None
+    login_flow_manager: (
+        KnownLoginFlowManager | LoginFlowManagerProvider | LoginFlowManager | None
+    ) = None  # noqa: E501
     login_redirect_uri: str | None = None
     request_refresh_tokens: bool = False
     token_storage: TokenStorage | None = None
