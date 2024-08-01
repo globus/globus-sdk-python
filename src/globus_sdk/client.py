@@ -9,7 +9,7 @@ from globus_sdk._types import ScopeCollectionType
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.paging import PaginatorTable
 from globus_sdk.response import GlobusHTTPResponse
-from globus_sdk.scopes import Scope, ScopeBuilder, scopes_to_str
+from globus_sdk.scopes import Scope, ScopeBuilder
 from globus_sdk.transport import RequestsTransport
 
 if t.TYPE_CHECKING:
@@ -209,8 +209,7 @@ class BaseClient:
                 "Unable to use an 'app' with a client with no "
                 "'resource_server' defined."
             )
-        scopes = Scope.parse(scopes_to_str(scope_collection))
-        self._app.add_scope_requirements({self.resource_server: scopes})
+        self._app.add_scope_requirements({self.resource_server: scope_collection})
 
         return self
 

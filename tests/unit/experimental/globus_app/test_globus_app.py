@@ -33,7 +33,7 @@ from globus_sdk.experimental.tokenstorage import (
     MemoryTokenStorage,
     TokenData,
 )
-from globus_sdk.scopes import Scope
+from globus_sdk.scopes import AuthScopes, Scope
 from globus_sdk.services.auth import OAuthTokenResponse
 
 
@@ -215,6 +215,41 @@ def test_add_scope_requirements_and_auth_params_with_required_scopes():
         ["email", "foo:all[bar:all baz:all]", "openid", "profile"],
         ["email", "foo:all[baz:all bar:all]", "openid", "profile"],
     )
+
+
+@pytest.mark.parametrize(
+    "scope_collection",
+    ("email", AuthScopes.email, Scope("email"), [Scope("email")]),
+)
+def test_add_scope_requirements_accepts_different_scope_types(scope_collection):
+    client_id = "mock_client_id"
+    user_app = UserApp("test-app", client_id=client_id)
+
+    assert _sorted_auth_scope_str(user_app) == "openid"
+
+    # Add a scope scope string
+    user_app.add_scope_requirements({"auth.globus.org": scope_collection})
+    assert _sorted_auth_scope_str(user_app) == "email openid"
+
+
+@pytest.mark.parametrize(
+    "scope_collection",
+    ("email", AuthScopes.email, Scope("email"), [Scope("email")]),
+)
+def test_constructor_scope_requirements_accepts_different_scope_types(scope_collection):
+    client_id = "mock_client_id"
+    user_app = UserApp(
+        "test-app",
+        client_id=client_id,
+        scope_requirements={"auth.globus.org": scope_collection},
+    )
+
+    assert _sorted_auth_scope_str(user_app) == "email openid"
+
+
+def _sorted_auth_scope_str(user_app: UserApp) -> str:
+    scope_list = user_app.get_scope_requirements("auth.globus.org")
+    return " ".join(sorted(str(scope) for scope in scope_list))
 
 
 def test_user_app_get_authorizer():

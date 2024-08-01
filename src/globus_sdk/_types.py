@@ -22,7 +22,7 @@ ScopeCollectionType = t.Union[
     str,
     MutableScope,
     Scope,
-    t.Iterable[t.Union[str, MutableScope, Scope]],
+    t.Iterable["ScopeCollectionType"],
 ]
 
 

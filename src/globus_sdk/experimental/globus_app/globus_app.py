@@ -14,7 +14,7 @@ from globus_sdk import (
     Scope,
 )
 from globus_sdk import config as sdk_config
-from globus_sdk._types import UUIDLike
+from globus_sdk._types import ScopeCollectionType, UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.exc import GlobusSDKUsageError
 from globus_sdk.experimental.auth_requirements_error import (
@@ -25,7 +25,7 @@ from globus_sdk.experimental.login_flow_manager import (
     LoginFlowManager,
 )
 from globus_sdk.experimental.tokenstorage import JSONTokenStorage, TokenStorage
-from globus_sdk.scopes import AuthScopes
+from globus_sdk.scopes import AuthScopes, scopes_to_scope_list
 
 from ._validating_token_storage import ValidatingTokenStorage
 from .authorizer_factory import (
@@ -149,7 +149,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         login_client: AuthLoginClient | None = None,
         client_id: UUIDLike | None = None,
         client_secret: str | None = None,
-        scope_requirements: dict[str, list[Scope]] | None = None,
+        scope_requirements: dict[str, ScopeCollectionType] | None = None,
         config: GlobusAppConfig = _DEFAULT_CONFIG,
     ):
         """
@@ -165,8 +165,9 @@ class GlobusApp(metaclass=abc.ABCMeta):
             type of ``GlobusApp``. Mutually exclusive with ``login_client``.
         :client_secret: The value of the client secret for ``client_id`` if it uses
             secrets. Mutually exclusive with ``login_client``.
-        :param scope_requirements: A dict of lists of required scopes indexed by
-            their resource server.
+        :param scope_requirements: A dictionary of scope requirements indexed by
+            resource server. The dict value may be a scope, scope string, or list of
+            scopes or scope strings.
         :config: A ``GlobusAppConfig`` used to control various behaviors of this app.
         """
         self.app_name = app_name
@@ -193,7 +194,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
             self.client_id = client_id
             self._initialize_login_client(client_secret)
 
-        self._scope_requirements = scope_requirements or {}
+        self._scope_requirements = self._setup_scope_requirements(scope_requirements)
 
         # either get config's TokenStorage, or make the default JSONTokenStorage
         if self.config.token_storage:
@@ -219,6 +220,17 @@ class GlobusApp(metaclass=abc.ABCMeta):
         # registered (it's required for token identity validation).
         consent_client = AuthClient(app=self, app_scopes=[Scope(AuthScopes.openid)])
         self._validating_token_storage.set_consent_client(consent_client)
+
+    def _setup_scope_requirements(
+        self, scope_requirements: dict[str, ScopeCollectionType] | None
+    ) -> dict[str, list[Scope]]:
+        if scope_requirements is None:
+            return {}
+
+        return {
+            resource_server: scopes_to_scope_list(scopes)
+            for resource_server, scopes in scope_requirements.items()
+        }
 
     @abc.abstractmethod
     def _initialize_login_client(self, client_secret: str | None) -> None:
@@ -288,7 +300,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
             raise e
 
     def add_scope_requirements(
-        self, scope_requirements: dict[str, list[Scope]]
+        self, scope_requirements: dict[str, ScopeCollectionType]
     ) -> None:
         """
         Add given scope requirements to the app's scope requirements. Any duplicate
@@ -298,10 +310,8 @@ class GlobusApp(metaclass=abc.ABCMeta):
             that will be added to this app's scope requirements
         """
         for resource_server, scopes in scope_requirements.items():
-            if resource_server not in self._scope_requirements:
-                self._scope_requirements[resource_server] = scopes[:]
-            else:
-                self._scope_requirements[resource_server].extend(scopes)
+            curr = self._scope_requirements.setdefault(resource_server, [])
+            curr.extend(scopes_to_scope_list(scopes))
 
         self._authorizer_factory.clear_cache(*scope_requirements.keys())
 
@@ -354,7 +364,7 @@ class UserApp(GlobusApp):
         login_client: AuthLoginClient | None = None,
         client_id: UUIDLike | None = None,
         client_secret: str | None = None,
-        scope_requirements: dict[str, list[Scope]] | None = None,
+        scope_requirements: dict[str, ScopeCollectionType] | None = None,
         config: GlobusAppConfig = _DEFAULT_CONFIG,
     ):
         super().__init__(
@@ -476,7 +486,7 @@ class ClientApp(GlobusApp):
         login_client: ConfidentialAppAuthClient | None = None,
         client_id: UUIDLike | None = None,
         client_secret: str | None = None,
-        scope_requirements: dict[str, list[Scope]] | None = None,
+        scope_requirements: dict[str, ScopeCollectionType] | None = None,
         config: GlobusAppConfig = _DEFAULT_CONFIG,
     ):
         if config and config.login_flow_manager is not None:
