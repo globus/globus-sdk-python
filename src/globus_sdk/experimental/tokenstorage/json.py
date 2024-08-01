@@ -37,7 +37,7 @@ class JSONTokenStorage(FileTokenStorage):
 
     def _invalid(self, msg: str) -> t.NoReturn:
         raise ValueError(
-            f"{msg} while loading from '{self.filename}' for JSON Token Storage"
+            f"{msg} while loading from '{self.filepath}' for JSON Token Storage"
         )
 
     def _raw_load(self) -> dict[str, t.Any]:
@@ -45,7 +45,7 @@ class JSONTokenStorage(FileTokenStorage):
         Load the file contents as JSON and return the resulting dict
         object. If a dict is not found, raises an error.
         """
-        with open(self.filename, encoding="utf-8") as f:
+        with open(self.filepath, encoding="utf-8") as f:
             val = json.load(f)
         if not isinstance(val, dict):
             self._invalid("Found non-dict root data")
@@ -60,7 +60,7 @@ class JSONTokenStorage(FileTokenStorage):
         format_version = read_data.get("format_version")
         if format_version not in self.supported_versions:
             raise ValueError(
-                f"cannot store data using SimpleJSONTokenStorage({self.filename}) "
+                f"cannot store data using SimpleJSONTokenStorage({self.filepath}) "
                 "existing data file is in an unknown format "
                 f"(format_version={format_version})"
             )
@@ -80,7 +80,7 @@ class JSONTokenStorage(FileTokenStorage):
 
         if not isinstance(read_data.get("data"), dict):
             raise ValueError(
-                f"cannot store data using SimpleJSONTokenStorage({self.filename}) "
+                f"cannot store data using SimpleJSONTokenStorage({self.filepath}) "
                 "existing data file is malformed"
             )
         if any(
@@ -119,7 +119,7 @@ class JSONTokenStorage(FileTokenStorage):
         self, token_data_by_resource_server: dict[str, TokenData]
     ) -> None:
         """
-        Store token data as JSON data in ``self.filename`` under the current namespace
+        Store token data as JSON data in ``self.filepath`` under the current namespace
 
         Additionally will write the version of ``globus_sdk``which was in use.
 
@@ -145,7 +145,7 @@ class JSONTokenStorage(FileTokenStorage):
 
         # write the file, denying rwx to Group and World, exec to User
         with self.user_only_umask():
-            with open(self.filename, "w", encoding="utf-8") as f:
+            with open(self.filepath, "w", encoding="utf-8") as f:
                 json.dump(to_write, f)
 
     def get_token_data_by_resource_server(self) -> dict[str, TokenData]:
@@ -163,7 +163,7 @@ class JSONTokenStorage(FileTokenStorage):
     def remove_token_data(self, resource_server: str) -> bool:
         """
         Remove all tokens for a resource server from the JSON data, then overwrite
-        ``self.filename``.
+        ``self.filepath``.
 
         Returns True if token data was removed, False if none was found to remove.
 
@@ -176,7 +176,7 @@ class JSONTokenStorage(FileTokenStorage):
 
         # overwrite the file, denying rwx to Group and World, exec to User
         with self.user_only_umask():
-            with open(self.filename, "w", encoding="utf-8") as f:
+            with open(self.filepath, "w", encoding="utf-8") as f:
                 json.dump(to_write, f)
 
         return popped is not None

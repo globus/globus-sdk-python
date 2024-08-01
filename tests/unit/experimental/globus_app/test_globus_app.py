@@ -92,8 +92,8 @@ def test_user_app_login_client():
 
 def test_user_app_no_client_or_id():
     msg = (
-        "Could not to set up a globus login client. One of client_id or "
-        "login_client is required."
+        "Could not set up a globus login client. One of client_id or login_client is "
+        "required."
     )
     with pytest.raises(GlobusSDKUsageError, match=msg):
         UserApp("test-app")
@@ -127,10 +127,10 @@ def test_user_app_default_token_storage():
         # on the windows-latest run this was
         # C:\Users\runneradmin\AppData\Roaming\globus\app\mock_client_id\test-app\tokens.json
         expected = "\\globus\\app\\mock_client_id\\test-app\\tokens.json"
-        assert expected in token_storage.filename
+        assert token_storage.filepath.endswith(expected)
     else:
         expected = "~/.globus/app/mock_client_id/test-app/tokens.json"
-        assert token_storage.filename == os.path.expanduser(expected)
+        assert token_storage.filepath == os.path.expanduser(expected)
 
 
 class CustomMemoryTokenStorage(MemoryTokenStorage):

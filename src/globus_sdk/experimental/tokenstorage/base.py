@@ -116,12 +116,12 @@ class FileTokenStorage(TokenStorage, metaclass=abc.ABCMeta):
     # File suffix associated with files of this type (e.g., "csv")
     file_format: str = "_UNSET_"  # must be overridden by subclasses
 
-    def __init__(self, filename: pathlib.Path | str, *, namespace: str = "DEFAULT"):
+    def __init__(self, filepath: pathlib.Path | str, *, namespace: str = "DEFAULT"):
         """
-        :param filename: the name of the file to write to and read from
+        :param filepath: the name of the file to write to and read from
         :param namespace: A user-supplied namespace for partitioning token data
         """
-        self.filename = str(filename)
+        self.filepath = str(filepath)
         self._ensure_containing_dir_exists()
         super().__init__(namespace=namespace)
 
@@ -146,20 +146,20 @@ class FileTokenStorage(TokenStorage, metaclass=abc.ABCMeta):
         :param config: The GlobusAppConfig object for the Globus App.
         :param namespace: A user-supplied namespace for partitioning token data.
         """
-        filename = _default_globus_app_filename(client_id, app_name, config.environment)
-        return cls(filename=f"{filename}.{cls.file_format}", namespace=namespace)
+        filepath = _default_globus_app_filepath(client_id, app_name, config.environment)
+        return cls(filepath=f"{filepath}.{cls.file_format}", namespace=namespace)
 
     def _ensure_containing_dir_exists(self) -> None:
         """
-        Ensure that the directory containing the given filename exists.
+        Ensure that the directory containing the given filepath exists.
         """
-        os.makedirs(os.path.dirname(self.filename), exist_ok=True)
+        os.makedirs(os.path.dirname(self.filepath), exist_ok=True)
 
     def file_exists(self) -> bool:
         """
         Check if the file used by this file storage adapter exists.
         """
-        return os.path.exists(self.filename)
+        return os.path.exists(self.filepath)
 
     @contextlib.contextmanager
     def user_only_umask(self) -> t.Iterator[None]:
@@ -182,12 +182,12 @@ class FileTokenStorage(TokenStorage, metaclass=abc.ABCMeta):
             os.umask(old_umask)
 
 
-def _default_globus_app_filename(
+def _default_globus_app_filepath(
     client_id: UUIDLike, app_name: str, environment: str
 ) -> str:
     r"""
-    Construct a default TokenStorage filename for a globus app.
-    The filename will have no file format suffix.
+    Construct a default TokenStorage filepath for a GlobusApp.
+    For flexibility, the filepath will omit the file format suffix.
 
     On Windows, this will be:
         ``~\AppData\Local\globus\app\{client_id}\{app_name}\tokens``

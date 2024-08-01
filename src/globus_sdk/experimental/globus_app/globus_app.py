@@ -49,7 +49,7 @@ else:
 
 
 @runtime_checkable
-class TokenStorageProvidable(Protocol):
+class TokenStorageProvider(Protocol):
     @classmethod
     def for_globus_app(
         cls, client_id: UUIDLike, app_name: str, config: GlobusAppConfig, namespace: str
@@ -91,7 +91,7 @@ KNOWN_LOGIN_FLOW_MANAGERS: dict[KnownLoginFlowManager, LoginFlowManagerProvider]
 }
 
 KnownTokenStorage = t.Literal["json", "sqlite", "memory"]
-KNOWN_TOKEN_STORAGES: dict[KnownTokenStorage, t.Type[TokenStorageProvidable]] = {
+KNOWN_TOKEN_STORAGES: dict[KnownTokenStorage, t.Type[TokenStorageProvider]] = {
     "json": JSONTokenStorage,
     "sqlite": SQLiteTokenStorage,
     "memory": MemoryTokenStorage,
@@ -127,7 +127,7 @@ class GlobusAppConfig:
         KnownLoginFlowManager | LoginFlowManagerProvider | LoginFlowManager | None
     ) = None
     login_redirect_uri: str | None = None
-    token_storage: KnownTokenStorage | TokenStorageProvidable | TokenStorage = "json"
+    token_storage: KnownTokenStorage | TokenStorageProvider | TokenStorage = "json"
     request_refresh_tokens: bool = False
     token_validation_error_handler: TokenValidationErrorHandler | None = (
         resolve_by_login_flow
@@ -160,7 +160,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        app_name: str = "DEFAULT",
+        app_name: str = "Unnamed Globus App",
         *,
         login_client: AuthLoginClient | None = None,
         client_id: UUIDLike | None = None,
@@ -281,7 +281,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
 
         else:
             raise GlobusSDKUsageError(
-                "Could not to set up a globus login client. One of client_id or "
+                "Could not set up a globus login client. One of client_id or "
                 "login_client is required."
             )
 
@@ -305,7 +305,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
 
         This may be:
             1.  A TokenStorage instance provided by the user, which we use directly.
-            2.  A TokenStorageProvidable, which we use to get a TokenStorage.
+            2.  A TokenStorageProvider, which we use to get a TokenStorage.
             3.  A string value, which we map onto supported TokenStorage types.
 
         :returns: TokenStorage instance to be used by the app.
@@ -317,16 +317,16 @@ class GlobusApp(metaclass=abc.ABCMeta):
         if isinstance(token_storage, TokenStorage):
             return token_storage
 
-        elif isinstance(token_storage, TokenStorageProvidable):
+        elif isinstance(token_storage, TokenStorageProvider):
             return token_storage.for_globus_app(client_id, app_name, config, namespace)
 
         elif token_storage in KNOWN_TOKEN_STORAGES:
-            providable = KNOWN_TOKEN_STORAGES[token_storage]
-            return providable.for_globus_app(client_id, app_name, config, namespace)
+            provider = KNOWN_TOKEN_STORAGES[token_storage]
+            return provider.for_globus_app(client_id, app_name, config, namespace)
 
         raise GlobusSDKUsageError(
             f"Unsupported token_storage value: {token_storage}. Must be a "
-            f"TokenStorage, TokenStorageProvidable, or a supported string value."
+            f"TokenStorage, TokenStorageProvider, or a supported string value."
         )
 
     @abc.abstractmethod
@@ -450,7 +450,7 @@ class UserApp(GlobusApp):
 
     def __init__(
         self,
-        app_name: str = "DEFAULT",
+        app_name: str = "Unnamed Globus App",
         *,
         login_client: AuthLoginClient | None = None,
         client_id: UUIDLike | None = None,
@@ -575,7 +575,7 @@ class ClientApp(GlobusApp):
 
     def __init__(
         self,
-        app_name: str = "DEFAULT",
+        app_name: str = "Unnamed Globus App",
         *,
         login_client: ConfidentialAppAuthClient | None = None,
         client_id: UUIDLike | None = None,

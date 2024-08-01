@@ -31,24 +31,24 @@ class SQLiteTokenStorage(FileTokenStorage):
 
     def __init__(
         self,
-        filename: pathlib.Path | str,
+        filepath: pathlib.Path | str,
         *,
         connect_params: dict[str, t.Any] | None = None,
         namespace: str = "DEFAULT",
     ):
         """
-        :param filename: The name of the DB file to write to and read from.
+        :param filepath: The path of the DB file to write to and read from.
         :param connect_params: A pass-through dictionary for fine-tuning the SQLite
              connection.
         :param namespace: A user-supplied namespace for partitioning token data.
         """
-        if filename == ":memory:":
+        if filepath == ":memory:":
             raise exc.GlobusSDKUsageError(
                 "SQLiteTokenStorage cannot be used with a ':memory:' database. "
                 "If you want to store tokens in memory, use MemoryTokenStorage instead."
             )
 
-        super().__init__(filename, namespace=namespace)
+        super().__init__(filepath, namespace=namespace)
         self._connection = self._init_and_connect(connect_params)
 
     def _init_and_connect(
@@ -59,7 +59,7 @@ class SQLiteTokenStorage(FileTokenStorage):
         if not self.file_exists():
             with self.user_only_umask():
                 conn: sqlite3.Connection = sqlite3.connect(
-                    self.filename, **connect_params
+                    self.filepath, **connect_params
                 )
             conn.executescript(
                 textwrap.dedent(
@@ -97,7 +97,7 @@ class SQLiteTokenStorage(FileTokenStorage):
             )
             conn.commit()
         else:
-            conn = sqlite3.connect(self.filename, **connect_params)
+            conn = sqlite3.connect(self.filepath, **connect_params)
         return conn
 
     def close(self) -> None:
@@ -111,7 +111,7 @@ class SQLiteTokenStorage(FileTokenStorage):
     ) -> None:
         """
         Given a dict of token data indexed by resource server, convert the data into
-        JSON dicts and write it to ``self.filename`` under the current namespace
+        JSON dicts and write it to ``self.filepath`` under the current namespace
 
         :param token_data_by_resource_server: a ``dict`` of ``TokenData`` objects
             indexed by their ``resource_server``.

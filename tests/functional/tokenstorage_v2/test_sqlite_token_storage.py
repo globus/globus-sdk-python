@@ -21,7 +21,7 @@ def adapters_to_close():
 @pytest.fixture
 def make_adapter(adapters_to_close, db_file):
     def func(*args, **kwargs):
-        if len(args) == 0 and "filename" not in kwargs:
+        if len(args) == 0 and "filepath" not in kwargs:
             args = (db_file,)
         ret = SQLiteTokenStorage(*args, **kwargs)
         adapters_to_close.add(ret)

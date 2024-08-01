@@ -20,5 +20,8 @@ Changed
         ``"json"`` to use a ``JSONTokenStorage``, ``"sqlite"`` to use a
         ``SQLiteTokenStorage`` and ``"memory"`` to use a ``MemoryTokenStorage``.
 
-    -   ``GlobusAppConfig.token_storage`` also now accepts a ``TokenStorageProvidable``,
+    -   ``GlobusAppConfig.token_storage`` also now accepts a ``TokenStorageProvider``,
         a class with a ``for_globus_app(...) -> TokenStorage`` class method.
+
+    -   Renamed the experimental ``FileTokenStorage`` attribute ``.filename`` to
+        ``.filepath``.
