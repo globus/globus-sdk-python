@@ -12,6 +12,87 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-3.44.0:
+
+v3.44.0 (2024-08-02)
+--------------------
+
+Added
+~~~~~
+
+-   Added a reference to the new Flows all scope under
+    ``globus_sdk.scopes.FlowsScopes.all``. (:pr:`1016`)
+
+.. rubric:: Experimental
+
+-   Added support for ``ScopeCollectionType`` to GlobusApp's ``__init__`` and
+    ``add_scope_requirements`` methods. (:pr:`1020`)
+
+Changed
+~~~~~~~
+
+-   Updated ``ScopeCollectionType`` to be defined recursively. (:pr:`1020`)
+
+- ``TransferClient.add_app_data_access_scope`` now raises an error if it is
+  given an invalid collection ID. (:pr:`1022`)
+
+.. rubric:: Experimental
+
+-   Changed the experimental ``GlobusApp`` class in the following way (:pr:`1017`):
+
+    -   ``app_name`` is no longer required (defaults to "DEFAULT")
+
+    -   Token storage now defaults to including the client id in the path.
+
+        -   Old (unix) : ``~/.globus/app/{app_name}/tokens.json``
+
+        -   New (unix): ``~/.globus/app/{client_id}/{app_name}/tokens.json``
+
+        -   Old (win): ``~\AppData\Local\globus\app\{app_name}\tokens.json``
+
+        -   New (win): ``~\AppData\Local\globus\app\{client_id}\{app_name}\tokens.json``
+
+    -   ``GlobusAppConfig.token_storage`` now accepts shorthand string references:
+        ``"json"`` to use a ``JSONTokenStorage``, ``"sqlite"`` to use a
+        ``SQLiteTokenStorage`` and ``"memory"`` to use a ``MemoryTokenStorage``.
+
+    -   ``GlobusAppConfig.token_storage`` also now accepts a ``TokenStorageProvider``,
+        a class with a ``for_globus_app(...) -> TokenStorage`` class method.
+
+    -   Renamed the experimental ``FileTokenStorage`` attribute ``.filename`` to
+        ``.filepath``.
+
+-   Changed the experimental ``GlobusApp`` class in the following ways (:pr:`1018`):
+
+    -   ``LoginFlowManagers`` now insert ``GlobusApp.app_name`` into any native
+        client login flows as the ``prefill_named_grant``.
+
+    -   ``GlobusAppConfig`` now accepts a ``login_redirect_uri`` parameter to specify
+        the redirect URI for a login flow.
+
+        -   Invalid when used with a ``LocalServerLoginFlowManager``.
+
+        -   Defaults to ``"https://auth.globus.org/v2/web/auth-code"`` for native
+            client flows. Raises an error if not set for confidential ones.
+
+    -   ``UserApp`` now allows for the use of confidential client flows with the use of
+        either a ``LocalServerLoginFlowManager`` or a configured ``login_redirect_uri``.
+
+    -   ``GlobusAppConfig.login_flow_manager`` now accepts shorthand string references
+        ``"command-line"`` to use a ``CommandLineLoginFlowManager`` and
+        ``"local-server"`` to use a ``LocalServerLoginFlowManager``.
+
+    -   ``GlobusAppConfig.login_flow_manager`` also now accepts a
+        ``LoginFlowManagerProvider``, a class with a
+        ``for_globus_app(...) -> LoginFlowManager`` class method.
+
+Development
+~~~~~~~~~~~
+
+-   Added a scope normalization function ``globus_sdk.scopes.scopes_to_scope_list`` to
+    translate from ``ScopeCollectionType`` to a list of ``Scope`` objects.
+    (:pr:`1020`)
+
 .. _changelog-3.43.0:
 
 v3.43.0 (2024-07-25)
