@@ -96,7 +96,7 @@ class ConnectorTable:
             yield item
 
     @classmethod
-    def lookup(cls, name_or_id: str | UUIDLike) -> GlobusConnectServerConnector | None:
+    def lookup(cls, name_or_id: UUIDLike) -> GlobusConnectServerConnector | None:
         """
         Convert a name or ID into a connector object.
         Returns None if the name or ID is not recognized.
@@ -115,6 +115,42 @@ class ConnectorTable:
             ):
                 return connector
         return None
+
+    @classmethod
+    def extend(
+        cls,
+        *,
+        connector_name: str,
+        connector_id: UUIDLike,
+        attribute_name: str | None = None,
+    ) -> type[ConnectorTable]:
+        """
+        Extend the ConnectorTable class with a new connector, returning a new
+        ConnectorTable subclass.
+
+        :param connector_name: The name of the connector to add
+        :param connector_id: The ID of the connector to add
+        :param attribute_name: The attribute name with which the connector will be
+            attached to the new subclass. Defaults to the connector name uppercased and
+            with spaces converted to underscores.
+        """
+        if attribute_name is None:
+            attribute_name = connector_name.upper().replace(" ", "_")
+        connector_id_str = str(connector_id)
+
+        connectors = cls._connectors + (
+            attribute_name,
+            connector_name,
+            connector_id_str,
+        )
+        connector_obj = GlobusConnectServerConnector(
+            name=connector_name, connector_id=connector_id_str
+        )
+        return type(
+            "ExtendedConnectorTable",
+            (ConnectorTable,),
+            {"_connectors": connectors, attribute_name: connector_obj},
+        )
 
 
 # "render" the _connectors to live attributes of the ConnectorTable
