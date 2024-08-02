@@ -32,7 +32,7 @@ def test_scopes_to_str_roundtrip_simple_str_in_collection(scope_collection):
         ((Scope("scope1"), MutableScope("scope2")), "scope1 scope2"),
         ((Scope("scope1"), MutableScope("scope2"), "scope3"), "scope1 scope2 scope3"),
         (
-            (Scope.parse("scope1 scope2"), "scope3 scope4"),
+            ((Scope("scope1"), Scope("scope2")), "scope3 scope4"),
             "scope1 scope2 scope3 scope4",
         ),
         (([[["bar"]]],), "bar"),
@@ -62,7 +62,7 @@ def test_scopes_to_scope_list_simple(scope_collection):
         ((Scope("scope1"), MutableScope("scope2")), "scope1 scope2"),
         ((Scope("scope1"), MutableScope("scope2"), "scope3"), "scope1 scope2 scope3"),
         (
-            (Scope.parse("scope1 scope2"), "scope3 scope4"),
+            ((Scope("scope1"), Scope("scope2")), "scope3 scope4"),
             "scope1 scope2 scope3 scope4",
         ),
         (([[["bar"]]],), "bar"),
