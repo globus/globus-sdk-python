@@ -32,7 +32,7 @@ def test_app_name_slugification_removes_control_characters():
 
 
 def test_app_name_slugification_rejects_empty_name():
-    with pytest.raises(GlobusSDKUsageError, match="name is empty"):
+    with pytest.raises(GlobusSDKUsageError, match="name results in the empty string"):
         _slugify_app_name("\n\t\r")
 
 
