@@ -40,7 +40,7 @@ Changed
 
 -   Changed the experimental ``GlobusApp`` class in the following way (:pr:`1017`):
 
-    -   ``app_name`` is no longer required (defaults to "DEFAULT")
+    -   ``app_name`` is no longer required (defaults to "Unnamed Globus App")
 
     -   Token storage now defaults to including the client id in the path.
 
