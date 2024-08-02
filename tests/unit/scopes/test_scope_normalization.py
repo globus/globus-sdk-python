@@ -31,6 +31,11 @@ def test_scopes_to_str_roundtrip_simple_str_in_collection(scope_collection):
         (("scope1", MutableScope("scope2")), "scope1 scope2"),
         ((Scope("scope1"), MutableScope("scope2")), "scope1 scope2"),
         ((Scope("scope1"), MutableScope("scope2"), "scope3"), "scope1 scope2 scope3"),
+        (
+            (Scope.parse("scope1 scope2"), "scope3 scope4"),
+            "scope1 scope2 scope3 scope4",
+        ),
+        (([[["bar"]]],), "bar"),
     ),
 )
 def test_scopes_to_str_handles_mixed_data(scope_collection, expect_str):
@@ -49,13 +54,25 @@ def test_scopes_to_scope_list_simple(scope_collection):
     assert str(actual_list[0]) == "scope1"
 
 
-def test_scopes_to_scope_list_handles_mixed_data():
-    scope_collection = ["scope1", MutableScope("scope2"), Scope.parse("scope3 scope4")]
+@pytest.mark.parametrize(
+    "scope_collection, expect_str",
+    (
+        (("scope1", "scope2"), "scope1 scope2"),
+        (("scope1", MutableScope("scope2")), "scope1 scope2"),
+        ((Scope("scope1"), MutableScope("scope2")), "scope1 scope2"),
+        ((Scope("scope1"), MutableScope("scope2"), "scope3"), "scope1 scope2 scope3"),
+        (
+            (Scope.parse("scope1 scope2"), "scope3 scope4"),
+            "scope1 scope2 scope3 scope4",
+        ),
+        (([[["bar"]]],), "bar"),
+    ),
+)
+def test_scopes_to_scope_list_handles_mixed_data(scope_collection, expect_str):
     actual_list = scopes_to_scope_list(scope_collection)
 
-    assert len(actual_list) == 4
     assert all(isinstance(scope, Scope) for scope in actual_list)
-    assert _as_sorted_string(actual_list) == "scope1 scope2 scope3 scope4"
+    assert _as_sorted_string(actual_list) == expect_str
 
 
 def test_scopes_to_scope_list_handles_dependent_scopes():
