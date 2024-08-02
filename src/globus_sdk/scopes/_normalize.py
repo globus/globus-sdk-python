@@ -11,7 +11,7 @@ if t.TYPE_CHECKING:
 
 def scopes_to_str(scopes: ScopeCollectionType) -> str:
     """
-    Utility function to normalize a scope collection to a space-separated scope string.
+    Normalize a scope collection to a space-separated scope string.
 
     e.g., scopes_to_str(Scope("foo")) -> "foo"
     e.g., scopes_to_str(Scope("foo"), "bar", MutableScope("qux")) -> "foo bar qux"
@@ -25,13 +25,17 @@ def scopes_to_str(scopes: ScopeCollectionType) -> str:
 
 def scopes_to_scope_list(scopes: ScopeCollectionType) -> list[Scope]:
     """
-    Utility function to normalize a scope collection to a list of Scope objects.
+    Normalize a scope collection to a list of Scope objects.
+
+    e.g., scopes_to_scope_list(Scope("foo")) -> [Scope("foo")]
+    e.g., scopes_to_scope_list(Scope("foo"), "bar baz", MutableScope("qux"))
+            -> [Scope("foo"), Scope("bar"), Scope("baz"), Scope("qux")]
 
     :param scopes: A scope string or object, or an iterable of scope strings or objects.
     :returns: A list of Scope objects.
     """
     scope_list: list[Scope] = []
-    for scope in _iter_scope_collection(scopes, split_root_scopes=True):
+    for scope in _iter_scope_collection(scopes):
         if isinstance(scope, str):
             scope_list.extend(Scope.parse(scope))
         elif isinstance(scope, MutableScope):
@@ -43,20 +47,27 @@ def scopes_to_scope_list(scopes: ScopeCollectionType) -> list[Scope]:
 
 def _iter_scope_collection(
     obj: ScopeCollectionType,
-    split_root_scopes: bool,
+    *,
+    split_root_scopes: bool = True,
 ) -> t.Iterator[str | MutableScope | Scope]:
     """
-    Convenience function to iterate over a scope collection type.
+    Provide an iterator over a scope collection type, flattening nested scope
+    collections as encountered.
+
+    e.g., _iter_scope_collection("foo") -> generator("foo")
+    e.g., _iter_scope_collection(Scope.parse("foo bar"), "baz qux")
+            -> generator(Scope("foo"), Scope("bar"), "baz", "qux")
 
     Collections of scope representations are yielded one at a time.
     Individual scope representations are yielded as-is.
 
     :obj: A scope collection or scope representation.
     :iter_scope_strings: If True, scope strings with multiple root scopes are split.
-        This flag allows you to skip a bfs operation if merging can be done purely
-        with strings.
-        e.g., _iter_scope_collection("foo bar[baz qux]", True) -> "foo", "bar[baz qux]"
-        e.g., _iter_scope_collection("foo bar[baz qux]", False) -> "foo bar[baz qux]"
+        This flag allows a caller to optimize, skipping a bfs operation if merging will
+        be done later purely with strings.
+        e.g., _iter_scope_collection("foo bar[baz qux]") -> "foo", "bar[baz qux]"
+        e.g., _iter_scope_collection("foo bar[baz qux]", split_root_scopes=False)
+            -> "foo bar[baz qux]"
     """
     if isinstance(obj, str):
         yield from _iter_scope_string(obj, split_root_scopes)
@@ -64,7 +75,7 @@ def _iter_scope_collection(
         yield obj
     else:
         for item in obj:
-            yield from _iter_scope_collection(item, split_root_scopes)
+            yield from _iter_scope_collection(item, split_root_scopes=split_root_scopes)
 
 
 def _iter_scope_string(scope_str: str, split_root_scopes: bool) -> t.Iterator[str]:
