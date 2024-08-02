@@ -196,8 +196,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
             client_secret=client_secret,
             login_client=login_client,
         )
-
-        self._scope_requirements = self._setup_scope_requirements(scope_requirements)
+        self._scope_requirements = self._resolve_scope_requirements(scope_requirements)
         self._token_storage = self._resolve_token_storage(
             app_name=self.app_name,
             client_id=self.client_id,
@@ -221,7 +220,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         consent_client = AuthClient(app=self, app_scopes=[Scope(AuthScopes.openid)])
         self._validating_token_storage.set_consent_client(consent_client)
 
-    def _setup_scope_requirements(
+    def _resolve_scope_requirements(
         self, scope_requirements: dict[str, ScopeCollectionType] | None
     ) -> dict[str, list[Scope]]:
         if scope_requirements is None:

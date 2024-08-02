@@ -32,14 +32,14 @@ def test_app_name_slugification_removes_control_characters():
 
 
 def test_app_name_slugification_rejects_empty_name():
-    with pytest.raises(GlobusSDKUsageError):
+    with pytest.raises(GlobusSDKUsageError, match="name is empty"):
         _slugify_app_name("\n\t\r")
 
 
 @pytest.mark.parametrize("app_name", ("CON", "PRN\n", "nul", "LPT9", "COM1"))
 def test_app_name_slugification_rejects_reserved_names(app_name):
     # # https://stackoverflow.com/a/31976060
-    with pytest.raises(GlobusSDKUsageError):
+    with pytest.raises(GlobusSDKUsageError, match="reserved filename"):
         _slugify_app_name(app_name)
 
 

@@ -251,13 +251,13 @@ def _slugify_app_name(app_name: str) -> str:
 
     if _RESERVED_FS_NAMES.fullmatch(app_name):
         msg = (
-            f'App name results in a reserved filename ("{app_name}"). Please choose a'
-            "different name."
+            f'App name results in a reserved filename ("{app_name}"). '
+            "Please choose a different name."
         )
         raise GlobusSDKUsageError(msg)
 
     if not app_name:
-        msg = "App name is empty after slugification. Please choose a different name."
+        msg = "App name results in the empty string. Please choose a different name."
         raise GlobusSDKUsageError(msg)
 
     return app_name
