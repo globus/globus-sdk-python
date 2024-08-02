@@ -69,7 +69,7 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         self.code_prompt = code_prompt
 
         if redirect_uri is None:
-            # Confidential clients must always define their own custom redirect uri.
+            # Confidential clients must always define their own custom redirect URI.
             if isinstance(login_client, ConfidentialAppAuthClient):
                 msg = "Use of a Confidential client requires an explicit redirect_uri."
                 raise GlobusSDKUsageError(msg)
@@ -89,9 +89,9 @@ class CommandLineLoginFlowManager(LoginFlowManager):
             native auth flows.
         :param login_client: The ``AuthLoginClient`` to use to drive Globus Auth flows.
         :param config: A ``GlobusAppConfig`` to configure the login flow.
-        :returns: A ``LocalServerLoginFlowManager`` instance.
-        :raises: GlobusSDKUsageError if a custom redirect_uri is omitted but a
-            ConfidentialAppAuthClient is used.
+        :returns: A ``CommandLineLoginFlowManager`` instance.
+        :raises: GlobusSDKUsageError if a login_redirect_uri is not set on the config
+            but a ConfidentialAppAuthClient is used.
         """
         return cls(
             login_client,

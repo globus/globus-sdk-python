@@ -140,11 +140,12 @@ class LocalServerLoginFlowManager(LoginFlowManager):
         :param login_client: The ``AuthLoginClient`` to use to drive Globus Auth flows.
         :param config: A ``GlobusAppConfig`` to configure the login flow.
         :returns: A ``LocalServerLoginFlowManager`` instance.
-        :raises: GlobusSDKUsageError if a custom redirect_uri is defined in config.
+        :raises: GlobusSDKUsageError if a custom login_redirect_uri is defined in
+            the config.
         """
         if config.login_redirect_uri:
             # A "local server" relies on the user being redirected back to the server
-            # running on the local machine, so it can't use a custom redirect uri.
+            # running on the local machine, so it can't use a custom redirect URI.
             msg = "Cannot define a custom redirect_uri for LocalServerLoginFlowManager."
             raise GlobusSDKUsageError(msg)
 
