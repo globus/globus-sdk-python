@@ -1,3 +1,4 @@
+from ._types import TokenValidationErrorHandler
 from ._validating_token_storage import ValidatingTokenStorage
 from .authorizer_factory import (
     AccessTokenAuthorizerFactory,
@@ -5,23 +6,20 @@ from .authorizer_factory import (
     ClientCredentialsAuthorizerFactory,
     RefreshTokenAuthorizerFactory,
 )
-from .globus_app import (
-    ClientApp,
-    GlobusApp,
-    GlobusAppConfig,
-    TokenValidationErrorHandler,
-    UserApp,
-)
+from .client_app import ClientApp
+from .config import GlobusAppConfig
+from .globus_app import GlobusApp
+from .user_app import UserApp
 
 __all__ = [
-    "ValidatingTokenStorage",
-    "AuthorizerFactory",
-    "AccessTokenAuthorizerFactory",
-    "RefreshTokenAuthorizerFactory",
-    "ClientCredentialsAuthorizerFactory",
     "GlobusApp",
     "UserApp",
     "ClientApp",
     "GlobusAppConfig",
+    "ValidatingTokenStorage",
+    "AccessTokenAuthorizerFactory",
+    "AuthorizerFactory",
+    "RefreshTokenAuthorizerFactory",
+    "ClientCredentialsAuthorizerFactory",
     "TokenValidationErrorHandler",
 ]
