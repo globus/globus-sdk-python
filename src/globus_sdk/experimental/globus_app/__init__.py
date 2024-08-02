@@ -1,5 +1,6 @@
 from ._types import TokenValidationErrorHandler
 from ._validating_token_storage import ValidatingTokenStorage
+from .app import GlobusApp
 from .authorizer_factory import (
     AccessTokenAuthorizerFactory,
     AuthorizerFactory,
@@ -8,7 +9,6 @@ from .authorizer_factory import (
 )
 from .client_app import ClientApp
 from .config import GlobusAppConfig
-from .globus_app import GlobusApp
 from .user_app import UserApp
 
 __all__ = [

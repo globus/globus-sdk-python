@@ -16,12 +16,12 @@ from globus_sdk.experimental.login_flow_manager import (
 )
 
 from ._types import LoginFlowManagerProvider
+from .app import GlobusApp
 from .authorizer_factory import (
     AccessTokenAuthorizerFactory,
     RefreshTokenAuthorizerFactory,
 )
 from .config import DEFAULT_CONFIG, KNOWN_LOGIN_FLOW_MANAGERS, GlobusAppConfig
-from .globus_app import GlobusApp
 
 
 class UserApp(GlobusApp):

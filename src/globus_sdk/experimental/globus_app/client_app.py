@@ -6,9 +6,9 @@ from globus_sdk.experimental.auth_requirements_error import (
     GlobusAuthorizationParameters,
 )
 
+from .app import GlobusApp
 from .authorizer_factory import ClientCredentialsAuthorizerFactory
 from .config import DEFAULT_CONFIG, GlobusAppConfig
-from .globus_app import GlobusApp
 
 
 class ClientApp(GlobusApp):

@@ -24,7 +24,7 @@ from ._types import (
 from .errors import IdentityMismatchError, TokenValidationError
 
 if t.TYPE_CHECKING:
-    from .globus_app import GlobusApp
+    from .app import GlobusApp
 
 
 KnownLoginFlowManager = t.Literal["command-line", "local-server"]
