@@ -4,11 +4,13 @@ import abc
 import contextlib
 import os
 import pathlib
+import re
 import sys
 import typing as t
 
 from globus_sdk.services.auth import OAuthTokenResponse
 
+from ... import GlobusSDKUsageError
 from ..._types import UUIDLike
 from .token_data import TokenData
 
@@ -122,7 +124,14 @@ class FileTokenStorage(TokenStorage, metaclass=abc.ABCMeta):
         :param namespace: A user-supplied namespace for partitioning token data
         """
         self.filepath = str(filepath)
-        self._ensure_containing_dir_exists()
+        try:
+            self._ensure_containing_dir_exists()
+        except OSError as e:
+            msg = (
+                "Encountered an error while initializing the token storage file "
+                f"'{self.filepath}'"
+            )
+            raise ValueError(msg) from e
         super().__init__(namespace=namespace)
 
     def __init_subclass__(cls, **kwargs: t.Any):
@@ -216,11 +225,39 @@ def _default_globus_app_filepath(
         )
 
 
+# https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#naming-conventions
+_RESERVED_FS_CHARS = re.compile(r'[<>:"/\\|?*]')
+# https://stackoverflow.com/a/31976060
+_RESERVED_FS_NAMES = re.compile(r"con|prn|aux|nul|com\d|lpt\d")
+
+
 def _slugify_app_name(app_name: str) -> str:
     """
     Slugify a globus app name for use in a file path.
 
-    This "slugification" will replace spaces with hyphens and lowercase the string so:
-      "My App" -> "my-app"
+    * Reserved filesystem characters are replaced with a '+'. ('a?' -> 'a+')
+    * Periods and Spaces are replaced with a '-'. ('a. b' -> 'a--b')
+    * Control characters are removed. ('a\0b' -> 'ab')
+    * The string is lowercased. ('AB' -> 'ab')
+
+    :raises: GlobusSDKUsageError if the app name is empty after slugification.
+    :raises: GlobusSDKUsageError if the app name is a reserved filesystem name (after
+        slugification).
     """
-    return app_name.replace(" ", "-").lower()
+    app_name = _RESERVED_FS_CHARS.sub("+", app_name)
+    app_name = app_name.replace(".", "-").replace(" ", "-")
+    app_name = "".join(c for c in app_name if c.isprintable())
+    app_name = app_name.lower()
+
+    if _RESERVED_FS_NAMES.fullmatch(app_name):
+        msg = (
+            f'App name results in a reserved filename ("{app_name}"). Please choose a'
+            "different name."
+        )
+        raise GlobusSDKUsageError(msg)
+
+    if not app_name:
+        msg = "App name is empty after slugification. Please choose a different name."
+        raise GlobusSDKUsageError(msg)
+
+    return app_name
