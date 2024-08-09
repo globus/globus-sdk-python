@@ -31,10 +31,7 @@ class FlowsClient(client.BaseClient):
     error_class = FlowsAPIError
     service_name = "flows"
     scopes = FlowsScopes
-    default_scope_requirements = [
-        Scope(FlowsScopes.view_flows),
-        Scope(FlowsScopes.run_status),
-    ]
+    default_scope_requirements = [Scope(FlowsScopes.all)]
 
     def create_flow(
         self,

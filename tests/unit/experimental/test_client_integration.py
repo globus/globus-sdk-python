@@ -107,9 +107,8 @@ def test_flows_client_default_scopes(app):
 
     flows_client_id = "eec9b274-0c81-4334-bdc2-54e90e689b9a"
     str_list = [str(s) for s in app.get_scope_requirements("flows.globus.org")]
-    assert len(str_list) == 2
-    assert f"https://auth.globus.org/scopes/{flows_client_id}/view_flows" in str_list
-    assert f"https://auth.globus.org/scopes/{flows_client_id}/run_status" in str_list
+    assert len(str_list) == 1
+    assert str_list == [f"https://auth.globus.org/scopes/{flows_client_id}/all"]
 
 
 def test_specific_flow_client_default_scopes(app):
