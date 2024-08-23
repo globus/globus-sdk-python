@@ -197,14 +197,21 @@ _LAZY_IMPORT_TABLE: list[tuple[str, tuple[str, ...]]] = [
         ),
     ),
     (
-        "services.timer",
+        "services.timers",
         (
-            "TimerAPIError",
-            "TimerClient",
+            "TimersAPIError",
+            "TimersClient",
             "TransferTimer",
             "TimerJob",
             "OnceTimerSchedule",
             "RecurringTimerSchedule",
+        ),
+    ),
+    (  # legacy module (remove in the future)
+        "services.timer",
+        (
+            "TimerAPIError",
+            "TimerClient",
         ),
     ),
     (

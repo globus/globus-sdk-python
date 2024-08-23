@@ -3,7 +3,11 @@ Globus Timer
 
 .. currentmodule:: globus_sdk
 
-.. autoclass:: TimerClient
+.. note::
+
+    ``TimersClient`` is also available under a legacy alias, ``TimerClient``.
+
+.. autoclass:: TimersClient
    :members:
    :member-order: bysource
    :show-inheritance:
@@ -43,9 +47,13 @@ New users should prefer the ``TransferTimer`` class.
 Client Errors
 -------------
 
-When an error occurs, a :class:`TimerClient` will raise specifically a `TimerAPIError`
-rather than just a :class:`GlobusAPIError`.
+When an error occurs on calls to the Timers service, a :class:`TimersClient`
+will raise a ``TimersAPIError``.
 
-.. autoclass:: TimerAPIError
+.. note::
+
+    ``TimersAPIError`` is also available under a legacy alias, ``TimerAPIError``.
+
+.. autoclass:: TimersAPIError
    :members:
    :show-inheritance:

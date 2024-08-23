@@ -120,13 +120,17 @@ _LAZY_IMPORT_TABLE = {
         "SearchQuery",
         "SearchScrollQuery",
     },
-    "services.timer": {
-        "TimerAPIError",
-        "TimerClient",
+    "services.timers": {
+        "TimersAPIError",
+        "TimersClient",
         "TransferTimer",
         "TimerJob",
         "OnceTimerSchedule",
         "RecurringTimerSchedule",
+    },
+    "services.timer": {
+        "TimerAPIError",
+        "TimerClient",
     },
     "services.transfer": {
         "ActivationRequirementsResponse",
@@ -228,12 +232,14 @@ if t.TYPE_CHECKING:
     from .services.search import SearchClient
     from .services.search import SearchQuery
     from .services.search import SearchScrollQuery
+    from .services.timers import TimersAPIError
+    from .services.timers import TimersClient
+    from .services.timers import TransferTimer
+    from .services.timers import TimerJob
+    from .services.timers import OnceTimerSchedule
+    from .services.timers import RecurringTimerSchedule
     from .services.timer import TimerAPIError
     from .services.timer import TimerClient
-    from .services.timer import TransferTimer
-    from .services.timer import TimerJob
-    from .services.timer import OnceTimerSchedule
-    from .services.timer import RecurringTimerSchedule
     from .services.transfer import ActivationRequirementsResponse
     from .services.transfer import DeleteData
     from .services.transfer import IterableTransferResponse
@@ -368,6 +374,8 @@ __all__ = (
     "TimerAPIError",
     "TimerClient",
     "TimerJob",
+    "TimersAPIError",
+    "TimersClient",
     "TransferAPIError",
     "TransferClient",
     "TransferData",

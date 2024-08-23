@@ -1,7 +1,7 @@
 Timer Operations Script
 -----------------------
 
-This example demonstrates the usage of methods on the Timer client to
+This example demonstrates the usage of methods on the Timers client to
 schedule a recurring Transfer task.
 
 .. note::
@@ -16,14 +16,14 @@ schedule a recurring Transfer task.
     from globus_sdk import (
         AccessTokenAuthorizer,
         NativeAppAuthClient,
-        TimerClient,
+        TimersClient,
         TimerJob,
         TransferData,
     )
     from globus_sdk.scopes import (
         GCSCollectionScopeBuilder,
         MutableScope,
-        TimerScopes,
+        TimersScopes,
         TransferScopes,
     )
 
@@ -38,9 +38,9 @@ schedule a recurring Transfer task.
     # that require data_access scopes, include them in this list
     MAPPED_COLLECTION_IDS = []
 
-    # Build a scope that will give the Timer service
+    # Build a scope that will give the Timers service
     # access to perform transfers on your behalf
-    timer_scope = TimerScopes.make_mutable("timer")
+    timer_scope = TimersScopes.make_mutable("timer")
     transfer_scope = TransferScopes.make_mutable("all")
     transfer_action_provider_scope_string = (
         "https://auth.globus.org/scopes/actions.globus.org/transfer/transfer"
@@ -63,7 +63,7 @@ schedule a recurring Transfer task.
     # Initialize your native app auth client
     native_client = NativeAppAuthClient(NATIVE_CLIENT_ID)
 
-    # Get access tokens to use for both Transfer and Timer
+    # Get access tokens to use for both Transfer and Timers
     native_client.oauth2_start_flow(requested_scopes=timer_scope)
     authorize_url = native_client.oauth2_get_authorize_url()
     print(f"Please go to this URL and login:\n\n{authorize_url}\n")
@@ -78,11 +78,11 @@ schedule a recurring Transfer task.
     )
     data.add_item("/share/godata/file1.txt", "/~/file1.txt")
 
-    # Set up the Timer client
+    # Set up the Timers client
     timer_authorizer = AccessTokenAuthorizer(timer_token)
-    timer_client = TimerClient(authorizer=timer_authorizer)
+    timer_client = TimersClient(authorizer=timer_authorizer)
 
-    # Create a Timer job, set to run the above transfer 2 times
+    # Create a timer, set to run the above transfer 2 times
     start = datetime.utcnow()
     interval = timedelta(minutes=30)
     name = "sdk-timer-example"

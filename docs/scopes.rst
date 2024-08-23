@@ -201,7 +201,11 @@ ScopeBuilder Constants
 .. autodata:: globus_sdk.scopes.data.SearchScopes
     :annotation:
 
-.. autodata:: globus_sdk.scopes.data.TimerScopes
+.. note::
+
+    ``TimersScopes`` is also available under the legacy name ``TimerScopes``.
+
+.. autodata:: globus_sdk.scopes.data.TimersScopes
     :annotation:
 
 .. autodata:: globus_sdk.scopes.data.TransferScopes

@@ -1,10 +1,10 @@
-from .client import TimerClient
+from .client import TimersClient
 from .data import OnceTimerSchedule, RecurringTimerSchedule, TimerJob, TransferTimer
-from .errors import TimerAPIError
+from .errors import TimersAPIError
 
 __all__ = (
-    "TimerAPIError",
-    "TimerClient",
+    "TimersAPIError",
+    "TimersClient",
     "OnceTimerSchedule",
     "RecurringTimerSchedule",
     "TimerJob",

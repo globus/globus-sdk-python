@@ -5,25 +5,25 @@ import typing as t
 
 from globus_sdk import client, exc, response
 from globus_sdk._types import UUIDLike
-from globus_sdk.scopes import Scope, TimerScopes
+from globus_sdk.scopes import Scope, TimersScopes
 
 from .data import TimerJob, TransferTimer
-from .errors import TimerAPIError
+from .errors import TimersAPIError
 
 log = logging.getLogger(__name__)
 
 
-class TimerClient(client.BaseClient):
+class TimersClient(client.BaseClient):
     r"""
     Client for the Globus Timer API.
 
-    .. automethodlist:: globus_sdk.TimerClient
+    .. automethodlist:: globus_sdk.TimersClient
     """
 
-    error_class = TimerAPIError
+    error_class = TimersAPIError
     service_name = "timer"
-    scopes = TimerScopes
-    default_scope_requirements = [Scope(TimerScopes.timer)]
+    scopes = TimersScopes
+    default_scope_requirements = [Scope(TimersScopes.timer)]
 
     def list_jobs(
         self, *, query_params: dict[str, t.Any] | None = None
@@ -35,10 +35,10 @@ class TimerClient(client.BaseClient):
 
         **Examples**
 
-        >>> timer_client = globus_sdk.TimerClient(...)
+        >>> timer_client = globus_sdk.TimersClient(...)
         >>> jobs = timer_client.list_jobs()
         """
-        log.info(f"TimerClient.list_jobs({query_params})")
+        log.info(f"TimersClient.list_jobs({query_params})")
         return self.get("/jobs/", query_params=query_params)
 
     def get_job(
@@ -55,11 +55,11 @@ class TimerClient(client.BaseClient):
 
         **Examples**
 
-        >>> timer_client = globus_sdk.TimerClient(...)
+        >>> timer_client = globus_sdk.TimersClient(...)
         >>> job = timer_client.get_job(job_id)
         >>> assert job["job_id"] == job_id
         """
-        log.info(f"TimerClient.get_job({job_id})")
+        log.info(f"TimersClient.get_job({job_id})")
         return self.get(f"/jobs/{job_id}", query_params=query_params)
 
     def create_timer(
@@ -81,7 +81,7 @@ class TimerClient(client.BaseClient):
 
                     >>> transfer_client = TransferClient(...)
                     >>> transfer_data = TransferData(transfer_client, ...)
-                    >>> timer_client = globus_sdk.TimerClient(...)
+                    >>> timer_client = globus_sdk.TimersClient(...)
                     >>> create_doc = globus_sdk.TransferTimer(
                     ...     name="my-timer",
                     ...     schedule={"type": "recurring", "interval": 1800},
@@ -102,7 +102,7 @@ class TimerClient(client.BaseClient):
                 "Cannot pass a TimerJob to create_timer(). "
                 "Create a TransferTimer instead."
             )
-        log.info("TimerClient.create_timer(...)")
+        log.info("TimersClient.create_timer(...)")
         return self.post("/v2/timer", data={"timer": timer})
 
     def create_job(
@@ -118,7 +118,7 @@ class TimerClient(client.BaseClient):
         >>> from datetime import datetime, timedelta
         >>> transfer_client = TransferClient(...)
         >>> transfer_data = TransferData(transfer_client, ...)
-        >>> timer_client = globus_sdk.TimerClient(...)
+        >>> timer_client = globus_sdk.TimersClient(...)
         >>> job = TimerJob.from_transfer_data(
         ...     transfer_data,
         ...     datetime.utcnow(),
@@ -132,7 +132,7 @@ class TimerClient(client.BaseClient):
                 "Cannot pass a TransferTimer to create_job(). Use create_timer() "
                 "instead."
             )
-        log.info(f"TimerClient.create_job({data})")
+        log.info(f"TimersClient.create_job({data})")
         return self.post("/jobs/", data=data)
 
     def update_job(
@@ -146,10 +146,10 @@ class TimerClient(client.BaseClient):
 
         **Examples**
 
-        >>> timer_client = globus_sdk.TimerClient(...)
+        >>> timer_client = globus_sdk.TimersClient(...)
         >>> timer_client.update_job(job_id, {"name": "new name}"})
         """
-        log.info(f"TimerClient.update_job({job_id}, {data})")
+        log.info(f"TimersClient.update_job({job_id}, {data})")
         return self.patch(f"/jobs/{job_id}", data=data)
 
     def delete_job(
@@ -163,10 +163,10 @@ class TimerClient(client.BaseClient):
 
         **Examples**
 
-        >>> timer_client = globus_sdk.TimerClient(...)
+        >>> timer_client = globus_sdk.TimersClient(...)
         >>> timer_client.delete_job(job_id)
         """
-        log.info(f"TimerClient.delete_job({job_id})")
+        log.info(f"TimersClient.delete_job({job_id})")
         return self.delete(f"/jobs/{job_id}")
 
     def pause_job(
@@ -180,10 +180,10 @@ class TimerClient(client.BaseClient):
 
         **Examples**
 
-        >>> timer_client = globus_sdk.TimerClient(...)
+        >>> timer_client = globus_sdk.TimersClient(...)
         >>> timer_client.pause_job(job_id)
         """
-        log.info(f"TimerClient.pause_job({job_id})")
+        log.info(f"TimersClient.pause_job({job_id})")
         return self.post(f"/jobs/{job_id}/pause")
 
     def resume_job(
@@ -208,10 +208,10 @@ class TimerClient(client.BaseClient):
 
         **Examples**
 
-        >>> timer_client = globus_sdk.TimerClient(...)
+        >>> timer_client = globus_sdk.TimersClient(...)
         >>> timer_client.resume_job(job_id)
         """
-        log.info(f"TimerClient.resume_job({job_id})")
+        log.info(f"TimersClient.resume_job({job_id})")
         data = {}
         if update_credentials is not None:
             data["update_credentials"] = update_credentials

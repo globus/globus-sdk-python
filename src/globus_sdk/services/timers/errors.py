@@ -6,12 +6,12 @@ from globus_sdk import _guards
 from globus_sdk.exc import ErrorSubdocument, GlobusAPIError
 
 
-class TimerAPIError(GlobusAPIError):
+class TimersAPIError(GlobusAPIError):
     """
-    Error class to represent error responses from Timer.
+    Error class to represent error responses from Timers.
 
     Has no particular additions to the base ``GlobusAPIError``, but implements a
-    different method for parsing error responses from Timer due to the differences
+    different method for parsing error responses from Timers due to the differences
     between various error formats used.
     """
 
