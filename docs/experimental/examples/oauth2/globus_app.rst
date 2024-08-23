@@ -87,7 +87,7 @@ client's resource server and configuring the app as the service client's auth pr
             my_app = UserApp("my-user-app", client_id=CLIENT_ID)
 
             transfer_client = globus_sdk.TransferClient(app=my_app)
-            flows_client = globus_Sdk.FlowsClient(app=my_app)
+            flows_client = globus_sdk.FlowsClient(app=my_app)
 
 
     .. tab-item:: ClientApp
