@@ -18,5 +18,5 @@ Each of these pages contains an example of a piece of SDK functionality.
    transfer_relative_deadlines
    recursive_ls
    endpoint_type_enum
-   timer_operations
+   timer_operations/index
    guest_collection_creation
