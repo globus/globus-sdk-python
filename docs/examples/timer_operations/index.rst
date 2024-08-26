@@ -3,7 +3,7 @@ Globus Timers Operations
 
 These examples demonstrate how to create, list, and delete Timers with the SDK.
 
-Create a Timer
+Create a timer
 ~~~~~~~~~~~~~~
 
 This script creates a new timer, on source and destination collections provided
@@ -13,18 +13,18 @@ via the command-line. It syncs an input file or directory between the two.
     The example given below does not handle ``data_access`` scope requirements.
     See the later example to handle this.
 
-.. literalinclude:: create_timer.py.py
-    :caption: ``create_timer.py.py`` [:download:`download <create_timer.py>`]
+.. literalinclude:: create_timer.py
+    :caption: ``create_timer.py`` [:download:`download <create_timer.py>`]
     :language: python
 
-Delete a Timer
+Delete a timer
 ~~~~~~~~~~~~~~
 
 This script creates a new timer, on source and destination collections provided
 via the command-line. It syncs an input file or directory between the two.
 
-.. literalinclude:: delete_timer.py.py
-    :caption: ``delete_timer.py.py`` [:download:`download <delete_timer.py>`]
+.. literalinclude:: delete_timer.py
+    :caption: ``delete_timer.py`` [:download:`download <delete_timer.py>`]
     :language: python
 
 Create a Timer with ``data_access``
