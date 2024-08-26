@@ -5,4 +5,4 @@ import globus_sdk
 
 @pytest.fixture
 def client():
-    return globus_sdk.TimerClient()
+    return globus_sdk.TimersClient()

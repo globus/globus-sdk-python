@@ -4,7 +4,7 @@ import globus_sdk
 
 
 def test_create_job_rejects_transfer_timer():
-    client = globus_sdk.TimerClient()
+    client = globus_sdk.TimersClient()
     payload = globus_sdk.TransferTimer(schedule={"type": "once"}, body={})
 
     with pytest.raises(
@@ -15,7 +15,7 @@ def test_create_job_rejects_transfer_timer():
 
 
 def test_create_timer_rejects_timer_job():
-    client = globus_sdk.TimerClient()
+    client = globus_sdk.TimersClient()
     payload = globus_sdk.TimerJob("https://bogus", {}, "2021-01-01T00:00:00Z", 300)
 
     with pytest.raises(

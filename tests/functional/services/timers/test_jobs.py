@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from globus_sdk import TimerAPIError, TimerJob, TransferData, config, exc, utils
+from globus_sdk import TimerJob, TimersAPIError, TransferData, config, exc, utils
 from globus_sdk._testing import get_last_request, load_response
 from tests.common import GO_EP1_ID, GO_EP2_ID
 
@@ -24,7 +24,7 @@ def test_get_job(client):
 
 def test_get_job_errors(client):
     meta = load_response(client.get_job, case="simple_500_error").metadata
-    with pytest.raises(TimerAPIError) as excinfo:
+    with pytest.raises(TimersAPIError) as excinfo:
         client.get_job(meta["job_id"])
     err = excinfo.value
     assert err.http_status == 500
@@ -75,7 +75,7 @@ def test_create_job_validation_error(client):
             transfer_data, "2022-04-05T06:00:00", 1800
         )
 
-    with pytest.raises(TimerAPIError) as excinfo:
+    with pytest.raises(TimersAPIError) as excinfo:
         client.create_job(timer_job)
 
     err = excinfo.value

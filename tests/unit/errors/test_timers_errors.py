@@ -1,10 +1,10 @@
-from globus_sdk import TimerAPIError
+from globus_sdk import TimersAPIError
 from globus_sdk._testing import construct_error
 
 
 def test_timer_error_load_simple():
     err = construct_error(
-        error_class=TimerAPIError,
+        error_class=TimersAPIError,
         body={"error": {"code": "ERROR", "detail": "Request failed", "status": 500}},
         http_status=500,
     )
@@ -15,7 +15,7 @@ def test_timer_error_load_simple():
 
 def test_timer_error_load_nested():
     err = construct_error(
-        error_class=TimerAPIError,
+        error_class=TimersAPIError,
         body={
             "detail": [
                 {
@@ -38,6 +38,6 @@ def test_timer_error_load_nested():
 
 
 def test_timer_error_load_unrecognized_format():
-    err = construct_error(error_class=TimerAPIError, body={}, http_status=400)
+    err = construct_error(error_class=TimersAPIError, body={}, http_status=400)
     assert err.code == "Error"
     assert err.message is None

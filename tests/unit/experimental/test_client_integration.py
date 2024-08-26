@@ -95,7 +95,7 @@ def test_search_client_default_scopes(app):
 
 
 def test_timer_client_default_scopes(app):
-    globus_sdk.TimerClient(app=app)
+    globus_sdk.TimersClient(app=app)
 
     timer_client_id = "524230d7-ea86-4a52-8312-86065a9e0417"
     str_list = [str(s) for s in app.get_scope_requirements(timer_client_id)]
