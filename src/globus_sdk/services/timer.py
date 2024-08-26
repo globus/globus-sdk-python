@@ -23,6 +23,8 @@ else:
         # In the future, add the following snippet or similar to emit
         # deprecation warnings:
         #
+        # from globus_sdk.exc import warn_deprecated
+        #
         # if name in _RENAMES:
         #     new_name = _RENAMES[name][0]
         #     warn_deprecated(
