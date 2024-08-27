@@ -41,7 +41,7 @@ def main():
     parser.add_argument("PATH")
     parser.add_argument(
         "--interval-seconds",
-        help="How frequently the timer runs (default: 1 hour)",
+        help="How frequently the timer runs, in seconds (default: 1 hour)",
         default=3600,
         type=int,
     )
