@@ -10,7 +10,7 @@ This script creates a new timer, on source and destination collections provided
 via the command-line. It syncs an input file or directory between the two.
 
 .. note::
-    The example given below does not handle ``data_access`` scope requirements.
+    This example does not handle ``data_access`` scope requirements.
     See the later example to handle this.
 
 .. literalinclude:: create_timer.py
@@ -27,7 +27,7 @@ via the command-line. It syncs an input file or directory between the two.
     :caption: ``delete_timer.py`` [:download:`download <delete_timer.py>`]
     :language: python
 
-Create a Timer with ``data_access``
+Create a timer with ``data_access``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This script is similar to the ``create_timer.py`` example above. However, it

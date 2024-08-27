@@ -10,9 +10,6 @@ CLIENT_ID = "61338d24-54d5-408f-a10d-66c06b59f6d2"
 NATIVE_CLIENT = globus_sdk.NativeAppAuthClient(CLIENT_ID)
 
 
-def _data_access(collection_id: str) -> str:
-    return globus_sdk.GCSClient.get_gcs_collection_scopes(collection_id).data_access
-
 
 def do_login_flow():
     # we will want to request a 'timer' scope for managing timers
