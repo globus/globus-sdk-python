@@ -4,7 +4,6 @@ import uuid
 from collections import defaultdict, namedtuple
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from random import randint
 
 from globus_sdk import Scope
 from globus_sdk._types import UUIDLike
@@ -25,7 +24,7 @@ class ConsentTest(Consent):
     client: UUIDLike
     scope: UUIDLike
     scope_name: str
-    id: int = field(default_factory=lambda: randint(1, 10000))
+    id: int = field(default_factory=lambda: uuid.uuid1().int)
     effective_identity: UUIDLike = str(uuid.uuid4())
     dependency_path: list[int] = field(default_factory=list)
     created: datetime = field(

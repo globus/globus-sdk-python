@@ -25,6 +25,7 @@ The resources defined herein are:
 
 from __future__ import annotations
 
+import textwrap
 import typing as t
 from dataclasses import dataclass
 from datetime import datetime
@@ -154,6 +155,12 @@ class ConsentForest:
 
         self.edges = self._compute_edges()
         self.trees = self._build_trees()
+
+    def __str__(self) -> str:
+        # indent 4 for inner elements, so that we can put their headings at 2 indent
+        trees = textwrap.indent("\n".join(str(t) for t in self.trees), "    ")
+        nodes = textwrap.indent("\n".join(str(n) for n in self.nodes), "    ")
+        return f"ConsentForest\n  nodes\n{nodes}\n  trees\n{trees}"
 
     def _compute_edges(self) -> dict[int, set[int]]:
         """
