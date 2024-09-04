@@ -138,7 +138,7 @@ invocation of your requested method will proceed as expected.
 Manually Running Login Flows
 ----------------------------
 
-While your app will automatically initiate and oversee login flows as detected,
+While your app will automatically initiate and oversee login flows when needed,
 sometimes an author may want to explicitly control when an authorization occurs. To
 manually trigger a login flow, call ``GlobusApp.login(...)``. The app will evaluate the
 current scope requirements against available tokens, initiating a login flow if it
@@ -147,11 +147,11 @@ will be cached for future use.
 
 This method accepts two optional keyword args:
 
--   ``auth_params`` a collection of additional auth parameters to customize the login.
-    This allows for specifications such as, requiring that a user be logged in with an
+-   ``auth_params``, a collection of additional auth parameters to customize the login.
+    This allows for specifications such as requiring that a user be logged in with an
     MFA token or rendering the authorization webpage with a specific message.
--   ``force``, a boolean flag instruct the app to run a login flow even if it believes
-    that no such login flow is required.
+-   ``force``, a boolean flag instructing the app to perform a login flow regardless of
+    whether it is required.
 
 
 ..  code-block:: python
