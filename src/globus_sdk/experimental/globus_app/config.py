@@ -53,7 +53,7 @@ def resolve_by_login_flow(app: GlobusApp, error: TokenValidationError) -> None:
         #   that can be resolved by running a login flow.
         raise error
 
-    app.run_login_flow()
+    app.login(force=True)
 
 
 @dataclasses.dataclass(frozen=True)

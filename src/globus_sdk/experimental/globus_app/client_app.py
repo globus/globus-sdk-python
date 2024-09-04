@@ -91,7 +91,7 @@ class ClientApp(GlobusApp):
             confidential_client=self._login_client,
         )
 
-    def run_login_flow(
+    def _run_login_flow(
         self, auth_params: GlobusAuthorizationParameters | None = None
     ) -> None:
         """

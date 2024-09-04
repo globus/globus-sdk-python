@@ -72,7 +72,7 @@ class ValidatingTokenStorage(TokenStorage):
         :param consent_client: An AuthClient to be used for consent polling. If omitted,
             dependent scope requirements are ignored during validation.
         """
-        self._token_storage = token_storage
+        self.token_storage = token_storage
         self.scope_requirements = scope_requirements
         self._consent_client = consent_client
 
@@ -90,7 +90,7 @@ class ValidatingTokenStorage(TokenStorage):
             storage, otherwise None
         """
         token_data_by_resource_server = (
-            self._token_storage.get_token_data_by_resource_server()
+            self.token_storage.get_token_data_by_resource_server()
         )
         return _get_identity_id_from_token_data_by_resource_server(
             token_data_by_resource_server
@@ -126,7 +126,7 @@ class ValidatingTokenStorage(TokenStorage):
                 resource_server, token_data, eval_dependent=False
             )
 
-        self._token_storage.store_token_data_by_resource_server(
+        self.token_storage.store_token_data_by_resource_server(
             token_data_by_resource_server
         )
 
@@ -136,7 +136,7 @@ class ValidatingTokenStorage(TokenStorage):
         :raises: :exc:`UnmetScopeRequirementsError` if any token data does not meet the
             attached scope requirements.
         """
-        by_resource_server = self._token_storage.get_token_data_by_resource_server()
+        by_resource_server = self.token_storage.get_token_data_by_resource_server()
 
         for resource_server, token_data in by_resource_server.items():
             self._validate_token_data_meets_scope_requirements(
@@ -154,7 +154,7 @@ class ValidatingTokenStorage(TokenStorage):
         :raises: :exc:`UnmetScopeRequirementsError` if the stored token data does not
             meet the scope requirements for the given resource server.
         """
-        token_data = self._token_storage.get_token_data(resource_server)
+        token_data = self.token_storage.get_token_data(resource_server)
         if token_data is None:
             msg = f"No token data for {resource_server}"
             raise MissingTokenError(msg, resource_server=resource_server)
@@ -167,7 +167,7 @@ class ValidatingTokenStorage(TokenStorage):
         """
         :param resource_server: The resource server string to remove token data for
         """
-        return self._token_storage.remove_token_data(resource_server)
+        return self.token_storage.remove_token_data(resource_server)
 
     def _validate_token_data_by_resource_server_meets_identity_requirements(
         self, token_data_by_resource_server: t.Mapping[str, TokenData]

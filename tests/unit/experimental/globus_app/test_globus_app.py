@@ -120,7 +120,7 @@ def test_user_app_default_token_storage():
     client_id = "mock_client_id"
     user_app = UserApp("test-app", client_id=client_id)
 
-    token_storage = user_app._authorizer_factory.token_storage._token_storage
+    token_storage = user_app._authorizer_factory.token_storage.token_storage
     assert isinstance(token_storage, JSONTokenStorage)
 
     if os.name == "nt":
@@ -425,27 +425,34 @@ def test_client_app_get_authorizer():
 
 
 @mock.patch.object(OAuthTokenResponse, "decode_id_token", _mock_decode)
-def test_user_app_run_login_flow(monkeypatch, capsys):
+def test_user_app_login_logout(monkeypatch, capsys):
     monkeypatch.setattr("builtins.input", _mock_input)
     load_response(NativeAppAuthClient.oauth2_exchange_code_for_tokens, case="openid")
+    load_response(NativeAppAuthClient.oauth2_revoke_token)
 
     client_id = "mock_client_id"
     memory_storage = MemoryTokenStorage()
     config = GlobusAppConfig(token_storage=memory_storage)
     user_app = UserApp("test-app", client_id=client_id, config=config)
 
-    user_app.run_login_flow()
-    assert (
-        user_app._token_storage.get_token_data("auth.globus.org").access_token
-        == "auth_access_token"
-    )
+    assert memory_storage.get_token_data("auth.globus.org") is None
+    assert user_app.login_required() is True
+
+    user_app.login()
+    assert memory_storage.get_token_data("auth.globus.org").access_token is not None
+    assert user_app.login_required() is False
+
+    user_app.logout()
+    assert memory_storage.get_token_data("auth.globus.org") is None
+    assert user_app.login_required() is True
 
 
 @mock.patch.object(OAuthTokenResponse, "decode_id_token", _mock_decode)
-def test_client_app_run_login_flow():
+def test_client_app_login_logout():
     load_response(
         ConfidentialAppAuthClient.oauth2_client_credentials_tokens, case="openid"
     )
+    load_response(ConfidentialAppAuthClient.oauth2_revoke_token)
 
     client_id = "mock_client_id"
     client_secret = "mock_client_secret"
@@ -455,8 +462,56 @@ def test_client_app_run_login_flow():
         "test-app", client_id=client_id, client_secret=client_secret, config=config
     )
 
-    client_app.run_login_flow()
-    assert (
-        client_app._token_storage.get_token_data("auth.globus.org").access_token
-        == "auth_access_token"
+    assert memory_storage.get_token_data("auth.globus.org") is None
+
+    client_app.login()
+    assert memory_storage.get_token_data("auth.globus.org").access_token is not None
+
+    client_app.logout()
+    assert memory_storage.get_token_data("auth.globus.org") is None
+
+
+@mock.patch.object(OAuthTokenResponse, "decode_id_token", _mock_decode)
+@pytest.mark.parametrize(
+    "login_kwargs,expected_login",
+    (
+        # No params - no additional login
+        ({}, False),
+        # "force" or "auth_params" - additional login
+        ({"force": True}, True),
+        (
+            {"auth_params": GlobusAuthorizationParameters(session_required_mfa=True)},
+            True,
+        ),
+    ),
+)
+def test_app_login_flows_can_be_forced(login_kwargs, expected_login, monkeypatch):
+    monkeypatch.setattr("builtins.input", _mock_input)
+    load_response(NativeAppAuthClient.oauth2_exchange_code_for_tokens, case="openid")
+
+    config = GlobusAppConfig(
+        token_storage="memory",
+        login_flow_manager=CountingCommandLineLoginFlowManager,
     )
+    user_app = UserApp("test-app", client_id="mock_client_id", config=config)
+
+    user_app.login()
+    assert user_app.login_required() is False
+    assert user_app._login_flow_manager.counter == 1
+
+    user_app.login(**login_kwargs)
+    expected_count = 2 if expected_login else 1
+    assert user_app._login_flow_manager.counter == expected_count
+
+
+class CountingCommandLineLoginFlowManager(CommandLineLoginFlowManager):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.counter = 0
+
+    def run_login_flow(
+        self,
+        auth_parameters: GlobusAuthorizationParameters,
+    ) -> OAuthTokenResponse:
+        self.counter += 1
+        return super().run_login_flow(auth_parameters)

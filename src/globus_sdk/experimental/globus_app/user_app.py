@@ -139,7 +139,7 @@ class UserApp(GlobusApp):
                 token_storage=self.token_storage
             )
 
-    def run_login_flow(
+    def _run_login_flow(
         self, auth_params: GlobusAuthorizationParameters | None = None
     ) -> None:
         """
