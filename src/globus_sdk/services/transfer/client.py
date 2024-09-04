@@ -147,7 +147,6 @@ class TransferClient(client.BaseClient):
 
                     app = UserApp("myapp", client_id=NATIVE_APP_CLIENT_ID)
                     client = TransferClient(app=app).add_app_data_access_scope(COLLECTION_ID)
-                    app.run_login_flow()
 
                     res = client.operation_ls(COLLECTION_ID)
 
@@ -160,7 +159,6 @@ class TransferClient(client.BaseClient):
                     client = TransferClient(app=app).add_app_data_access_scope(
                         (COLLECTION_ID_1, COLLECTION_ID_2)
                     )
-                    app.run_login_flow()
 
                     transfer_data = TransferData(
                         source_endpoint=COLLECTION_ID_1,
