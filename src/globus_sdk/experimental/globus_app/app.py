@@ -237,9 +237,9 @@ class GlobusApp(metaclass=abc.ABCMeta):
         Log an auth entity into the app, if needed, storing the resulting tokens.
 
         A login flow will be performed if:
-            * ``auth_params`` are provided
-            * ``force`` is set to True
-            * ``self.login_required()`` evaluates to True
+            * ``auth_params`` are provided,
+            * ``force`` is set to True, or
+            * ``self.login_required()`` evaluates to True.
 
         :param auth_params: An optional set of authorization parameters to establish
             requirements and controls for the login flow.
