@@ -298,11 +298,10 @@ class GlobusApp(metaclass=abc.ABCMeta):
     @property
     def scope_requirements(self) -> dict[str, list[Scope]]:
         """
-        Access a copy of scope requirements defined for this service.
+        Access a copy of app's aggregate scope requirements.
 
         Modifying the returned dict will not affect the app's scope requirements.
-        To add scope requirements, please use ``GlobusApp.add_scope_requirements()``
-            instead.
+        To add scope requirements, use ``GlobusApp.add_scope_requirements()``.
         """
         # Scopes are mutable objects so we return a deepcopy
         return copy.deepcopy(self._scope_requirements)
