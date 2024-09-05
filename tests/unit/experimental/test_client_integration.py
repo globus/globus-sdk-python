@@ -38,7 +38,7 @@ def test_client_environment_does_not_match_the_globus_app_environment():
 def test_transfer_client_default_scopes(app):
     globus_sdk.TransferClient(app=app)
 
-    assert [str(s) for s in app.get_scope_requirements("transfer.api.globus.org")] == [
+    assert [str(s) for s in app.scope_requirements["transfer.api.globus.org"]] == [
         "urn:globus:auth:scope:transfer.api.globus.org:all"
     ]
 
@@ -48,7 +48,7 @@ def test_transfer_client_add_app_data_access_scope(app):
 
     collection_id = str(uuid.UUID(int=0))
     client.add_app_data_access_scope(collection_id)
-    str_list = [str(s) for s in app.get_scope_requirements("transfer.api.globus.org")]
+    str_list = [str(s) for s in app.scope_requirements["transfer.api.globus.org"]]
     expected = f"urn:globus:auth:scope:transfer.api.globus.org:all[*https://auth.globus.org/scopes/{collection_id}/data_access]"  # noqa: E501
     assert expected in str_list
 
@@ -62,7 +62,7 @@ def test_transfer_client_add_app_data_access_scope_chaining(app):
         .add_app_data_access_scope(collection_id_2)
     )
 
-    str_list = [str(s) for s in app.get_scope_requirements("transfer.api.globus.org")]
+    str_list = [str(s) for s in app.scope_requirements["transfer.api.globus.org"]]
     expected_1 = f"urn:globus:auth:scope:transfer.api.globus.org:all[*https://auth.globus.org/scopes/{collection_id_1}/data_access]"  # noqa: E501
     expected_2 = f"urn:globus:auth:scope:transfer.api.globus.org:all[*https://auth.globus.org/scopes/{collection_id_2}/data_access]"  # noqa: E501
     assert expected_1 in str_list
@@ -80,7 +80,7 @@ def test_transfer_client_add_app_data_access_scope_in_iterable(app):
     expected_2 = f"https://auth.globus.org/scopes/{collection_id_2}/data_access"
 
     transfer_dependencies = []
-    for scope in app.get_scope_requirements("transfer.api.globus.org"):
+    for scope in app.scope_requirements["transfer.api.globus.org"]:
         if scope.scope_string != globus_sdk.TransferClient.scopes.all:
             continue
         for dep in scope.dependencies:
@@ -106,7 +106,7 @@ def test_transfer_client_add_app_data_access_scope_catches_bad_uuid_in_iterable(
 def test_auth_client_default_scopes(app):
     globus_sdk.AuthClient(app=app)
 
-    str_list = [str(s) for s in app.get_scope_requirements("auth.globus.org")]
+    str_list = [str(s) for s in app.scope_requirements["auth.globus.org"]]
     assert "openid" in str_list
     assert "profile" in str_list
     assert "email" in str_list
@@ -115,7 +115,7 @@ def test_auth_client_default_scopes(app):
 def test_groups_client_default_scopes(app):
     globus_sdk.GroupsClient(app=app)
 
-    assert [str(s) for s in app.get_scope_requirements("groups.api.globus.org")] == [
+    assert [str(s) for s in app.scope_requirements["groups.api.globus.org"]] == [
         "urn:globus:auth:scope:groups.api.globus.org:view_my_groups_and_memberships"
     ]
 
@@ -123,7 +123,7 @@ def test_groups_client_default_scopes(app):
 def test_search_client_default_scopes(app):
     globus_sdk.SearchClient(app=app)
 
-    assert [str(s) for s in app.get_scope_requirements("search.api.globus.org")] == [
+    assert [str(s) for s in app.scope_requirements["search.api.globus.org"]] == [
         "urn:globus:auth:scope:search.api.globus.org:search"
     ]
 
@@ -132,7 +132,7 @@ def test_timer_client_default_scopes(app):
     globus_sdk.TimersClient(app=app)
 
     timer_client_id = "524230d7-ea86-4a52-8312-86065a9e0417"
-    str_list = [str(s) for s in app.get_scope_requirements(timer_client_id)]
+    str_list = [str(s) for s in app.scope_requirements[timer_client_id]]
     assert str_list == [f"https://auth.globus.org/scopes/{timer_client_id}/timer"]
 
 
@@ -140,7 +140,7 @@ def test_flows_client_default_scopes(app):
     globus_sdk.FlowsClient(app=app)
 
     flows_client_id = "eec9b274-0c81-4334-bdc2-54e90e689b9a"
-    str_list = [str(s) for s in app.get_scope_requirements("flows.globus.org")]
+    str_list = [str(s) for s in app.scope_requirements["flows.globus.org"]]
     assert len(str_list) == 1
     assert str_list == [f"https://auth.globus.org/scopes/{flows_client_id}/all"]
 
@@ -148,7 +148,7 @@ def test_flows_client_default_scopes(app):
 def test_specific_flow_client_default_scopes(app):
     globus_sdk.SpecificFlowClient("flow_id", app=app)
 
-    assert [str(s) for s in app.get_scope_requirements("flow_id")] == [
+    assert [str(s) for s in app.scope_requirements["flow_id"]] == [
         "https://auth.globus.org/scopes/flow_id/flow_flow_id_user"
     ]
 
@@ -160,6 +160,6 @@ def test_gcs_client_default_scopes(app):
 
     globus_sdk.GCSClient(domain_name, app=app)
 
-    assert [str(s) for s in app.get_scope_requirements(endpoint_client_id)] == [
+    assert [str(s) for s in app.scope_requirements[endpoint_client_id]] == [
         f"urn:globus:auth:scope:{endpoint_client_id}:manage_collections"
     ]

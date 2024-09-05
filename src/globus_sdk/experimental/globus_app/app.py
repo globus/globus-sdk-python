@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import abc
+import copy
 import typing as t
 
 from globus_sdk import AuthClient, AuthLoginClient, GlobusSDKUsageError, Scope
@@ -294,11 +295,14 @@ class GlobusApp(metaclass=abc.ABCMeta):
 
         self._authorizer_factory.clear_cache(*scope_requirements.keys())
 
-    def get_scope_requirements(self, resource_server: str) -> tuple[Scope, ...]:
+    @property
+    def scope_requirements(self) -> dict[str, list[Scope]]:
         """
-        Get an immutable copy of the collection scope requirements currently defined
-        on a resource server.
+        Access a copy of scope requirements defined for this service.
 
-        :param resource_server: the resource server to get scope requirements for
+        Modifying the returned dict will not affect the app's scope requirements.
+        To add scope requirements, please use ``GlobusApp.add_scope_requirements()``
+            instead.
         """
-        return tuple(self._scope_requirements.get(resource_server, []))
+        # Scopes are mutable objects so we return a deepcopy
+        return copy.deepcopy(self._scope_requirements)

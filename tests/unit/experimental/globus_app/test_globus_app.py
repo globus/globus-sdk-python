@@ -313,8 +313,30 @@ def test_constructor_scope_requirements_accepts_different_scope_types(scope_coll
     assert _sorted_auth_scope_str(user_app) == "email openid"
 
 
+def test_scope_requirements_returns_copies_scopes():
+    user_app = UserApp("test-app", client_id="mock_client_id")
+    foo_scope = Scope("foo:all").add_dependency(Scope("bar:all"))
+    user_app.add_scope_requirements({"foo": [foo_scope]})
+
+    real_requirements = user_app._scope_requirements
+    real_openid = real_requirements["auth.globus.org"][0]
+    real_foo = real_requirements["foo"][0]
+
+    copied_requirements = user_app.scope_requirements
+    copied_openid = copied_requirements["auth.globus.org"][0]
+    copied_foo = copied_requirements["foo"][0]
+
+    assert real_requirements is not copied_requirements
+
+    # Copied requirements mirror the originals but are distinct objects.
+    assert real_openid is not copied_openid
+    assert real_foo is not copied_foo
+    assert str(real_openid) == str(copied_openid)
+    assert str(real_foo) == str(copied_foo)
+
+
 def _sorted_auth_scope_str(user_app: UserApp) -> str:
-    scope_list = user_app.get_scope_requirements("auth.globus.org")
+    scope_list = user_app.scope_requirements["auth.globus.org"]
     return " ".join(sorted(str(scope) for scope in scope_list))
 
 
