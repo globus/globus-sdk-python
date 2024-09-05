@@ -274,7 +274,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         This will remove and revoke all tokens stored for the current app user.
         """
         # Revoke all tokens, removing them from the underlying token storage
-        inner_token_storage = self._validating_token_storage.token_storage
+        inner_token_storage = self.token_storage.token_storage
         for resource_server in self._scope_requirements.keys():
             token_data = inner_token_storage.get_token_data(resource_server)
             if token_data:
