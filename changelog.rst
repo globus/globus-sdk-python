@@ -12,6 +12,139 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-3.45.0:
+
+v3.45.0 (2024-09-06)
+--------------------
+
+Added
+~~~~~
+
+- The scope builder for ``SpecificFlowClient`` is now available for direct
+  access and use via ``globus_sdk.scopes.SpecificFlowScopeBuilder``. Callers can
+  initialize this class with a ``flow_id`` to get a scope builder for a
+  specific flow, e.g., ``SpecificFlowScopeBuilder(flow_id).user``.
+  ``SpecificFlowClient`` now uses this class internally. (:pr:`1030`)
+
+- ``TransferClient.add_app_data_access_scope`` now accepts iterables of
+  collection IDs as an alternative to individual collection IDs. (:pr:`1034`)
+
+.. rubric:: Experimental
+
+-   Added ``login(...)``, ``logout(...)``, and ``login_required(...)`` to the
+    experimental ``GlobusApp`` construct. (:pr:`1041`)
+
+    -   ``login(...)`` initiates a login flow if:
+
+        -   the current entity requires a login to satisfy local scope requirements or
+        -   ``auth_params``/``force=True`` is passed to the method.
+
+    -   ``logout(...)`` remove and revokes the current entity's app-associated tokens.
+
+    -   ``login_required(...)`` returns a boolean indicating whether the app believes
+        a login is required to satisfy local scope requirements.
+
+Removed
+~~~~~~~
+
+.. rubric:: Experimental
+
+-   Made ``run_login_flow`` private in the experimental ``GlobusApp`` construct.
+    Usage sites should be replaced with either ``app.login()`` or
+    ``app.login(force=True)``. (:pr:`1041`)
+
+    -   **Old Usage**
+
+        .. code-block:: python
+
+            app = UserApp("my-app", client_id="<my-client-id>")
+            app.run_login_flow()
+
+    -   **New Usage**
+
+        .. code-block:: python
+
+            app = UserApp("my-app", client_id="<my-client-id>")
+            app.login(force=True)
+
+Changed
+~~~~~~~
+
+- The client for Globus Timers has been renamed to ``TimersClient``. The prior
+  name, ``TimerClient``, has been retained as an alias. (:pr:`1032`)
+
+  - Similarly, the error and scopes classes have been renamed and aliased:
+    ``TimersAPIError`` replaces ``TimerAPIError`` and ``TimersScopes`` replaces
+    ``TimerScopes``.
+
+  - Internal module names have been changed to ``timers`` from ``timer`` where
+    possible.
+
+  - The ``service_name`` attribute is left as ``timer`` for now, as it is
+    integrated into URL and ``_testing`` logic.
+
+.. rubric:: Experimental
+
+- The experimental ``TokenStorageProvider`` and ``LoginFlowManagerProvider``
+  protocols have been updated to require keyword-only arguments for their
+  ``for_globus_app`` methods. This protects against potential ordering
+  confusion for their arguments. (:pr:`1028`)
+
+- The ``default_scope_requirements`` for ``globus_sdk.FlowsClient`` has been
+  updated to list the Flows ``all`` scope. (:pr:`1029`)
+
+-   The ``CommandLineLoginFlowManager`` now exposes ``print_authorize_url`` and
+    ``prompt_for_code`` as methods, which replace the ``login_prompt`` and
+    ``code_prompt`` parameters. Users who wish to customize prompting behavior
+    now have a greater degree of control, and can effect this by subclassing the
+    ``CommandLineLoginFlowManager``. (:pr:`1039`)
+
+    Example usage, which uses the popular ``click`` library to handle the
+    prompts:
+
+    .. code-block:: python
+
+        import click
+        from globus_sdk.experimental.login_flow_manager import CommandLineLoginFlowManager
+
+
+        class ClickLoginFlowManager(CommandLineLoginFlowManager):
+            def print_authorize_url(self, authorize_url: str) -> None:
+                click.echo(click.style("Login here for a code:", fg="yellow"))
+                click.echo(authorize_url)
+
+            def prompt_for_code(self) -> str:
+                return click.prompt("Enter the code here:")
+
+- ``GlobusApp.token_storage`` is now a public property, allowing users
+  direct access to the ``ValidatingTokenStorage`` used by the app to build
+  authorizers. (:pr:`1040`)
+
+-   The experimental ``GlobusApp`` construct's scope exploration interface has changed
+    from ``app.get_scope_requirements(resource_server: str) -> tuple[Scope]`` to
+    ``app.scope_requirements``. The new property will return a deep copy of the internal
+    requirements dictionary mapping resource server to a list of Scopes. (:pr:`1042`)
+
+Deprecated
+~~~~~~~~~~
+
+- ``TimerScopes`` is now a deprecated name. Use ``TimersScopes`` instead. (:pr:`1032`)
+
+Fixed
+~~~~~
+
+.. rubric:: Experimental
+
+- Container types in ``GlobusApp`` function argument annotations are now
+  generally covariant collections like ``Mapping`` rather than invariant
+  types like ``dict``. (:pr:`1035`)
+
+Documentation
+~~~~~~~~~~~~~
+
+- The Globus Timers examples have been significantly enhanced and now leverage
+  more modern usage patterns. (:pr:`1032`)
+
 .. _changelog-3.44.0:
 
 v3.44.0 (2024-08-02)
