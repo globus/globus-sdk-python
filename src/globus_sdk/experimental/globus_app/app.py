@@ -236,14 +236,15 @@ class GlobusApp(metaclass=abc.ABCMeta):
         """
         Log an auth entity into the app, if needed, storing the resulting tokens.
 
-        A login flow will be performed if:
-            * ``auth_params`` are provided,
-            * ``force`` is set to True, or
-            * ``self.login_required()`` evaluates to True.
+        A login flow will be performed if any of the following are true:
+            * The kwarg ``auth_params`` is provided.
+            * The kwarg ``force`` is set to True.
+            * The method ``self.login_required()`` evaluates to True.
 
         :param auth_params: An optional set of authorization parameters to establish
             requirements and controls for the login flow.
-        :param force: If True, perform a login flow even if one is not necessary.
+        :param force: If True, perform a login flow even if one does not appear to
+            be necessary.
         """
         if auth_params or force or self.login_required():
             self._run_login_flow(auth_params)
@@ -253,12 +254,12 @@ class GlobusApp(metaclass=abc.ABCMeta):
         Determine if a login flow will be required to interact with resource servers
         under the current scope requirements.
 
-        This will return false if:
-            * access tokens have never been issued,
-            * access tokens have been issued but have insufficient scopes, or
-            * access tokens have expired and wouldn't be resolved with refresh tokens
+        This will return false if any of the following are true:
+            * Access tokens have never been issued.
+            * Access tokens have been issued but have insufficient scopes.
+            * Access tokens have expired and wouldn't be resolved with refresh tokens.
 
-        :returns: True if a login flow is required, False otherwise.
+        :returns: True if a login flow appears to be required, False otherwise.
         """
         for resource_server in self._scope_requirements.keys():
             try:
@@ -333,7 +334,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         Get a ``GlobusAuthorizer`` from the app's authorizer factory for a specified
         resource server. The type of authorizer is dependent on the app.
 
-        :param resource_server: the resource server for which the requested Authorizer
+        :param resource_server: The resource server for which the requested Authorizer
             should provide authorization headers.
         :param skip_error_handling: If True, skip the configured token validation error
             handler when a ``TokenValidationError`` is raised. Default: False.
