@@ -6,8 +6,8 @@ Service Clients
 .. currentmodule:: globus_sdk
 
 The Globus SDK provides a client class for every public Globus API.
-Each client object takes authentication credentials from config files,
-environment variables, or programmatically via :ref:`GlobusAuthorizers <authorization>`.
+Each client object takes authentication credentials via
+:ref:`GlobusAuthorizers <globus_authorizers>`.
 
 Once instantiated, a Client gives you high-level interface to make API calls,
 without needing to know Globus API endpoints or their various parameters.

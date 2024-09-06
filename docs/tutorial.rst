@@ -120,7 +120,7 @@ Run the following code sample to get your Access Tokens:
 The Globus SDK offers several features for managing credentials. The following components
 are useful for further reading:
 
-* :ref:`using GlobusAuthorizer objects <authorization>` handle passing tokens to Globus,
+* :ref:`using GlobusAuthorizer objects <globus_authorizers>` handle passing tokens to Globus,
   and may handle token expiration
 
 * :ref:`TokenStorage <tokenstorage>` objects handle storage of tokens
