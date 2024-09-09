@@ -30,10 +30,14 @@ so:
     client.oauth2_start_flow(requested_scopes=[TransferScopes.all])
     ...
 
-As Client Class Attributes
---------------------------
+As Client Attributes
+--------------------
 
-Token scopes are associated with a particular client, the one which will use that token. Because of this, each service client contains a ``ScopeBuilder`` attribute (``client.scopes``) defining the relevant scopes for that client.
+Token scopes are associated with a particular client, the one which will use that token.
+Because of this, each service client contains a ``ScopeBuilder`` attribute (``client.scopes``) defining the relevant scopes for that client.
+
+For most client classes, this is a class attribute. For example, accessing
+``TransferClient.scopes`` is valid:
 
 .. code-block:: python
 
@@ -48,6 +52,33 @@ Token scopes are associated with a particular client, the one which will use tha
     # or, potentially, after there is a concrete client
     _tc = globus_sdk.TransferClient()
     client.oauth2_start_flow(requested_scopes=[_tc.scopes.all])
+
+As Instance Attributes and Methods
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Some client classes only provide their scopes for instances. These cases cover
+services which are distributed or contain multiple subservices with their own
+scopes.
+
+For example, ``GCSClient`` and ``SpecificFlowClient`` each have a ``scopes``
+attribute of ``None`` on their classes.
+
+In the case of ``SpecificFlowClient``, scopes are populated whenever an
+instance is instantiated. So the following usage is valid:
+
+.. code-block:: python
+
+    import globus_sdk
+
+    FLOW_ID = "<YOUR_ID_HERE>"
+
+    client = globus_sdk.SpecificFlowClient(FLOW_ID)
+    flow_user_scope = client.scopes.user
+
+In the case of GCS, a distributed service, ``scopes`` is always ``None``.
+However, :meth:`globus_sdk.GCSClient.get_gcs_endpoint_scopes` and
+:meth:`globus_sdk.GCSClient.get_gcs_collection_scopes` are available helpers
+for getting specific collections of scopes.
 
 Using a Scope Builder to Get Matching Tokens
 --------------------------------------------
@@ -77,8 +108,9 @@ To elaborate on the above example:
 Scope objects
 -------------
 
-In order to support optional and dependent scopes, an additional type is
-provided by ``globus_sdk.scopes``: the ``Scope`` class.
+The SDK provides a ``Scope`` object which is the class model for a scope.
+``Scope``\s can be parsed from strings and serialized to strings, and support
+programmatic manipulations to describe dependent scopes.
 
 ``Scope`` can be constructed using its initializer, or one of its two main
 parsing methods: ``Scope.parse`` and ``Scope.deserialize``.

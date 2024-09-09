@@ -42,8 +42,14 @@ Abstract Base Class:
     :member-order: bysource
 
 Authorizers within this SDK fall into two categories:
- * "Static Authorizers" already contain all authorization data and simply format it into the proper authorization header. These all inherit from the ``StaticGlobusAuthorizer`` class.
- * "Renewing Authorizer" take some initial parameters but internally define a functional behavior to acquire new authorization data as necessary. These all inherit from the ``RenewingGlobusAuthorizer`` class.
+
+ * "Static Authorizers" already contain all authorization data and simply format it
+   into the proper authorization header.
+   These all inherit from the ``StaticGlobusAuthorizer`` class.
+
+ * "Renewing Authorizer" take some initial parameters but internally define a
+   functional behavior to acquire new authorization data as necessary.
+   These all inherit from the ``RenewingGlobusAuthorizer`` class.
 
 .. autoclass:: StaticGlobusAuthorizer
     :member-order: bysource
@@ -61,16 +67,6 @@ Authorizer Types
 All of these types of authorizers can be imported from
 ``globus_sdk.authorizers``.
 
-.. autoclass:: NullAuthorizer
-    :members:
-    :member-order: bysource
-    :show-inheritance:
-
-.. autoclass:: BasicAuthorizer
-    :members:
-    :member-order: bysource
-    :show-inheritance:
-
 .. autoclass:: AccessTokenAuthorizer
     :members:
     :member-order: bysource
@@ -82,6 +78,16 @@ All of these types of authorizers can be imported from
     :show-inheritance:
 
 .. autoclass:: ClientCredentialsAuthorizer
+    :members:
+    :member-order: bysource
+    :show-inheritance:
+
+.. autoclass:: BasicAuthorizer
+    :members:
+    :member-order: bysource
+    :show-inheritance:
+
+.. autoclass:: NullAuthorizer
     :members:
     :member-order: bysource
     :show-inheritance:
