@@ -41,10 +41,10 @@ Abstract Base Class:
     :members:
     :member-order: bysource
 
-Authorizers within this SDK fall into two categories: 
+Authorizers within this SDK fall into two categories:
  * "Static Authorizers" already contain all authorization data and simply format it into the proper authorization header. These all inherit from the ``StaticGlobusAuthorizer`` class.
  * "Renewing Authorizer" take some initial parameters but internally define a functional behavior to acquire new authorization data as necessary. These all inherit from the ``RenewingGlobusAuthorizer`` class.
- 
+
 .. autoclass:: StaticGlobusAuthorizer
     :member-order: bysource
     :show-inheritance:
