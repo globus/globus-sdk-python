@@ -33,11 +33,7 @@ so:
 As Client Class Attributes
 --------------------------
 
-Because the scopes for a token are associated with some concrete client which
-will use that token, it makes sense to associate a scope with a client class.
-
-The Globus SDK does this by providing the ``ScopeBuilder`` for a service as an
-attribute of the client. For example,
+Token scopes are associated with a particular client, the one which will use that token. Because of this, each service client contains a ``ScopeBuilder`` attribute (``client.scopes``) defining the relevant scopes for that client.
 
 .. code-block:: python
 

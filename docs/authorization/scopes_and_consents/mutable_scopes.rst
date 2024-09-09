@@ -8,7 +8,7 @@ MutableScopes
 .. warning::
 
     The ``MutableScope`` class and its interfaces are considered a legacy
-    feature. They will be deprecated and removed in future SDK releases.
+    feature. They will be deprecated and removed in a future SDK release.
 
     Users should prefer to use ``globus_sdk.Scope`` instead.
     ``globus_sdk.Scope``, documented in :ref:`the scopes documentation <scopes>`,

@@ -41,19 +41,15 @@ Abstract Base Class:
     :members:
     :member-order: bysource
 
-``GlobusAuthorizer`` objects that fetch new access tokens when their existing
-ones expire or a 401 is received implement the RenewingAuthorizer class
-
-.. autoclass:: RenewingAuthorizer
-    :members: get_authorization_header, handle_missing_authorization
+Authorizers within this SDK fall into two categories: 
+ * "Static Authorizers" already contain all authorization data and simply format it into the proper authorization header. These all inherit from the ``StaticGlobusAuthorizer`` class.
+ * "Renewing Authorizer" take some initial parameters but internally define a functional behavior to acquire new authorization data as necessary. These all inherit from the ``RenewingGlobusAuthorizer`` class.
+ 
+.. autoclass:: StaticGlobusAuthorizer
     :member-order: bysource
     :show-inheritance:
 
-``GlobusAuthorizer`` objects which have a static authorization header are all
-implemented using the static authorizer class:
-
-.. autoclass:: StaticGlobusAuthorizer
-    :members:
+.. autoclass:: RenewingAuthorizer
     :member-order: bysource
     :show-inheritance:
 
