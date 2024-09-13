@@ -8,10 +8,10 @@ Scopes and ScopeBuilders
 OAuth2 Scopes for various Globus services are represented by ``ScopeBuilder``
 objects.
 
-A number of pre-set scope builders are provided and populated with useful data,
+A number of preset scope builders are provided and populated with useful data,
 and they are also accessible via the relevant client classes.
 
-Direct Use (as constants)
+Direct Use (As Constants)
 -------------------------
 
 To use the scope builders directly, import from ``globus_sdk.scopes``.
@@ -33,7 +33,7 @@ so:
 As Client Attributes
 --------------------
 
-Token scopes are associated with a particular client, the one which will use that token.
+Token scopes are associated with a particular client which will use that token.
 Because of this, each service client contains a ``ScopeBuilder`` attribute (``client.scopes``) defining the relevant scopes for that client.
 
 For most client classes, this is a class attribute. For example, accessing
@@ -130,10 +130,10 @@ as follows:
 
     * parsing (deserializing)
     * stringifying (serializing)
-    * dynamic scope tree building
+    * scope tree construction
 
-Dynamic Scope Construction
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Scope Construction
+~~~~~~~~~~~~~~~~~~
 
 ``Scope`` objects provide a tree-like interface for constructing scopes
 and their dependencies.
@@ -163,8 +163,8 @@ Serializing Scopes
 Whenever scopes are being sent to Globus services, they need to be encoded as
 strings. All scope objects support this by means of their defined
 ``serialize`` method. Note that ``__str__`` for a ``Scope`` is just an
-alias for ``serialize``. For example, the following is valid usage to demonstrate
-``str()``, ``repr()``, and ``serialize()``:
+alias for ``serialize``. For example, the following is an example of
+``str()``, ``repr()``, and ``serialize()`` usage:
 
 .. code-block:: pycon
 
