@@ -9,13 +9,11 @@ from globus_sdk import (
     NativeAppAuthClient,
 )
 from globus_sdk._types import ScopeCollectionType, UUIDLike
-from globus_sdk.experimental.auth_requirements_error import (
-    GlobusAuthorizationParameters,
-)
 from globus_sdk.experimental.login_flow_manager import (
     CommandLineLoginFlowManager,
     LoginFlowManager,
 )
+from globus_sdk.gare import GlobusAuthorizationParameters
 
 from ._types import LoginFlowManagerProvider
 from .app import GlobusApp

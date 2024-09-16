@@ -16,9 +16,6 @@ from globus_sdk import (
 )
 from globus_sdk._testing import load_response
 from globus_sdk.exc import GlobusSDKUsageError
-from globus_sdk.experimental.auth_requirements_error import (
-    GlobusAuthorizationParameters,
-)
 from globus_sdk.experimental.globus_app import (
     AccessTokenAuthorizerFactory,
     ClientApp,
@@ -38,6 +35,7 @@ from globus_sdk.experimental.tokenstorage import (
     SQLiteTokenStorage,
     TokenData,
 )
+from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.scopes import AuthScopes, Scope
 from globus_sdk.services.auth import OAuthTokenResponse
 

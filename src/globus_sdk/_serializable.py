@@ -1,9 +1,13 @@
 from __future__ import annotations
 
 import inspect
+import sys
 import typing as t
 
-T = t.TypeVar("T", bound="Serializable")
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 
 class Serializable:
@@ -30,7 +34,7 @@ class Serializable:
         ]
 
     @classmethod
-    def from_dict(cls: type[T], data: dict[str, t.Any]) -> T:
+    def from_dict(cls, data: dict[str, t.Any]) -> Self:
         """
         Instantiate from a dictionary.
 

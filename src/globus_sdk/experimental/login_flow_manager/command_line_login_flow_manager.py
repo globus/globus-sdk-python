@@ -9,9 +9,7 @@ from globus_sdk import (
     GlobusSDKUsageError,
     OAuthTokenResponse,
 )
-from globus_sdk.experimental.auth_requirements_error import (
-    GlobusAuthorizationParameters,
-)
+from globus_sdk.gare import GlobusAuthorizationParameters
 
 from .login_flow_manager import LoginFlowManager
 

@@ -8,3 +8,4 @@ Components of the Globus SDK which handle application authorization.
 
     globus_authorizers
     scopes_and_consents/index
+    gare

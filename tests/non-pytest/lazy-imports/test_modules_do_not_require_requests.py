@@ -19,10 +19,10 @@ PYTHON_BINARY = os.environ.get("GLOBUS_TEST_PY", sys.executable)
     (
         # experimental modules
         "experimental",
-        "experimental.auth_requirements_error",
         "experimental.scope_parser",
         # parts which are expected to be standalone
         "scopes",
+        "gare",
         "config",
         # the top-level of the 'exc' subpackage (but not necessarily its contents)
         "exc",

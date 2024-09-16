@@ -11,9 +11,9 @@ class GlobusAuthorizationParameters(Serializable):
     Data class containing authorization parameters that can be passed during
     an authentication flow to control how the user will authenticate.
 
-    When used with a GlobusAuthRequirementsError this represents the additional
-    authorization parameters needed in order to complete a request that had
-    insufficient authorization state.
+    When used with a GARE  this represents the additional authorization
+    parameters needed in order to complete a request that had insufficient
+    authorization state.
 
     :ivar session_message: A message to be displayed to the user.
     :vartype session_message: str, optional
@@ -77,7 +77,7 @@ class GlobusAuthorizationParameters(Serializable):
         self.extra = extra or {}
 
 
-class GlobusAuthRequirementsError(Serializable):
+class GARE(Serializable):
     """
     Represents a Globus Auth Requirements Error.
 

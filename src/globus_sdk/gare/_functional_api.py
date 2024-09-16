@@ -5,7 +5,7 @@ import typing as t
 
 from globus_sdk import exc
 
-from ._auth_requirements_error import GlobusAuthRequirementsError
+from ._auth_requirements_error import GARE
 from ._variants import (
     LegacyAuthorizationParametersError,
     LegacyAuthRequirementsErrorVariant,
@@ -13,25 +13,20 @@ from ._variants import (
     LegacyConsentRequiredTransferError,
 )
 
-if t.TYPE_CHECKING:
-    from globus_sdk.exc import ErrorSubdocument, GlobusAPIError
-
 log = logging.getLogger(__name__)
 
 
 def to_auth_requirements_error(
-    error: GlobusAPIError | ErrorSubdocument | dict[str, t.Any]
-) -> GlobusAuthRequirementsError | None:
+    error: exc.GlobusAPIError | exc.ErrorSubdocument | dict[str, t.Any]
+) -> GARE | None:
     """
     Converts a GlobusAPIError, ErrorSubdocument, or dict into a
-    GlobusAuthRequirementsError by attempting to match to
-    GlobusAuthRequirementsError (preferred) or legacy variants.
+    GARE by attempting to match to GARE (preferred) or legacy variants.
 
     .. note::
 
         A GlobusAPIError may contain multiple errors, and in this case only a single
-        GlobusAuthRequirementsError is returned for the first error that matches
-        a known format.
+        GARE is returned for the first error that matches a known format.
 
 
     If the provided error does not match a known format, None is returned.
@@ -58,9 +53,9 @@ def to_auth_requirements_error(
 
     # Prefer a proper auth requirements error, if possible
     try:
-        return GlobusAuthRequirementsError.from_dict(error_dict)
+        return GARE.from_dict(error_dict)
     except exc.ValidationError as err:
-        log.debug(f"Failed to parse error as 'GlobusAuthRequirementsError' ({err})")
+        log.debug(f"Failed to parse error as 'GARE' ({err})")
 
     supported_variants: list[type[LegacyAuthRequirementsErrorVariant]] = [
         LegacyAuthorizationParametersError,
@@ -77,12 +72,11 @@ def to_auth_requirements_error(
 
 
 def to_auth_requirements_errors(
-    errors: list[GlobusAPIError | ErrorSubdocument | dict[str, t.Any]]
-) -> list[GlobusAuthRequirementsError]:
+    errors: list[exc.GlobusAPIError | exc.ErrorSubdocument | dict[str, t.Any]]
+) -> list[GARE]:
     """
     Converts a list of GlobusAPIErrors, ErrorSubdocuments, or dicts into a list of
-    GlobusAuthRequirementsErrors by attempting to match each error to
-    GlobusAuthRequirementsError (preferred) or legacy variants.
+    GAREs  by attempting to match each error to GARE (preferred) or legacy variants.
 
     .. note::
 
@@ -95,7 +89,7 @@ def to_auth_requirements_errors(
     """
     from globus_sdk.exc import GlobusAPIError
 
-    candidate_errors: list[ErrorSubdocument | dict[str, t.Any]] = []
+    candidate_errors: list[exc.ErrorSubdocument | dict[str, t.Any]] = []
     for error in errors:
         if isinstance(error, GlobusAPIError):
             # Use the ErrorSubdocuments
@@ -111,7 +105,7 @@ def to_auth_requirements_errors(
 
 
 def is_auth_requirements_error(
-    error: GlobusAPIError | ErrorSubdocument | dict[str, t.Any]
+    error: exc.GlobusAPIError | exc.ErrorSubdocument | dict[str, t.Any]
 ) -> bool:
     """
     Return True if the provided error matches a known
@@ -123,7 +117,7 @@ def is_auth_requirements_error(
 
 
 def has_auth_requirements_errors(
-    errors: list[GlobusAPIError | ErrorSubdocument | dict[str, t.Any]]
+    errors: list[exc.GlobusAPIError | exc.ErrorSubdocument | dict[str, t.Any]]
 ) -> bool:
     """
     Return True if any of the provided errors match a known

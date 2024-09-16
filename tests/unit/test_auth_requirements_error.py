@@ -2,9 +2,9 @@ import pytest
 
 from globus_sdk._testing import construct_error
 from globus_sdk.exc import ErrorSubdocument
-from globus_sdk.experimental.auth_requirements_error import (
+from globus_sdk.gare import (
+    GARE,
     GlobusAuthorizationParameters,
-    GlobusAuthRequirementsError,
     _variants,
     has_auth_requirements_errors,
     is_auth_requirements_error,
@@ -59,7 +59,7 @@ def test_create_auth_requirements_error_from_consent_error(error_dict, status):
 
         # Create a Globus Auth requirements error from a Transfer format error
         authreq_error = to_auth_requirements_error(error)
-        assert isinstance(authreq_error, GlobusAuthRequirementsError)
+        assert isinstance(authreq_error, GARE)
         assert authreq_error.code == "ConsentRequired"
         assert authreq_error.authorization_parameters.required_scopes == [
             "urn:globus:auth:scope:transfer.api.globus.org:all[*foo *bar]"
@@ -124,7 +124,7 @@ def test_create_auth_requirements_error_from_authorization_error(
         # Create a Globus Auth requirements error from a legacy
         # authorization parameters format error
         authreq_error = to_auth_requirements_error(error)
-        assert isinstance(authreq_error, GlobusAuthRequirementsError)
+        assert isinstance(authreq_error, GARE)
 
         # Check that the default error code is set
         assert authreq_error.code == "AuthorizationRequired"
@@ -184,7 +184,7 @@ def test_create_auth_requirements_error_from_authorization_error_csv(
         # Create a Globus Auth requirements error from a legacy
         # authorization parameters format error
         authreq_error = to_auth_requirements_error(error)
-        assert isinstance(authreq_error, GlobusAuthRequirementsError)
+        assert isinstance(authreq_error, GARE)
 
         # Check that the default error code is set
         assert authreq_error.code == "AuthorizationRequired"
@@ -261,7 +261,7 @@ def test_create_auth_requirements_errors_from_multiple_errors():
 
     # Check that errors properly converted
     for authreq_error in authreq_errors:
-        assert isinstance(authreq_error, GlobusAuthRequirementsError)
+        assert isinstance(authreq_error, GARE)
 
     # Check that the proper auth requirements errors were produced
     assert authreq_errors[0].code == "ConsentRequired"
@@ -322,7 +322,7 @@ def test_create_auth_requirements_error_from_legacy_authorization_error_with_cod
         # Create a Globus Auth requirements error from a legacy
         # authorization parameters format error
         authreq_error = to_auth_requirements_error(error)
-        assert isinstance(authreq_error, GlobusAuthRequirementsError)
+        assert isinstance(authreq_error, GARE)
 
         # Check that the custom error code is set
         assert authreq_error.code == "UnsatisfiedPolicy"
@@ -371,7 +371,7 @@ def test_backward_compatibility_consent_required_error():
 
     # Create a Globus Auth requirements error
     authreq_error = to_auth_requirements_error(error)
-    assert isinstance(authreq_error, GlobusAuthRequirementsError)
+    assert isinstance(authreq_error, GARE)
     assert authreq_error.code == "ConsentRequired"
     assert authreq_error.authorization_parameters.required_scopes == [
         "urn:globus:auth:scope:transfer.api.globus.org:all[*baz]"
@@ -414,7 +414,7 @@ def test_backward_compatibility_consent_required_error():
     "target_class, data, expect_message",
     [
         (  # missing 'code'
-            GlobusAuthRequirementsError,
+            GARE,
             {"authorization_parameters": {"session_required_policies": "foo"}},
             "'code' must be a string",
         ),

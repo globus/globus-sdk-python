@@ -8,12 +8,10 @@ from contextlib import contextmanager
 from string import Template
 
 from globus_sdk import AuthLoginClient, GlobusSDKUsageError, OAuthTokenResponse
-from globus_sdk.experimental.auth_requirements_error import (
-    GlobusAuthorizationParameters,
-)
 from globus_sdk.experimental.login_flow_manager.login_flow_manager import (
     LoginFlowManager,
 )
+from globus_sdk.gare import GlobusAuthorizationParameters
 
 from ._local_server import (
     DEFAULT_HTML_TEMPLATE,

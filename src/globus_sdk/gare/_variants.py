@@ -7,10 +7,7 @@ from globus_sdk import exc
 from globus_sdk._guards import validators
 from globus_sdk._serializable import Serializable
 
-from ._auth_requirements_error import (
-    GlobusAuthorizationParameters,
-    GlobusAuthRequirementsError,
-)
+from ._auth_requirements_error import GARE, GlobusAuthorizationParameters
 
 if sys.version_info >= (3, 8):
     from typing import Literal, Protocol
@@ -29,7 +26,7 @@ class LegacyAuthRequirementsErrorVariant(Protocol):
     def from_dict(cls: type[V], data: dict[str, t.Any]) -> V:
         pass
 
-    def to_auth_requirements_error(self) -> GlobusAuthRequirementsError: ...
+    def to_auth_requirements_error(self) -> GARE: ...
 
 
 class LegacyConsentRequiredTransferError(Serializable):
@@ -48,11 +45,11 @@ class LegacyConsentRequiredTransferError(Serializable):
         self.required_scopes = validators.str_list("required_scopes", required_scopes)
         self.extra = extra or {}
 
-    def to_auth_requirements_error(self) -> GlobusAuthRequirementsError:
+    def to_auth_requirements_error(self) -> GARE:
         """
         Return a GlobusAuthRequirementsError representing this error.
         """
-        return GlobusAuthRequirementsError(
+        return GARE(
             code=self.code,
             authorization_parameters=GlobusAuthorizationParameters(
                 required_scopes=self.required_scopes,
@@ -79,14 +76,14 @@ class LegacyConsentRequiredAPError(Serializable):
         self.required_scope = validators.str_("required_scope", required_scope)
         self.extra = extra or {}
 
-    def to_auth_requirements_error(self) -> GlobusAuthRequirementsError:
+    def to_auth_requirements_error(self) -> GARE:
         """
         Return a GlobusAuthRequirementsError representing this error.
 
         Normalizes the required_scope field to a list and uses the description
         to set the session message.
         """
-        return GlobusAuthRequirementsError(
+        return GARE(
             code=self.code,
             authorization_parameters=GlobusAuthorizationParameters(
                 required_scopes=[self.required_scope],
@@ -180,14 +177,14 @@ class LegacyAuthorizationParametersError(Serializable):
         )
         self.extra = extra or {}
 
-    def to_auth_requirements_error(self) -> GlobusAuthRequirementsError:
+    def to_auth_requirements_error(self) -> GARE:
         """
         Return a GlobusAuthRequirementsError representing this error.
         """
         authorization_parameters = (
             self.authorization_parameters.to_authorization_parameters()
         )
-        return GlobusAuthRequirementsError(
+        return GARE(
             authorization_parameters=authorization_parameters,
             code=self.code,
             extra=self.extra,

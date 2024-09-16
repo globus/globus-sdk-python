@@ -2,13 +2,11 @@ from unittest.mock import Mock, patch
 
 from globus_sdk import ConfidentialAppAuthClient, NativeAppAuthClient
 from globus_sdk._testing import load_response
-from globus_sdk.experimental.auth_requirements_error import (
-    GlobusAuthorizationParameters,
-)
 from globus_sdk.experimental.login_flow_manager import (
     CommandLineLoginFlowManager,
     LocalServerLoginFlowManager,
 )
+from globus_sdk.gare import GlobusAuthorizationParameters
 
 
 def _mock_input(s):

@@ -1,29 +1,29 @@
 Auth Requirements Errors
 ========================
 
-Globus Auth Requirements Error is a response format that conveys to a client any
+'Globus Auth Requirements Error' is a response format that conveys to a client any
 modifications to a session (i.e., "boosting") that will be required
 to complete a particular request.
 
-The ``globus_sdk.experimental.auth_requirements_error`` module provides a
-number of tools to make it easier to identify and handle these errors when they occur.
+The ``globus_sdk.gare`` module provides a number of tools to make it easier to
+identify and handle these errors when they occur.
 
-GlobusAuthRequirementsError
----------------------------
+GARE
+----
 
-The ``GlobusAuthRequirementsError`` class provides a model for working with Globus
-Auth Requirements Error responses.
+The ``GARE`` class provides a model for working with Globus Auth Requirements Error
+responses.
 
 Services in the Globus ecosystem may need to communicate authorization requirements
 to their consumers. For example, a service may need to instruct clients to have the user
-consent to an additional scope, ``"foo"``. In such a case, ``GlobusAuthRequirementsError``
-can provide serialization into the well-known Globus Auth Requirements Error format:
+consent to an additional scope, ``"foo"``. In such a case, ``GARE`` can provide
+serialization into the well-known Globus Auth Requirements Error format:
 
 .. code-block:: python
 
-    from globus_sdk.experimental.auth_requirements_error import GlobusAuthRequirementsError
+    from globus_sdk.gare import GARE
 
-    error = GlobusAuthRequirementsError(
+    error_doc = GARE(
         code="ConsentRequired",
         authorization_parameters=GlobusAuthorizationParameters(
             required_scopes=["foo"],
@@ -42,9 +42,9 @@ by specifying ``include_extra=True`` when calling ``to_dict()``.
 
 .. code-block:: python
 
-    from globus_sdk.experimental.auth_requirements_error import GlobusAuthRequirementsError
+    from globus_sdk.gare import GARE
 
-    error = GlobusAuthRequirementsError(
+    error = GARE(
         code="ConsentRequired",
         authorization_parameters=GlobusAuthorizationParameters(
             required_scopes=["foo"],
@@ -61,8 +61,8 @@ by specifying ``include_extra=True`` when calling ``to_dict()``.
     # Render a dictionary with extra fields
     error.to_dict(include_extra=True)
 
-These fields are stored by both the ``GlobusAuthRequirementsError`` and
-``GlobusAuthenticationParameters`` classes in an ``extra`` attribute.
+These fields are stored by both the ``GARE`` and ``GlobusAuthenticationParameters``
+classes in an ``extra`` attribute.
 
 .. note::
 
@@ -75,9 +75,8 @@ These fields are stored by both the ``GlobusAuthRequirementsError`` and
 Parsing Responses
 -----------------
 
-If you are writing a client to a Globus API, the ``auth_requirements_error`` subpackage
-provides utilities to detect legacy Globus Auth requirements error response
-formats and normalize them.
+If you are writing a client to a Globus API, the ``gare`` subpackage provides utilities
+to detect legacy Globus Auth requirements error response formats and normalize them.
 
 To detect if a ``GlobusAPIError``, ``ErrorSubdocument``, or JSON response
 dictionary represents an error that can be converted to a Globus Auth
@@ -85,27 +84,25 @@ Requirements Error, you can use, e.g.,:
 
 .. code-block:: python
 
-    from globus_sdk.experimental import auth_requirements_error
+    from globus_sdk import gare
 
     error_dict = {
         "code": "ConsentRequired",
         "message": "Missing required foo consent",
     }
     # The dict is not a Globus Auth Requirements Error, so `False` is returned.
-    auth_requirements_error.utils.is_auth_requirements_error(error_dict)
+    gare.is_auth_requirements_error(error_dict)
 
     # The dict is not a Globus Auth Requirements Error and cannot be converted.
-    auth_requirements_error.utils.to_auth_requirements_error(error_dict)  # None
+    gare.to_auth_requirements_error(error_dict)  # None
 
     error_dict = {
         "code": "ConsentRequired",
         "message": "Missing required foo consent",
         "required_scopes": ["urn:globus:auth:scope:transfer.api.globus.org:all[*foo]"],
     }
-    auth_requirements_error.utils.is_auth_requirements_error(error_dict)  # True
-    auth_requirements_error.utils.to_auth_requirements_error(
-        error_dict
-    )  # GlobusAuthRequirementsError
+    gare.is_auth_requirements_error(error_dict)  # True
+    gare.to_auth_requirements_error(error_dict)  # GARE
 
 .. note::
 
@@ -118,22 +115,38 @@ Requirements Error, you can use, e.g.,:
 
 .. code-block:: python
 
-    auth_requirements_error.utils.to_auth_requirements_error(
-        other_error
-    )  # GlobusAuthRequirementsError
-    auth_requirements_error.utils.to_auth_requirements_errors(
-        [other_error]
-    )  # [GlobusAuthRequirementsError, ...]
+    gare.to_auth_requirements_error(other_error)  # GARE
+    gare.to_auth_requirements_errors([other_error])  # [GARE, ...]
 
 Notes
 -----
 
-``GlobusAuthRequirementsError`` enforces types strictly when parsing a Globus
-Auth Requirements Error response dictionary, and will raise a ``ValueError`` if a
+``GARE`` enforces types strictly when parsing a Globus Auth Requirements Error
+response dictionary, and will raise a :class:`globus_sdk.ValidationError` if a
 supported field is supplied with a value of the wrong type.
 
-``GlobusAuthRequirementsError`` does not attempt to mimic or itself enforce
-any logic specific to the Globus Auth service with regard to what represents a valid
-combination of fields (e.g., ``session_required_mfa`` requires either
-``session_required_identities`` or ``session_required_single_domain``
-in order to be properly handled).
+``GARE`` does not attempt to mimic or itself enforce any logic specific to the
+Globus Auth service with regard to what represents a valid combination of fields
+(e.g., ``session_required_mfa`` requires either ``session_required_identities`` or
+``session_required_single_domain`` in order to be properly handled).
+
+Reference
+---------
+
+.. currentmodule:: globus_sdk.gare
+
+.. autoclass:: GARE
+    :members:
+    :inherited-members:
+
+.. autoclass:: GlobusAuthorizationParameters
+    :members:
+    :inherited-members:
+
+.. autofunction:: to_auth_requirements_error
+
+.. autofunction:: to_auth_requirements_errors
+
+.. autofunction:: is_auth_requirements_error
+
+.. autofunction:: has_auth_requirements_errors

@@ -2,9 +2,7 @@ from __future__ import annotations
 
 from globus_sdk import AuthLoginClient, ConfidentialAppAuthClient, GlobusSDKUsageError
 from globus_sdk._types import ScopeCollectionType, UUIDLike
-from globus_sdk.experimental.auth_requirements_error import (
-    GlobusAuthorizationParameters,
-)
+from globus_sdk.gare import GlobusAuthorizationParameters
 
 from .app import GlobusApp
 from .authorizer_factory import ClientCredentialsAuthorizerFactory
