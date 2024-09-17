@@ -79,7 +79,7 @@ class ClientCredentialsAuthorizer(
 
     def _get_token_response(self) -> globus_sdk.ClientCredentialsTokenResponse:
         """
-        Make a client credentials request for new tokens.
+        Make a request for new client credentials tokens.
         """
         return self.confidential_client.oauth2_client_credentials_tokens(
             requested_scopes=self.scopes
