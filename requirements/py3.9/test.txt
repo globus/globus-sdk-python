@@ -4,21 +4,21 @@
 #
 #    tox p -m freezedeps
 #
-certifi==2024.7.4
+certifi==2024.8.30
     # via requests
 charset-normalizer==3.3.2
     # via requests
-coverage==7.5.4
+coverage==7.6.1
     # via -r test.in
-exceptiongroup==1.2.1
+exceptiongroup==1.2.2
     # via pytest
 execnet==2.1.1
     # via pytest-xdist
 flaky==3.8.1
     # via -r test.in
-idna==3.7
+idna==3.10
     # via requests
-importlib-metadata==8.0.0
+importlib-metadata==8.5.0
     # via pytest-randomly
 iniconfig==2.0.0
     # via pytest
@@ -26,7 +26,7 @@ packaging==24.1
     # via pytest
 pluggy==1.5.0
     # via pytest
-pytest==8.2.2
+pytest==8.3.3
     # via
     #   -r test.in
     #   pytest-randomly
@@ -35,7 +35,7 @@ pytest-randomly==3.15.0
     # via -r test.in
 pytest-xdist==3.6.1
     # via -r test.in
-pyyaml==6.0.1
+pyyaml==6.0.2
     # via responses
 requests==2.32.3
     # via responses
@@ -43,9 +43,9 @@ responses==0.25.3
     # via -r test.in
 tomli==2.0.1
     # via pytest
-urllib3==2.2.2
+urllib3==2.2.3
     # via
     #   requests
     #   responses
-zipp==3.19.2
+zipp==3.20.2
     # via importlib-metadata

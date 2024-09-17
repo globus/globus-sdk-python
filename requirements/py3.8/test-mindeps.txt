@@ -4,17 +4,17 @@
 #
 #    tox p -m freezedeps
 #
-certifi==2024.7.4
+certifi==2024.8.30
     # via requests
-cffi==1.16.0
+cffi==1.17.1
     # via cryptography
 chardet==3.0.4
     # via requests
-coverage==7.5.4
+coverage==7.6.1
     # via -r test.in
 cryptography==3.3.1
     # via -r test-mindeps.in
-exceptiongroup==1.2.1
+exceptiongroup==1.2.2
     # via pytest
 execnet==2.1.1
     # via pytest-xdist
@@ -22,7 +22,7 @@ flaky==3.8.1
     # via -r test.in
 idna==2.8
     # via requests
-importlib-metadata==8.0.0
+importlib-metadata==8.5.0
     # via pytest-randomly
 iniconfig==2.0.0
     # via pytest
@@ -34,7 +34,7 @@ pycparser==2.22
     # via cffi
 pyjwt==2.0.0
     # via -r test-mindeps.in
-pytest==8.2.2
+pytest==8.3.3
     # via
     #   -r test.in
     #   pytest-randomly
@@ -43,7 +43,7 @@ pytest-randomly==3.15.0
     # via -r test.in
 pytest-xdist==3.6.1
     # via -r test.in
-pyyaml==6.0.1
+pyyaml==6.0.2
     # via responses
 requests==2.22.0
     # via
@@ -55,7 +55,7 @@ six==1.16.0
     # via cryptography
 tomli==2.0.1
     # via pytest
-types-pyyaml==6.0.12.20240311
+types-pyyaml==6.0.12.20240917
     # via responses
 typing-extensions==4.0.0
     # via -r test-mindeps.in
@@ -63,5 +63,5 @@ urllib3==1.25.11
     # via
     #   requests
     #   responses
-zipp==3.19.2
+zipp==3.20.2
     # via importlib-metadata
