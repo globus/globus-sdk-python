@@ -77,7 +77,7 @@ class RefreshTokenAuthorizer(RenewingAuthorizer["globus_sdk.RefreshTokenResponse
 
         super().__init__(access_token, expires_at, on_refresh)
 
-    def _get_token_response(self) -> globus_sdk.RfreshTokenResponse:
+    def _get_token_response(self) -> globus_sdk.RefreshTokenResponse:
         """
         Make a refresh token grant
         """
