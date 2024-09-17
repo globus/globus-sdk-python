@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing as t
 
 from globus_sdk import AuthClient, Scope
-from globus_sdk.experimental.tokenstorage import TokenData, TokenStorage
+from globus_sdk.experimental.tokenstorage import TokenStorage, TokenStorageData
 from globus_sdk.scopes.consents import ConsentForest
 
 from ..._types import UUIDLike
@@ -16,10 +16,10 @@ from .errors import (
 
 
 def _get_identity_id_from_token_data_by_resource_server(
-    token_data_by_resource_server: t.Mapping[str, TokenData]
+    token_data_by_resource_server: t.Mapping[str, TokenStorageData]
 ) -> str | None:
     """
-    Get the identity_id attribute from all TokenData objects by resource server
+    Get the identity_id attribute from all TokenStorageData objects by resource server
     Sanity check that they are all the same, and then return that identity_id or None
     """
     token_data_identity_ids: set[str] = set()
@@ -34,7 +34,7 @@ def _get_identity_id_from_token_data_by_resource_server(
         return token_data_identity_ids.pop()
     else:
         raise ValueError(
-            "token_data_by_resource_server contained TokenData objects with "
+            "token_data_by_resource_server contained TokenStorageData objects with "
             f"different identity_id values: {token_data_identity_ids}"
         )
 
@@ -105,11 +105,11 @@ class ValidatingTokenStorage(TokenStorage):
         self._consent_client = consent_client
 
     def store_token_data_by_resource_server(
-        self, token_data_by_resource_server: t.Mapping[str, TokenData]
+        self, token_data_by_resource_server: t.Mapping[str, TokenStorageData]
     ) -> None:
         """
-        :param token_data_by_resource_server: A dict of TokenData objects indexed by
-            their resource server
+        :param token_data_by_resource_server: A dict of TokenStorageData objects
+            indexed by their resource server
 
         :raises: :exc:`MissingIdentityError` if the token data does not contain
             identity information.
@@ -130,9 +130,9 @@ class ValidatingTokenStorage(TokenStorage):
             token_data_by_resource_server
         )
 
-    def get_token_data_by_resource_server(self) -> dict[str, TokenData]:
+    def get_token_data_by_resource_server(self) -> dict[str, TokenStorageData]:
         """
-        :returns: A dict of TokenData objects indexed by their resource server
+        :returns: A dict of TokenStorageData objects indexed by their resource server
         :raises: :exc:`UnmetScopeRequirementsError` if any token data does not meet the
             attached scope requirements.
         """
@@ -145,7 +145,7 @@ class ValidatingTokenStorage(TokenStorage):
 
         return by_resource_server
 
-    def get_token_data(self, resource_server: str) -> TokenData:
+    def get_token_data(self, resource_server: str) -> TokenStorageData:
         """
         :param resource_server: A resource server with cached token data.
         :returns: The token data for the given resource server.
@@ -170,7 +170,7 @@ class ValidatingTokenStorage(TokenStorage):
         return self.token_storage.remove_token_data(resource_server)
 
     def _validate_token_data_by_resource_server_meets_identity_requirements(
-        self, token_data_by_resource_server: t.Mapping[str, TokenData]
+        self, token_data_by_resource_server: t.Mapping[str, TokenStorageData]
     ) -> None:
         """
         Validate that the identity info in the token data matches the stored identity
@@ -209,7 +209,10 @@ class ValidatingTokenStorage(TokenStorage):
             )
 
     def _validate_token_data_meets_scope_requirements(
-        self, resource_server: str, token_data: TokenData, eval_dependent: bool = True
+        self,
+        resource_server: str,
+        token_data: TokenStorageData,
+        eval_dependent: bool = True,
     ) -> None:
         """
         Given a particular resource server/token data, evaluate whether the token +

@@ -33,7 +33,7 @@ from globus_sdk.experimental.tokenstorage import (
     JSONTokenStorage,
     MemoryTokenStorage,
     SQLiteTokenStorage,
-    TokenData,
+    TokenStorageData,
 )
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.scopes import AuthScopes, Scope
@@ -42,7 +42,7 @@ from globus_sdk.services.auth import OAuthTokenResponse
 
 def _mock_token_data_by_rs():
     return {
-        "auth.globus.org": TokenData(
+        "auth.globus.org": TokenStorageData(
             resource_server="auth.globus.org",
             identity_id="mock_identity_id",
             scope="openid",

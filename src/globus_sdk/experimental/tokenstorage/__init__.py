@@ -2,7 +2,7 @@ from globus_sdk.experimental.tokenstorage.base import FileTokenStorage, TokenSto
 from globus_sdk.experimental.tokenstorage.json import JSONTokenStorage
 from globus_sdk.experimental.tokenstorage.memory import MemoryTokenStorage
 from globus_sdk.experimental.tokenstorage.sqlite import SQLiteTokenStorage
-from globus_sdk.experimental.tokenstorage.token_data import TokenData
+from globus_sdk.experimental.tokenstorage.token_data import TokenStorageData
 
 __all__ = (
     "JSONTokenStorage",
@@ -10,5 +10,5 @@ __all__ = (
     "TokenStorage",
     "FileTokenStorage",
     "MemoryTokenStorage",
-    "TokenData",
+    "TokenStorageData",
 )

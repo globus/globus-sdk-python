@@ -12,7 +12,7 @@ from globus_sdk.services.auth import OAuthTokenResponse
 
 from ... import GlobusSDKUsageError
 from ..._types import UUIDLike
-from .token_data import TokenData
+from .token_data import TokenStorageData
 
 if t.TYPE_CHECKING:
     from globus_sdk.experimental.globus_app import GlobusAppConfig
@@ -37,30 +37,30 @@ class TokenStorage(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def store_token_data_by_resource_server(
-        self, token_data_by_resource_server: t.Mapping[str, TokenData]
+        self, token_data_by_resource_server: t.Mapping[str, TokenStorageData]
     ) -> None:
         """
         Store token data in underlying storage partitioned by the resource server
         and the current namespace.
 
-        :param token_data_by_resource_server: a ``dict`` of ``TokenData`` objects
+        :param token_data_by_resource_server: a ``dict`` of ``TokenStorageData`` objects
         indexed by their ``resource_server``.
         """
 
     @abc.abstractmethod
-    def get_token_data_by_resource_server(self) -> dict[str, TokenData]:
+    def get_token_data_by_resource_server(self) -> dict[str, TokenStorageData]:
         """
         Lookup all token data under the current namespace in the underlying storage.
 
-        Returns a dict of ``TokenData`` objects indexed by their resource server.
+        Returns a dict of ``TokenStorageData`` objects indexed by their resource server.
         """
 
-    def get_token_data(self, resource_server: str) -> TokenData | None:
+    def get_token_data(self, resource_server: str) -> TokenStorageData | None:
         """
         Lookup token data for a resource server in the underlying storage
         under the current namespace.
 
-        Either returns a ``TokenData`` object containing tokens and metadata for
+        Either returns a ``TokenStorageData`` object containing tokens and metadata for
         the given resource server or ``None`` indicating that there was no data for
         that resource server.
 
@@ -96,7 +96,7 @@ class TokenStorage(metaclass=abc.ABCMeta):
             identity_id = None
 
         for resource_server, token_dict in token_response.by_resource_server.items():
-            token_data_by_resource_server[resource_server] = TokenData(
+            token_data_by_resource_server[resource_server] = TokenStorageData(
                 resource_server=token_dict["resource_server"],
                 identity_id=identity_id,
                 scope=token_dict["scope"],

@@ -10,7 +10,7 @@ from globus_sdk import exc
 from globus_sdk.experimental.tokenstorage.base import FileTokenStorage
 from globus_sdk.version import __version__
 
-from .token_data import TokenData
+from .token_data import TokenStorageData
 
 
 class SQLiteTokenStorage(FileTokenStorage):
@@ -107,13 +107,13 @@ class SQLiteTokenStorage(FileTokenStorage):
         self._connection.close()
 
     def store_token_data_by_resource_server(
-        self, token_data_by_resource_server: t.Mapping[str, TokenData]
+        self, token_data_by_resource_server: t.Mapping[str, TokenStorageData]
     ) -> None:
         """
         Given a dict of token data indexed by resource server, convert the data into
         JSON dicts and write it to ``self.filepath`` under the current namespace
 
-        :param token_data_by_resource_server: a ``dict`` of ``TokenData`` objects
+        :param token_data_by_resource_server: a ``dict`` of ``TokenStorageData`` objects
             indexed by their ``resource_server``.
         """
         pairs = []
@@ -130,13 +130,13 @@ class SQLiteTokenStorage(FileTokenStorage):
         )
         self._connection.commit()
 
-    def get_token_data_by_resource_server(self) -> dict[str, TokenData]:
+    def get_token_data_by_resource_server(self) -> dict[str, TokenStorageData]:
         """
         Lookup all token data under the current namespace from the database.
 
-        Returns a dict of ``TokenData`` objects indexed by their resource server.
+        Returns a dict of ``TokenStorageData`` objects indexed by their resource server.
         """
-        ret: dict[str, TokenData] = {}
+        ret: dict[str, TokenStorageData] = {}
         for row in self._connection.execute(
             "SELECT resource_server, token_data_json "
             "FROM token_storage WHERE namespace=?",
@@ -144,7 +144,7 @@ class SQLiteTokenStorage(FileTokenStorage):
         ):
             resource_server, token_data_json = row
             token_data_dict = json.loads(token_data_json)
-            ret[resource_server] = TokenData.from_dict(token_data_dict)
+            ret[resource_server] = TokenStorageData.from_dict(token_data_dict)
         return ret
 
     def remove_token_data(self, resource_server: str) -> bool:

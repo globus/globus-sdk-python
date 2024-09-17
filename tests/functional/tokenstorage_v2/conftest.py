@@ -3,14 +3,14 @@ from unittest import mock
 
 import pytest
 
-from globus_sdk.experimental.tokenstorage import TokenData
+from globus_sdk.experimental.tokenstorage import TokenStorageData
 
 
 @pytest.fixture
 def mock_token_data_by_resource_server():
     expiration_time = int(time.time()) + 3600
     ret = {
-        "resource_server_1": TokenData(
+        "resource_server_1": TokenStorageData(
             resource_server="resource_server_1",
             identity_id="user_id",
             scope="scope1",
@@ -19,7 +19,7 @@ def mock_token_data_by_resource_server():
             expires_at_seconds=expiration_time,
             token_type="Bearer",
         ),
-        "resource_server_2": TokenData(
+        "resource_server_2": TokenStorageData(
             resource_server="resource_server_2",
             identity_id="user_id",
             scope="scope2 scope2:0 scope2:1",

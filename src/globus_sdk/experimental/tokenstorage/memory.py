@@ -4,7 +4,7 @@ import typing as t
 
 from globus_sdk.experimental.tokenstorage.base import TokenStorage
 
-from .token_data import TokenData
+from .token_data import TokenStorageData
 
 if t.TYPE_CHECKING:
     from globus_sdk._types import UUIDLike
@@ -35,7 +35,7 @@ class MemoryTokenStorage(TokenStorage):
         return cls(namespace=namespace)
 
     def store_token_data_by_resource_server(
-        self, token_data_by_resource_server: t.Mapping[str, TokenData]
+        self, token_data_by_resource_server: t.Mapping[str, TokenStorageData]
     ) -> None:
         if self.namespace not in self._tokens:
             self._tokens[self.namespace] = {}
@@ -43,11 +43,11 @@ class MemoryTokenStorage(TokenStorage):
         for resource_server, token_data in token_data_by_resource_server.items():
             self._tokens[self.namespace][resource_server] = token_data.to_dict()
 
-    def get_token_data_by_resource_server(self) -> dict[str, TokenData]:
+    def get_token_data_by_resource_server(self) -> dict[str, TokenStorageData]:
         ret = {}
         dicts_by_resource_server = self._tokens.get(self.namespace, {})
         for resource_server, token_data_dict in dicts_by_resource_server.items():
-            ret[resource_server] = TokenData.from_dict(token_data_dict)
+            ret[resource_server] = TokenStorageData.from_dict(token_data_dict)
         return ret
 
     def remove_token_data(self, resource_server: str) -> bool:

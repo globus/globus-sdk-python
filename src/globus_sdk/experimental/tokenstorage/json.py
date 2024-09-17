@@ -6,7 +6,7 @@ import typing as t
 from globus_sdk.experimental.tokenstorage.base import FileTokenStorage
 from globus_sdk.version import __version__
 
-from .token_data import TokenData
+from .token_data import TokenStorageData
 
 # use the non-annotation form of TypedDict to apply a non-identifier key
 _JSONFileData_0 = t.TypedDict("_JSONFileData_0", {"globus-sdk.version": str})
@@ -116,7 +116,7 @@ class JSONTokenStorage(FileTokenStorage):
         return self._handle_formats(data)
 
     def store_token_data_by_resource_server(
-        self, token_data_by_resource_server: t.Mapping[str, TokenData]
+        self, token_data_by_resource_server: t.Mapping[str, TokenStorageData]
     ) -> None:
         """
         Store token data as JSON data in ``self.filepath`` under the current namespace
@@ -127,7 +127,7 @@ class JSONTokenStorage(FileTokenStorage):
         local users, this sets the umask such that only the owner of the
         resulting file can read or write it.
 
-        :param token_data_by_resource_server: a ``dict`` of ``TokenData`` objects
+        :param token_data_by_resource_server: a ``dict`` of ``TokenStorageData`` objects
             indexed by their ``resource_server``.
         """
         to_write = self._load()
@@ -148,16 +148,16 @@ class JSONTokenStorage(FileTokenStorage):
             with open(self.filepath, "w", encoding="utf-8") as f:
                 json.dump(to_write, f)
 
-    def get_token_data_by_resource_server(self) -> dict[str, TokenData]:
+    def get_token_data_by_resource_server(self) -> dict[str, TokenStorageData]:
         """
         Lookup all token data under the current namespace from the JSON file.
 
-        Returns a dict of ``TokenData`` objects indexed by their resource server.
+        Returns a dict of ``TokenStorageData`` objects indexed by their resource server.
         """
         ret = {}
         dicts_by_resource_server = self._load()["data"].get(self.namespace, {})
         for resource_server, token_data_dict in dicts_by_resource_server.items():
-            ret[resource_server] = TokenData.from_dict(token_data_dict)
+            ret[resource_server] = TokenStorageData.from_dict(token_data_dict)
         return ret
 
     def remove_token_data(self, resource_server: str) -> bool:

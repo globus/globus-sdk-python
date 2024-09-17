@@ -6,7 +6,7 @@ from globus_sdk._guards import validators
 from globus_sdk._serializable import Serializable
 
 
-class TokenData(Serializable):
+class TokenStorageData(Serializable):
     """
     Data class containing tokens and metadata for a specific resource server used
     as the python interface for ``TokenStorage``.

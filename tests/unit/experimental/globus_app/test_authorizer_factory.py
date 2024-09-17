@@ -12,7 +12,7 @@ from globus_sdk.experimental.globus_app.errors import (
     ExpiredTokenError,
     MissingTokenError,
 )
-from globus_sdk.experimental.tokenstorage import TokenData
+from globus_sdk.experimental.tokenstorage import TokenStorageData
 
 
 def make_mock_token_response(token_number=1):
@@ -40,7 +40,7 @@ class MockValidatingTokenStorage:
             msg = f"No token data for {resource_server}"
             raise MissingTokenError(msg, resource_server=resource_server)
 
-        return TokenData.from_dict(self.token_data[resource_server])
+        return TokenStorageData.from_dict(self.token_data[resource_server])
 
     def store_token_response(self, mock_token_response):
         self.token_data = mock_token_response.by_resource_server
