@@ -48,8 +48,8 @@ class ClientCredentialsAuthorizer(
     :param on_refresh: A callback which is triggered any time this authorizer fetches a
         new access_token. The ``on_refresh`` callable is invoked on the
         :class:`globus_sdk.ClientCredentialsTokenResponse` object resulting from the
-        token being refreshed. It should take only one positional argument, the token response
-        object.
+        token being refreshed. It should take only one positional argument, the token
+        response object.
         This is useful for implementing storage for Access Tokens, as the
         ``on_refresh`` callback can be used to update the Access Tokens and
         their expiration times.
@@ -79,7 +79,7 @@ class ClientCredentialsAuthorizer(
 
     def _get_token_response(self) -> globus_sdk.ClientCredentialsTokenResponse:
         """
-        Make a request for new client credentials tokens.
+        Make a request for new tokens, using a 'client_credentials' grant.
         """
         return self.confidential_client.oauth2_client_credentials_tokens(
             requested_scopes=self.scopes
