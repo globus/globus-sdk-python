@@ -12,10 +12,13 @@ from .flow_managers import (
 )
 from .identity_map import IdentityMap
 from .response import (
+    AuthorizationCodeTokenResponse,
+    ClientCredentialsTokenResponse,
     GetConsentsResponse,
     GetIdentitiesResponse,
     OAuthDependentTokenResponse,
     OAuthTokenResponse,
+    RefreshTokenResponse,
 )
 
 __all__ = (
@@ -33,8 +36,11 @@ __all__ = (
     "GlobusNativeAppFlowManager",
     "GlobusAuthorizationCodeFlowManager",
     # responses
+    "AuthorizationCodeTokenResponse",
+    "ClientCredentialsTokenResponse",
     "GetConsentsResponse",
     "GetIdentitiesResponse",
     "OAuthDependentTokenResponse",
     "OAuthTokenResponse",
+    "RefreshTokenResponse",
 )

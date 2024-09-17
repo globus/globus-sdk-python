@@ -3,18 +3,18 @@ from __future__ import annotations
 import logging
 import typing as t
 
+import globus_sdk
 from globus_sdk._types import ScopeCollectionType
 from globus_sdk.scopes import scopes_to_str
 
 from .renewing import RenewingAuthorizer
 
-if t.TYPE_CHECKING:
-    from globus_sdk.services.auth import ConfidentialAppAuthClient, OAuthTokenResponse
-
 log = logging.getLogger(__name__)
 
 
-class ClientCredentialsAuthorizer(RenewingAuthorizer):
+class ClientCredentialsAuthorizer(
+    RenewingAuthorizer["globus_sdk.ClientCredentialsTokenResponse"]
+):
     r"""
     Implementation of a RenewingAuthorizer that renews confidential app client
     Access Tokens using a ConfidentialAppAuthClient and a set of scopes to
@@ -47,9 +47,9 @@ class ClientCredentialsAuthorizer(RenewingAuthorizer):
         POSIX timestamp (i.e. seconds since the epoch)
     :param on_refresh: A callback which is triggered any time this authorizer fetches a
         new access_token. The ``on_refresh`` callable is invoked on the
-        :class:`OAuthTokenResponse <globus_sdk.OAuthTokenResponse>`
-        object resulting from the token being refreshed. It should take only one
-        argument, the token response object.
+        :class:`globus_sdk.ClientCredentialsTokenResponse` object resulting from the
+        token being refreshed. It should take only one argument, the token response
+        object.
         This is useful for implementing storage for Access Tokens, as the
         ``on_refresh`` callback can be used to update the Access Tokens and
         their expiration times.
@@ -57,12 +57,14 @@ class ClientCredentialsAuthorizer(RenewingAuthorizer):
 
     def __init__(
         self,
-        confidential_client: ConfidentialAppAuthClient,
+        confidential_client: globus_sdk.ConfidentialAppAuthClient,
         scopes: ScopeCollectionType,
         *,
         access_token: str | None = None,
         expires_at: int | None = None,
-        on_refresh: None | t.Callable[[OAuthTokenResponse], t.Any] = None,
+        on_refresh: (
+            None | t.Callable[[globus_sdk.ClientCredentialsTokenResponse], t.Any]
+        ) = None,
     ):
         # values for _get_token_data
         self.confidential_client = confidential_client
@@ -75,15 +77,17 @@ class ClientCredentialsAuthorizer(RenewingAuthorizer):
 
         super().__init__(access_token, expires_at, on_refresh)
 
-    def _get_token_response(self) -> OAuthTokenResponse:
+    def _get_token_response(self) -> globus_sdk.ClientCredentialsTokenResponse:
         """
-        Make a client credentials grant
+        Make a client credentials request for new tokens.
         """
         return self.confidential_client.oauth2_client_credentials_tokens(
             requested_scopes=self.scopes
         )
 
-    def _extract_token_data(self, res: OAuthTokenResponse) -> dict[str, t.Any]:
+    def _extract_token_data(
+        self, res: globus_sdk.ClientCredentialsTokenResponse
+    ) -> dict[str, t.Any]:
         """
         Get the tokens .by_resource_server,
         Ensure that only one token was gotten, and return that token.

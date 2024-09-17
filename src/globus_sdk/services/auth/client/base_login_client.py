@@ -15,7 +15,11 @@ from globus_sdk.scopes import AuthScopes, Scope
 from .._common import get_jwk_data, pem_decode_jwk_data
 from ..errors import AuthAPIError
 from ..flow_managers import GlobusOAuthFlowManager
-from ..response import OAuthTokenResponse
+from ..response import (
+    AuthorizationCodeTokenResponse,
+    OAuthTokenResponse,
+    RefreshTokenResponse,
+)
 
 if sys.version_info >= (3, 8):
     from typing import Literal
@@ -203,7 +207,9 @@ class AuthLoginClient(client.BaseClient):
         log.info(f"Got authorization URL: {auth_url}")
         return auth_url
 
-    def oauth2_exchange_code_for_tokens(self, auth_code: str) -> OAuthTokenResponse:
+    def oauth2_exchange_code_for_tokens(
+        self, auth_code: str
+    ) -> AuthorizationCodeTokenResponse:
         """
         Exchange an authorization code for a token or tokens.
 
@@ -231,7 +237,7 @@ class AuthLoginClient(client.BaseClient):
         refresh_token: str,
         *,
         body_params: dict[str, t.Any] | None = None,
-    ) -> OAuthTokenResponse:
+    ) -> RefreshTokenResponse:
         r"""
         Exchange a refresh token for a
         :class:`OAuthTokenResponse <.OAuthTokenResponse>`, containing
@@ -251,7 +257,9 @@ class AuthLoginClient(client.BaseClient):
         """
         log.info("Executing token refresh; typically requires client credentials")
         form_data = {"refresh_token": refresh_token, "grant_type": "refresh_token"}
-        return self.oauth2_token(form_data, body_params=body_params)
+        return self.oauth2_token(
+            form_data, body_params=body_params, response_class=RefreshTokenResponse
+        )
 
     def oauth2_validate_token(
         self,

@@ -63,6 +63,9 @@ _LAZY_IMPORT_TABLE = {
         "GetIdentitiesResponse",
         "OAuthDependentTokenResponse",
         "OAuthTokenResponse",
+        "AuthorizationCodeTokenResponse",
+        "ClientCredentialsTokenResponse",
+        "RefreshTokenResponse",
         "DependentScopeSpec",
     },
     "services.gcs": {
@@ -185,6 +188,9 @@ if t.TYPE_CHECKING:
     from .services.auth import GetIdentitiesResponse
     from .services.auth import OAuthDependentTokenResponse
     from .services.auth import OAuthTokenResponse
+    from .services.auth import AuthorizationCodeTokenResponse
+    from .services.auth import ClientCredentialsTokenResponse
+    from .services.auth import RefreshTokenResponse
     from .services.auth import DependentScopeSpec
     from .services.gcs import CollectionDocument
     from .services.gcs import GCSAPIError
@@ -292,6 +298,7 @@ __all__ = (
     "AuthAPIError",
     "AuthClient",
     "AuthLoginClient",
+    "AuthorizationCodeTokenResponse",
     "AzureBlobStoragePolicies",
     "BaseClient",
     "BasicAuthorizer",
@@ -300,6 +307,7 @@ __all__ = (
     "BoxStoragePolicies",
     "CephStoragePolicies",
     "ClientCredentialsAuthorizer",
+    "ClientCredentialsTokenResponse",
     "CollectionDocument",
     "CollectionPolicies",
     "ConfidentialAppAuthClient",
@@ -361,6 +369,7 @@ __all__ = (
     "POSIXStoragePolicies",
     "RecurringTimerSchedule",
     "RefreshTokenAuthorizer",
+    "RefreshTokenResponse",
     "RemovedInV4Warning",
     "S3StoragePolicies",
     "Scope",

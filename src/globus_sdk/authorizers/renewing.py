@@ -17,8 +17,12 @@ log = logging.getLogger(__name__)
 # possible delays or clock skew.
 EXPIRES_ADJUST_SECONDS = 60
 
+# the type of the response which is produced by the authorizer, received by it, and
+# passed to the `on_refresh` callback
+ResponseT = t.TypeVar("ResponseT", bound="OAuthTokenResponse")
 
-class RenewingAuthorizer(GlobusAuthorizer, metaclass=abc.ABCMeta):
+
+class RenewingAuthorizer(GlobusAuthorizer, t.Generic[ResponseT], metaclass=abc.ABCMeta):
     r"""
     A ``RenewingAuthorizer`` is an abstract superclass to any authorizer
     that needs to get new Access Tokens in order to form Authorization headers.
@@ -38,8 +42,7 @@ class RenewingAuthorizer(GlobusAuthorizer, metaclass=abc.ABCMeta):
     :param expires_at: Expiration time for the starting ``access_token`` expressed as a
         POSIX timestamp (i.e. seconds since the epoch)
     :param on_refresh: A callback which is triggered any time this authorizer fetches a
-        new access_token. The ``on_refresh`` callable is invoked on the
-        :class:`OAuthTokenResponse <globus_sdk.OAuthTokenResponse>`
+        new access_token. The ``on_refresh`` callable is invoked on the response
         object resulting from the token being refreshed. It should take only one
         argument, the token response object.
         This is useful for implementing storage for Access Tokens, as the
@@ -51,8 +54,8 @@ class RenewingAuthorizer(GlobusAuthorizer, metaclass=abc.ABCMeta):
         self,
         access_token: str | None = None,
         expires_at: int | None = None,
-        on_refresh: None | t.Callable[[OAuthTokenResponse], t.Any] = None,
-    ):
+        on_refresh: None | t.Callable[[ResponseT], t.Any] = None,
+    ) -> None:
         self._access_token = None
         self._access_token_hash = None
 
@@ -97,14 +100,14 @@ class RenewingAuthorizer(GlobusAuthorizer, metaclass=abc.ABCMeta):
             self._access_token_hash = utils.sha256_string(value)
 
     @abc.abstractmethod
-    def _get_token_response(self) -> OAuthTokenResponse:
+    def _get_token_response(self) -> ResponseT:
         """
         Using whatever method the specific authorizer implementing this class
         does, get a new token response.
         """
 
     @abc.abstractmethod
-    def _extract_token_data(self, res: OAuthTokenResponse) -> dict[str, t.Any]:
+    def _extract_token_data(self, res: ResponseT) -> dict[str, t.Any]:
         """
         Given a token response object, get the first element of
         token_response.by_resource_server

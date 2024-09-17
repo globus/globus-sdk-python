@@ -10,7 +10,7 @@ from .renewing import RenewingAuthorizer
 log = logging.getLogger(__name__)
 
 
-class RefreshTokenAuthorizer(RenewingAuthorizer):
+class RefreshTokenAuthorizer(RenewingAuthorizer["globus_sdk.RefreshTokenResponse"]):
     """
     Implements Authorization using a Refresh Token to periodically fetch
     renewed Access Tokens. It may be initialized with an Access Token, or it
@@ -39,9 +39,8 @@ class RefreshTokenAuthorizer(RenewingAuthorizer):
         POSIX timestamp (i.e. seconds since the epoch)
     :param on_refresh: A callback which is triggered any time this authorizer fetches a
         new access_token. The ``on_refresh`` callable is invoked on the
-        :class:`OAuthTokenResponse <globus_sdk.OAuthTokenResponse>`
-        object resulting from the token being refreshed. It should take only one
-        argument, the token response object.
+        :class:`globus_sdk.RefreshTokenResponse` object resulting from the token being
+        refreshed. It should take only one argument, the token response object.
         This is useful for implementing storage for Access Tokens, as the
         ``on_refresh`` callback can be used to update the Access Tokens and
         their expiration times.
@@ -54,7 +53,7 @@ class RefreshTokenAuthorizer(RenewingAuthorizer):
         *,
         access_token: str | None = None,
         expires_at: int | None = None,
-        on_refresh: None | t.Callable[[globus_sdk.OAuthTokenResponse], t.Any] = None,
+        on_refresh: None | t.Callable[[globus_sdk.RefreshTokenResponse], t.Any] = None,
     ):
         log.info(
             "Setting up RefreshTokenAuthorizer with auth_client="
@@ -78,14 +77,14 @@ class RefreshTokenAuthorizer(RenewingAuthorizer):
 
         super().__init__(access_token, expires_at, on_refresh)
 
-    def _get_token_response(self) -> globus_sdk.OAuthTokenResponse:
+    def _get_token_response(self) -> globus_sdk.RfreshTokenResponse:
         """
         Make a refresh token grant
         """
         return self.auth_client.oauth2_refresh_token(self.refresh_token)
 
     def _extract_token_data(
-        self, res: globus_sdk.OAuthTokenResponse
+        self, res: globus_sdk.RefreshTokenResponse
     ) -> dict[str, t.Any]:
         """
         Get the tokens .by_resource_server,

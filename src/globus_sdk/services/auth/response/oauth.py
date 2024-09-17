@@ -250,12 +250,49 @@ class OAuthTokenResponse(GlobusHTTPResponse):
         )
 
 
+class AuthorizationCodeTokenResponse(OAuthTokenResponse):
+    """
+    Class for responses from the OAuth2 'authorization_code' grant.
+
+    This class of response is returned by methods which get new tokens via a
+    code-exchange, as in 3-legged OAuth or PKCE.
+
+    For example,
+    :meth:`globus_sdk.ConfidentialAppAuthClient.oauth2_exchange_code_for_tokens`
+    will return an ``AuthorizationCodeTokenResponse``.
+    """
+
+
+class ClientCredentialsTokenResponse(OAuthTokenResponse):
+    """
+    Class for responses from the OAuth2 'client_credentials' grant.
+
+    This class of response is returned by methods which get new tokens by means of
+    client credentials, namely
+    :meth:`globus_sdk.ConfidentialAppAuthClient.oauth2_client_credentials_tokens`.
+    """
+
+
+class RefreshTokenResponse(OAuthTokenResponse):
+    """
+    Class for responses from the OAuth2 'refresh_token' grant.
+
+    This class of response is returned by methods which get new tokens from an
+    existing Refresh Token, e.g.,
+    :meth:`globus_sdk.NativeAppAuthClient.oauth2_refresh_token`.
+    """
+
+
 class OAuthDependentTokenResponse(OAuthTokenResponse):
     """
-    Class for responses from the OAuth2 code for tokens retrieved by the
-    OAuth2 Dependent Token Extension Grant. For more complete docs, see
+    Class for responses from the OAuth2
+    'urn:globus:auth:grant_type:dependent_token' grant.
+
+    This is an extension grant type defined by Globus.
+
     :meth:`oauth2_get_dependent_tokens \
     <globus_sdk.ConfidentialAppAuthClient.oauth2_get_dependent_tokens>`
+    provides this response, and includes some documentation on its proper usage.
     """
 
     def _init_rs_dict(self) -> None:

@@ -8,7 +8,7 @@ from globus_sdk import utils
 from globus_sdk._types import ScopeCollectionType
 
 from .._common import stringify_requested_scopes
-from ..response import OAuthTokenResponse
+from ..response import AuthorizationCodeTokenResponse
 from .base import GlobusOAuthFlowManager
 
 if t.TYPE_CHECKING:
@@ -105,7 +105,9 @@ class GlobusAuthorizationCodeFlowManager(GlobusOAuthFlowManager):
         encoded_params = urllib.parse.urlencode(params)
         return f"{authorize_base_url}?{encoded_params}"
 
-    def exchange_code_for_tokens(self, auth_code: str) -> OAuthTokenResponse:
+    def exchange_code_for_tokens(
+        self, auth_code: str
+    ) -> AuthorizationCodeTokenResponse:
         """
         The second step of the Authorization Code flow, exchange an
         authorization code for access tokens (and refresh tokens if specified)
@@ -121,5 +123,6 @@ class GlobusAuthorizationCodeFlowManager(GlobusOAuthFlowManager):
                 "grant_type": "authorization_code",
                 "code": auth_code.encode("utf-8"),
                 "redirect_uri": self.redirect_uri,
-            }
+            },
+            response_class=AuthorizationCodeTokenResponse,
         )
