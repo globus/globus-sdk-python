@@ -16,13 +16,11 @@ __all__ = (
 # (when accessed, these will emit deprecation warnings)
 if t.TYPE_CHECKING:
     from globus_sdk.gare import GARE as GlobusAuthRequirementsError
-    from globus_sdk.gare import (
-        GlobusAuthorizationParameters,
-        has_auth_requirements_errors,
-        is_auth_requirements_error,
-        to_auth_requirements_error,
-        to_auth_requirements_errors,
-    )
+    from globus_sdk.gare import GlobusAuthorizationParameters
+    from globus_sdk.gare import has_gares as has_auth_requirements_errors
+    from globus_sdk.gare import is_gare as is_auth_requirements_error
+    from globus_sdk.gare import to_gare as to_auth_requirements_error
+    from globus_sdk.gare import to_gares as to_auth_requirements_errors
 else:
 
     _RENAMES = {
