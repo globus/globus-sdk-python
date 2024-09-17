@@ -1,16 +1,37 @@
 import pytest
 
 from globus_sdk._testing import construct_error
-from globus_sdk.exc import ErrorSubdocument
+from globus_sdk.exc import ErrorSubdocument, RemovedInV4Warning
 from globus_sdk.gare import (
     GARE,
     GlobusAuthorizationParameters,
     _variants,
-    has_auth_requirements_errors,
-    is_auth_requirements_error,
-    to_auth_requirements_error,
-    to_auth_requirements_errors,
+    has_gares,
+    is_gare,
+    to_gare,
+    to_gares,
 )
+
+
+@pytest.mark.parametrize(
+    "alias, value",
+    (
+        ("GlobusAuthorizationParameters", GlobusAuthorizationParameters),
+        ("GlobusAuthRequirementsError", GARE),
+        ("to_auth_requirements_error", to_gare),
+        ("to_auth_requirements_errors", to_gares),
+        ("has_auth_requirements_errors", has_gares),
+        ("is_auth_requirements_error", is_gare),
+    ),
+)
+def test_deprecated_experimental_alias(alias, value):
+    with pytest.warns(RemovedInV4Warning):
+        from globus_sdk.experimental import (
+            auth_requirements_error as experimental_module,
+        )
+
+        aliased_value = getattr(experimental_module, alias)
+    assert aliased_value is value
 
 
 @pytest.mark.parametrize(
@@ -51,14 +72,14 @@ def test_create_auth_requirements_error_from_consent_error(error_dict, status):
 
     for error in (error_dict, error_subdoc, api_error):
         # Test boolean utility functions
-        assert is_auth_requirements_error(error)
-        assert has_auth_requirements_errors([error])
+        assert is_gare(error)
+        assert has_gares([error])
 
         # Check that this only produces one error
-        assert len(to_auth_requirements_errors([error])) == 1
+        assert len(to_gares([error])) == 1
 
         # Create a Globus Auth requirements error from a Transfer format error
-        authreq_error = to_auth_requirements_error(error)
+        authreq_error = to_gare(error)
         assert isinstance(authreq_error, GARE)
         assert authreq_error.code == "ConsentRequired"
         assert authreq_error.authorization_parameters.required_scopes == [
@@ -115,15 +136,15 @@ def test_create_auth_requirements_error_from_authorization_error(
 
     for error in (error_dict, error_subdoc, api_error):
         # Test boolean utility functions
-        assert is_auth_requirements_error(error)
-        assert has_auth_requirements_errors([error])
+        assert is_gare(error)
+        assert has_gares([error])
 
         # Check that this only produces one error
-        assert len(to_auth_requirements_errors([error])) == 1
+        assert len(to_gares([error])) == 1
 
         # Create a Globus Auth requirements error from a legacy
         # authorization parameters format error
-        authreq_error = to_auth_requirements_error(error)
+        authreq_error = to_gare(error)
         assert isinstance(authreq_error, GARE)
 
         # Check that the default error code is set
@@ -175,15 +196,15 @@ def test_create_auth_requirements_error_from_authorization_error_csv(
 
     for error in (error_dict, error_subdoc, api_error):
         # Test boolean utility functions
-        assert is_auth_requirements_error(error)
-        assert has_auth_requirements_errors([error])
+        assert is_gare(error)
+        assert has_gares([error])
 
         # Check that this only produces one error
-        assert len(to_auth_requirements_errors([error])) == 1
+        assert len(to_gares([error])) == 1
 
         # Create a Globus Auth requirements error from a legacy
         # authorization parameters format error
-        authreq_error = to_auth_requirements_error(error)
+        authreq_error = to_gare(error)
         assert isinstance(authreq_error, GARE)
 
         # Check that the default error code is set
@@ -252,10 +273,10 @@ def test_create_auth_requirements_errors_from_multiple_errors():
     all_errors = [consent_errors, not_an_error, authorization_error]
 
     # Test boolean utility function
-    assert has_auth_requirements_errors(all_errors)
+    assert has_gares(all_errors)
 
     # Create auth requirements errors from a all errors
-    authreq_errors = to_auth_requirements_errors(all_errors)
+    authreq_errors = to_gares(all_errors)
     assert isinstance(authreq_errors, list)
     assert len(authreq_errors) == 3
 
@@ -313,15 +334,15 @@ def test_create_auth_requirements_error_from_legacy_authorization_error_with_cod
 
     for error in (error_dict, error_subdoc, api_error):
         # Test boolean utility functions
-        assert is_auth_requirements_error(error)
-        assert has_auth_requirements_errors([error])
+        assert is_gare(error)
+        assert has_gares([error])
 
         # Check that this only produces one error
-        assert len(to_auth_requirements_errors([error])) == 1
+        assert len(to_gares([error])) == 1
 
         # Create a Globus Auth requirements error from a legacy
         # authorization parameters format error
-        authreq_error = to_auth_requirements_error(error)
+        authreq_error = to_gare(error)
         assert isinstance(authreq_error, GARE)
 
         # Check that the custom error code is set
@@ -363,14 +384,14 @@ def test_backward_compatibility_consent_required_error():
     )
 
     # Test boolean utility functions
-    assert is_auth_requirements_error(error)
-    assert has_auth_requirements_errors([error])
+    assert is_gare(error)
+    assert has_gares([error])
 
     # Check that this only produces one error
-    assert len(to_auth_requirements_errors([error])) == 1
+    assert len(to_gares([error])) == 1
 
     # Create a Globus Auth requirements error
-    authreq_error = to_auth_requirements_error(error)
+    authreq_error = to_gare(error)
     assert isinstance(authreq_error, GARE)
     assert authreq_error.code == "ConsentRequired"
     assert authreq_error.authorization_parameters.required_scopes == [

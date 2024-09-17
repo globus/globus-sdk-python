@@ -1,16 +1,11 @@
 from ._auth_requirements_error import GARE, GlobusAuthorizationParameters
-from ._functional_api import (
-    has_auth_requirements_errors,
-    is_auth_requirements_error,
-    to_auth_requirements_error,
-    to_auth_requirements_errors,
-)
+from ._functional_api import has_gares, is_gare, to_gare, to_gares
 
-__all__ = [
+__all__ = (
     "GARE",
     "GlobusAuthorizationParameters",
-    "to_auth_requirements_error",
-    "to_auth_requirements_errors",
-    "is_auth_requirements_error",
-    "has_auth_requirements_errors",
-]
+    "to_gare",
+    "to_gares",
+    "is_gare",
+    "has_gares",
+)

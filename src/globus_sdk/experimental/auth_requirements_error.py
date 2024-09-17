@@ -25,21 +25,28 @@ if t.TYPE_CHECKING:
     )
 else:
 
+    _RENAMES = {
+        "GlobusAuthRequirementsError": "GARE",
+        "to_auth_requirements_error": "to_gare",
+        "to_auth_requirements_errors": "to_gares",
+        "is_auth_requirements_error": "is_gare",
+        "has_auth_requirements_errors": "has_gares",
+    }
+
     def __getattr__(name: str) -> t.Any:
         import globus_sdk.gare as gare_module
         from globus_sdk.exc import warn_deprecated
 
+        new_name = _RENAMES.get(name, name)
+
         warn_deprecated(
             "'globus_sdk.experimental.auth_requirements_error' has been renamed to "
             "'globus_sdk.gare'. "
-            f"Importing '{name}' from `globus_sdk.experimental` is deprecated."
+            f"Importing '{name}' from `globus_sdk.experimental` is deprecated. "
+            f"Use `globus_sdk.gare.{new_name}` instead."
         )
 
-        # rename GlobusAuthRequirementsError -> GARE
-        if name == "GlobusAuthRequirementsError":
-            name = "GARE"
-
-        value = getattr(gare_module, name, None)
+        value = getattr(gare_module, new_name, None)
         if value is None:
             raise AttributeError(f"module {__name__} has no attribute {name}")
         setattr(sys.modules[__name__], name, value)

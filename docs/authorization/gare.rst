@@ -1,5 +1,5 @@
-Auth Requirements Errors
-========================
+Globus Auth Requirements Errors (GAREs)
+=======================================
 
 'Globus Auth Requirements Error' is a response format that conveys to a client any
 modifications to a session (i.e., "boosting") that will be required
@@ -143,10 +143,10 @@ Reference
     :members:
     :inherited-members:
 
-.. autofunction:: to_auth_requirements_error
+.. autofunction:: to_gare
 
-.. autofunction:: to_auth_requirements_errors
+.. autofunction:: to_gares
 
-.. autofunction:: is_auth_requirements_error
+.. autofunction:: is_gare
 
-.. autofunction:: has_auth_requirements_errors
+.. autofunction:: has_gares

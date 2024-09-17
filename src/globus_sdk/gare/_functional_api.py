@@ -16,7 +16,7 @@ from ._variants import (
 log = logging.getLogger(__name__)
 
 
-def to_auth_requirements_error(
+def to_gare(
     error: exc.GlobusAPIError | exc.ErrorSubdocument | dict[str, t.Any]
 ) -> GARE | None:
     """
@@ -40,7 +40,7 @@ def to_auth_requirements_error(
     if isinstance(error, GlobusAPIError):
         # Iterate over ErrorSubdocuments
         for subdoc in error.errors:
-            authreq_error = to_auth_requirements_error(subdoc)
+            authreq_error = to_gare(subdoc)
             if authreq_error is not None:
                 # Return only the first auth requirements error we encounter
                 return authreq_error
@@ -71,7 +71,7 @@ def to_auth_requirements_error(
     return None
 
 
-def to_auth_requirements_errors(
+def to_gares(
     errors: list[exc.GlobusAPIError | exc.ErrorSubdocument | dict[str, t.Any]]
 ) -> list[GARE]:
     """
@@ -98,13 +98,13 @@ def to_auth_requirements_errors(
             candidate_errors.append(error)
 
     # Try to convert all candidate errors to auth requirements errors
-    all_errors = [to_auth_requirements_error(error) for error in candidate_errors]
+    all_errors = [to_gare(error) for error in candidate_errors]
 
     # Remove any errors that did not resolve to a Globus Auth Requirements Error
     return [error for error in all_errors if error is not None]
 
 
-def is_auth_requirements_error(
+def is_gare(
     error: exc.GlobusAPIError | exc.ErrorSubdocument | dict[str, t.Any]
 ) -> bool:
     """
@@ -113,10 +113,10 @@ def is_auth_requirements_error(
 
     :param error: The error to check.
     """
-    return to_auth_requirements_error(error) is not None
+    return to_gare(error) is not None
 
 
-def has_auth_requirements_errors(
+def has_gares(
     errors: list[exc.GlobusAPIError | exc.ErrorSubdocument | dict[str, t.Any]]
 ) -> bool:
     """
@@ -125,4 +125,4 @@ def has_auth_requirements_errors(
 
     :param errors: The errors to check.
     """
-    return any(is_auth_requirements_error(error) for error in errors)
+    return any(is_gare(error) for error in errors)
