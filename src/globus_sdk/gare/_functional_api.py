@@ -76,7 +76,7 @@ def to_gares(
 ) -> list[GARE]:
     """
     Converts a list of GlobusAPIErrors, ErrorSubdocuments, or dicts into a list of
-    GAREs  by attempting to match each error to GARE (preferred) or legacy variants.
+    GAREs by attempting to match each error to GARE (preferred) or legacy variants.
 
     .. note::
 

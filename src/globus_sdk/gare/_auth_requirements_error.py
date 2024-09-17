@@ -11,7 +11,7 @@ class GlobusAuthorizationParameters(Serializable):
     Data class containing authorization parameters that can be passed during
     an authentication flow to control how the user will authenticate.
 
-    When used with a GARE  this represents the additional authorization
+    When used with a GARE this represents the additional authorization
     parameters needed in order to complete a request that had insufficient
     authorization state.
 
