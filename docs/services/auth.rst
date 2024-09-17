@@ -61,10 +61,6 @@ Auth Responses
    :members:
    :show-inheritance:
 
-.. autoclass:: OAuthDependentTokenResponse
-   :members:
-   :show-inheritance:
-
 .. autoclass:: AuthorizationCodeTokenResponse
    :members:
    :show-inheritance:
@@ -74,6 +70,10 @@ Auth Responses
    :show-inheritance:
 
 .. autoclass:: ClientCredentialsTokenResponse
+   :members:
+   :show-inheritance:
+
+.. autoclass:: OAuthDependentTokenResponse
    :members:
    :show-inheritance:
 
