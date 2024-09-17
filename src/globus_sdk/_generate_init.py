@@ -36,7 +36,7 @@ FIXED_EPILOG = """
 logging.getLogger("globus_sdk").addHandler(logging.NullHandler())
 """
 
-FIXED_MODULE_METHODS = """
+FIXED_MODULE_METHODS = """\
 def __dir__() -> t.List[str]:
     # dir(globus_sdk) should include everything exported in __all__
     # as well as some explicitly selected attributes from the default dir() output
@@ -51,7 +51,6 @@ def __dir__() -> t.List[str]:
         "__file__",
         "__path__",
     ]
-
 
 def __getattr__(name: str) -> t.Any:
     for modname, items in _LAZY_IMPORT_TABLE.items():
@@ -279,7 +278,9 @@ def _init_pieces() -> t.Iterator[str]:
     yield "if t.TYPE_CHECKING:"
     yield from _generate_imports()
     yield ""
-    yield FIXED_MODULE_METHODS
+    yield "else:"
+    yield ""
+    yield textwrap.indent(FIXED_MODULE_METHODS, "    ")
     yield ""
     yield from _generate_all_tuple()
     yield ""

@@ -254,32 +254,32 @@ if t.TYPE_CHECKING:
     from .utils import MISSING
     from .utils import MissingType
 
+else:
 
-def __dir__() -> t.List[str]:
-    # dir(globus_sdk) should include everything exported in __all__
-    # as well as some explicitly selected attributes from the default dir() output
-    # on a module
-    #
-    # see also:
-    # https://discuss.python.org/t/how-to-properly-extend-standard-dir-search-with-module-level-dir/4202
-    return list(__all__) + [
-        # __all__ itself can be inspected
-        "__all__",
-        # useful to figure out where a package is installed
-        "__file__",
-        "__path__",
-    ]
+    def __dir__() -> t.List[str]:
+        # dir(globus_sdk) should include everything exported in __all__
+        # as well as some explicitly selected attributes from the default dir() output
+        # on a module
+        #
+        # see also:
+        # https://discuss.python.org/t/how-to-properly-extend-standard-dir-search-with-module-level-dir/4202
+        return list(__all__) + [
+            # __all__ itself can be inspected
+            "__all__",
+            # useful to figure out where a package is installed
+            "__file__",
+            "__path__",
+        ]
 
+    def __getattr__(name: str) -> t.Any:
+        for modname, items in _LAZY_IMPORT_TABLE.items():
+            if name in items:
+                mod = importlib.import_module("." + modname, __name__)
+                value = getattr(mod, name)
+                setattr(sys.modules[__name__], name, value)
+                return value
 
-def __getattr__(name: str) -> t.Any:
-    for modname, items in _LAZY_IMPORT_TABLE.items():
-        if name in items:
-            mod = importlib.import_module("." + modname, __name__)
-            value = getattr(mod, name)
-            setattr(sys.modules[__name__], name, value)
-            return value
-
-    raise AttributeError(f"module {__name__} has no attribute {name}")
+        raise AttributeError(f"module {__name__} has no attribute {name}")
 
 
 __all__ = (
