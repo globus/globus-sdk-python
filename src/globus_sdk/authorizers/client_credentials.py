@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 
 
 class ClientCredentialsAuthorizer(
-    RenewingAuthorizer["globus_sdk.ClientCredentialsTokenResponse"]
+    RenewingAuthorizer["globus_sdk.OAuthClientCredentialsResponse"]
 ):
     r"""
     Implementation of a RenewingAuthorizer that renews confidential app client
@@ -47,7 +47,7 @@ class ClientCredentialsAuthorizer(
         POSIX timestamp (i.e. seconds since the epoch)
     :param on_refresh: A callback which is triggered any time this authorizer fetches a
         new access_token. The ``on_refresh`` callable is invoked on the
-        :class:`globus_sdk.ClientCredentialsTokenResponse` object resulting from the
+        :class:`globus_sdk.OAuthClientCredentialsResponse` object resulting from the
         token being refreshed. It should take only one positional argument, the token
         response object.
         This is useful for implementing storage for Access Tokens, as the
@@ -63,7 +63,7 @@ class ClientCredentialsAuthorizer(
         access_token: str | None = None,
         expires_at: int | None = None,
         on_refresh: (
-            None | t.Callable[[globus_sdk.ClientCredentialsTokenResponse], t.Any]
+            None | t.Callable[[globus_sdk.OAuthClientCredentialsResponse], t.Any]
         ) = None,
     ):
         # values for _get_token_data
@@ -77,7 +77,7 @@ class ClientCredentialsAuthorizer(
 
         super().__init__(access_token, expires_at, on_refresh)
 
-    def _get_token_response(self) -> globus_sdk.ClientCredentialsTokenResponse:
+    def _get_token_response(self) -> globus_sdk.OAuthClientCredentialsResponse:
         """
         Make a request for new tokens, using a 'client_credentials' grant.
         """
@@ -86,7 +86,7 @@ class ClientCredentialsAuthorizer(
         )
 
     def _extract_token_data(
-        self, res: globus_sdk.ClientCredentialsTokenResponse
+        self, res: globus_sdk.OAuthClientCredentialsResponse
     ) -> dict[str, t.Any]:
         """
         Get the tokens .by_resource_server,

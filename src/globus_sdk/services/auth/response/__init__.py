@@ -3,11 +3,11 @@ from .consents import GetConsentsResponse
 from .credentials import GetClientCredentialsResponse
 from .identities import GetIdentitiesResponse, GetIdentityProvidersResponse
 from .oauth import (
-    AuthorizationCodeTokenResponse,
-    ClientCredentialsTokenResponse,
+    OAuthAuthorizationCodeResponse,
+    OAuthClientCredentialsResponse,
     OAuthDependentTokenResponse,
+    OAuthRefreshTokenResponse,
     OAuthTokenResponse,
-    RefreshTokenResponse,
 )
 from .policies import GetPoliciesResponse
 from .projects import GetProjectsResponse
@@ -22,9 +22,9 @@ __all__ = (
     "GetPoliciesResponse",
     "GetProjectsResponse",
     "GetScopesResponse",
-    "OAuthTokenResponse",
+    "OAuthAuthorizationCodeResponse",
+    "OAuthClientCredentialsResponse",
     "OAuthDependentTokenResponse",
-    "AuthorizationCodeTokenResponse",
-    "RefreshTokenResponse",
-    "ClientCredentialsTokenResponse",
+    "OAuthRefreshTokenResponse",
+    "OAuthTokenResponse",
 )

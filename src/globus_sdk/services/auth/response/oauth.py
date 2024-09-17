@@ -250,7 +250,7 @@ class OAuthTokenResponse(GlobusHTTPResponse):
         )
 
 
-class AuthorizationCodeTokenResponse(OAuthTokenResponse):
+class OAuthAuthorizationCodeResponse(OAuthTokenResponse):
     """
     Class for responses from the OAuth2 'authorization_code' grant.
 
@@ -259,11 +259,11 @@ class AuthorizationCodeTokenResponse(OAuthTokenResponse):
 
     For example,
     :meth:`globus_sdk.ConfidentialAppAuthClient.oauth2_exchange_code_for_tokens`
-    will return an ``AuthorizationCodeTokenResponse``.
+    will return an ``OAuthAuthorizationCodeResponse``.
     """
 
 
-class ClientCredentialsTokenResponse(OAuthTokenResponse):
+class OAuthClientCredentialsResponse(OAuthTokenResponse):
     """
     Class for responses from the OAuth2 'client_credentials' grant.
 
@@ -273,7 +273,7 @@ class ClientCredentialsTokenResponse(OAuthTokenResponse):
     """
 
 
-class RefreshTokenResponse(OAuthTokenResponse):
+class OAuthRefreshTokenResponse(OAuthTokenResponse):
     """
     Class for responses from the OAuth2 'refresh_token' grant.
 

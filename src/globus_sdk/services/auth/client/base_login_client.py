@@ -16,9 +16,9 @@ from .._common import get_jwk_data, pem_decode_jwk_data
 from ..errors import AuthAPIError
 from ..flow_managers import GlobusOAuthFlowManager
 from ..response import (
-    AuthorizationCodeTokenResponse,
+    OAuthAuthorizationCodeResponse,
+    OAuthRefreshTokenResponse,
     OAuthTokenResponse,
-    RefreshTokenResponse,
 )
 
 if sys.version_info >= (3, 8):
@@ -209,7 +209,7 @@ class AuthLoginClient(client.BaseClient):
 
     def oauth2_exchange_code_for_tokens(
         self, auth_code: str
-    ) -> AuthorizationCodeTokenResponse:
+    ) -> OAuthAuthorizationCodeResponse:
         """
         Exchange an authorization code for a token or tokens.
 
@@ -237,7 +237,7 @@ class AuthLoginClient(client.BaseClient):
         refresh_token: str,
         *,
         body_params: dict[str, t.Any] | None = None,
-    ) -> RefreshTokenResponse:
+    ) -> OAuthRefreshTokenResponse:
         r"""
         Exchange a refresh token for a
         :class:`OAuthTokenResponse <.OAuthTokenResponse>`, containing
@@ -258,7 +258,7 @@ class AuthLoginClient(client.BaseClient):
         log.info("Executing token refresh; typically requires client credentials")
         form_data = {"refresh_token": refresh_token, "grant_type": "refresh_token"}
         return self.oauth2_token(
-            form_data, body_params=body_params, response_class=RefreshTokenResponse
+            form_data, body_params=body_params, response_class=OAuthRefreshTokenResponse
         )
 
     def oauth2_validate_token(

@@ -61,15 +61,15 @@ Auth Responses
    :members:
    :show-inheritance:
 
-.. autoclass:: AuthorizationCodeTokenResponse
+.. autoclass:: OAuthAuthorizationCodeResponse
    :members:
    :show-inheritance:
 
-.. autoclass:: RefreshTokenResponse
+.. autoclass:: OAuthRefreshTokenResponse
    :members:
    :show-inheritance:
 
-.. autoclass:: ClientCredentialsTokenResponse
+.. autoclass:: OAuthClientCredentialsResponse
    :members:
    :show-inheritance:
 

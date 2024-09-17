@@ -13,7 +13,7 @@ from globus_sdk._types import ScopeCollectionType
 from globus_sdk.exc import GlobusSDKUsageError
 
 from .._common import stringify_requested_scopes
-from ..response import AuthorizationCodeTokenResponse
+from ..response import OAuthAuthorizationCodeResponse
 from .base import GlobusOAuthFlowManager
 
 if t.TYPE_CHECKING:
@@ -192,7 +192,7 @@ class GlobusNativeAppFlowManager(GlobusOAuthFlowManager):
 
     def exchange_code_for_tokens(
         self, auth_code: str
-    ) -> AuthorizationCodeTokenResponse:
+    ) -> OAuthAuthorizationCodeResponse:
         """
         The second step of the Native App flow, exchange an authorization code
         for access tokens (and refresh tokens if specified).
@@ -211,5 +211,5 @@ class GlobusNativeAppFlowManager(GlobusOAuthFlowManager):
                 "code_verifier": self.verifier,
                 "redirect_uri": self.redirect_uri,
             },
-            response_class=AuthorizationCodeTokenResponse,
+            response_class=OAuthAuthorizationCodeResponse,
         )

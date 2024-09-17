@@ -11,8 +11,8 @@ from globus_sdk.response import GlobusHTTPResponse
 from .._common import stringify_requested_scopes
 from ..flow_managers import GlobusAuthorizationCodeFlowManager
 from ..response import (
-    ClientCredentialsTokenResponse,
     GetIdentitiesResponse,
+    OAuthClientCredentialsResponse,
     OAuthDependentTokenResponse,
 )
 from .base_login_client import AuthLoginClient
@@ -109,7 +109,7 @@ class ConfidentialAppAuthClient(AuthLoginClient):
     def oauth2_client_credentials_tokens(
         self,
         requested_scopes: ScopeCollectionType | None = None,
-    ) -> ClientCredentialsTokenResponse:
+    ) -> OAuthClientCredentialsResponse:
         r"""
         Perform an OAuth2 Client Credentials Grant to get access tokens which
         directly represent your client and allow it to act on its own
@@ -133,7 +133,7 @@ class ConfidentialAppAuthClient(AuthLoginClient):
         requested_scopes_string = stringify_requested_scopes(requested_scopes)
         return self.oauth2_token(
             {"grant_type": "client_credentials", "scope": requested_scopes_string},
-            response_class=ClientCredentialsTokenResponse,
+            response_class=OAuthClientCredentialsResponse,
         )
 
     def oauth2_start_flow(

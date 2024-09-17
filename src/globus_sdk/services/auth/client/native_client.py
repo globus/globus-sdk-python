@@ -8,7 +8,7 @@ from globus_sdk.authorizers import NullAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
 
 from ..flow_managers import GlobusNativeAppFlowManager
-from ..response import RefreshTokenResponse
+from ..response import OAuthRefreshTokenResponse
 from .base_login_client import AuthLoginClient
 
 log = logging.getLogger(__name__)
@@ -115,7 +115,7 @@ class NativeAppAuthClient(AuthLoginClient):
         refresh_token: str,
         *,
         body_params: dict[str, t.Any] | None = None,
-    ) -> RefreshTokenResponse:
+    ) -> OAuthRefreshTokenResponse:
         """
         ``NativeAppAuthClient`` specializes the refresh token grant to include
         its client ID as a parameter in the POST body.
@@ -132,7 +132,7 @@ class NativeAppAuthClient(AuthLoginClient):
             "client_id": self.client_id,
         }
         return self.oauth2_token(
-            form_data, body_params=body_params, response_class=RefreshTokenResponse
+            form_data, body_params=body_params, response_class=OAuthRefreshTokenResponse
         )
 
     def create_native_app_instance(

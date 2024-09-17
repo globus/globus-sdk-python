@@ -123,11 +123,11 @@ _LAZY_IMPORT_TABLE: list[tuple[str, tuple[str, ...]]] = [
             # responses
             "GetConsentsResponse",
             "GetIdentitiesResponse",
+            "OAuthAuthorizationCodeResponse",
+            "OAuthClientCredentialsResponse",
             "OAuthDependentTokenResponse",
+            "OAuthRefreshTokenResponse",
             "OAuthTokenResponse",
-            "AuthorizationCodeTokenResponse",
-            "ClientCredentialsTokenResponse",
-            "RefreshTokenResponse",
             # API data helpers
             "DependentScopeSpec",
         ),

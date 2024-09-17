@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 import typing as t
 
-from ..response import AuthorizationCodeTokenResponse
+from ..response import OAuthAuthorizationCodeResponse
 
 
 class GlobusOAuthFlowManager(abc.ABC):
@@ -43,7 +43,7 @@ class GlobusOAuthFlowManager(abc.ABC):
     @abc.abstractmethod
     def exchange_code_for_tokens(
         self, auth_code: str
-    ) -> AuthorizationCodeTokenResponse:
+    ) -> OAuthAuthorizationCodeResponse:
         """
         This method takes an auth_code and produces a response object
         containing one or more tokens.
