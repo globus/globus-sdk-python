@@ -24,11 +24,6 @@ from globus_sdk.experimental.globus_app import (
     RefreshTokenAuthorizerFactory,
     UserApp,
 )
-from globus_sdk.experimental.login_flow_manager import (
-    CommandLineLoginFlowManager,
-    LocalServerLoginFlowManager,
-    LoginFlowManager,
-)
 from globus_sdk.experimental.tokenstorage import (
     JSONTokenStorage,
     MemoryTokenStorage,
@@ -36,6 +31,11 @@ from globus_sdk.experimental.tokenstorage import (
     TokenStorageData,
 )
 from globus_sdk.gare import GlobusAuthorizationParameters
+from globus_sdk.login_flows import (
+    CommandLineLoginFlowManager,
+    LocalServerLoginFlowManager,
+    LoginFlowManager,
+)
 from globus_sdk.scopes import AuthScopes, Scope
 from globus_sdk.services.auth import OAuthTokenResponse
 

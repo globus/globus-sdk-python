@@ -9,6 +9,8 @@ Eventually these constructs do get deprecated at which point the tests in this m
   can be deleted.
 """
 
+import pytest
+
 
 def test_scope_importable_from_experimental():
     from globus_sdk.experimental.scope_parser import (  # noqa: F401
@@ -16,3 +18,12 @@ def test_scope_importable_from_experimental():
         ScopeCycleError,
         ScopeParseError,
     )
+
+
+def test_login_flow_manager_importable_from_experimental():
+    with pytest.warns(DeprecationWarning):
+        from globus_sdk.experimental.login_flow_manager import (  # noqa: F401
+            CommandLineLoginFlowManager,
+            LocalServerLoginFlowManager,
+            LoginFlowManager,
+        )

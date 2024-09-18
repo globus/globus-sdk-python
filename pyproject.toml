@@ -53,7 +53,7 @@ namespaces = false
 
 [tool.setuptools.package-data]
 globus_sdk = ["py.typed"]
-"globus_sdk.experimental.login_flow_manager.local_server_login_flow_manager.html_files" = ["*.html"]
+"globus_sdk.login_flows.local_server_login_flow_manager.html_files" = ["*.html"]
 
 [tool.setuptools.dynamic.version]
 attr = "globus_sdk.__version__"

@@ -2,11 +2,11 @@ from unittest.mock import Mock, patch
 
 from globus_sdk import ConfidentialAppAuthClient, NativeAppAuthClient
 from globus_sdk._testing import load_response
-from globus_sdk.experimental.login_flow_manager import (
+from globus_sdk.gare import GlobusAuthorizationParameters
+from globus_sdk.login_flows import (
     CommandLineLoginFlowManager,
     LocalServerLoginFlowManager,
 )
-from globus_sdk.gare import GlobusAuthorizationParameters
 
 
 def _mock_input(s):
@@ -112,7 +112,7 @@ class MockRedirectServer:
 
 
 _LOCAL_SERVER_MODULE = (
-    "globus_sdk.experimental.login_flow_manager.local_server_login_flow_manager."
+    "globus_sdk.login_flows.local_server_login_flow_manager."
     "local_server_login_flow_manager"
 )
 

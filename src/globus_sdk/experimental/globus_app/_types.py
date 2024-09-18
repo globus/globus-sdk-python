@@ -5,8 +5,8 @@ import typing as t
 
 from globus_sdk import AuthLoginClient
 from globus_sdk._types import UUIDLike
-from globus_sdk.experimental.login_flow_manager import LoginFlowManager
 from globus_sdk.experimental.tokenstorage import TokenStorage
+from globus_sdk.login_flows import LoginFlowManager
 
 if sys.version_info < (3, 8):
     from typing_extensions import Protocol, runtime_checkable
