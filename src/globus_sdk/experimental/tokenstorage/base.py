@@ -8,7 +8,7 @@ import re
 import sys
 import typing as t
 
-from globus_sdk.services.auth import OAuthTokenResponse
+from globus_sdk.services.auth import OAuthDependentTokenResponse, OAuthTokenResponse
 
 from ... import GlobusSDKUsageError
 from ..._types import UUIDLike
@@ -88,12 +88,7 @@ class TokenStorage(metaclass=abc.ABCMeta):
         """
         token_data_by_resource_server = {}
 
-        # get identity_id from id_token if available
-        if token_response.get("id_token"):
-            decoded_id_token = token_response.decode_id_token()
-            identity_id = decoded_id_token["sub"]
-        else:
-            identity_id = None
+        identity_id = self._extract_identity_id(token_response)
 
         for resource_server, token_dict in token_response.by_resource_server.items():
             token_data_by_resource_server[resource_server] = TokenStorageData(
@@ -106,6 +101,30 @@ class TokenStorage(metaclass=abc.ABCMeta):
                 token_type=token_dict.get("token_type"),
             )
         self.store_token_data_by_resource_server(token_data_by_resource_server)
+
+    def _extract_identity_id(self, token_response: OAuthTokenResponse) -> str | None:
+        """
+        Get identity_id from id_token if available.
+
+        .. note::
+
+            This method is private, but is used in ValidatingTokenStorage to
+            override the extraction of ``identity_id`` information.
+
+        Generalizing customization of ``identity_id`` extraction will require
+        implementation of a user-facing mechanism for controlling calls to
+        ``decode_id_token()``.
+        """
+        # dependent token responses cannot contain an `id_token` field, as the
+        # top-level data is an array
+        if isinstance(token_response, OAuthDependentTokenResponse):
+            return None
+
+        if token_response.get("id_token"):
+            decoded_id_token = token_response.decode_id_token()
+            return decoded_id_token["sub"]
+        else:
+            return None
 
 
 class FileTokenStorage(TokenStorage, metaclass=abc.ABCMeta):

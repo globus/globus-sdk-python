@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typing as t
 
-from globus_sdk import AuthClient, Scope
+from globus_sdk import AuthClient, OAuthRefreshTokenResponse, OAuthTokenResponse, Scope
 from globus_sdk.experimental.tokenstorage import TokenStorage, TokenStorageData
 from globus_sdk.scopes.consents import ConsentForest
 
@@ -276,3 +276,15 @@ class ValidatingTokenStorage(TokenStorage):
         # Cache the consent forest first.
         self._cached_consent_forest = forest
         return forest
+
+    def _extract_identity_id(self, token_response: OAuthTokenResponse) -> str | None:
+        """
+        Override determination of the identity_id for a token response.
+
+        When handling a refresh token, use the stored identity ID.
+        Otherwise, call the inner token storage's method of lookup.
+        """
+        if isinstance(token_response, OAuthRefreshTokenResponse):
+            return self.identity_id
+        else:
+            return self.token_storage._extract_identity_id(token_response)
