@@ -11,13 +11,8 @@ from globus_sdk import AuthLoginClient, GlobusSDKUsageError, OAuthTokenResponse
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.login_flows.login_flow_manager import LoginFlowManager
 
-from .errors import LocalServerEnvironmentalLoginError
-from .local_server import (
-    DEFAULT_HTML_TEMPLATE,
-    LocalServerLoginError,
-    RedirectHandler,
-    RedirectHTTPServer,
-)
+from .errors import LocalServerEnvironmentalLoginError, LocalServerLoginError
+from .local_server import DEFAULT_HTML_TEMPLATE, RedirectHandler, RedirectHTTPServer
 
 if t.TYPE_CHECKING:
     from globus_sdk.experimental.globus_app import GlobusAppConfig
