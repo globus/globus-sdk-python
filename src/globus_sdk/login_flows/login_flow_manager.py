@@ -14,9 +14,18 @@ from globus_sdk.gare import GlobusAuthorizationParameters
 
 class LoginFlowManager(metaclass=abc.ABCMeta):
     """
-    A ``LoginFlowManager`` is an abstract superclass for subclasses that manage
-    interactive login flows with a user in order to authenticate with Globus Auth
-    and obtain tokens.
+    The abstract base class defining the interface for managing login flows.
+
+    Implementing classes must supply a ``run_login_flow`` method.
+    Utility functions starting an authorization-code grant flow and getting an
+    authorization-code URL are provided on the class.
+
+    :ivar AuthLoginClient login_client: A native or confidential login client to be
+        used by the login flow manager.
+    :ivar bool request_refresh_tokens: A signal of whether refresh tokens are expected
+        to be requested, in addition to access tokens.
+    :ivar str native_prefill_named_grant: A string to prefill in a Native App login
+        flow. This value is only to be used if the `login_client` is a native client.
     """
 
     def __init__(
@@ -26,13 +35,6 @@ class LoginFlowManager(metaclass=abc.ABCMeta):
         request_refresh_tokens: bool = False,
         native_prefill_named_grant: str | None = None,
     ) -> None:
-        """
-        :param login_client: The client to use for login flows.
-        :param request_refresh_tokens: Control whether refresh tokens will be requested.
-        :param native_prefill_named_grant: The name of a prefill in a Native App login
-            flow. This value will be ignored if the login_client is not a
-            NativeAppAuthClient.
-        """
         if not isinstance(login_client, NativeAppAuthClient) and not isinstance(
             login_client, ConfidentialAppAuthClient
         ):
@@ -94,7 +96,7 @@ class LoginFlowManager(metaclass=abc.ABCMeta):
         auth_parameters: GlobusAuthorizationParameters,
     ) -> OAuthTokenResponse:
         """
-        Run an interactive login flow to get tokens for the user.
+        Run a login flow to get tokens for a user.
 
         :param auth_parameters: ``GlobusAuthorizationParameters`` passed through
             to the authentication flow to control how the user will authenticate.

@@ -13,9 +13,12 @@ import socket
 import sys
 import time
 import typing as t
+from datetime import timedelta
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from string import Template
 from urllib.parse import parse_qsl, urlparse
+
+from .errors import LocalServerLoginError
 
 if sys.version_info >= (3, 9):
     import importlib.resources as importlib_resources
@@ -31,59 +34,6 @@ DEFAULT_HTML_TEMPLATE = Template(
     .joinpath("local_server_landing_page.html")
     .read_text()
 )
-
-
-class LocalServerError(Exception):
-    """
-    Error class for errors raised by the local server when using a
-    LocalServerLoginFlowManager
-    """
-
-
-class RedirectHTTPServer(HTTPServer):
-    """
-    HTTPServer that accepts an html_template to be displayed to the user
-    and uses a Queue to receive an auth_code from its RequestHandler.
-    """
-
-    def __init__(
-        self,
-        server_address: tuple[str, int],
-        handler_class: type[BaseHTTPRequestHandler],
-        html_template: Template,
-    ) -> None:
-        super().__init__(server_address, handler_class)
-
-        self.html_template = html_template
-        self._auth_code_queue: queue.Queue[str | BaseException] = queue.Queue()
-
-    def handle_error(
-        self,
-        request: socket.socket | tuple[bytes, socket.socket],
-        client_address: t.Any,
-    ) -> None:
-        _, excval, _ = sys.exc_info()
-        assert excval is not None
-        self._auth_code_queue.put(excval)
-
-    def return_code(self, code: str | BaseException) -> None:
-        self._auth_code_queue.put_nowait(code)
-
-    def wait_for_code(self) -> str | BaseException:
-        # Windows needs special handling as blocking prevents ctrl-c interrupts
-        if _IS_WINDOWS:
-            deadline = time.time() + 3600
-            while time.time() < deadline:
-                try:
-                    return self._auth_code_queue.get()
-                except queue.Empty:
-                    time.sleep(1)
-        else:
-            try:
-                return self._auth_code_queue.get(block=True, timeout=3600)
-            except queue.Empty:
-                pass
-        raise LocalServerError("Login timed out. Please try again.")
 
 
 class RedirectHandler(BaseHTTPRequestHandler):
@@ -119,4 +69,52 @@ class RedirectHandler(BaseHTTPRequestHandler):
                 ).encode("utf-8")
             )
 
-            self.server.return_code(LocalServerError(msg))
+            self.server.return_code(LocalServerLoginError(msg))
+
+
+class RedirectHTTPServer(HTTPServer):
+    """
+    An HTTPServer which accepts a html_template to be displayed to the user
+    and uses a Queue to receive an auth_code from its RequestHandler.
+    """
+
+    WAIT_TIMEOUT = timedelta(minutes=5)
+
+    def __init__(
+        self,
+        server_address: tuple[str, int],
+        handler_class: type[BaseHTTPRequestHandler],
+        html_template: Template,
+    ) -> None:
+        super().__init__(server_address, handler_class)
+
+        self.html_template = html_template
+        self._auth_code_queue: queue.Queue[str | BaseException] = queue.Queue()
+
+    def handle_error(
+        self,
+        request: socket.socket | tuple[bytes, socket.socket],
+        client_address: t.Any,
+    ) -> None:
+        _, excval, _ = sys.exc_info()
+        assert excval is not None
+        self._auth_code_queue.put(excval)
+
+    def return_code(self, code: str | BaseException) -> None:
+        self._auth_code_queue.put_nowait(code)
+
+    def wait_for_code(self) -> str | BaseException:
+        # Windows needs special handling as blocking prevents ctrl-c interrupts
+        if _IS_WINDOWS:
+            deadline = time.time() + self.WAIT_TIMEOUT.total_seconds()
+            while time.time() < deadline:
+                try:
+                    return self._auth_code_queue.get()
+                except queue.Empty:
+                    time.sleep(1)
+        else:
+            try:
+                return self._auth_code_queue.get(block=True, timeout=3600)
+            except queue.Empty:
+                pass
+        raise LocalServerLoginError("Login timed out. Please try again.")

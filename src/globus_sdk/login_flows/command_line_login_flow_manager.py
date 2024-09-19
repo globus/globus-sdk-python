@@ -19,17 +19,22 @@ if t.TYPE_CHECKING:
 
 class CommandLineLoginFlowManager(LoginFlowManager):
     """
-    A ``CommandLineLoginFlowManager`` is a ``LoginFlowManager`` that uses the command
-    line for interacting with the user during its interactive login flows.
+    A login flow manager which drives authorization-code token grants through the
+    command line.
 
-    Example usage:
+    :param AuthLoginClient login_client: The client that will be making Globus
+        Auth API calls required for a login flow.
 
-    >>> login_client = globus_sdk.NativeAppAuthClient(...)
-    >>> login_flow_manager = CommandLineLoginFlowManager(login_client)
-    >>> scopes = [globus_sdk.scopes.TransferScopes.all]
-    >>> auth_params = GlobusAuthorizationParameters(required_scopes=scopes)
-    >>> tokens = login_flow_manager.run_login_flow(auth_params)
+        .. note::
+            If this client is a :class:`globus_sdk.ConfidentialAppAuthClient`, an
+            explicit `redirect_uri` param is required.
 
+    :param str redirect_uri: The redirect URI to use for the login flow. When the
+        `login_client` is a native client, this defaults to a globus-hosted URI.
+    :param bool request_refresh_tokens: A signal of whether refresh tokens are expected
+        to be requested, in addition to access tokens.
+    :param str native_prefill_named_grant: A string to prefill in a Native App login
+        flow. This value is only used if the `login_client` is a native client.
     """
 
     def __init__(
@@ -40,18 +45,6 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         request_refresh_tokens: bool = False,
         native_prefill_named_grant: str | None = None,
     ) -> None:
-        """
-        :param login_client: The ``AuthLoginClient`` that will be making the Globus
-            Auth API calls needed for the authentication flow. Note that this
-            must either be a NativeAppAuthClient or a templated
-            ConfidentialAppAuthClient, standard ConfidentialAppAuthClients cannot
-            use the web auth-code flow.
-        :param redirect_uri: The redirect URI to use for the login flow. Defaults to
-            a globus-hosted helper web auth-code URI for NativeAppAuthClients.
-        :param request_refresh_tokens: Control whether refresh tokens will be requested.
-        :param native_prefill_named_grant: The named grant label to prefill on the
-            consent page when using a NativeAppAuthClient.
-        """
         super().__init__(
             login_client,
             request_refresh_tokens=request_refresh_tokens,
@@ -73,15 +66,13 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         cls, app_name: str, login_client: AuthLoginClient, config: GlobusAppConfig
     ) -> CommandLineLoginFlowManager:
         """
-        Create a ``CommandLineLoginFlowManager`` for a given ``GlobusAppConfig``.
+        Creates a ``CommandLineLoginFlowManager`` for use in a GlobusApp.
 
-        :param app_name: The name of the app to use for prefilling the named grant in
-            native auth flows.
-        :param login_client: The ``AuthLoginClient`` to use to drive Globus Auth flows.
-        :param config: A ``GlobusAppConfig`` to configure the login flow.
-        :returns: A ``CommandLineLoginFlowManager`` instance.
-        :raises: GlobusSDKUsageError if a login_redirect_uri is not set on the config
-            but a ConfidentialAppAuthClient is used.
+        :param app_name: The name of the app. Will be prefilled in native auth flows.
+        :param login_client: A client used to make Globus Auth API calls.
+        :param config: A GlobusApp-bounded object used to configure login flow manager.
+        :raises: GlobusSDKUsageError if login_redirect_uri is not set on the config
+            but a ConfidentialAppAuthClient is supplied.
         """
         return cls(
             login_client,
@@ -110,6 +101,9 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         """
         Prompt the user to authenticate using the provided ``authorize_url``.
 
+        This method is publicly exposed to allow for simpler customization through
+        subclassing and overriding.
+
         :param authorize_url: The URL at which the user will login and consent to
             application accesses.
         """
@@ -128,6 +122,11 @@ class CommandLineLoginFlowManager(LoginFlowManager):
     def prompt_for_code(self) -> str:
         """
         Prompt the user to enter an authorization code.
+
+        This method is publicly exposed to allow for simpler customization through
+        subclassing and overriding.
+
+        :returns str: The authorization code entered by the user.
         """
         code_prompt = "Enter the resulting Authorization Code here: "
         return input(code_prompt).strip()

@@ -11,9 +11,10 @@ from globus_sdk import AuthLoginClient, GlobusSDKUsageError, OAuthTokenResponse
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.login_flows.login_flow_manager import LoginFlowManager
 
-from ._local_server import (
+from .errors import LocalServerEnvironmentalLoginError
+from .local_server import (
     DEFAULT_HTML_TEMPLATE,
-    LocalServerError,
+    LocalServerLoginError,
     RedirectHandler,
     RedirectHTTPServer,
 )
@@ -29,22 +30,13 @@ if t.TYPE_CHECKING:
 BROWSER_BLACKLIST = ["lynx", "www-browser", "links", "elinks", "w3m"]
 
 
-class LocalServerLoginFlowError(BaseException):
-    """
-    Error class for errors raised due to inability to run a local server login flow
-    due to known failure conditions such as remote sessions or text-only browsers.
-    Catching this should be sufficient to detect cases where one should fallback
-    to a CommandLineLoginFlowManager
-    """
-
-
 def _check_remote_session() -> None:
     """
     Try to check if this is being run during a remote session, if so
     raise LocalServerLoginFlowError
     """
     if bool(os.environ.get("SSH_TTY", os.environ.get("SSH_CONNECTION"))):
-        raise LocalServerLoginFlowError(
+        raise LocalServerEnvironmentalLoginError(
             "Cannot use LocalServerLoginFlowManager in a remote session"
         )
 
@@ -64,34 +56,42 @@ def _open_webbrowser(url: str) -> None:
             # https://github.com/python/cpython/issues/82828
             browser_name = browser._name
         else:
-            raise LocalServerLoginFlowError("Unable to determine local browser name.")
+            raise LocalServerEnvironmentalLoginError(
+                "Unable to determine local browser name."
+            )
 
         if browser_name in BROWSER_BLACKLIST:
-            raise LocalServerLoginFlowError(
+            raise LocalServerEnvironmentalLoginError(
                 "Cannot use LocalServerLoginFlowManager with "
                 f"text-only browser '{browser_name}'"
             )
 
         if not browser.open(url, new=1):
-            raise LocalServerLoginFlowError(f"Failed to open browser '{browser_name}'")
+            raise LocalServerEnvironmentalLoginError(
+                f"Failed to open browser '{browser_name}'"
+            )
     except webbrowser.Error as exc:
-        raise LocalServerLoginFlowError("Failed to open browser") from exc
+        raise LocalServerEnvironmentalLoginError("Failed to open browser") from exc
 
 
 class LocalServerLoginFlowManager(LoginFlowManager):
     """
-    A ``LocalServerLoginFlowManager`` is a ``LoginFlowManager`` that uses a locally
-    hosted server to automatically receive the auth code from Globus auth after the
-    user has authenticated.
+    A login flow manager which uses a locally hosted server to drive authentication-code
+    token grants. The local server is used as the authorization redirect URI,
+    automatically receiving the auth code from Globus Auth after authentication/consent.
 
-    Example usage:
-
-    >>> login_client = globus_sdk.NativeAppAuthClient(...)
-    >>> login_flow_manager = LocalServerLoginFlowManager(login_client)
-    >>> scopes = [globus_sdk.scopes.TransferScopes.all]
-    >>> auth_params = GlobusAuthorizationParameters(required_scopes=scopes)
-    >>> tokens = login_flow_manager.run_login_flow(auth_params)
-
+    :param AuthLoginClient login_client: The client that will be making Globus
+        Auth API calls required for a login flow.
+    :param bool request_refresh_tokens: A signal of whether refresh tokens are expected
+        to be requested, in addition to access tokens.
+    :param str native_prefill_named_grant: A string to prefill in a Native App login
+        flow. This value is only used if the `login_client` is a native client.
+    :param Template html_template: Optional HTML Template to be populated with the
+        values login_result and post_login_message and displayed to the user. A simple
+        default is supplied if not provided which informs the user that the login was
+        successful and that they may close the browser window.
+    :param tuple[str, int] server_address: Optional tuple of the form (host, port) to
+        specify an address to run the local server at. Defaults to ("127.0.0.1", 0).
     """
 
     def __init__(
@@ -103,20 +103,6 @@ class LocalServerLoginFlowManager(LoginFlowManager):
         server_address: tuple[str, int] = ("127.0.0.1", 0),
         html_template: Template = DEFAULT_HTML_TEMPLATE,
     ) -> None:
-        """
-        :param login_client: The ``AuthLoginClient`` that will be making the Globus
-            Auth API calls needed for the authentication flow. Note that this
-            must either be a NativeAppAuthClient or a templated
-            ConfidentialAppAuthClient, standard ConfidentialAppAuthClients cannot
-            use the web auth-code flow.
-        :param request_refresh_tokens: Control whether refresh tokens will be requested.
-        :param native_prefill_named_grant: The named grant label to prefill on the
-            consent page when using a NativeAppAuthClient.
-        :param html_template: Optional HTML Template to be populated with the values
-            login_result and post_login_message and displayed to the user.
-        :param server_address: Optional tuple of the form (host, port) to specify an
-            address to run the local server at.
-        """
         super().__init__(
             login_client,
             request_refresh_tokens=request_refresh_tokens,
@@ -130,12 +116,11 @@ class LocalServerLoginFlowManager(LoginFlowManager):
         cls, app_name: str, login_client: AuthLoginClient, config: GlobusAppConfig
     ) -> LocalServerLoginFlowManager:
         """
-        Create a ``LocalServerLoginFlowManager`` for a given ``GlobusAppConfig``.
+        Create a ``LocalServerLoginFlowManager`` for use in a GlobusApp.
 
-        :param app_name: The name of the app to use for prefilling the named grant,.
-        :param login_client: The ``AuthLoginClient`` to use to drive Globus Auth flows.
-        :param config: A ``GlobusAppConfig`` to configure the login flow.
-        :returns: A ``LocalServerLoginFlowManager`` instance.
+        :param app_name: The name of the app. Will be prefilled in native auth flows.
+        :param login_client: A client used to make Globus Auth API calls.
+        :param config: A GlobusApp-bounded object used to configure login flow manager.
         :raises: GlobusSDKUsageError if a custom login_redirect_uri is defined in
             the config.
         """
@@ -161,6 +146,11 @@ class LocalServerLoginFlowManager(LoginFlowManager):
 
         :param auth_parameters: ``GlobusAuthorizationParameters`` passed through
             to the authentication flow to control how the user will authenticate.
+        :raises LocalServerEnvironmentalLoginError: If the local server login flow
+            cannot be run due to known failure conditions such as remote sessions or
+            text-only browsers.
+        :raises LocalServerLoginError: If the local server login flow fails for any
+            reason.
         """
         _check_remote_session()
 
@@ -177,7 +167,7 @@ class LocalServerLoginFlowManager(LoginFlowManager):
 
         if isinstance(auth_code, BaseException):
             msg = f"Authorization failed with unexpected error:\n{auth_code}."
-            raise LocalServerError(msg)
+            raise LocalServerLoginError(msg)
 
         # get and return tokens
         return self.login_client.oauth2_exchange_code_for_tokens(auth_code)
