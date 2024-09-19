@@ -122,7 +122,7 @@ class TokenStorage(metaclass=abc.ABCMeta):
 
         if token_response.get("id_token"):
             decoded_id_token = token_response.decode_id_token()
-            return decoded_id_token["sub"]
+            return decoded_id_token["sub"]  # type: ignore[no-any-return]
         else:
             return None
 

@@ -6,7 +6,6 @@ from globus_sdk import AuthClient, OAuthRefreshTokenResponse, OAuthTokenResponse
 from globus_sdk.experimental.tokenstorage import TokenStorage, TokenStorageData
 from globus_sdk.scopes.consents import ConsentForest
 
-from ..._types import UUIDLike
 from .errors import (
     IdentityMismatchError,
     MissingIdentityError,
@@ -81,7 +80,7 @@ class ValidatingTokenStorage(TokenStorage):
 
         super().__init__(namespace=token_storage.namespace)
 
-    def _lookup_stored_identity_id(self) -> UUIDLike | None:
+    def _lookup_stored_identity_id(self) -> str | None:
         """
         Attempts to extract an identity id from stored token data using the internal
             token storage.
