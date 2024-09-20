@@ -30,7 +30,7 @@ class CommandLineLoginFlowManager(LoginFlowManager):
             explicit `redirect_uri` param is required.
 
     :param str redirect_uri: The redirect URI to use for the login flow. When the
-        `login_client` is a native client, this defaults to a globus-hosted URI.
+        `login_client` is a native client, this defaults to a Globus-hosted URL.
     :param bool request_refresh_tokens: A signal of whether refresh tokens are expected
         to be requested, in addition to access tokens.
     :param str native_prefill_named_grant: A string to prefill in a Native App login
@@ -66,7 +66,7 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         cls, app_name: str, login_client: AuthLoginClient, config: GlobusAppConfig
     ) -> CommandLineLoginFlowManager:
         """
-        Creates a ``CommandLineLoginFlowManager`` for use in a GlobusApp.
+        Create a ``CommandLineLoginFlowManager`` for use in a GlobusApp.
 
         :param app_name: The name of the app. Will be prefilled in native auth flows.
         :param login_client: A client used to make Globus Auth API calls.
@@ -101,9 +101,6 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         """
         Prompt the user to authenticate using the provided ``authorize_url``.
 
-        This method is publicly exposed to allow for simpler customization through
-        subclassing and overriding.
-
         :param authorize_url: The URL at which the user will login and consent to
             application accesses.
         """
@@ -123,10 +120,7 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         """
         Prompt the user to enter an authorization code.
 
-        This method is publicly exposed to allow for simpler customization through
-        subclassing and overriding.
-
-        :returns str: The authorization code entered by the user.
+        :returns: The authorization code entered by the user.
         """
         code_prompt = "Enter the resulting Authorization Code here: "
         return input(code_prompt).strip()

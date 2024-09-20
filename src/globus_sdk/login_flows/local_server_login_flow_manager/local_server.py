@@ -74,11 +74,11 @@ class RedirectHandler(BaseHTTPRequestHandler):
 
 class RedirectHTTPServer(HTTPServer):
     """
-    An HTTPServer which accepts a html_template to be displayed to the user
+    An HTTPServer which accepts an HTML `Template` to be displayed to the user
     and uses a Queue to receive an auth_code from its RequestHandler.
     """
 
-    WAIT_TIMEOUT = timedelta(minutes=5)
+    WAIT_TIMEOUT = timedelta(minutes=15)
 
     def __init__(
         self,

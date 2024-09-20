@@ -22,7 +22,7 @@ Command Line
 
 As the name might suggest, a CommandLineLoginFlowManager drives user logins through
 the command line (stdin/stdout). When run, the manager will print a URL to the console
-then prompt a user to navigate to that url and enter the resulting auth code
+then prompt a user to navigate to that URL and enter the resulting auth code
 back into the terminal.
 
 Example Code:
@@ -54,16 +54,16 @@ Example Code:
 Local Server
 ------------
 
-A LocalServerLoginFlowManager drives more automated but less portable login flows
+A LocalServerLoginFlowManager drives more automated, but less portable, login flows
 compared with its command line counterpart. When run, rather than printing the
 authorization URL, the manager will open it in the user's default browser. Alongside
 this, the manager will start a local web server to receive the auth code upon completion
 of the login flow.
 
 This provides a more user-friendly login experience as there is no manually copy/pasting
-of links and codes but also requires that  the python process is running in an
-environment with access to a supported browser. This flow is not suitable for headless
-environments (e.g., while ssh-ed into a cluster node).
+of links and codes. It also requires however that the python process be running in an
+environment with access to a supported browser. As such, this flow is not suitable for
+headless environments (e.g., while ssh-ed into a cluster node).
 
 .. warning::
 
