@@ -71,7 +71,7 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         :param app_name: The name of the app. Will be prefilled in native auth flows.
         :param login_client: A client used to make Globus Auth API calls.
         :param config: A GlobusApp-bounded object used to configure login flow manager.
-        :raises: GlobusSDKUsageError if login_redirect_uri is not set on the config
+        :raises GlobusSDKUsageError: if login_redirect_uri is not set on the config
             but a ConfidentialAppAuthClient is supplied.
         """
         return cls(

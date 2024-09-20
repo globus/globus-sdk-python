@@ -121,7 +121,7 @@ class LocalServerLoginFlowManager(LoginFlowManager):
         :param app_name: The name of the app. Will be prefilled in native auth flows.
         :param login_client: A client used to make Globus Auth API calls.
         :param config: A GlobusApp-bounded object used to configure login flow manager.
-        :raises: GlobusSDKUsageError if app config is incompatible with the manager.
+        :raises GlobusSDKUsageError: if app config is incompatible with the manager.
         """
         if config.login_redirect_uri:
             # A "local server" relies on the user being redirected back to the server
