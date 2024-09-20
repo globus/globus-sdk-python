@@ -87,6 +87,7 @@ class ClientApp(GlobusApp):
         self._authorizer_factory = ClientCredentialsAuthorizerFactory(
             token_storage=self.token_storage,
             confidential_client=self._login_client,
+            scope_requirements=self._scope_requirements,
         )
 
     def _run_login_flow(

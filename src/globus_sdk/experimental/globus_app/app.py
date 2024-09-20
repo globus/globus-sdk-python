@@ -12,6 +12,7 @@ from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.scopes import AuthScopes, scopes_to_scope_list
 from globus_sdk.tokenstorage import TokenStorage
 
+from ._token_validators import ScopeRequirementsValidator, UnchangingIdentityIDValidator
 from ._types import TokenStorageProvider
 from ._validating_token_storage import ValidatingTokenStorage
 from .authorizer_factory import AuthorizerFactory
@@ -50,7 +51,8 @@ class GlobusApp(metaclass=abc.ABCMeta):
         scopes or scope strings.
     :param config: A ``GlobusAppConfig`` used to control various behaviors of this app.
 
-    :ivar token_storage: The ``ValidatingTokenStorage`` containing tokens for the app.
+    :ivar token_storage: The ``TokenStorage`` containing tokens for the app and
+        capable of validating identity and scope requirements.
         Authorization mediated by the app will use this object, so modifying this will
         impact clients which are defined to use the app whenever they fetch tokens.
     """
@@ -85,23 +87,13 @@ class GlobusApp(metaclass=abc.ABCMeta):
             client_id=self.client_id,
             config=self.config,
         )
-
-        # construct ValidatingTokenStorage around the TokenStorage and
-        # our initial scope requirements
-        self.token_storage = ValidatingTokenStorage(
-            token_storage=self._token_storage,
-            scope_requirements=self._scope_requirements,
-        )
+        self.token_storage = ValidatingTokenStorage(self._token_storage)
 
         # initialize our authorizer factory
         self._initialize_authorizer_factory()
 
-        # create a consent client for token validation
-        # reducing the scope requirements to barebones openid (user identification)
-        # additionally, this will ensure that openid scope requirement is always
-        # registered (it's required for token identity validation).
-        consent_client = AuthClient(app=self, app_scopes=[Scope(AuthScopes.openid)])
-        self.token_storage.set_consent_client(consent_client)
+        # apply final settings to ValidatingTokenStorage
+        self._finalize_token_storage()
 
     def _resolve_scope_requirements(
         self, scope_requirements: t.Mapping[str, ScopeCollectionType] | None
@@ -166,6 +158,39 @@ class GlobusApp(metaclass=abc.ABCMeta):
                 "Could not set up a globus login client. One of client_id or "
                 "login_client is required."
             )
+
+    def _finalize_token_storage(self) -> None:
+        """
+        Update the ValidatingTokenStorage for a GlobusApp to add the necessary
+        validators.
+        Because the validators include an AuthClient which can call back into the app,
+        this must happen at the very end of initialization.
+
+        This storage will include validators to ensure that scope requirements are met
+        and that the identity ID of the logged-in user does not change.
+        """
+        # create a consent client for token validation
+        # reducing the scope requirements to barebones openid (user identification)
+        # additionally, this will ensure that openid scope requirement is always
+        # registered (it's required for token identity validation).
+        consent_client = AuthClient(app=self, app_scopes=[Scope(AuthScopes.openid)])
+
+        # construct ValidatingTokenStorage around the TokenStorage and
+        # our initial scope requirements
+        # use validators to enforce invariants about scopes and identity ID
+        scope_validator = ScopeRequirementsValidator(
+            self._scope_requirements, consent_client
+        )
+        identity_id_validator = UnchangingIdentityIDValidator()
+        self.token_storage.before_store_validators.extend(
+            (
+                scope_validator.before_store,
+                identity_id_validator.before_store,
+            )
+        )
+        self.token_storage.after_retrieve_validators.append(
+            scope_validator.after_retrieve
+        )
 
     @abc.abstractmethod
     def _initialize_login_client(
