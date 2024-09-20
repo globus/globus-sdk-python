@@ -65,14 +65,9 @@ of links and codes. It also requires however that the python process be running 
 environment with access to a supported browser. As such, this flow is not suitable for
 headless environments (e.g., while ssh-ed into a cluster node).
 
-.. warning::
+.. note::
 
-    Globus Auth requires that redirect URIs, including the local server used
-    here, be pre-registered with the client in use.
-
-    Before using this flow, navigate to the
-    `Globus Developers Pane <https://auth.globus.org/v2/web/developers>`_ and ensure
-    that `https://localhost` is listed as an allowed "Redirect URL" for your client.
+   This login manager is only supported for native clients.
 
 
 Example Usage:

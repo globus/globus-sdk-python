@@ -7,7 +7,12 @@ import webbrowser
 from contextlib import contextmanager
 from string import Template
 
-from globus_sdk import AuthLoginClient, GlobusSDKUsageError, OAuthTokenResponse
+from globus_sdk import (
+    AuthLoginClient,
+    GlobusSDKUsageError,
+    NativeAppAuthClient,
+    OAuthTokenResponse,
+)
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.login_flows.login_flow_manager import LoginFlowManager
 
@@ -95,7 +100,7 @@ class LocalServerLoginFlowManager(LoginFlowManager):
         *,
         request_refresh_tokens: bool = False,
         native_prefill_named_grant: str | None = None,
-        server_address: tuple[str, int] = ("127.0.0.1", 0),
+        server_address: tuple[str, int] = ("localhost", 0),
         html_template: Template = DEFAULT_HTML_TEMPLATE,
     ) -> None:
         super().__init__(
@@ -116,13 +121,19 @@ class LocalServerLoginFlowManager(LoginFlowManager):
         :param app_name: The name of the app. Will be prefilled in native auth flows.
         :param login_client: A client used to make Globus Auth API calls.
         :param config: A GlobusApp-bounded object used to configure login flow manager.
-        :raises: GlobusSDKUsageError if a custom login_redirect_uri is defined in
-            the config.
+        :raises: GlobusSDKUsageError if app config is incompatible with the manager.
         """
         if config.login_redirect_uri:
             # A "local server" relies on the user being redirected back to the server
             # running on the local machine, so it can't use a custom redirect URI.
             msg = "Cannot define a custom redirect_uri for LocalServerLoginFlowManager."
+            raise GlobusSDKUsageError(msg)
+        if not isinstance(login_client, NativeAppAuthClient):
+            # Globus Auth has special provisions for native clients which allow implicit
+            # redirect url grant to localhost:<any-port>. This is required for the
+            # LocalServerLoginFlowManager to work and is not reproducible in
+            # confidential clients.
+            msg = "LocalServerLoginFlowManager is only supported for Native Apps."
             raise GlobusSDKUsageError(msg)
 
         return cls(
