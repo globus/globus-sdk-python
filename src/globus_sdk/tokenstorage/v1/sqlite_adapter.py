@@ -6,7 +6,7 @@ import sqlite3
 import typing as t
 
 from globus_sdk.services.auth import OAuthTokenResponse
-from globus_sdk.tokenstorage.base import FileAdapter
+from globus_sdk.tokenstorage.v1.base import FileAdapter
 from globus_sdk.version import __version__
 
 

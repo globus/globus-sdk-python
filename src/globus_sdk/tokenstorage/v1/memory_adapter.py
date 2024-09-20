@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing as t
 
 from globus_sdk.services.auth import OAuthTokenResponse
-from globus_sdk.tokenstorage.base import StorageAdapter
+from globus_sdk.tokenstorage.v1.base import StorageAdapter
 
 
 class MemoryAdapter(StorageAdapter):
