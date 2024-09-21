@@ -12,7 +12,7 @@ from globus_sdk.experimental.globus_app.errors import (
     ExpiredTokenError,
     MissingTokenError,
 )
-from globus_sdk.experimental.tokenstorage import TokenStorageData
+from globus_sdk.tokenstorage import TokenStorageData
 
 
 def make_mock_token_response(token_number=1):

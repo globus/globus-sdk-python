@@ -1,7 +1,7 @@
 import pytest
 
 from globus_sdk import GlobusSDKUsageError
-from globus_sdk.experimental.tokenstorage.base import _slugify_app_name
+from globus_sdk.tokenstorage.v2.base import _slugify_app_name
 
 
 @pytest.mark.parametrize(

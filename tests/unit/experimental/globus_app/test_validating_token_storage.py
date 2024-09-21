@@ -22,8 +22,8 @@ from globus_sdk.experimental.globus_app.errors import (
     MissingTokenError,
     UnmetScopeRequirementsError,
 )
-from globus_sdk.experimental.tokenstorage import MemoryTokenStorage
 from globus_sdk.scopes.consents import ConsentForest
+from globus_sdk.tokenstorage import MemoryTokenStorage
 from tests.common import make_consent_forest
 
 

@@ -27,3 +27,12 @@ def test_login_flow_manager_importable_from_experimental():
             LocalServerLoginFlowManager,
             LoginFlowManager,
         )
+
+
+def test_tokenstorage_importable_from_experimental():
+    with pytest.warns(DeprecationWarning):
+        from globus_sdk.experimental.tokenstorage import (  # noqa: F401
+            JSONTokenStorage,
+            MemoryTokenStorage,
+            SQLiteTokenStorage,
+        )

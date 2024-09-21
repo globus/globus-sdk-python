@@ -7,9 +7,9 @@ import typing as t
 from globus_sdk import AuthClient, AuthLoginClient, GlobusSDKUsageError, Scope
 from globus_sdk._types import ScopeCollectionType, UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
-from globus_sdk.experimental.tokenstorage import TokenStorage
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.scopes import AuthScopes, scopes_to_scope_list
+from globus_sdk.tokenstorage import TokenStorage
 
 from ._types import TokenStorageProvider
 from ._validating_token_storage import ValidatingTokenStorage

@@ -7,9 +7,9 @@ import textwrap
 import typing as t
 
 from globus_sdk import exc
-from globus_sdk.experimental.tokenstorage.base import FileTokenStorage
 from globus_sdk.version import __version__
 
+from .base import FileTokenStorage
 from .token_data import TokenStorageData
 
 

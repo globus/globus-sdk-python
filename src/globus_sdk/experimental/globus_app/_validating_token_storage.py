@@ -3,8 +3,8 @@ from __future__ import annotations
 import typing as t
 
 from globus_sdk import AuthClient, OAuthRefreshTokenResponse, OAuthTokenResponse, Scope
-from globus_sdk.experimental.tokenstorage import TokenStorage, TokenStorageData
 from globus_sdk.scopes.consents import ConsentForest
+from globus_sdk.tokenstorage import TokenStorage, TokenStorageData
 
 from .errors import (
     IdentityMismatchError,

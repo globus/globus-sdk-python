@@ -8,10 +8,10 @@ import re
 import sys
 import typing as t
 
+from globus_sdk import GlobusSDKUsageError
+from globus_sdk._types import UUIDLike
 from globus_sdk.services.auth import OAuthDependentTokenResponse, OAuthTokenResponse
 
-from ... import GlobusSDKUsageError
-from ..._types import UUIDLike
 from .token_data import TokenStorageData
 
 if t.TYPE_CHECKING:

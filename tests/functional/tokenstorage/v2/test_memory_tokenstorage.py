@@ -1,4 +1,4 @@
-from globus_sdk.experimental.tokenstorage import MemoryTokenStorage
+from globus_sdk.tokenstorage import MemoryTokenStorage
 
 
 def test_store_and_get_token_data_by_resource_server(

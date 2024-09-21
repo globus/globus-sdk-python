@@ -1,8 +1,7 @@
 import pytest
 
 from globus_sdk import exc
-from globus_sdk.experimental.tokenstorage import SQLiteTokenStorage
-from globus_sdk.tokenstorage import SQLiteAdapter
+from globus_sdk.tokenstorage import SQLiteAdapter, SQLiteTokenStorage
 
 
 @pytest.fixture
@@ -116,7 +115,7 @@ def test_iter_namespaces(mock_response, db_file, make_adapter):
         assert set(adapter.iter_namespaces()) == {"foo", "bar"}
 
 
-def test_backwards_compatible_storage(mock_response, db_file, make_adapter):
+def test_migrate_from_v1_adapter(mock_response, db_file, make_adapter):
     # store data with SQLiteAdapter
     old_adapter = SQLiteAdapter(db_file)
     old_adapter.store(mock_response)

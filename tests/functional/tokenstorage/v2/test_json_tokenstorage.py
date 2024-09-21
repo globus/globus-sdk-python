@@ -3,8 +3,7 @@ import os
 
 import pytest
 
-from globus_sdk.experimental.tokenstorage import JSONTokenStorage
-from globus_sdk.tokenstorage import SimpleJSONFileAdapter
+from globus_sdk.tokenstorage import JSONTokenStorage, SimpleJSONFileAdapter
 from globus_sdk.version import __version__
 
 IS_WINDOWS = os.name == "nt"
@@ -90,7 +89,7 @@ def test_store_perms(json_file, mock_response):
     assert st_mode | 0o600 == 0o600
 
 
-def test_migrate_from_simple(json_file, mock_response):
+def test_migrate_from_v1_adapter(json_file, mock_response):
     # write with a SimpleJSONFileAdapter
     old_adapter = SimpleJSONFileAdapter(json_file)
     old_adapter.store(mock_response)

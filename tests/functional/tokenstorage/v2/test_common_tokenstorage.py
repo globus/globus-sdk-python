@@ -1,6 +1,6 @@
 import pytest
 
-from globus_sdk.experimental.tokenstorage import (
+from globus_sdk.tokenstorage import (
     JSONTokenStorage,
     MemoryTokenStorage,
     SQLiteTokenStorage,

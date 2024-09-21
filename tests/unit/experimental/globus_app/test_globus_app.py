@@ -24,12 +24,6 @@ from globus_sdk.experimental.globus_app import (
     RefreshTokenAuthorizerFactory,
     UserApp,
 )
-from globus_sdk.experimental.tokenstorage import (
-    JSONTokenStorage,
-    MemoryTokenStorage,
-    SQLiteTokenStorage,
-    TokenStorageData,
-)
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.login_flows import (
     CommandLineLoginFlowManager,
@@ -38,6 +32,12 @@ from globus_sdk.login_flows import (
 )
 from globus_sdk.scopes import AuthScopes, Scope
 from globus_sdk.services.auth import OAuthTokenResponse
+from globus_sdk.tokenstorage import (
+    JSONTokenStorage,
+    MemoryTokenStorage,
+    SQLiteTokenStorage,
+    TokenStorageData,
+)
 
 
 def _mock_token_data_by_rs():
