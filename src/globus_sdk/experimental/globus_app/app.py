@@ -264,7 +264,8 @@ class GlobusApp(metaclass=abc.ABCMeta):
         """
         for resource_server in self._scope_requirements.keys():
             try:
-                self.get_authorizer(resource_server, skip_error_handling=True)
+                with self._disabled_token_validation_error_handler():
+                    self.get_authorizer(resource_server)
             except TokenValidationError:
                 return True
         return False
@@ -325,23 +326,15 @@ class GlobusApp(metaclass=abc.ABCMeta):
 
         return auth_params
 
-    def get_authorizer(
-        self,
-        resource_server: str,
-        *,
-        skip_error_handling: bool | None = None,
-    ) -> GlobusAuthorizer:
+    def get_authorizer(self, resource_server: str) -> GlobusAuthorizer:
         """
         Get a ``GlobusAuthorizer`` from the app's authorizer factory for a specified
         resource server. The type of authorizer is dependent on the app.
 
         :param resource_server: The resource server for which the requested Authorizer
             should provide authorization headers.
-        :param skip_error_handling: If True, skip the configured token validation error
-            handler when a ``TokenValidationError`` is raised. Default: False.
         """
-        if skip_error_handling is None:
-            skip_error_handling = not self._token_validation_error_handling_enabled
+        error_handling_enabled = self._token_validation_error_handling_enabled
 
         try:
             # Disable token validation error handling while try to get an authorizer.
@@ -350,7 +343,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
             with self._disabled_token_validation_error_handler():
                 return self._authorizer_factory.get_authorizer(resource_server)
         except TokenValidationError as e:
-            if not skip_error_handling and self.config.token_validation_error_handler:
+            if error_handling_enabled and self.config.token_validation_error_handler:
                 # Dispatch to the configured error handler if one is set then retry.
                 self.config.token_validation_error_handler(self, e)
                 return self._authorizer_factory.get_authorizer(resource_server)
