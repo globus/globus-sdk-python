@@ -157,11 +157,13 @@ def test_user_app_token_storage_configuration(token_storage_value, token_storage
     assert isinstance(user_app._token_storage, token_storage_class)
 
 
-def test_user_app_creates_consent_client():
+def test_user_app_registers_openid_scope_implicitly():
     client_id = "mock_client_id"
     user_app = UserApp("test-app", client_id=client_id)
 
-    assert user_app.token_storage._consent_client is not None
+    assert "auth.globus.org" in user_app.scope_requirements
+    scopes = user_app.scope_requirements["auth.globus.org"]
+    assert "openid" in [str(s) for s in scopes]
 
 
 class MockLoginFlowManager(LoginFlowManager):
