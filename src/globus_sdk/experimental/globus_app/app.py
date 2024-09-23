@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import abc
+import contextlib
 import copy
 import typing as t
 
@@ -69,6 +70,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
     ) -> None:
         self.app_name = app_name
         self.config = config
+        self._token_validation_error_handling_enabled = True
 
         self.client_id, self._login_client = self._resolve_client_info(
             app_name=self.app_name,
@@ -327,7 +329,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         self,
         resource_server: str,
         *,
-        skip_error_handling: bool = False,
+        skip_error_handling: bool | None = None,
     ) -> GlobusAuthorizer:
         """
         Get a ``GlobusAuthorizer`` from the app's authorizer factory for a specified
@@ -338,14 +340,36 @@ class GlobusApp(metaclass=abc.ABCMeta):
         :param skip_error_handling: If True, skip the configured token validation error
             handler when a ``TokenValidationError`` is raised. Default: False.
         """
+        if skip_error_handling is None:
+            skip_error_handling = not self._token_validation_error_handling_enabled
+
         try:
-            return self._authorizer_factory.get_authorizer(resource_server)
+            # Disable token validation error handling while try to get an authorizer.
+            # This will ultimately ensure that the error handler is only called once
+            # by the root `get_authorizer` invocation.
+            with self._disabled_token_validation_error_handler():
+                return self._authorizer_factory.get_authorizer(resource_server)
         except TokenValidationError as e:
             if not skip_error_handling and self.config.token_validation_error_handler:
                 # Dispatch to the configured error handler if one is set then retry.
                 self.config.token_validation_error_handler(self, e)
                 return self._authorizer_factory.get_authorizer(resource_server)
             raise e
+
+    @contextlib.contextmanager
+    def _disabled_token_validation_error_handler(self) -> t.ContextManager[None]:
+        """
+        Context manager to disable token validation error handling (as a default)
+        for the duration of the context.
+        """
+        # Record the starting value so we can reset it after the context ends.
+        initial_val = self._token_validation_error_handling_enabled
+
+        self._token_validation_error_handling_enabled = False
+        try:
+            yield
+        finally:
+            self._token_validation_error_handling_enabled = initial_val
 
     def add_scope_requirements(
         self, scope_requirements: t.Mapping[str, ScopeCollectionType]
