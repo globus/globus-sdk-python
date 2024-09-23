@@ -8,11 +8,14 @@ from globus_sdk.experimental.globus_app import (
     ClientCredentialsAuthorizerFactory,
     RefreshTokenAuthorizerFactory,
 )
+from globus_sdk.experimental.globus_app._validating_token_storage import (
+    ValidatingTokenStorage,
+)
 from globus_sdk.experimental.globus_app.errors import (
     ExpiredTokenError,
     MissingTokenError,
 )
-from globus_sdk.tokenstorage import TokenStorageData
+from globus_sdk.tokenstorage import MemoryTokenStorage
 
 
 def make_mock_token_response(token_number=1):
@@ -27,28 +30,17 @@ def make_mock_token_response(token_number=1):
             "token_type": "Bearer",
         }
     }
+    ret.decode_id_token.return_value = {"sub": "dummy_id"}
     return ret
 
 
-class MockValidatingTokenStorage:
-    def __init__(self):
-        self.token_data = {}
-        self.scope_requirements = {"rs1": "rs1:all"}
-
-    def get_token_data(self, resource_server):
-        if resource_server not in self.token_data:
-            msg = f"No token data for {resource_server}"
-            raise MissingTokenError(msg, resource_server=resource_server)
-
-        return TokenStorageData.from_dict(self.token_data[resource_server])
-
-    def store_token_response(self, mock_token_response):
-        self.token_data = mock_token_response.by_resource_server
+def _make_mem_token_storage():
+    return ValidatingTokenStorage(MemoryTokenStorage())
 
 
 def test_access_token_authorizer_factory():
     initial_response = make_mock_token_response()
-    mock_token_storage = MockValidatingTokenStorage()
+    mock_token_storage = _make_mem_token_storage()
     mock_token_storage.store_token_response(initial_response)
     factory = AccessTokenAuthorizerFactory(token_storage=mock_token_storage)
 
@@ -73,7 +65,7 @@ def test_access_token_authorizer_factory():
 
 def test_access_token_authorizer_factory_no_tokens():
     initial_response = make_mock_token_response()
-    mock_token_storage = MockValidatingTokenStorage()
+    mock_token_storage = _make_mem_token_storage()
     mock_token_storage.store_token_response(initial_response)
     factory = AccessTokenAuthorizerFactory(token_storage=mock_token_storage)
 
@@ -88,7 +80,7 @@ def test_access_token_authorizer_factory_expired_access_token():
         time.time() - 3600
     )
 
-    mock_token_storage = MockValidatingTokenStorage()
+    mock_token_storage = _make_mem_token_storage()
     mock_token_storage.store_token_response(initial_response)
     factory = AccessTokenAuthorizerFactory(token_storage=mock_token_storage)
 
@@ -98,7 +90,7 @@ def test_access_token_authorizer_factory_expired_access_token():
 
 def test_refresh_token_authorizer_factory():
     initial_response = make_mock_token_response()
-    mock_token_storage = MockValidatingTokenStorage()
+    mock_token_storage = _make_mem_token_storage()
     mock_token_storage.store_token_response(initial_response)
 
     refresh_data = make_mock_token_response(token_number=2)
@@ -137,7 +129,7 @@ def test_refresh_token_authorizer_factory_expired_access_token():
         time.time() - 3600
     )
 
-    mock_token_storage = MockValidatingTokenStorage()
+    mock_token_storage = _make_mem_token_storage()
     mock_token_storage.store_token_response(initial_response)
 
     refresh_data = make_mock_token_response(token_number=2)
@@ -161,7 +153,7 @@ def test_refresh_token_authorizer_factory_no_refresh_token():
     initial_response = make_mock_token_response()
     initial_response.by_resource_server["rs1"]["refresh_token"] = None
 
-    mock_token_storage = MockValidatingTokenStorage()
+    mock_token_storage = _make_mem_token_storage()
     mock_token_storage.store_token_response(initial_response)
 
     factory = RefreshTokenAuthorizerFactory(
@@ -176,7 +168,7 @@ def test_refresh_token_authorizer_factory_no_refresh_token():
 
 def test_client_credentials_authorizer_factory():
     initial_response = make_mock_token_response()
-    mock_token_storage = MockValidatingTokenStorage()
+    mock_token_storage = _make_mem_token_storage()
     mock_token_storage.store_token_response(initial_response)
 
     client_token_data = make_mock_token_response(token_number=2)
@@ -190,6 +182,7 @@ def test_client_credentials_authorizer_factory():
     factory = ClientCredentialsAuthorizerFactory(
         token_storage=mock_token_storage,
         confidential_client=mock_confidential_client,
+        scope_requirements={"rs1": ["scope1"]},
     )
 
     # calling get_authorizer once creates a new authorizer using existing tokens
@@ -212,7 +205,7 @@ def test_client_credentials_authorizer_factory():
 
 
 def test_client_credentials_authorizer_factory_no_tokens():
-    mock_token_storage = MockValidatingTokenStorage()
+    mock_token_storage = _make_mem_token_storage()
 
     client_token_data = make_mock_token_response()
     mock_confidential_client = mock.Mock()
@@ -225,6 +218,7 @@ def test_client_credentials_authorizer_factory_no_tokens():
     factory = ClientCredentialsAuthorizerFactory(
         token_storage=mock_token_storage,
         confidential_client=mock_confidential_client,
+        scope_requirements={"rs1": ["scope1"]},
     )
 
     # calling get_authorizer once creates a new authorizer automatically making
@@ -235,11 +229,12 @@ def test_client_credentials_authorizer_factory_no_tokens():
 
 
 def test_client_credentials_authorizer_factory_no_scopes():
-    mock_token_storage = MockValidatingTokenStorage()
+    mock_token_storage = _make_mem_token_storage()
     mock_confidential_client = mock.Mock()
     factory = ClientCredentialsAuthorizerFactory(
         token_storage=mock_token_storage,
         confidential_client=mock_confidential_client,
+        scope_requirements={},
     )
 
     with pytest.raises(ValueError) as exc:
