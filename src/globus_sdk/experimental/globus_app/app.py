@@ -357,7 +357,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
             raise e
 
     @contextlib.contextmanager
-    def _disabled_token_validation_error_handler(self) -> t.ContextManager[None]:
+    def _disabled_token_validation_error_handler(self) -> t.Iterator[None]:
         """
         Context manager to disable token validation error handling (as a default)
         for the duration of the context.
