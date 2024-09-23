@@ -49,18 +49,27 @@ class IdentityIDReader:
 
         :raises ValueError: if there is inconsistent ``identity_id`` information
         """
-        token_data_identity_ids: set[str] = {
-            token_data.identity_id
-            for token_data in token_data_by_resource_server.values()
-            if token_data.identity_id is not None
-        }
+        self.identity_id = _pure_read_token_data_by_resource_server(
+            token_data_by_resource_server
+        )
+        return self.identity_id
 
-        if len(token_data_identity_ids) == 0:
-            return None
-        elif len(token_data_identity_ids) == 1:
-            return token_data_identity_ids.pop()
-        else:
-            raise ValueError(
-                "token_data_by_resource_server contained TokenStorageData objects with "
-                f"different identity_id values: {token_data_identity_ids}"
-            )
+
+def _pure_read_token_data_by_resource_server(
+    token_data_by_resource_server: t.Mapping[str, TokenStorageData]
+) -> str | None:
+    token_data_identity_ids: set[str] = {
+        token_data.identity_id
+        for token_data in token_data_by_resource_server.values()
+        if token_data.identity_id is not None
+    }
+
+    if len(token_data_identity_ids) == 0:
+        return None
+    elif len(token_data_identity_ids) == 1:
+        return token_data_identity_ids.pop()
+    else:
+        raise ValueError(
+            "token_data_by_resource_server contained TokenStorageData objects with "
+            f"different identity_id values: {token_data_identity_ids}"
+        )

@@ -16,6 +16,10 @@ from globus_sdk import (
     Scope,
 )
 from globus_sdk.experimental.globus_app import ValidatingTokenStorage
+from globus_sdk.experimental.globus_app._token_validators import (
+    ScopeRequirementsValidator,
+    UnchangingIdentityIDValidator,
+)
 from globus_sdk.experimental.globus_app.errors import (
     IdentityMismatchError,
     MissingIdentityError,
@@ -27,11 +31,26 @@ from globus_sdk.tokenstorage import MemoryTokenStorage
 from tests.common import make_consent_forest
 
 
-def test_validating_token_storage_evaluates_identity_requirements(
-    make_token_response,
-):
+def _make_memstorage_with_scope_validator(consent_client, scope_requirements):
+    scope_validator = ScopeRequirementsValidator(scope_requirements, consent_client)
+    return ValidatingTokenStorage(
+        MemoryTokenStorage(),
+        before_store_validators=(scope_validator.before_store,),
+        after_retrieve_validators=(scope_validator.after_retrieve,),
+    )
+
+
+def _make_memstorage_with_identity_id_validator():
+    identity_validator = UnchangingIdentityIDValidator()
+    return ValidatingTokenStorage(
+        MemoryTokenStorage(),
+        before_store_validators=(identity_validator.before_store,),
+    )
+
+
+def test_validating_token_storage_evaluates_identity_requirements(make_token_response):
     id_a, id_b = str(uuid.uuid4()), str(uuid.uuid4())
-    adapter = ValidatingTokenStorage(MemoryTokenStorage(), {})
+    adapter = _make_memstorage_with_identity_id_validator()
 
     # Seed the adapter with an initial identity.
     assert adapter.identity_id is None
@@ -49,8 +68,8 @@ def test_validating_token_storage_evaluates_identity_requirements(
 def test_validating_token_storage_evaluates_root_scope_requirements(
     make_token_response,
 ):
-    adapter = ValidatingTokenStorage(
-        MemoryTokenStorage(), {"rs1": [Scope.deserialize("scope1")]}
+    adapter = _make_memstorage_with_scope_validator(
+        consent_client, {"rs1": [Scope.deserialize("scope1")]}
     )
     identity_id = str(uuid.uuid4())
     valid_token_response = make_token_response(
@@ -70,14 +89,11 @@ def test_validating_token_storage_evaluates_root_scope_requirements(
     )
 
 
-def test_validating_token_storage_evaluates_dependent_scope_requirements(
-    make_token_response,
-    consent_client,
+def test_storage_with_scope_validator_evaluates_dependent_scope_requirements(
+    make_token_response, consent_client
 ):
-    adapter = ValidatingTokenStorage(
-        MemoryTokenStorage(),
-        {"rs1": [Scope.deserialize("scope[subscope]")]},
-        consent_client=consent_client,
+    adapter = _make_memstorage_with_scope_validator(
+        consent_client, {"rs1": [Scope.deserialize("scope[subscope]")]}
     )
     token_response = make_token_response(scopes={"rs1": "scope"})
     adapter.store_token_response(token_response)
@@ -98,7 +114,7 @@ def test_validating_token_storage_evaluates_dependent_scope_requirements(
 def test_validating_token_storage_fails_non_identifiable_responses(
     make_token_response,
 ):
-    adapter = ValidatingTokenStorage(MemoryTokenStorage(), {})
+    adapter = _make_memstorage_with_identity_id_validator()
     token_response = make_token_response(identity_id=None)
 
     with pytest.raises(MissingIdentityError):
@@ -110,7 +126,7 @@ def test_validating_token_storage_loads_identity_info_from_storage(
 ):
     # Create an in memory storage adapter
     storage = MemoryTokenStorage()
-    adapter = ValidatingTokenStorage(storage, {})
+    adapter = ValidatingTokenStorage(storage)
 
     # Store an identifiable token response
     identity_id = str(uuid.uuid4())
@@ -118,7 +134,7 @@ def test_validating_token_storage_loads_identity_info_from_storage(
     adapter.store_token_response(token_response)
 
     # Create a net new adapter, pointing at the same storage.
-    new_adapter = ValidatingTokenStorage(storage, {})
+    new_adapter = ValidatingTokenStorage(storage)
     # Verify that the new adapter loads the identity info from storage.
     assert new_adapter.identity_id == identity_id
 
@@ -126,9 +142,8 @@ def test_validating_token_storage_loads_identity_info_from_storage(
 def test_validating_token_storage_stores_with_saved_identity_id_on_refresh_tokens(
     make_token_response,
 ):
-    # Create an in memory storage adapter
-    storage = MemoryTokenStorage()
-    adapter = ValidatingTokenStorage(storage, {})
+    # Create an in memory storage adapter with identity_id verification
+    adapter = _make_memstorage_with_identity_id_validator()
 
     # Store an identifiable token response
     identity_id = str(uuid.uuid4())
@@ -151,7 +166,7 @@ def test_validating_token_storage_stores_with_saved_identity_id_on_refresh_token
 
 
 def test_validating_token_storage_raises_error_when_no_token_data():
-    adapter = ValidatingTokenStorage(MemoryTokenStorage(), {})
+    adapter = ValidatingTokenStorage(MemoryTokenStorage())
 
     with pytest.raises(MissingTokenError):
         adapter.get_token_data("rs1")
