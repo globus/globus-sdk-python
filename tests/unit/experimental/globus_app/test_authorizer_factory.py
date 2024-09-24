@@ -6,14 +6,10 @@ import pytest
 from globus_sdk.experimental.globus_app import (
     AccessTokenAuthorizerFactory,
     ClientCredentialsAuthorizerFactory,
-    RefreshTokenAuthorizerFactory,
-)
-from globus_sdk.experimental.globus_app._validating_token_storage import (
-    ValidatingTokenStorage,
-)
-from globus_sdk.experimental.globus_app.errors import (
     ExpiredTokenError,
     MissingTokenError,
+    RefreshTokenAuthorizerFactory,
+    ValidatingTokenStorage,
 )
 from globus_sdk.tokenstorage import MemoryTokenStorage
 

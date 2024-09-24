@@ -1,73 +1,59 @@
 from __future__ import annotations
 
+import time
 import typing as t
 
 import globus_sdk
 from globus_sdk.experimental.tokenstorage import TokenStorageData
 from globus_sdk.scopes.consents import ConsentForest
 
-from ._identity_id_reader import IdentityIDReader
-from ._validating_token_storage import ValidatingTokenStorage
-from .errors import (
+from ..errors import (
+    ExpiredTokenError,
     IdentityMismatchError,
     MissingIdentityError,
+    MissingTokenError,
     UnmetScopeRequirementsError,
 )
+from .context import TokenValidationContext
 
 
 class UnchangingIdentityIDValidator:
-    def __init__(self) -> None:
-        self.identity_id: str | None = None
-        self._reader = IdentityIDReader()
-
     def before_store(
         self,
-        token_storage: ValidatingTokenStorage,
-        token_data_by_resource_server: t.Mapping[str, TokenStorageData],
+        token_data_by_resource_server: t.Mapping[  # pylint: disable=unused-argument
+            str, TokenStorageData
+        ],
+        context: TokenValidationContext,
     ) -> None:
         """
         Validate that the identity info in the token data matches the prior identity
-        info. If no prior identity was set, the incoming identity_id may be stored
-        (but only if the token storage
+        info. If no prior identity was set, any new identity_id is accepted.
 
-        :param token_storage: The token storage which invoked this validator.
         :param token_data_by_resource_server: The data to validate.
+        :param context: The validation context object, containing state of the system at
+            the time of validation.
 
         :raises IdentityMismatchError: if the identity info in the token data
             does not match the stored identity info.
         :raises MissingIdentityError: if the token data did not have identity
             information (generally due to missing the openid scope)
         """
-        # if an identity ID is not known to the validator, but one is known to the
-        # storage, trust the storage and set that on the validator
-        if self.identity_id is None:
-            self.identity_id = token_storage.identity_id
-
-        token_data_identity_id = self._reader.read_token_data_by_resource_server(
-            token_data_by_resource_server
-        )
-
-        if token_data_identity_id is None:
+        if context.token_data_identity_id is None:
             raise MissingIdentityError(
                 "Token grant response doesn't contain an id_token. This normally "
                 "occurs if the auth flow didn't include 'openid' alongside other "
                 "scopes."
             )
 
-        # at this point, if the identity_id is not known, this can only mean that
-        # we are storing an initial response (which has not been seen by the storage
-        # before now), as from a new login flow
-        #
-        # therefore, trust the token data and set that as the expected identity_id
-        if self.identity_id is None:
-            self.identity_id = token_data_identity_id
+        # no prior ID means we cannot validate the content further
+        if context.prior_identity_id is None:
             return
 
-        if token_data_identity_id != self.identity_id:
+        if context.token_data_identity_id != context.prior_identity_id:
             raise IdentityMismatchError(
                 "Detected a change in identity associated with the token data.",
-                stored_id=self.identity_id,
-                new_id=token_data_identity_id,
+                stored_id=context.prior_identity_id,
+                new_id=context.token_data_identity_id,
             )
 
 
@@ -83,39 +69,46 @@ class ScopeRequirementsValidator:
 
     def before_store(
         self,
-        token_storage: ValidatingTokenStorage,
         token_data_by_resource_server: t.Mapping[str, TokenStorageData],
+        context: TokenValidationContext,
     ) -> None:
         """
         Validate the token data against scope requirements, but do not check
         dependent scopes before storage.
 
-        :param token_storage: The token storage which invoked this validator.
         :param token_data_by_resource_server: The data to validate.
+        :param context: The validation context object, containing state of the system at
+            the time of validation.
         """
+        identity_id = context.token_data_identity_id or context.prior_identity_id
         for resource_server, token_data in token_data_by_resource_server.items():
             self._validate_token_data_meets_scope_requirements(
                 resource_server=resource_server,
                 token_data=token_data,
-                identity_id=token_storage.identity_id,
+                identity_id=identity_id,
                 eval_dependent=False,
             )
 
     def after_retrieve(
-        self, token_storage: ValidatingTokenStorage, token_data: TokenStorageData
+        self,
+        token_data_by_resource_server: t.Mapping[str, TokenStorageData],
+        context: TokenValidationContext,
     ) -> None:
         """
         Validate the token data against scope requirements, including dependent
         scope requirements.
 
-        :param token_storage: The token storage which invoked this validator.
-        :param token_data: The data to validate.
+        :param token_data_by_resource_server: The data to validate.
+        :param context: The validation context object, containing state of the system at
+            the time of validation.
         """
-        self._validate_token_data_meets_scope_requirements(
-            resource_server=token_data.resource_server,
-            token_data=token_data,
-            identity_id=token_storage.identity_id,
-        )
+        identity_id = context.token_data_identity_id or context.prior_identity_id
+        for token_data in token_data_by_resource_server.values():
+            self._validate_token_data_meets_scope_requirements(
+                resource_server=token_data.resource_server,
+                token_data=token_data,
+                identity_id=identity_id,
+            )
 
     def _validate_token_data_meets_scope_requirements(
         self,
@@ -187,3 +180,44 @@ class ScopeRequirementsValidator:
         # Cache the consent forest first.
         self._cached_consent_forest = forest
         return forest
+
+
+class HasRefreshTokensValidator:
+    def __call__(
+        self,
+        token_data_by_resource_server: t.Mapping[str, TokenStorageData],
+        context: TokenValidationContext,  # pylint: disable=unused-argument
+    ) -> None:
+        """
+        Verify that token data contains `refresh_token` values.
+
+        :param token_data_by_resource_server: The data to validate.
+        :param context: The validation context object, containing state of the system at
+            the time of validation.
+
+        :raises MissingTokenError: on failure to find a refresh_token
+        """
+        for token_data in token_data_by_resource_server.values():
+            if token_data.refresh_token is None:
+                msg = f"No refresh_token for {token_data.resource_server}"
+                raise MissingTokenError(msg, resource_server=token_data.resource_server)
+
+
+class NotExpiredValidator:
+    def __call__(
+        self,
+        token_data_by_resource_server: t.Mapping[str, TokenStorageData],
+        context: TokenValidationContext,  # pylint: disable=unused-argument
+    ) -> None:
+        """
+        Verify that the `expires_at_seconds` times in the token data are in the future.
+
+        :param token_data_by_resource_server: The data to validate.
+        :param context: The validation context object, containing state of the system at
+            the time of validation.
+
+        :raises ExpiredTokenError: if any token_data shows a past timestamp
+        """
+        for token_data in token_data_by_resource_server.values():
+            if token_data.expires_at_seconds < time.time():
+                raise ExpiredTokenError(token_data.expires_at_seconds)

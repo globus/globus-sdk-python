@@ -5,19 +5,9 @@ import typing as t
 import globus_sdk
 from globus_sdk.tokenstorage import TokenStorage, TokenStorageData
 
-from ._identity_id_reader import IdentityIDReader
-from .errors import MissingTokenError
-
-# before_store validators take (validating_token_storage, token_data_by_resource_server)
-# and may have any return type
-BeforeStoreValidatorT = t.Callable[
-    ["ValidatingTokenStorage", t.Mapping[str, TokenStorageData]], t.Any
-]
-# after_retreive validators take (validating_token_storage, token_data)
-# and may have any return type
-AfterRetrieveValidatorT = t.Callable[
-    ["ValidatingTokenStorage", TokenStorageData], t.Any
-]
+from ..errors import MissingTokenError
+from .context import TokenValidationContext
+from .protocols import TokenDataValidator
 
 
 class ValidatingTokenStorage(TokenStorage):
@@ -41,27 +31,42 @@ class ValidatingTokenStorage(TokenStorage):
         self,
         token_storage: TokenStorage,
         *,
-        before_store_validators: t.Iterable[BeforeStoreValidatorT] = (),
-        after_retrieve_validators: t.Iterable[AfterRetrieveValidatorT] = (),
+        before_store_validators: t.Iterable[TokenDataValidator] = (),
+        after_retrieve_validators: t.Iterable[TokenDataValidator] = (),
     ) -> None:
         self.token_storage = token_storage
-        self.before_store_validators: list[BeforeStoreValidatorT] = list(
+        self.before_store_validators: list[TokenDataValidator] = list(
             before_store_validators
         )
-        self.after_retrieve_validators: list[AfterRetrieveValidatorT] = list(
+        self.after_retrieve_validators: list[TokenDataValidator] = list(
             after_retrieve_validators
         )
-        self._identity_id_reader = IdentityIDReader()
-        self._identity_id_reader.read_token_storage(token_storage)
+        self.identity_id = _identity_id_from_token_data(
+            token_storage.get_token_data_by_resource_server()
+        )
         super().__init__(namespace=token_storage.namespace)
 
-    @property
-    def identity_id(self) -> str | None:
+    def _make_context(
+        self, token_data_by_resource_server: t.Mapping[str, TokenStorageData]
+    ) -> TokenValidationContext:
         """
-        The identity_id associated with the token data stored in this
-        ValidatingTokenStorage.
+        Build a TokenValidationContext object and potentially update the stored
+        ``identity_id`` information in this ValidatingTokenStorage.
+
+        Importantly, this records ``self.identity_id`` into the ``prior_identity_id``
+        slot before applying this update.
         """
-        return self._identity_id_reader.identity_id
+        context = TokenValidationContext(
+            prior_identity_id=self.identity_id,
+            token_data_identity_id=_identity_id_from_token_data(
+                token_data_by_resource_server
+            ),
+        )
+
+        if self.identity_id is None:
+            self.identity_id = context.token_data_identity_id
+
+        return context
 
     def store_token_data_by_resource_server(
         self, token_data_by_resource_server: t.Mapping[str, TokenStorageData]
@@ -70,12 +75,10 @@ class ValidatingTokenStorage(TokenStorage):
         :param token_data_by_resource_server: A dict of TokenStorageData objects
             indexed by their resource server
         """
+        context = self._make_context(token_data_by_resource_server)
         for validator in self.before_store_validators:
-            validator(self, token_data_by_resource_server)
+            validator(token_data_by_resource_server, context)
 
-        self._identity_id_reader.read_token_data_by_resource_server(
-            token_data_by_resource_server
-        )
         self.token_storage.store_token_data_by_resource_server(
             token_data_by_resource_server
         )
@@ -92,17 +95,22 @@ class ValidatingTokenStorage(TokenStorage):
             msg = f"No token data for {resource_server}"
             raise MissingTokenError(msg, resource_server=resource_server)
 
+        token_data_by_resource_server = {token_data.resource_server: token_data}
+        context = self._make_context(token_data_by_resource_server)
+
         for validator in self.after_retrieve_validators:
-            validator(self, token_data)
+            validator(token_data_by_resource_server, context)
 
         return token_data
 
     def get_token_data_by_resource_server(self) -> dict[str, TokenStorageData]:
-        all_data = self.token_storage.get_token_data_by_resource_server()
-        for token_data in all_data.values():
-            for validator in self.after_retrieve_validators:
-                validator(self, token_data)
-        return all_data
+        token_data_by_resource_server = (
+            self.token_storage.get_token_data_by_resource_server()
+        )
+        context = self._make_context(token_data_by_resource_server)
+        for validator in self.after_retrieve_validators:
+            validator(token_data_by_resource_server, context)
+        return token_data_by_resource_server
 
     def remove_token_data(self, resource_server: str) -> bool:
         """
@@ -123,3 +131,31 @@ class ValidatingTokenStorage(TokenStorage):
             return self.identity_id
         else:
             return self.token_storage._extract_identity_id(token_response)
+
+
+def _identity_id_from_token_data(
+    token_data_by_resource_server: t.Mapping[str, TokenStorageData]
+) -> str | None:
+    """
+    Read token data by resource server and return the ``identity_id`` value
+    which was produced.
+
+    :param token_data_by_resource_server: The token data to read for identity_id.
+
+    :raises ValueError: if there is inconsistent ``identity_id`` information
+    """
+    token_data_identity_ids: set[str] = {
+        token_data.identity_id
+        for token_data in token_data_by_resource_server.values()
+        if token_data.identity_id is not None
+    }
+
+    if len(token_data_identity_ids) == 0:
+        return None
+    elif len(token_data_identity_ids) == 1:
+        return token_data_identity_ids.pop()
+    else:
+        raise ValueError(
+            "token_data_by_resource_server contained TokenStorageData objects with "
+            f"different identity_id values: {token_data_identity_ids}"
+        )

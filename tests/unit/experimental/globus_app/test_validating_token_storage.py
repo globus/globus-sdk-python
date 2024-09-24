@@ -15,10 +15,10 @@ from globus_sdk import (
     OAuthTokenResponse,
     Scope,
 )
-from globus_sdk.experimental.globus_app import ValidatingTokenStorage
-from globus_sdk.experimental.globus_app._token_validators import (
+from globus_sdk.experimental.globus_app import (
     ScopeRequirementsValidator,
     UnchangingIdentityIDValidator,
+    ValidatingTokenStorage,
 )
 from globus_sdk.experimental.globus_app.errors import (
     IdentityMismatchError,

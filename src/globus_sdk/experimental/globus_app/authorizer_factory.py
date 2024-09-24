@@ -11,11 +11,14 @@ from globus_sdk.authorizers import (
     GlobusAuthorizer,
     RefreshTokenAuthorizer,
 )
-from globus_sdk.experimental.tokenstorage import TokenStorageData
 from globus_sdk.services.auth import OAuthTokenResponse
 
-from ._validating_token_storage import ValidatingTokenStorage
-from .errors import ExpiredTokenError, MissingTokenError
+from .errors import MissingTokenError
+from .validating_token_storage import (
+    HasRefreshTokensValidator,
+    NotExpiredValidator,
+    ValidatingTokenStorage,
+)
 
 GA = t.TypeVar("GA", bound=GlobusAuthorizer)
 
@@ -113,9 +116,7 @@ class AccessTokenAuthorizerFactory(AuthorizerFactory[AccessTokenAuthorizer]):
         self._cached_authorizer_expiration: dict[str, int] = {}
         # inject a validator which ensures that tokens have an expiration time
         # in the future
-        self.token_storage.after_retrieve_validators.insert(
-            0, self._check_expires_at_seconds
-        )
+        self.token_storage.after_retrieve_validators.insert(0, NotExpiredValidator())
 
     def store_token_response_and_clear_cache(
         self, token_res: OAuthTokenResponse
@@ -157,19 +158,6 @@ class AccessTokenAuthorizerFactory(AuthorizerFactory[AccessTokenAuthorizer]):
 
         return super().get_authorizer(resource_server)
 
-    def _check_expires_at_seconds(
-        self,
-        token_storage: ValidatingTokenStorage,  # pylint: disable=unused-argument
-        token_data: TokenStorageData,
-    ) -> None:
-        """
-        This is the before-validation hook set on the inner ValidatingTokenStorage.
-
-        It confirms that `expires_at_seconds` is in the past.
-        """
-        if token_data.expires_at_seconds < time.time():
-            raise ExpiredTokenError(token_data.expires_at_seconds)
-
     def _make_authorizer(self, resource_server: str) -> AccessTokenAuthorizer:
         """
         Construct an ``AccessTokenAuthorizer`` for the given resource server.
@@ -204,22 +192,8 @@ class RefreshTokenAuthorizerFactory(AuthorizerFactory[RefreshTokenAuthorizer]):
         self.auth_login_client = auth_login_client
         # prepend a validator which ensures that tokens include refresh_tokens
         self.token_storage.after_retrieve_validators.insert(
-            0, self._check_has_refresh_token
+            0, HasRefreshTokensValidator()
         )
-
-    def _check_has_refresh_token(
-        self,
-        token_storage: ValidatingTokenStorage,  # pylint: disable=unused-argument
-        token_data: TokenStorageData,
-    ) -> None:
-        """
-        This is the before-validation hook set on the inner ValidatingTokenStorage.
-
-        It confirms that `refresh_token` is present.
-        """
-        if token_data.refresh_token is None:
-            msg = f"No refresh_token for {token_data.resource_server}"
-            raise MissingTokenError(msg, resource_server=token_data.resource_server)
 
     def _make_authorizer(self, resource_server: str) -> RefreshTokenAuthorizer:
         """
@@ -232,9 +206,9 @@ class RefreshTokenAuthorizerFactory(AuthorizerFactory[RefreshTokenAuthorizer]):
         """
         token_data = self.token_storage.get_token_data(resource_server)
         # this condition should be unreachable -- `get_token_data` will invoke the
-        # `_check_has_refresh_token` hook
-        # the only way to reach it would be to manipulate the hooks such that the check
-        # is removed
+        # `refresh_token` validator
+        # the only way to reach it would be to manipulate the validators such that
+        # the check is removed
         if token_data.refresh_token is None:  # pragma: no cover
             raise ValueError("token data missing required field refresh_token")
         return RefreshTokenAuthorizer(

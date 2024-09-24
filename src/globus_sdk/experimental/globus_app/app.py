@@ -12,12 +12,15 @@ from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.scopes import AuthScopes, scopes_to_scope_list
 from globus_sdk.tokenstorage import TokenStorage
 
-from ._token_validators import ScopeRequirementsValidator, UnchangingIdentityIDValidator
 from ._types import TokenStorageProvider
-from ._validating_token_storage import ValidatingTokenStorage
 from .authorizer_factory import AuthorizerFactory
 from .config import DEFAULT_CONFIG, KNOWN_TOKEN_STORAGES, GlobusAppConfig
 from .errors import TokenValidationError
+from .validating_token_storage import (
+    ScopeRequirementsValidator,
+    UnchangingIdentityIDValidator,
+    ValidatingTokenStorage,
+)
 
 
 class GlobusApp(metaclass=abc.ABCMeta):
