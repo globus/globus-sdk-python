@@ -337,7 +337,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         error_handling_enabled = self._token_validation_error_handling_enabled
 
         try:
-            # Disable token validation error handling while try to get an authorizer.
+            # Disable token validation error handling for nested calls.
             # This will ultimately ensure that the error handler is only called once
             # by the root `get_authorizer` invocation.
             with self._disabled_token_validation_error_handler():
