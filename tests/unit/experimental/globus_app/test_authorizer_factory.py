@@ -11,6 +11,10 @@ from globus_sdk.experimental.globus_app import (
     RefreshTokenAuthorizerFactory,
     ValidatingTokenStorage,
 )
+from globus_sdk.experimental.globus_app.validating_token_storage import (
+    HasRefreshTokensValidator,
+    NotExpiredValidator,
+)
 from globus_sdk.tokenstorage import MemoryTokenStorage
 
 
@@ -30,8 +34,8 @@ def make_mock_token_response(token_number=1):
     return ret
 
 
-def _make_mem_token_storage():
-    return ValidatingTokenStorage(MemoryTokenStorage())
+def _make_mem_token_storage(validators=()):
+    return ValidatingTokenStorage(MemoryTokenStorage(), validators=validators)
 
 
 def test_access_token_authorizer_factory():
@@ -76,7 +80,7 @@ def test_access_token_authorizer_factory_expired_access_token():
         time.time() - 3600
     )
 
-    mock_token_storage = _make_mem_token_storage()
+    mock_token_storage = _make_mem_token_storage(validators=(NotExpiredValidator(),))
     mock_token_storage.store_token_response(initial_response)
     factory = AccessTokenAuthorizerFactory(token_storage=mock_token_storage)
 
@@ -86,7 +90,9 @@ def test_access_token_authorizer_factory_expired_access_token():
 
 def test_refresh_token_authorizer_factory():
     initial_response = make_mock_token_response()
-    mock_token_storage = _make_mem_token_storage()
+    mock_token_storage = _make_mem_token_storage(
+        validators=(HasRefreshTokensValidator(),)
+    )
     mock_token_storage.store_token_response(initial_response)
 
     refresh_data = make_mock_token_response(token_number=2)
@@ -125,7 +131,9 @@ def test_refresh_token_authorizer_factory_expired_access_token():
         time.time() - 3600
     )
 
-    mock_token_storage = _make_mem_token_storage()
+    mock_token_storage = _make_mem_token_storage(
+        validators=(HasRefreshTokensValidator(),)
+    )
     mock_token_storage.store_token_response(initial_response)
 
     refresh_data = make_mock_token_response(token_number=2)
@@ -149,7 +157,9 @@ def test_refresh_token_authorizer_factory_no_refresh_token():
     initial_response = make_mock_token_response()
     initial_response.by_resource_server["rs1"]["refresh_token"] = None
 
-    mock_token_storage = _make_mem_token_storage()
+    mock_token_storage = _make_mem_token_storage(
+        validators=(HasRefreshTokensValidator(),)
+    )
     mock_token_storage.store_token_response(initial_response)
 
     factory = RefreshTokenAuthorizerFactory(
