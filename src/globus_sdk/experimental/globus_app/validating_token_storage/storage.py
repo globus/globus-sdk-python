@@ -7,7 +7,7 @@ from globus_sdk.tokenstorage import TokenStorage, TokenStorageData
 
 from ..errors import MissingTokenError
 from .context import TokenValidationContext
-from .protocols import TokenDataValidator, TokenDataValidatorFunc
+from .validators import TokenDataValidator
 
 
 class ValidatingTokenStorage(TokenStorage):
@@ -36,16 +36,6 @@ class ValidatingTokenStorage(TokenStorage):
             token_storage.get_token_data_by_resource_server()
         )
         super().__init__(namespace=token_storage.namespace)
-
-    def _before_store_validators(self) -> t.Iterator[TokenDataValidatorFunc]:
-        for validator in self.validators:
-            if validator.before_store is not None:
-                yield validator.before_store
-
-    def _after_retrieve_validators(self) -> t.Iterator[TokenDataValidatorFunc]:
-        for validator in self.validators:
-            if validator.after_retrieve is not None:
-                yield validator.after_retrieve
 
     def _make_context(
         self, token_data_by_resource_server: t.Mapping[str, TokenStorageData]
@@ -77,8 +67,8 @@ class ValidatingTokenStorage(TokenStorage):
             indexed by their resource server
         """
         context = self._make_context(token_data_by_resource_server)
-        for validator_func in self._before_store_validators():
-            validator_func(token_data_by_resource_server, context)
+        for validator in self.validators:
+            validator.before_store(token_data_by_resource_server, context)
 
         self.token_storage.store_token_data_by_resource_server(
             token_data_by_resource_server
@@ -99,8 +89,8 @@ class ValidatingTokenStorage(TokenStorage):
         token_data_by_resource_server = {token_data.resource_server: token_data}
         context = self._make_context(token_data_by_resource_server)
 
-        for validator_func in self._after_retrieve_validators():
-            validator_func(token_data_by_resource_server, context)
+        for validator in self.validators:
+            validator.after_retrieve(token_data_by_resource_server, context)
 
         return token_data
 
@@ -109,8 +99,8 @@ class ValidatingTokenStorage(TokenStorage):
             self.token_storage.get_token_data_by_resource_server()
         )
         context = self._make_context(token_data_by_resource_server)
-        for validator in self._after_retrieve_validators():
-            validator(token_data_by_resource_server, context)
+        for validator in self.validators:
+            validator.after_retrieve(token_data_by_resource_server, context)
         return token_data_by_resource_server
 
     def remove_token_data(self, resource_server: str) -> bool:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import abc
 import time
 import typing as t
 
@@ -17,9 +18,68 @@ from ..errors import (
 from .context import TokenValidationContext
 
 
-class UnchangingIdentityIDValidator:
-    after_retrieve = None
+class TokenDataValidator(abc.ABC):
+    """
+    TokenDataValidators are objects which define and apply validation criteria
+    before token data is stored and after it is retrieved.
 
+    They are expected to raise errors on failure.
+    """
+
+    @abc.abstractmethod
+    def before_store(
+        self,
+        token_data_by_resource_server: t.Mapping[str, TokenStorageData],
+        context: TokenValidationContext,
+    ) -> None:
+        """
+        Validate token data against this validator's constraints before it is
+        written to token storage.
+
+        :param token_data_by_resource_server: The data to validate.
+        :param context: The validation context object, containing state of the system at
+            the time of validation.
+
+        :raises TokenValidationError: on failure
+        """
+
+    @abc.abstractmethod
+    def after_retrieve(
+        self,
+        token_data_by_resource_server: t.Mapping[str, TokenStorageData],
+        context: TokenValidationContext,
+    ) -> None:
+        """
+        Validate token data against this validator's constraints after it is
+        retrieved from token storage.
+
+        :param token_data_by_resource_server: The data to validate.
+        :param context: The validation context object, containing state of the system at
+            the time of validation.
+
+        :raises TokenValidationError: on failure
+        """
+
+
+class _OnlyBeforeValidator(TokenDataValidator):
+    def after_retrieve(
+        self,
+        token_data_by_resource_server: t.Mapping[str, TokenStorageData],
+        context: TokenValidationContext,
+    ) -> None:
+        return None
+
+
+class _OnlyAfterValidator(TokenDataValidator):
+    def before_store(
+        self,
+        token_data_by_resource_server: t.Mapping[str, TokenStorageData],
+        context: TokenValidationContext,
+    ) -> None:
+        return None
+
+
+class UnchangingIdentityIDValidator(_OnlyBeforeValidator):
     def before_store(
         self,
         token_data_by_resource_server: t.Mapping[  # pylint: disable=unused-argument
@@ -59,7 +119,7 @@ class UnchangingIdentityIDValidator:
             )
 
 
-class ScopeRequirementsValidator:
+class ScopeRequirementsValidator(TokenDataValidator):
     def __init__(
         self,
         scope_requirements: t.Mapping[str, t.Sequence[globus_sdk.Scope]],
@@ -188,9 +248,7 @@ class ScopeRequirementsValidator:
         return forest
 
 
-class HasRefreshTokensValidator:
-    before_store = None
-
+class HasRefreshTokensValidator(_OnlyAfterValidator):
     def after_retrieve(
         self,
         token_data_by_resource_server: t.Mapping[str, TokenStorageData],
@@ -211,9 +269,7 @@ class HasRefreshTokensValidator:
                 raise MissingTokenError(msg, resource_server=token_data.resource_server)
 
 
-class NotExpiredValidator:
-    before_store = None
-
+class NotExpiredValidator(_OnlyAfterValidator):
     def after_retrieve(
         self,
         token_data_by_resource_server: t.Mapping[str, TokenStorageData],
