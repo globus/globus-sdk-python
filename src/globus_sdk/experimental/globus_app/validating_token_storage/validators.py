@@ -18,6 +18,8 @@ from .context import TokenValidationContext
 
 
 class UnchangingIdentityIDValidator:
+    after_retrieve = None
+
     def before_store(
         self,
         token_data_by_resource_server: t.Mapping[  # pylint: disable=unused-argument
@@ -60,7 +62,7 @@ class UnchangingIdentityIDValidator:
 class ScopeRequirementsValidator:
     def __init__(
         self,
-        scope_requirements: dict[str, list[globus_sdk.Scope]],
+        scope_requirements: t.Mapping[str, t.Sequence[globus_sdk.Scope]],
         consent_client: globus_sdk.AuthClient,
     ) -> None:
         self.scope_requirements = scope_requirements
@@ -143,7 +145,9 @@ class ScopeRequirementsValidator:
         if not all(scope.scope_string in root_scopes for scope in required_scopes):
             raise UnmetScopeRequirementsError(
                 "Unmet scope requirements",
-                scope_requirements=self.scope_requirements,
+                scope_requirements={
+                    k: list(v) for k, v in self.scope_requirements.items()
+                },
             )
 
         # Short circuit - No dependent scopes; don't validate them.
@@ -167,7 +171,9 @@ class ScopeRequirementsValidator:
         if not forest.meets_scope_requirements(required_scopes):
             raise UnmetScopeRequirementsError(
                 "Unmet dependent scope requirements",
-                scope_requirements=self.scope_requirements,
+                scope_requirements={
+                    k: list(v) for k, v in self.scope_requirements.items()
+                },
             )
 
     def _poll_and_cache_consents(self, identity_id: str) -> ConsentForest:
@@ -183,7 +189,9 @@ class ScopeRequirementsValidator:
 
 
 class HasRefreshTokensValidator:
-    def __call__(
+    before_store = None
+
+    def after_retrieve(
         self,
         token_data_by_resource_server: t.Mapping[str, TokenStorageData],
         context: TokenValidationContext,  # pylint: disable=unused-argument
@@ -204,7 +212,9 @@ class HasRefreshTokensValidator:
 
 
 class NotExpiredValidator:
-    def __call__(
+    before_store = None
+
+    def after_retrieve(
         self,
         token_data_by_resource_server: t.Mapping[str, TokenStorageData],
         context: TokenValidationContext,  # pylint: disable=unused-argument

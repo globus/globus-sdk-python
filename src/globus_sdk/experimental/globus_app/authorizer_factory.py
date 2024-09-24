@@ -14,11 +14,7 @@ from globus_sdk.authorizers import (
 from globus_sdk.services.auth import OAuthTokenResponse
 
 from .errors import MissingTokenError
-from .validating_token_storage import (
-    HasRefreshTokensValidator,
-    NotExpiredValidator,
-    ValidatingTokenStorage,
-)
+from .validating_token_storage import ValidatingTokenStorage
 
 GA = t.TypeVar("GA", bound=GlobusAuthorizer)
 
@@ -114,9 +110,6 @@ class AccessTokenAuthorizerFactory(AuthorizerFactory[AccessTokenAuthorizer]):
     def __init__(self, token_storage: ValidatingTokenStorage) -> None:
         super().__init__(token_storage)
         self._cached_authorizer_expiration: dict[str, int] = {}
-        # inject a validator which ensures that tokens have an expiration time
-        # in the future
-        self.token_storage.after_retrieve_validators.insert(0, NotExpiredValidator())
 
     def store_token_response_and_clear_cache(
         self, token_res: OAuthTokenResponse
@@ -190,10 +183,6 @@ class RefreshTokenAuthorizerFactory(AuthorizerFactory[RefreshTokenAuthorizer]):
         """
         super().__init__(token_storage)
         self.auth_login_client = auth_login_client
-        # prepend a validator which ensures that tokens include refresh_tokens
-        self.token_storage.after_retrieve_validators.insert(
-            0, HasRefreshTokensValidator()
-        )
 
     def _make_authorizer(self, resource_server: str) -> RefreshTokenAuthorizer:
         """

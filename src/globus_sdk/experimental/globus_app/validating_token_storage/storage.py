@@ -7,7 +7,7 @@ from globus_sdk.tokenstorage import TokenStorage, TokenStorageData
 
 from ..errors import MissingTokenError
 from .context import TokenValidationContext
-from .protocols import TokenDataValidator
+from .protocols import TokenDataValidator, TokenDataValidatorFunc
 
 
 class ValidatingTokenStorage(TokenStorage):
@@ -20,31 +20,32 @@ class ValidatingTokenStorage(TokenStorage):
 
     :param token_storage: The token storage being wrapped.
     :param before_store_validators: An iterable of validators to use before storing
-        token data. These take the full ``{resource_server: token_data}`` mapping and
-        raise errors if validation fails.
-    :param after_retrieve_validators: An iterable of validators to use after retrieving
-        token data. These take the individual ``token_data`` may raise errors if
-        validation fails.
+        and after retrieving token data. These take the full
+        ``{resource_server: token_data}`` mapping and raise errors if validation fails.
     """
 
     def __init__(
         self,
         token_storage: TokenStorage,
         *,
-        before_store_validators: t.Iterable[TokenDataValidator] = (),
-        after_retrieve_validators: t.Iterable[TokenDataValidator] = (),
+        validators: t.Iterable[TokenDataValidator] = (),
     ) -> None:
         self.token_storage = token_storage
-        self.before_store_validators: list[TokenDataValidator] = list(
-            before_store_validators
-        )
-        self.after_retrieve_validators: list[TokenDataValidator] = list(
-            after_retrieve_validators
-        )
+        self.validators: list[TokenDataValidator] = list(validators)
         self.identity_id = _identity_id_from_token_data(
             token_storage.get_token_data_by_resource_server()
         )
         super().__init__(namespace=token_storage.namespace)
+
+    def _before_store_validators(self) -> t.Iterator[TokenDataValidatorFunc]:
+        for validator in self.validators:
+            if validator.before_store is not None:
+                yield validator.before_store
+
+    def _after_retrieve_validators(self) -> t.Iterator[TokenDataValidatorFunc]:
+        for validator in self.validators:
+            if validator.after_retrieve is not None:
+                yield validator.after_retrieve
 
     def _make_context(
         self, token_data_by_resource_server: t.Mapping[str, TokenStorageData]
@@ -76,8 +77,8 @@ class ValidatingTokenStorage(TokenStorage):
             indexed by their resource server
         """
         context = self._make_context(token_data_by_resource_server)
-        for validator in self.before_store_validators:
-            validator(token_data_by_resource_server, context)
+        for validator_func in self._before_store_validators():
+            validator_func(token_data_by_resource_server, context)
 
         self.token_storage.store_token_data_by_resource_server(
             token_data_by_resource_server
@@ -98,8 +99,8 @@ class ValidatingTokenStorage(TokenStorage):
         token_data_by_resource_server = {token_data.resource_server: token_data}
         context = self._make_context(token_data_by_resource_server)
 
-        for validator in self.after_retrieve_validators:
-            validator(token_data_by_resource_server, context)
+        for validator_func in self._after_retrieve_validators():
+            validator_func(token_data_by_resource_server, context)
 
         return token_data
 
@@ -108,7 +109,7 @@ class ValidatingTokenStorage(TokenStorage):
             self.token_storage.get_token_data_by_resource_server()
         )
         context = self._make_context(token_data_by_resource_server)
-        for validator in self.after_retrieve_validators:
+        for validator in self._after_retrieve_validators():
             validator(token_data_by_resource_server, context)
         return token_data_by_resource_server
 

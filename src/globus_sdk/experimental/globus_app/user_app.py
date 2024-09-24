@@ -19,6 +19,7 @@ from .authorizer_factory import (
     RefreshTokenAuthorizerFactory,
 )
 from .config import DEFAULT_CONFIG, KNOWN_LOGIN_FLOW_MANAGERS, GlobusAppConfig
+from .validating_token_storage import HasRefreshTokensValidator, NotExpiredValidator
 
 
 class UserApp(GlobusApp):
@@ -129,10 +130,12 @@ class UserApp(GlobusApp):
             self._authorizer_factory = RefreshTokenAuthorizerFactory(
                 token_storage=self.token_storage, auth_login_client=self._login_client
             )
+            self.token_storage.validators.insert(0, HasRefreshTokensValidator())
         else:
             self._authorizer_factory = AccessTokenAuthorizerFactory(
                 token_storage=self.token_storage
             )
+            self.token_storage.validators.insert(0, NotExpiredValidator())
 
     def _run_login_flow(
         self, auth_params: GlobusAuthorizationParameters | None = None

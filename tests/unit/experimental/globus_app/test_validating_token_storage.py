@@ -33,18 +33,13 @@ from tests.common import make_consent_forest
 
 def _make_memstorage_with_scope_validator(consent_client, scope_requirements):
     scope_validator = ScopeRequirementsValidator(scope_requirements, consent_client)
-    return ValidatingTokenStorage(
-        MemoryTokenStorage(),
-        before_store_validators=(scope_validator.before_store,),
-        after_retrieve_validators=(scope_validator.after_retrieve,),
-    )
+    return ValidatingTokenStorage(MemoryTokenStorage(), validators=(scope_validator,))
 
 
 def _make_memstorage_with_identity_id_validator():
     identity_validator = UnchangingIdentityIDValidator()
     return ValidatingTokenStorage(
-        MemoryTokenStorage(),
-        before_store_validators=(identity_validator.before_store,),
+        MemoryTokenStorage(), validators=(identity_validator,)
     )
 
 
