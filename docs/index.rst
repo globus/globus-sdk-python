@@ -34,7 +34,6 @@ Table of Contents
     services/index
     local_endpoints
     Authorization <authorization/index>
-    tokenstorage
     config
     core/index
 

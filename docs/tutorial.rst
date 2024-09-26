@@ -123,7 +123,7 @@ are useful for further reading:
 * :ref:`using GlobusAuthorizer objects <globus_authorizers>` handle passing tokens to Globus,
   and may handle token expiration
 
-* :ref:`TokenStorage <tokenstorage>` objects handle storage of tokens
+* :ref:`storage_adapters` objects handle storage of tokens
 
 These are covered by several of the available :ref:`Examples <examples>` as
 well.
