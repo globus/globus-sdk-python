@@ -21,7 +21,7 @@ class _JSONFileData(_JSONFileData_0):  # pylint: disable=inherit-non-class
 
 class JSONTokenStorage(FileTokenStorage):
     """
-    A token storage which stores token data on disk in json files.
+    A token storage which stores token data on disk in a JSON file.
 
     This class defines a `format_version` which determines what the specific data shape.
     Any data in a `supported_version` format which is not the primary `format_version`
@@ -32,7 +32,7 @@ class JSONTokenStorage(FileTokenStorage):
     :cvar "2.0" format_version: The data format version used when writing data.
     :cvar ("1.0", "2.0") supported_versions: The list of data format versions which can
         be read.
-    :param filepath: The path to a json file where token data should be stored.
+    :param filepath: The path to a JSON file where token data should be stored.
     :param namespace: A unique string for partitioning token data (Default: "DEFAULT").
     """
 
@@ -124,16 +124,17 @@ class JSONTokenStorage(FileTokenStorage):
         self, token_data_by_resource_server: t.Mapping[str, TokenStorageData]
     ) -> None:
         """
-        Store token data for one or more resource server in the current namespace
+        Store token data for one or more resource server in the current namespace.
 
-        Token data, alongside globus-sdk version info, is serialized to json before
+        Token data, alongside Globus SDK version info, is serialized to JSON before
         being written to the file at ``self.filepath``.
 
         Under the assumption that this may be running on a system with multiple
         local users, this sets the umask such that only the owner of the
         resulting file can read or write it.
 
-        :param token_data_by_resource_server: mapping of resource server to token data.
+        :param token_data_by_resource_server: A mapping of resource servers to token
+            data.
         """
         to_write = self._load()
 

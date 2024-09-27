@@ -5,7 +5,7 @@
 Token Storages
 ==============
 
-Interacting with globus services requires the use of globus auth issued OAuth2 tokens.
+Interacting with Globus services requires the use of Globus Auth-issued OAuth2 tokens.
 To assist in reuse of these tokens, the SDK provides an interface to store and
 retrieve this data across different storage backends.
 

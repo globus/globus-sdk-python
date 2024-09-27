@@ -14,8 +14,9 @@ class TokenStorageData(Serializable):
     Tokens are scoped to a specific user/client (`identity_id`) performing
     specific operations (`scope`) with a specific service (`resource_server`).
 
-    :ivar str resource_server: The resource server this for which this token data was
+    :ivar str resource_server: The resource server for which this token data was
         granted.
+
     :ivar str identity_id: The primary identity id of the user or client which
         requested this token. This will be None if an identity id was not extractable
         from the token grant response.
@@ -23,10 +24,10 @@ class TokenStorageData(Serializable):
     :ivar str scope: A space separated list of scopes that this token data provides
         access to.
 
-    :ivar str access_token: A globus auth issued OAuth2 access token. Used for
+    :ivar str access_token: A Globus Auth-issued OAuth2 access token. Used for
         authentication when interacting with service APIs.
 
-    :ivar str | None refresh_token: A globus auth issued OAuth2 refresh token. Used to
+    :ivar str | None refresh_token: A Globus Auth-issued OAuth2 refresh token. Used to
         obtain new access tokens when the current one expires. This value will be None
         if the original token grant did not request refresh tokens.
 
@@ -34,7 +35,7 @@ class TokenStorageData(Serializable):
         access_token expires.
 
     :ivar str | None token_type: The token type of access_token, currently this will
-        always be "Bearer" if present
+        always be "Bearer" if present.
 
     :param extra: An optional dictionary of additional fields to include. Included for
         forward/backward compatibility.

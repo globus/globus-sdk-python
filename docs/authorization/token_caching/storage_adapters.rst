@@ -80,7 +80,7 @@ Complete Example Usage
 ~~~~~~~~~~~~~~~~~~~~~~
 
 The :ref:`Group Listing With Token Storage Script <example_group_listing_with_token_storage>`
-provides complete and runnable example which leverages ``tokenstorage``.
+provides a complete and runnable example which leverages ``tokenstorage``.
 
 
 Adapter Types

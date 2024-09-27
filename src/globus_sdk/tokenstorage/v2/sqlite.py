@@ -15,7 +15,7 @@ from .token_data import TokenStorageData
 
 class SQLiteTokenStorage(FileTokenStorage):
     """
-    A token storage which stores token data on disk in sqlite databases.
+    A token storage which stores token data on disk in a SQLite database.
 
     See :class:`TokenStorage` for common interface details.
 
@@ -105,11 +105,12 @@ class SQLiteTokenStorage(FileTokenStorage):
         self, token_data_by_resource_server: t.Mapping[str, TokenStorageData]
     ) -> None:
         """
-        Store token data for one or more resource server in the current namespace.
+        Store token data for one or more resource servers in the current namespace.
 
-        Token data is json-serialized before being inserted into the database.
+        Token data is JSON-serialized before being inserted into the database.
 
-        :param token_data_by_resource_server: mapping of resource server to token data.
+        :param token_data_by_resource_server: A mapping of resource servers to token
+            data.
         """
         pairs = []
         for resource_server, token_data in token_data_by_resource_server.items():
@@ -129,7 +130,7 @@ class SQLiteTokenStorage(FileTokenStorage):
         """
         Lookup all token data under the current namespace from the database.
 
-        :returns: a dict of ``TokenStorageData`` objects indexed by their
+        :returns: A dict of ``TokenStorageData`` objects indexed by their
             resource server.
         """
         ret: dict[str, TokenStorageData] = {}
@@ -161,7 +162,7 @@ class SQLiteTokenStorage(FileTokenStorage):
         return rowcount != 0
 
     def iter_namespaces(self) -> t.Iterator[str]:
-        """Iterate over all distinct namespaces in the sqlite database."""
+        """Iterate over all distinct namespaces in the SQLite database."""
         seen: set[str] = set()
         for row in self._connection.execute(
             "SELECT DISTINCT namespace FROM token_storage;"

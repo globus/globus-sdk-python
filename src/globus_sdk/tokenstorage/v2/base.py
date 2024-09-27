@@ -22,8 +22,8 @@ class TokenStorage(metaclass=abc.ABCMeta):
     """
     The interface for interacting with a store of :class:`TokenStorageData` objects.
 
-    Implementations must partition their token data objects by `namespace`.
-    Within a namespace, token data must be indexed by `resource_server`.
+    Implementations must partition their token data objects by ``namespace``.
+    Within a namespace, token data must be indexed by ``resource_server``.
 
     :param namespace: A unique string for partitioning token data (Default: "DEFAULT").
     """
@@ -117,7 +117,7 @@ class TokenStorage(metaclass=abc.ABCMeta):
 
 class FileTokenStorage(TokenStorage, metaclass=abc.ABCMeta):
     """
-    A base class for token storages which store tokens on a local file.
+    A base class for token storages which store tokens in a local file.
 
     Common functionality for file-based token storages like file creation and class
     instantiation for a GlobusApp is defined here.
