@@ -201,7 +201,7 @@ class ScopeRequirementsValidator(TokenDataValidator):
             return
 
         # 1. Does the token meet root scope requirements?
-        root_scopes = token_data.scope.split(" ")
+        root_scopes = token_data.scope.split()
         if not all(scope.scope_string in root_scopes for scope in required_scopes):
             raise UnmetScopeRequirementsError(
                 "Unmet scope requirements",
