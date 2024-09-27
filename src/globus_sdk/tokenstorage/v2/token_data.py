@@ -8,36 +8,36 @@ from globus_sdk._serializable import Serializable
 
 class TokenStorageData(Serializable):
     """
-    Data class containing tokens and metadata for a specific resource server used
-    as the python interface for ``TokenStorage``.
-    Contains the following attributes:
+    Data class for tokens and token metadata issued by a globus auth token grant.
+    For storage and retrieval of these objects, see :class:`TokenStorage`.
 
-    resource_server: str
-    The name of the resource server this token data is valid for
+    Tokens are scoped to a specific user/client (`identity_id`) performing
+    specific operations (`scope`) with a specific service (`resource_server`).
 
-    identity_id: str
-    A UUID string for the user this token data was granted to. This value may
-    be None if the original token grant did not include the "openid" scope
+    :ivar str resource_server: The resource server this for which this token data was
+        granted.
+    :ivar str identity_id: The primary identity id of the user or client which
+        requested this token. This will be None if an identity id was not extractable
+        from the token grant response.
 
-    scope: str
-    A space separated list of scopes these tokens provide access to.
+    :ivar str scope: A space separated list of scopes that this token data provides
+        access to.
 
-    access_token: str
-    An access token that can be used for authentication with Globus APIs.
+    :ivar str access_token: A globus auth issued OAuth2 access token. Used for
+        authentication when interacting with service APIs.
 
-    refresh_token: str | None
-    A refresh token that can be used for refresh token grants. This value may be
-    None if the original token grant did not allow for refresh tokens.
+    :ivar str | None refresh_token: A globus auth issued OAuth2 refresh token. Used to
+        obtain new access tokens when the current one expires. This value will be None
+        if the original token grant did not request refresh tokens.
 
-    expires_at_seconds: int
-    A POSIX timestamp for the time when access_token expires.
+    :ivar int expires_at_seconds: An epoch seconds timestamp for when the associated
+        access_token expires.
 
-    token_type: str | None
-    The token type of access_token, currently this will always be "Bearer" if present
+    :ivar str | None token_type: The token type of access_token, currently this will
+        always be "Bearer" if present
 
-    extra: dict | None
-    A dictionary of additional fields that were provided. May be used for
-    forward/backward compatibility.
+    :param extra: An optional dictionary of additional fields to include. Included for
+        forward/backward compatibility.
     """
 
     def __init__(

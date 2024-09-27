@@ -20,19 +20,15 @@ if t.TYPE_CHECKING:
 
 class TokenStorage(metaclass=abc.ABCMeta):
     """
-    Abstract base class for interacting with an underlying storage system to manage
-    storage of token data.
+    The interface for interacting with a store of :class:`TokenStorageData` objects.
 
-    The ``namespace`` is a user-supplied way of partitioning data, and any token
-    response data passed to the storage adapter are stored indexed by
-    *resource_server*. If you have a more complex use-case in which this scheme will be
-    insufficient, you should encode that in your choice of ``namespace`` values.
+    Implementations must partition their token data objects by `namespace`.
+    Within a namespace, token data must be indexed by `resource_server`.
+
+    :param namespace: A unique string for partitioning token data (Default: "DEFAULT").
     """
 
     def __init__(self, namespace: str = "DEFAULT") -> None:
-        """
-        :param namespace: A user-supplied namespace for partitioning token data.
-        """
         self.namespace = namespace
 
     @abc.abstractmethod
@@ -40,51 +36,43 @@ class TokenStorage(metaclass=abc.ABCMeta):
         self, token_data_by_resource_server: t.Mapping[str, TokenStorageData]
     ) -> None:
         """
-        Store token data in underlying storage partitioned by the resource server
-        and the current namespace.
+        Store token data for one or more resource server in the current namespace.
 
-        :param token_data_by_resource_server: a ``dict`` of ``TokenStorageData`` objects
-        indexed by their ``resource_server``.
+        :param token_data_by_resource_server: mapping of resource server to token data.
         """
 
     @abc.abstractmethod
     def get_token_data_by_resource_server(self) -> dict[str, TokenStorageData]:
         """
-        Lookup all token data under the current namespace in the underlying storage.
+        Retrieve all token data stored in the current namespace.
 
-        Returns a dict of ``TokenStorageData`` objects indexed by their resource server.
+        :returns: a dict of ``TokenStorageData`` objects indexed by their
+            resource server.
         """
 
     def get_token_data(self, resource_server: str) -> TokenStorageData | None:
         """
-        Lookup token data for a resource server in the underlying storage
-        under the current namespace.
+        Retrieve token data for a particular resource server in the current namespace.
 
-        Either returns a ``TokenStorageData`` object containing tokens and metadata for
-        the given resource server or ``None`` indicating that there was no data for
-        that resource server.
-
-        :param resource_server: The resource_server string to get token data for
+        :param resource_server: The resource_server string to get token data for.
+        :returns: token data if found or else None.
         """
         return self.get_token_data_by_resource_server().get(resource_server)
 
     @abc.abstractmethod
     def remove_token_data(self, resource_server: str) -> bool:
         """
-        Remove all token data for a resource server from the underlying storage under
-        the current namespace.
+        Remove token data for a resource server in the current namespace.
 
-        Returns True if token data was deleted, False if none was found to delete.
-
-        :param resource_server: The resource server string to remove token data for
+        :param resource_server: The resource server string to remove token data for.
+        :returns: True if token data was deleted, False if none was found to delete.
         """
 
     def store_token_response(self, token_response: OAuthTokenResponse) -> None:
         """
-        Wrapper around ``store_token_data_by_resource_server`` that accepts an
-        ``OAuthTokenResponse``.
+        Store token data from an :class:`OAuthTokenResponse` in the current namespace.
 
-        :param token_response: An ``OAuthTokenResponse`` from an authentication flow
+        :param token_response: A token response object from an authentication flow.
         """
         token_data_by_resource_server = {}
 
@@ -129,9 +117,16 @@ class TokenStorage(metaclass=abc.ABCMeta):
 
 class FileTokenStorage(TokenStorage, metaclass=abc.ABCMeta):
     """
-    File adapters are for single-user cases, where we can assume that there's a
-    simple file-per-user and users are only ever attempting to read their own
-    files.
+    A base class for token storages which store tokens on a local file.
+
+    Common functionality for file-based token storages like file creation and class
+    instantiation for a GlobusApp is defined here.
+
+    :cvar file_format: The file format suffix associated with files of this type. This
+        is used when constructing the file path for a GlobusApp.
+
+    :param filepath: The path to a file where token data should be stored.
+    :param namespace: A unique string for partitioning token data (Default: "DEFAULT").
     """
 
     # File suffix associated with files of this type (e.g., "csv")

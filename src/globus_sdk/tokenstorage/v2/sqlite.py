@@ -15,16 +15,17 @@ from .token_data import TokenStorageData
 
 class SQLiteTokenStorage(FileTokenStorage):
     """
-    A storage adapter for storing token data in sqlite databases.
+    A token storage which stores token data on disk in sqlite databases.
 
-    SQLite adapters are for more complex cases, where there may be multiple users or
-    "profiles" in play, and additionally a dynamic set of resource servers which need to
-    be stored in an extensible way.
+    See :class:`TokenStorage` for common interface details.
 
-    The ``connect_params`` is an optional dictionary whose elements are passed directly
-    to the underlying ``sqlite3.connect()`` method, enabling developers to fine-tune the
-    connection to the SQLite database.  Refer to the ``sqlite3.connect()``
-    documentation for SQLite-specific parameters.
+    :param filepath: The path on disk to a SQLite database file.
+    :param connect_params: A dictionary of parameters to pass to ``sqlite3.connect()``.
+    :param namespace: A unique string for partitioning token data (Default: "DEFAULT").
+
+    :raises GlobusSDKUsageError: If the filepath is ":memory:". This usage-mode is not
+        supported in this class; use :class:`MemoryTokenStorage` instead if in-memory
+        token storage is desired.
     """
 
     file_format = "db"
@@ -36,12 +37,6 @@ class SQLiteTokenStorage(FileTokenStorage):
         connect_params: dict[str, t.Any] | None = None,
         namespace: str = "DEFAULT",
     ) -> None:
-        """
-        :param filepath: The path of the DB file to write to and read from.
-        :param connect_params: A pass-through dictionary for fine-tuning the SQLite
-             connection.
-        :param namespace: A user-supplied namespace for partitioning token data.
-        """
         if filepath == ":memory:":
             raise exc.GlobusSDKUsageError(
                 "SQLiteTokenStorage cannot be used with a ':memory:' database. "
@@ -110,11 +105,11 @@ class SQLiteTokenStorage(FileTokenStorage):
         self, token_data_by_resource_server: t.Mapping[str, TokenStorageData]
     ) -> None:
         """
-        Given a dict of token data indexed by resource server, convert the data into
-        JSON dicts and write it to ``self.filepath`` under the current namespace
+        Store token data for one or more resource server in the current namespace.
 
-        :param token_data_by_resource_server: a ``dict`` of ``TokenStorageData`` objects
-            indexed by their ``resource_server``.
+        Token data is json-serialized before being inserted into the database.
+
+        :param token_data_by_resource_server: mapping of resource server to token data.
         """
         pairs = []
         for resource_server, token_data in token_data_by_resource_server.items():
@@ -134,7 +129,8 @@ class SQLiteTokenStorage(FileTokenStorage):
         """
         Lookup all token data under the current namespace from the database.
 
-        Returns a dict of ``TokenStorageData`` objects indexed by their resource server.
+        :returns: a dict of ``TokenStorageData`` objects indexed by their
+            resource server.
         """
         ret: dict[str, TokenStorageData] = {}
         for row in self._connection.execute(
@@ -154,9 +150,8 @@ class SQLiteTokenStorage(FileTokenStorage):
         You can use this as part of a logout command implementation, loading token data
         as a dict, and then deleting the data for each resource server.
 
-        Returns True if token data was deleted, False if none was found to delete.
-
         :param resource_server: The name of the resource server to remove from the DB
+        :returns: True if token data was deleted, False if none was found to delete.
         """
         rowcount = self._connection.execute(
             "DELETE FROM token_storage WHERE namespace=? AND resource_server=?",
@@ -166,11 +161,7 @@ class SQLiteTokenStorage(FileTokenStorage):
         return rowcount != 0
 
     def iter_namespaces(self) -> t.Iterator[str]:
-        """
-        Iterate over the namespaces which are in use in this storage adapter's database.
-        The presence of tokens for a namespace does not indicate that those tokens are
-        valid, only that they have been stored and have not been removed.
-        """
+        """Iterate over all distinct namespaces in the sqlite database."""
         seen: set[str] = set()
         for row in self._connection.execute(
             "SELECT DISTINCT namespace FROM token_storage;"

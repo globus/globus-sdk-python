@@ -21,18 +21,23 @@ class _JSONFileData(_JSONFileData_0):  # pylint: disable=inherit-non-class
 
 class JSONTokenStorage(FileTokenStorage):
     """
-    A storage adapter for storing token data in JSON files.
+    A token storage which stores token data on disk in json files.
+
+    This class defines a `format_version` which determines what the specific data shape.
+    Any data in a `supported_version` format which is not the primary `format_version`
+    will be automatically rewritten.
+
+    See :class:`TokenStorage` for common interface details.
+
+    :cvar "2.0" format_version: The data format version used when writing data.
+    :cvar ("1.0", "2.0") supported_versions: The list of data format versions which can
+        be read.
+    :param filepath: The path to a json file where token data should be stored.
+    :param namespace: A unique string for partitioning token data (Default: "DEFAULT").
     """
 
-    # the version for the current data format used by the file adapter.
-    # 1.0 was used by ``SimpleJSONFileAdapter``. If ``JSONFileAdapter`` is
-    # pointed at storage used by a ``SimpleJSONFileAdapter` it will be converted to 2.0
-    # and no longer usable by ``SimpleJSONFileAdapter``.
     format_version = "2.0"
-
-    # the supported versions (data not in these versions causes an error)
     supported_versions = ("1.0", "2.0")
-
     file_format = "json"
 
     def _invalid(self, msg: str) -> t.NoReturn:
@@ -119,16 +124,16 @@ class JSONTokenStorage(FileTokenStorage):
         self, token_data_by_resource_server: t.Mapping[str, TokenStorageData]
     ) -> None:
         """
-        Store token data as JSON data in ``self.filepath`` under the current namespace
+        Store token data for one or more resource server in the current namespace
 
-        Additionally will write the version of ``globus_sdk``which was in use.
+        Token data, alongside globus-sdk version info, is serialized to json before
+        being written to the file at ``self.filepath``.
 
         Under the assumption that this may be running on a system with multiple
         local users, this sets the umask such that only the owner of the
         resulting file can read or write it.
 
-        :param token_data_by_resource_server: a ``dict`` of ``TokenStorageData`` objects
-            indexed by their ``resource_server``.
+        :param token_data_by_resource_server: mapping of resource server to token data.
         """
         to_write = self._load()
 
