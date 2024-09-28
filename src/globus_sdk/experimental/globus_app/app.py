@@ -5,6 +5,7 @@ import contextlib
 import copy
 import typing as t
 
+import globus_sdk
 from globus_sdk import AuthClient, AuthLoginClient, GlobusSDKUsageError, Scope
 from globus_sdk._types import ScopeCollectionType, UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
@@ -65,7 +66,6 @@ class GlobusApp(metaclass=abc.ABCMeta):
     # this allows code during init call into otherwise unsafe codepaths in the app,
     # namely those which manipulate scope requirements
     _authorizer_factory: AuthorizerFactory[GlobusAuthorizer]
-    _authorizer_factory_initialized: bool = False
     token_storage: ValidatingTokenStorage
 
     def __init__(
@@ -81,6 +81,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         self.app_name = app_name
         self.config = config
         self._token_validation_error_handling_enabled = True
+        self._authorizer_factory = _InitStubAuthorizerFactory()
 
         self.client_id, self._login_client = self._resolve_client_info(
             app_name=self.app_name,
@@ -112,7 +113,6 @@ class GlobusApp(metaclass=abc.ABCMeta):
 
         # initialize our authorizer factory
         self._initialize_authorizer_factory()
-        self._authorizer_factory_initialized = True
 
     def _resolve_scope_requirements(
         self, scope_requirements: t.Mapping[str, ScopeCollectionType] | None
@@ -389,10 +389,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
             curr = self._scope_requirements.setdefault(resource_server, [])
             curr.extend(scopes_to_scope_list(scopes))
 
-        # clear cache, but only if the authorizer factory has been fully initialized
-        # if this is called during init, it will only register the scope requirements
-        if self._authorizer_factory_initialized:
-            self._authorizer_factory.clear_cache(*scope_requirements.keys())
+        self._authorizer_factory.clear_cache(*scope_requirements.keys())
 
     @property
     def scope_requirements(self) -> dict[str, list[Scope]]:
@@ -437,3 +434,39 @@ def _build_default_validating_token_storage(
     )
 
     return validating_token_storage
+
+
+class _InitStubAuthorizerFactory(AuthorizerFactory[GlobusAuthorizer]):
+    """
+    An internal stub used to represent partially initialized state in a GlobusApp.
+    This is set during init, before the real authorizer factory is built.
+    """
+
+    # override init to be a no-op
+    def __init__(self) -> None:  # pylint: disable=super-init-not-called
+        pass
+
+    def store_token_response_and_clear_cache(
+        self, token_res: globus_sdk.OAuthTokenResponse
+    ) -> None:
+        raise NotImplementedError(
+            "Attempting to store token data in a partially initialized "
+            "GlobusApp is undefined."
+        )
+
+    def clear_cache(self, *resource_servers: str) -> None:
+        # Clearing cache is a well-defined no-op.
+        # this is used during GlobusApp.__init__
+        pass
+
+    def get_authorizer(self, resource_server: str) -> GlobusAuthorizer:
+        raise NotImplementedError(
+            "Attempting to get an authorizer from a partially initialized "
+            "GlobusApp is undefined."
+        )
+
+    def _make_authorizer(self, resource_server: str) -> GlobusAuthorizer:
+        raise NotImplementedError(
+            "Attempting to create an authorizer from a partially initialized "
+            "GlobusApp is undefined."
+        )
