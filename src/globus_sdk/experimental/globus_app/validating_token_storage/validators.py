@@ -40,7 +40,7 @@ class TokenDataValidator(abc.ABC):
         :param context: The validation context object, containing state of the system at
             the time of validation.
 
-        :raises TokenValidationError: on failure
+        :raises TokenValidationError: On failure.
         """
 
     @abc.abstractmethod
@@ -57,7 +57,7 @@ class TokenDataValidator(abc.ABC):
         :param context: The validation context object, containing state of the system at
             the time of validation.
 
-        :raises TokenValidationError: on failure
+        :raises TokenValidationError: On failure.
         """
 
 
@@ -95,10 +95,10 @@ class UnchangingIdentityIDValidator(_OnlyBeforeValidator):
         :param context: The validation context object, containing state of the system at
             the time of validation.
 
-        :raises IdentityMismatchError: if the identity info in the token data
+        :raises IdentityMismatchError: If the identity info in the token data
             does not match the stored identity info.
-        :raises MissingIdentityError: if the token data did not have identity
-            information (generally due to missing the openid scope)
+        :raises MissingIdentityError: If the token data did not have identity
+            information (generally due to missing the openid scope).
         """
         if context.token_data_identity_id is None:
             raise MissingIdentityError(
@@ -181,16 +181,20 @@ class ScopeRequirementsValidator(TokenDataValidator):
         eval_dependent: bool = True,
     ) -> None:
         """
-        Given a particular resource server/token data, evaluate whether the token +
-            user's consent forest meet the attached scope requirements.
+        Given a particular resource server and token data, evaluate whether or not the
+        user's consent forest meet the attached scope requirements.
 
-        Note: If consent_client was omitted, only root scope requirements are validated.
+        .. note::
 
-        :param resource_server: The resource server string to validate against.
-        :param token_data: The token data to validate against.
+            If consent_client was omitted, only root scope requirements are validated.
+
+        :param resource_server: The resource server whose scope requirements are being
+            validated.
+        :param token_data: The token data which is used for initial validation steps,
+            and potential fail-fast before consents are inspected.
         :param identity_id: The identity ID of the user, from the surrounding context.
         :param eval_dependent: Whether to evaluate dependent scope requirements.
-        :raises UnmetScopeRequirements: if token/consent data does not meet the
+        :raises UnmetScopeRequirements: If token/consent data does not meet the
             attached root or dependent scope requirements for the resource server.
         :returns: None if all scope requirements are met (or indeterminable).
         """
@@ -261,7 +265,7 @@ class HasRefreshTokensValidator(_OnlyAfterValidator):
         :param context: The validation context object, containing state of the system at
             the time of validation.
 
-        :raises MissingTokenError: on failure to find a refresh_token
+        :raises MissingTokenError: On failure to find a refresh_token.
         """
         for token_data in token_data_by_resource_server.values():
             if token_data.refresh_token is None:
@@ -282,7 +286,7 @@ class NotExpiredValidator(_OnlyAfterValidator):
         :param context: The validation context object, containing state of the system at
             the time of validation.
 
-        :raises ExpiredTokenError: if any token_data shows a past timestamp
+        :raises ExpiredTokenError: If any token_data shows a past timestamp.
         """
         for token_data in token_data_by_resource_server.values():
             if token_data.expires_at_seconds < time.time():
