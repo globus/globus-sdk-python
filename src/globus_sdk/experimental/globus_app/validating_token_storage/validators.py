@@ -5,8 +5,8 @@ import time
 import typing as t
 
 import globus_sdk
-from globus_sdk.experimental.tokenstorage import TokenStorageData
 from globus_sdk.scopes.consents import ConsentForest
+from globus_sdk.tokenstorage import TokenStorageData
 
 from ..errors import (
     ExpiredTokenError,
