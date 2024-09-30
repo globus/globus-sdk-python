@@ -3,27 +3,28 @@ from __future__ import annotations
 import abc
 import time
 import typing as t
+from abc import ABC
 
 import globus_sdk
 from globus_sdk.scopes.consents import ConsentForest
-from globus_sdk.tokenstorage import TokenStorageData
 
-from ..errors import (
+from ..token_data import TokenStorageData
+from .context import TokenValidationContext
+from .errors import (
     ExpiredTokenError,
     IdentityMismatchError,
     MissingIdentityError,
     MissingTokenError,
     UnmetScopeRequirementsError,
 )
-from .context import TokenValidationContext
 
 
 class TokenDataValidator(abc.ABC):
     """
-    TokenDataValidators are objects which define and apply validation criteria
-    before token data is stored and after it is retrieved.
+    The abstract base class for custom token validation logic.
 
-    They are expected to raise errors on failure.
+    Implementations should raise a :class:`TokenValidationError` if a validation error
+    is encountered.
     """
 
     @abc.abstractmethod
@@ -61,7 +62,7 @@ class TokenDataValidator(abc.ABC):
         """
 
 
-class _OnlyBeforeValidator(TokenDataValidator):
+class _OnlyBeforeValidator(TokenDataValidator, ABC):
     def after_retrieve(
         self,
         token_data_by_resource_server: t.Mapping[str, TokenStorageData],
@@ -70,7 +71,7 @@ class _OnlyBeforeValidator(TokenDataValidator):
         return None
 
 
-class _OnlyAfterValidator(TokenDataValidator):
+class _OnlyAfterValidator(TokenDataValidator, ABC):
     def before_store(
         self,
         token_data_by_resource_server: t.Mapping[str, TokenStorageData],
@@ -79,7 +80,57 @@ class _OnlyAfterValidator(TokenDataValidator):
         return None
 
 
+class HasRefreshTokensValidator(_OnlyAfterValidator):
+    """
+    A validator to validate that token data contains refresh tokens.
+
+    *  This validator only runs `after_retrieve`.
+
+    :raises MissingTokenError: If any token data does not contain a refresh token.
+    """
+
+    def after_retrieve(
+        self,
+        token_data_by_resource_server: t.Mapping[str, TokenStorageData],
+        context: TokenValidationContext,  # pylint: disable=unused-argument
+    ) -> None:
+        for token_data in token_data_by_resource_server.values():
+            if token_data.refresh_token is None:
+                msg = f"No refresh_token for {token_data.resource_server}"
+                raise MissingTokenError(msg, resource_server=token_data.resource_server)
+
+
+class NotExpiredValidator(_OnlyAfterValidator):
+    """
+    A validator to validate that token data has not expired.
+
+    * This validator only runs `after_retrieve`.
+
+    :raises ExpiredTokenError: If any token data shows has expired.
+    """
+
+    def after_retrieve(
+        self,
+        token_data_by_resource_server: t.Mapping[str, TokenStorageData],
+        context: TokenValidationContext,  # pylint: disable=unused-argument
+    ) -> None:
+        for token_data in token_data_by_resource_server.values():
+            if token_data.expires_at_seconds < time.time():
+                raise ExpiredTokenError(token_data.expires_at_seconds)
+
+
 class UnchangingIdentityIDValidator(_OnlyBeforeValidator):
+    """
+    A validator to validate that user identity does not change across token grants.
+
+    *   This validator only runs `before_store`.
+
+    :raises IdentityMismatchError: If identity info changes across token storage
+        operations.
+    :raises MissingIdentityError: If the token data did not have any identity
+        information.
+    """
+
     def before_store(
         self,
         token_data_by_resource_server: t.Mapping[  # pylint: disable=unused-argument
@@ -87,19 +138,6 @@ class UnchangingIdentityIDValidator(_OnlyBeforeValidator):
         ],
         context: TokenValidationContext,
     ) -> None:
-        """
-        Validate that the identity info in the token data matches the prior identity
-        info. If no prior identity was set, any new identity_id is accepted.
-
-        :param token_data_by_resource_server: The data to validate.
-        :param context: The validation context object, containing state of the system at
-            the time of validation.
-
-        :raises IdentityMismatchError: If the identity info in the token data
-            does not match the stored identity info.
-        :raises MissingIdentityError: If the token data did not have identity
-            information (generally due to missing the openid scope).
-        """
         if context.token_data_identity_id is None:
             raise MissingIdentityError(
                 "Token grant response doesn't contain an id_token. This normally "
@@ -120,6 +158,30 @@ class UnchangingIdentityIDValidator(_OnlyBeforeValidator):
 
 
 class ScopeRequirementsValidator(TokenDataValidator):
+    """
+    A validator to validate that token data meets scope requirements.
+
+    A scope requirement, i.e., "transfer:all[collection:data_access]", can be broken
+    into two parts: the **root scope**, "transfer:all", and one or more
+    **dependent scopes**, "collection:data_access".
+
+    *   On `before_store`, this validator only evaluates **root** scope requirements.
+    *   On `after_retrieve`, this validator evaluates both **root** and **dependent**
+        scope requirements.
+
+    .. note::
+
+        Dependent scopes are only evaluated if an identity ID is extractable from
+        token grants. If no identity ID is available, dependent scope evaluation
+        is silently skipped.
+
+    :param scope_requirements: A mapping of resource servers to required scopes.
+    :param consent_client: An AuthClient to fetch consents with. This auth client must
+        have (or have access to) any valid Globus Auth scoped token.
+
+    :raises UnmetScopeRequirementsError: If any scope requirements are not met.
+    """
+
     def __init__(
         self,
         scope_requirements: t.Mapping[str, t.Sequence[globus_sdk.Scope]],
@@ -134,14 +196,6 @@ class ScopeRequirementsValidator(TokenDataValidator):
         token_data_by_resource_server: t.Mapping[str, TokenStorageData],
         context: TokenValidationContext,
     ) -> None:
-        """
-        Validate the token data against scope requirements, but do not check
-        dependent scopes before storage.
-
-        :param token_data_by_resource_server: The data to validate.
-        :param context: The validation context object, containing state of the system at
-            the time of validation.
-        """
         identity_id = context.token_data_identity_id or context.prior_identity_id
         for resource_server, token_data in token_data_by_resource_server.items():
             self._validate_token_data_meets_scope_requirements(
@@ -156,14 +210,6 @@ class ScopeRequirementsValidator(TokenDataValidator):
         token_data_by_resource_server: t.Mapping[str, TokenStorageData],
         context: TokenValidationContext,
     ) -> None:
-        """
-        Validate the token data against scope requirements, including dependent
-        scope requirements.
-
-        :param token_data_by_resource_server: The data to validate.
-        :param context: The validation context object, containing state of the system at
-            the time of validation.
-        """
         identity_id = context.token_data_identity_id or context.prior_identity_id
         for token_data in token_data_by_resource_server.values():
             self._validate_token_data_meets_scope_requirements(
@@ -181,25 +227,17 @@ class ScopeRequirementsValidator(TokenDataValidator):
         eval_dependent: bool = True,
     ) -> None:
         """
-        Given a particular resource server and token data, evaluate whether or not the
-        user's consent forest meet the attached scope requirements.
+        Evaluate whether the scope requirements for a given resource server are met.
 
-        .. note::
-
-            If consent_client was omitted, only root scope requirements are validated.
-
-        :param resource_server: The resource server whose scope requirements are being
-            validated.
-        :param token_data: The token data which is used for initial validation steps,
-            and potential fail-fast before consents are inspected.
+        :param resource_server: A resource server to access scope requirements.
+        :param token_data: A token data object to validate.
         :param identity_id: The identity ID of the user, from the surrounding context.
         :param eval_dependent: Whether to evaluate dependent scope requirements.
+
         :raises UnmetScopeRequirements: If token/consent data does not meet the
             attached root or dependent scope requirements for the resource server.
-        :returns: None if all scope requirements are met (or indeterminable).
         """
         required_scopes = self.scope_requirements.get(resource_server)
-
         # Short circuit - No scope requirements are, by definition, met.
         if required_scopes is None:
             return
@@ -226,6 +264,7 @@ class ScopeRequirementsValidator(TokenDataValidator):
         if forest is not None and forest.meets_scope_requirements(required_scopes):
             return
 
+        # Identity id is required to fetch consents.
         # if we cannot fetch consents, we cannot do any further validation
         if identity_id is None:
             return
@@ -241,53 +280,6 @@ class ScopeRequirementsValidator(TokenDataValidator):
             )
 
     def _poll_and_cache_consents(self, identity_id: str) -> ConsentForest:
-        """
-        Poll for consents, caching and returning the result.
-
-        :param identity_id: The identity_id of the user.
-        """
         forest = self.consent_client.get_consents(identity_id).to_forest()
-        # Cache the consent forest first.
         self._cached_consent_forest = forest
         return forest
-
-
-class HasRefreshTokensValidator(_OnlyAfterValidator):
-    def after_retrieve(
-        self,
-        token_data_by_resource_server: t.Mapping[str, TokenStorageData],
-        context: TokenValidationContext,  # pylint: disable=unused-argument
-    ) -> None:
-        """
-        Verify that token data contains `refresh_token` values.
-
-        :param token_data_by_resource_server: The data to validate.
-        :param context: The validation context object, containing state of the system at
-            the time of validation.
-
-        :raises MissingTokenError: On failure to find a refresh_token.
-        """
-        for token_data in token_data_by_resource_server.values():
-            if token_data.refresh_token is None:
-                msg = f"No refresh_token for {token_data.resource_server}"
-                raise MissingTokenError(msg, resource_server=token_data.resource_server)
-
-
-class NotExpiredValidator(_OnlyAfterValidator):
-    def after_retrieve(
-        self,
-        token_data_by_resource_server: t.Mapping[str, TokenStorageData],
-        context: TokenValidationContext,  # pylint: disable=unused-argument
-    ) -> None:
-        """
-        Verify that the `expires_at_seconds` times in the token data are in the future.
-
-        :param token_data_by_resource_server: The data to validate.
-        :param context: The validation context object, containing state of the system at
-            the time of validation.
-
-        :raises ExpiredTokenError: If any token_data shows a past timestamp.
-        """
-        for token_data in token_data_by_resource_server.values():
-            if token_data.expires_at_seconds < time.time():
-                raise ExpiredTokenError(token_data.expires_at_seconds)

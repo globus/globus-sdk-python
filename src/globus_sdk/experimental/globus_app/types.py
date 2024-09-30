@@ -14,9 +14,10 @@ else:
     from typing import Protocol, runtime_checkable
 
 if t.TYPE_CHECKING:
+    from globus_sdk.tokenstorage import TokenValidationError
+
     from .app import GlobusApp
     from .config import GlobusAppConfig
-    from .errors import TokenValidationError
 
 
 @runtime_checkable

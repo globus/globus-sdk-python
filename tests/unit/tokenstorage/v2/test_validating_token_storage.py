@@ -15,19 +15,19 @@ from globus_sdk import (
     OAuthTokenResponse,
     Scope,
 )
-from globus_sdk.experimental.globus_app import (
+from globus_sdk.scopes.consents import ConsentForest
+from globus_sdk.tokenstorage import (
+    MemoryTokenStorage,
     ScopeRequirementsValidator,
     UnchangingIdentityIDValidator,
     ValidatingTokenStorage,
 )
-from globus_sdk.experimental.globus_app.errors import (
+from globus_sdk.tokenstorage.v2.validating_token_storage import (
     IdentityMismatchError,
     MissingIdentityError,
     MissingTokenError,
     UnmetScopeRequirementsError,
 )
-from globus_sdk.scopes.consents import ConsentForest
-from globus_sdk.tokenstorage import MemoryTokenStorage
 from tests.common import make_consent_forest
 
 

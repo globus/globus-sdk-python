@@ -1,7 +1,6 @@
 class GlobusError(Exception):
     """
     Root of the Globus Exception hierarchy.
-    Stub class.
     """
 
 

@@ -6,16 +6,18 @@ import pytest
 from globus_sdk.experimental.globus_app import (
     AccessTokenAuthorizerFactory,
     ClientCredentialsAuthorizerFactory,
-    ExpiredTokenError,
-    MissingTokenError,
     RefreshTokenAuthorizerFactory,
-    ValidatingTokenStorage,
 )
-from globus_sdk.experimental.globus_app.validating_token_storage import (
+from globus_sdk.tokenstorage import (
     HasRefreshTokensValidator,
+    MemoryTokenStorage,
     NotExpiredValidator,
 )
-from globus_sdk.tokenstorage import MemoryTokenStorage
+from globus_sdk.tokenstorage.v2.validating_token_storage import (
+    ExpiredTokenError,
+    MissingTokenError,
+    ValidatingTokenStorage,
+)
 
 
 def make_mock_token_response(token_number=1):

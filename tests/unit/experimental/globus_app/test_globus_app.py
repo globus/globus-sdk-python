@@ -24,10 +24,6 @@ from globus_sdk.experimental.globus_app import (
     RefreshTokenAuthorizerFactory,
     UserApp,
 )
-from globus_sdk.experimental.globus_app.validating_token_storage import (
-    HasRefreshTokensValidator,
-    NotExpiredValidator,
-)
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.login_flows import (
     CommandLineLoginFlowManager,
@@ -37,8 +33,10 @@ from globus_sdk.login_flows import (
 from globus_sdk.scopes import AuthScopes, Scope
 from globus_sdk.services.auth import OAuthTokenResponse
 from globus_sdk.tokenstorage import (
+    HasRefreshTokensValidator,
     JSONTokenStorage,
     MemoryTokenStorage,
+    NotExpiredValidator,
     SQLiteTokenStorage,
     TokenStorageData,
 )

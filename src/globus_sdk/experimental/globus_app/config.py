@@ -14,14 +14,15 @@ from globus_sdk.tokenstorage import (
     MemoryTokenStorage,
     SQLiteTokenStorage,
     TokenStorage,
+    TokenValidationError,
 )
+from globus_sdk.tokenstorage.v2.validating_token_storage import IdentityMismatchError
 
-from ._types import (
+from .types import (
     LoginFlowManagerProvider,
     TokenStorageProvider,
     TokenValidationErrorHandler,
 )
-from .errors import IdentityMismatchError, TokenValidationError
 
 if t.TYPE_CHECKING:
     from .app import GlobusApp

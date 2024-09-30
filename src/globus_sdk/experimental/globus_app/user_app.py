@@ -11,15 +11,15 @@ from globus_sdk import (
 from globus_sdk._types import ScopeCollectionType, UUIDLike
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.login_flows import CommandLineLoginFlowManager, LoginFlowManager
+from globus_sdk.tokenstorage import HasRefreshTokensValidator, NotExpiredValidator
 
-from ._types import LoginFlowManagerProvider
 from .app import GlobusApp
 from .authorizer_factory import (
     AccessTokenAuthorizerFactory,
     RefreshTokenAuthorizerFactory,
 )
 from .config import DEFAULT_CONFIG, KNOWN_LOGIN_FLOW_MANAGERS, GlobusAppConfig
-from .validating_token_storage import HasRefreshTokensValidator, NotExpiredValidator
+from .types import LoginFlowManagerProvider
 
 
 class UserApp(GlobusApp):

@@ -12,9 +12,8 @@ from globus_sdk.authorizers import (
     RefreshTokenAuthorizer,
 )
 from globus_sdk.services.auth import OAuthTokenResponse
-
-from .errors import MissingTokenError
-from .validating_token_storage import ValidatingTokenStorage
+from globus_sdk.tokenstorage import ValidatingTokenStorage
+from globus_sdk.tokenstorage.v2.validating_token_storage import MissingTokenError
 
 GA = t.TypeVar("GA", bound=GlobusAuthorizer)
 

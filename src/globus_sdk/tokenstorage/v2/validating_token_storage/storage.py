@@ -3,25 +3,28 @@ from __future__ import annotations
 import typing as t
 
 import globus_sdk
-from globus_sdk.tokenstorage import TokenStorage, TokenStorageData
 
-from ..errors import MissingTokenError
+from ..base import TokenStorage
+from ..token_data import TokenStorageData
 from .context import TokenValidationContext
+from .errors import MissingTokenError
 from .validators import TokenDataValidator
 
 
 class ValidatingTokenStorage(TokenStorage):
     """
-    A ValidatingTokenStorage wraps another TokenStorage and applies validators when
-    storing and retrieving tokens.
+    A special token storage which provides token data validation hooks.
 
-    ValidatingTokenStorage is not concerned with the actual storage location of tokens
-    but rather validating that they meet requirements.
+    See :class:`TokenDataValidator` for details on hook specifics.
 
-    :param token_storage: The token storage being wrapped.
-    :param before_store_validators: An iterable of validators to use before storing
-        and after retrieving token data. These take the full
-        ``{resource_server: token_data}`` mapping and raise errors if validation fails.
+    See :class:`TokenStorage` for common interface details.
+
+    :param token_storage: A proxy token storage for this class to pass through store,
+        get, and remove requests to.
+    :param validators: A collection of validation hooks to call.
+
+    :ivar str | None identity_id: The primary identity ID of the entity which granted
+        tokens, if known.
     """
 
     def __init__(

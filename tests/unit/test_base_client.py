@@ -9,11 +9,8 @@ import globus_sdk
 from globus_sdk._testing import RegisteredResponse, get_last_request
 from globus_sdk.authorizers import NullAuthorizer
 from globus_sdk.experimental.globus_app import GlobusApp, GlobusAppConfig, UserApp
-from globus_sdk.experimental.globus_app.errors import (
-    MissingTokenError,
-    TokenValidationError,
-)
 from globus_sdk.scopes import Scope, TransferScopes
+from globus_sdk.tokenstorage import TokenValidationError
 
 
 @pytest.fixture
@@ -234,7 +231,7 @@ def test_app_integration(base_client_class):
     RegisteredResponse(
         service="transfer", path="foo", method="get", json={"x": "y"}
     ).add()
-    with pytest.raises(MissingTokenError) as ex:
+    with pytest.raises(TokenValidationError) as ex:
         c.get("foo")
     assert str(ex.value) == "No token data for transfer.api.globus.org"
 

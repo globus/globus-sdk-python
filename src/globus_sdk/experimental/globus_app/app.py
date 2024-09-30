@@ -10,17 +10,17 @@ from globus_sdk._types import ScopeCollectionType, UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.scopes import AuthScopes, scopes_to_scope_list
-from globus_sdk.tokenstorage import TokenStorage
-
-from ._types import TokenStorageProvider
-from .authorizer_factory import AuthorizerFactory
-from .config import DEFAULT_CONFIG, KNOWN_TOKEN_STORAGES, GlobusAppConfig
-from .errors import TokenValidationError
-from .validating_token_storage import (
+from globus_sdk.tokenstorage import (
     ScopeRequirementsValidator,
+    TokenStorage,
+    TokenValidationError,
     UnchangingIdentityIDValidator,
     ValidatingTokenStorage,
 )
+
+from .authorizer_factory import AuthorizerFactory
+from .config import DEFAULT_CONFIG, KNOWN_TOKEN_STORAGES, GlobusAppConfig
+from .types import TokenStorageProvider
 
 
 class GlobusApp(metaclass=abc.ABCMeta):
