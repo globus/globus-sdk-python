@@ -232,6 +232,9 @@ ScopeBuilder Constants
 .. autodata:: globus_sdk.scopes.data.AuthScopes
     :annotation:
 
+.. autodata:: globus_sdk.scopes.data.ComputeScopes
+    :annotation:
+
 .. autodata:: globus_sdk.scopes.data.FlowsScopes
     :annotation:
 

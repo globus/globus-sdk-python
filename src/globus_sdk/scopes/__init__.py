@@ -5,6 +5,7 @@ from ._normalize import scopes_to_scope_list, scopes_to_str
 from .builder import ScopeBuilder
 from .data import (
     AuthScopes,
+    ComputeScopes,
     FlowsScopes,
     GCSCollectionScopeBuilder,
     GCSEndpointScopeBuilder,
@@ -28,6 +29,7 @@ __all__ = (
     "GCSCollectionScopeBuilder",
     "GCSEndpointScopeBuilder",
     "AuthScopes",
+    "ComputeScopes",
     "FlowsScopes",
     "SpecificFlowScopeBuilder",
     "GroupsScopes",

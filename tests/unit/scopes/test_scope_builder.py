@@ -1,6 +1,6 @@
 import uuid
 
-from globus_sdk.scopes import FlowsScopes, ScopeBuilder
+from globus_sdk.scopes import ComputeScopes, FlowsScopes, ScopeBuilder
 
 
 def test_url_scope_string():
@@ -93,6 +93,14 @@ def test_flows_scopes_creation():
     assert (
         FlowsScopes.run
         == "https://auth.globus.org/scopes/eec9b274-0c81-4334-bdc2-54e90e689b9a/run"
+    )
+
+
+def test_compute_scopes_creation():
+    assert ComputeScopes.resource_server == "funcx_service"
+    assert (
+        ComputeScopes.all
+        == "https://auth.globus.org/scopes/facd7ccc-c5f4-42aa-916b-a0e270e2c2a9/all"
     )
 
 
