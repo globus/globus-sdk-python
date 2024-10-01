@@ -1,7 +1,7 @@
 import pytest
 
 from globus_sdk._testing import construct_error
-from globus_sdk.exc import ErrorSubdocument, RemovedInV4Warning
+from globus_sdk.exc import ErrorSubdocument
 from globus_sdk.gare import (
     GARE,
     GlobusAuthorizationParameters,
@@ -11,27 +11,6 @@ from globus_sdk.gare import (
     to_gare,
     to_gares,
 )
-
-
-@pytest.mark.parametrize(
-    "alias, value",
-    (
-        ("GlobusAuthorizationParameters", GlobusAuthorizationParameters),
-        ("GlobusAuthRequirementsError", GARE),
-        ("to_auth_requirements_error", to_gare),
-        ("to_auth_requirements_errors", to_gares),
-        ("has_auth_requirements_errors", has_gares),
-        ("is_auth_requirements_error", is_gare),
-    ),
-)
-def test_deprecated_experimental_alias(alias, value):
-    with pytest.warns(RemovedInV4Warning):
-        from globus_sdk.experimental import (
-            auth_requirements_error as experimental_module,
-        )
-
-        aliased_value = getattr(experimental_module, alias)
-    assert aliased_value is value
 
 
 @pytest.mark.parametrize(

@@ -1,5 +1,5 @@
 
-.. py:currentmodule:: globus_sdk.experimental.globus_app
+.. py:currentmodule:: globus_sdk
 
 Globus App
 ==========
@@ -15,4 +15,7 @@ For a narrative-style introduction to the concepts contained within GlobusApp, s
     :members:
 
 ..  autoclass:: ClientApp
+    :members:
+
+.. autoclass:: GlobusAppConfig
     :members:

@@ -7,7 +7,7 @@ from .token_data import TokenStorageData
 
 if t.TYPE_CHECKING:
     from globus_sdk._types import UUIDLike
-    from globus_sdk.experimental.globus_app import GlobusAppConfig
+    from globus_sdk.globus_app import GlobusAppConfig
 
 
 class MemoryTokenStorage(TokenStorage):

@@ -1,5 +1,5 @@
 import globus_sdk
-from globus_sdk.experimental.globus_app import ClientApp
+from globus_sdk.globus_app import ClientApp
 
 # Confidential Client ID/Secret - <replace these with real client values>
 CONFIDENTIAL_CLIENT_ID = "..."

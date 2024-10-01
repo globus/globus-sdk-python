@@ -1,7 +1,7 @@
 
 .. _using_globus_app:
 
-.. py:currentmodule:: globus_sdk.experimental.globus_app
+.. py:currentmodule:: globus_sdk
 
 Using a GlobusApp
 =================
@@ -81,10 +81,9 @@ client's resource server and configuring the app as the service client's auth pr
         ..  code-block:: python
 
             import globus_sdk
-            from globus_sdk.experimental.globus_app import UserApp
 
             CLIENT_ID = "..."
-            my_app = UserApp("my-user-app", client_id=CLIENT_ID)
+            my_app = globus_sdk.UserApp("my-user-app", client_id=CLIENT_ID)
 
             transfer_client = globus_sdk.TransferClient(app=my_app)
             flows_client = globus_sdk.FlowsClient(app=my_app)
@@ -102,11 +101,12 @@ client's resource server and configuring the app as the service client's auth pr
         ..  code-block:: python
 
             import globus_sdk
-            from globus_sdk.experimental.globus_app import ClientApp
 
             CLIENT_ID = "..."
             CLIENT_SECRET = "..."
-            my_app = ClientApp("my-client-app", client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
+            my_app = globus_sdk.ClientApp(
+                "my-client-app", client_id=CLIENT_ID, client_secret=CLIENT_SECRET
+            )
 
             transfer_client = globus_sdk.TransferClient(app=my_app)
             flows_client = globus_sdk.FlowsClient(app=my_app)
@@ -156,7 +156,7 @@ This method accepts two optional keyword args:
 
 ..  code-block:: python
 
-    from globus_sdk.experimental.auth_requirements_error import GlobusAuthorizationParameters
+    from globus_sdk.gare import GlobusAuthorizationParameters
 
     ...
 

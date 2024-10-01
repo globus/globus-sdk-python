@@ -16,7 +16,8 @@ from globus_sdk import (
 )
 from globus_sdk._testing import load_response
 from globus_sdk.exc import GlobusSDKUsageError
-from globus_sdk.experimental.globus_app import (
+from globus_sdk.gare import GlobusAuthorizationParameters
+from globus_sdk.globus_app import (
     AccessTokenAuthorizerFactory,
     ClientApp,
     ClientCredentialsAuthorizerFactory,
@@ -24,7 +25,6 @@ from globus_sdk.experimental.globus_app import (
     RefreshTokenAuthorizerFactory,
     UserApp,
 )
-from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.login_flows import (
     CommandLineLoginFlowManager,
     LocalServerLoginFlowManager,

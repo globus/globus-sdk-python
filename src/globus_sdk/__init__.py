@@ -148,6 +148,12 @@ _LAZY_IMPORT_TABLE = {
         "TransferClient",
         "TransferData",
     },
+    "globus_app": {
+        "GlobusApp",
+        "UserApp",
+        "ClientApp",
+        "GlobusAppConfig",
+    },
     "scopes": {
         "Scope",
         "ScopeParseError",
@@ -260,6 +266,10 @@ if t.TYPE_CHECKING:
     from .services.transfer import TransferAPIError
     from .services.transfer import TransferClient
     from .services.transfer import TransferData
+    from .globus_app import GlobusApp
+    from .globus_app import UserApp
+    from .globus_app import ClientApp
+    from .globus_app import GlobusAppConfig
     from .scopes import Scope
     from .scopes import ScopeParseError
     from .scopes import ScopeCycleError
@@ -311,6 +321,7 @@ __all__ = (
     "BlackPearlStoragePolicies",
     "BoxStoragePolicies",
     "CephStoragePolicies",
+    "ClientApp",
     "ClientCredentialsAuthorizer",
     "CollectionDocument",
     "CollectionPolicies",
@@ -330,6 +341,8 @@ __all__ = (
     "GetConsentsResponse",
     "GetIdentitiesResponse",
     "GlobusAPIError",
+    "GlobusApp",
+    "GlobusAppConfig",
     "GlobusConnectPersonalOwnerInfo",
     "GlobusConnectServerConnector",
     "GlobusConnectionError",
@@ -400,6 +413,7 @@ __all__ = (
     "TransferData",
     "TransferTimer",
     "UnpackingGCSResponse",
+    "UserApp",
     "UserCredentialDocument",
     "ValidationError",
 )

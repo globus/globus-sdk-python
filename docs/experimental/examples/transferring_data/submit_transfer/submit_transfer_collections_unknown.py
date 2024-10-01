@@ -1,5 +1,5 @@
 import globus_sdk
-from globus_sdk.experimental.globus_app import UserApp
+from globus_sdk.globus_app import UserApp
 
 # Tutorial Client ID - <replace this with your own client>
 NATIVE_CLIENT_ID = "61338d24-54d5-408f-a10d-66c06b59f6d2"

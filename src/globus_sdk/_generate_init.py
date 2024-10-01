@@ -236,6 +236,15 @@ _LAZY_IMPORT_TABLE: list[tuple[str, tuple[str, ...]]] = [
         ),
     ),
     (
+        "globus_app",
+        (
+            "GlobusApp",
+            "UserApp",
+            "ClientApp",
+            "GlobusAppConfig",
+        ),
+    ),
+    (
         "scopes",
         (
             "Scope",

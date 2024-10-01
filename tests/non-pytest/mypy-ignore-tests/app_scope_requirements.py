@@ -1,4 +1,4 @@
-from globus_sdk.experimental.globus_app import UserApp
+from globus_sdk import UserApp
 
 # declare scope data in the form of a subtype of the ScopeCollectionType (`list[str]`)
 # indexed in a dict, this is meant to be a subtype of the requirements data accepted
