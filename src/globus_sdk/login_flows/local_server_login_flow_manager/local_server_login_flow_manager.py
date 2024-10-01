@@ -27,7 +27,7 @@ if t.TYPE_CHECKING:
 #
 # see the webbrowser library for a list of names:
 #   https://github.com/python/cpython/blob/69cdeeb93e0830004a495ed854022425b93b3f3e/Lib/webbrowser.py#L489-L502
-BROWSER_BLACKLIST = ["lynx", "www-browser", "links", "elinks", "w3m"]
+BROWSER_DENY_LIST = ["lynx", "www-browser", "links", "elinks", "w3m"]
 
 
 def _check_remote_session() -> None:
@@ -60,7 +60,7 @@ def _open_webbrowser(url: str) -> None:
                 "Unable to determine local browser name."
             )
 
-        if browser_name in BROWSER_BLACKLIST:
+        if browser_name in BROWSER_DENY_LIST:
             raise LocalServerEnvironmentalLoginError(
                 "Cannot use LocalServerLoginFlowManager with "
                 f"text-only browser '{browser_name}'"
