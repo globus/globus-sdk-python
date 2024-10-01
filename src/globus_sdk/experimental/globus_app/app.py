@@ -20,7 +20,7 @@ from globus_sdk.tokenstorage import (
 
 from .authorizer_factory import AuthorizerFactory
 from .config import DEFAULT_CONFIG, KNOWN_TOKEN_STORAGES, GlobusAppConfig
-from .types import TokenStorageProvider
+from .protocols import TokenStorageProvider
 
 
 class GlobusApp(metaclass=abc.ABCMeta):

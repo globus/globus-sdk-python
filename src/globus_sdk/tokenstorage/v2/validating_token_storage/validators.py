@@ -3,7 +3,6 @@ from __future__ import annotations
 import abc
 import time
 import typing as t
-from abc import ABC
 
 import globus_sdk
 from globus_sdk.scopes.consents import ConsentForest
@@ -62,7 +61,7 @@ class TokenDataValidator(abc.ABC):
         """
 
 
-class _OnlyBeforeValidator(TokenDataValidator, ABC):
+class _OnlyBeforeValidator(TokenDataValidator, abc.ABC):
     def after_retrieve(
         self,
         token_data_by_resource_server: t.Mapping[str, TokenStorageData],
@@ -71,7 +70,7 @@ class _OnlyBeforeValidator(TokenDataValidator, ABC):
         return None
 
 
-class _OnlyAfterValidator(TokenDataValidator, ABC):
+class _OnlyAfterValidator(TokenDataValidator, abc.ABC):
     def before_store(
         self,
         token_data_by_resource_server: t.Mapping[str, TokenStorageData],

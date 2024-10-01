@@ -19,7 +19,7 @@ from .authorizer_factory import (
     RefreshTokenAuthorizerFactory,
 )
 from .config import DEFAULT_CONFIG, KNOWN_LOGIN_FLOW_MANAGERS, GlobusAppConfig
-from .types import LoginFlowManagerProvider
+from .protocols import LoginFlowManagerProvider
 
 
 class UserApp(GlobusApp):

@@ -7,7 +7,7 @@ from .authorizer_factory import (
 )
 from .client_app import ClientApp
 from .config import GlobusAppConfig
-from .types import TokenValidationErrorHandler
+from .protocols import TokenValidationErrorHandler
 from .user_app import UserApp
 
 __all__ = [
