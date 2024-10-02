@@ -1,0 +1,11 @@
+Added
+~~~~~
+
+-   Added an initial Globus Compute client class, ``globus_sdk.ComputeClient``. (:pr:`NUMBER`)
+
+    -   ``globus_sdk.ComputeAPIError`` is the error class for this client.
+
+    -   ``ComputeClient.get_function`` is a method to get information about a registered function.
+
+    -   Users can access scopes for the Globus Compute API via ``globus_sdk.scopes.ComputeScopes``
+        or ``globus_sdk.ComputeClient.scopes``.
