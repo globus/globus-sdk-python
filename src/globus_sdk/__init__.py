@@ -68,6 +68,10 @@ _LAZY_IMPORT_TABLE = {
         "OAuthTokenResponse",
         "DependentScopeSpec",
     },
+    "services.compute": {
+        "ComputeClient",
+        "ComputeAPIError",
+    },
     "services.gcs": {
         "CollectionDocument",
         "GCSAPIError",
@@ -192,6 +196,8 @@ if t.TYPE_CHECKING:
     from .services.auth import OAuthRefreshTokenResponse
     from .services.auth import OAuthTokenResponse
     from .services.auth import DependentScopeSpec
+    from .services.compute import ComputeClient
+    from .services.compute import ComputeAPIError
     from .services.gcs import CollectionDocument
     from .services.gcs import GCSAPIError
     from .services.gcs import GCSClient
@@ -308,6 +314,8 @@ __all__ = (
     "ClientCredentialsAuthorizer",
     "CollectionDocument",
     "CollectionPolicies",
+    "ComputeAPIError",
+    "ComputeClient",
     "ConfidentialAppAuthClient",
     "ConnectorTable",
     "DeleteData",

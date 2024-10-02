@@ -30,6 +30,7 @@ class RegisteredResponse:
         "groups": "https://groups.api.globus.org/v2/",
         "timer": "https://timer.automate.globus.org/",
         "flows": "https://flows.automate.globus.org/",
+        "compute": "https://compute.api.globus.org/",
     }
     _base_path_map = {
         "transfer": "/v0.10/",

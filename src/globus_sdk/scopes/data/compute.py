@@ -4,13 +4,8 @@ from ..builder import ScopeBuilder, ScopeBuilderScopes
 
 
 class _ComputeScopeBuilder(ScopeBuilder):
-    """
-    The Compute service breaks the scopes/resource server convention: its resource
+    """The Compute service breaks the scopes/resource server convention: its resource
     server is a service name and its scopes are built around the client ID.
-
-    Given that there isn't a simple way to support this more generally (and we
-    shouldn't encourage supporting this more generally), this class serves to
-    build out the scopes specifically for Compute.
     """
 
     def __init__(
