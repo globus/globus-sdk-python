@@ -70,13 +70,9 @@ def test_tokenstorage_importable_from_experimental():
 
 
 def test_globus_app_importable_from_experimental():
-    # Each of these constructs should be imported from `globus_sdk.globus_app`.
+    # This construct should be imported from `globus_sdk.globus_app`.
     with pytest.warns(RemovedInV4Warning, match=r"globus_sdk\.globus_app\."):
         from globus_sdk.experimental.globus_app import (  # noqa: F401
-            AccessTokenAuthorizerFactory,
-            AuthorizerFactory,
-            ClientCredentialsAuthorizerFactory,
-            RefreshTokenAuthorizerFactory,
             TokenValidationErrorHandler,
         )
 

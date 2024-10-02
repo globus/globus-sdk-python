@@ -15,10 +15,11 @@ _ALL_NAME_PATTERN = re.compile(r'\s+"(\w+)",?')
 
 PACKAGE_LOCS_TO_SCAN = (
     "globus_sdk/",
-    "globus_sdk/response.py",
-    "globus_sdk/scopes/",
-    "globus_sdk/gare/",
     "globus_sdk/login_flows/",
+    "globus_sdk/gare/",
+    "globus_sdk/globus_app/",
+    "globus_sdk/scopes/",
+    "globus_sdk/response.py",
     "globus_sdk/_testing/",
 )
 
@@ -41,11 +42,14 @@ def iter_all_documented_names() -> t.Iterable[str]:
     # names under these directives
     #
     #   .. autoclass:: <name>
+    #   .. autoclass:: <name>(<args>)
     #   .. autofunction:: <name>
     #   .. autoexception:: <name>
     #   .. autodata:: <name>
+    auto_directive = r"auto(?:class|function|exception|data)"
+    name_capturer = r"(?:\w+\.)*(\w+)(?:\(.*\))?"
     autodoc_pattern = re.compile(
-        r"^\.\.\s+auto(?:class|function|exception|data)\:\:\s+(?:\w+\.)*(\w+)$",
+        rf"^\.\.\s+{auto_directive}::\s+{name_capturer}$",
         flags=re.MULTILINE,
     )
     # names under these directives
@@ -53,7 +57,7 @@ def iter_all_documented_names() -> t.Iterable[str]:
     #   .. class:: <name>
     #   .. py:data:: <name>
     pydoc_pattern = re.compile(
-        r"^\.\.\s+(?:py\:data|class)\:\:\s+(?:\w+\.)*(\w+)$",
+        r"^\.\.\s+(?:py:data|class)::\s+(?:\w+\.)*(\w+)$",
         flags=re.MULTILINE,
     )
     for data in load_docs().values():
@@ -82,7 +86,11 @@ def get_names_from_all_list(file_path: str) -> list[str]:
         if found_all:
             if line.strip() == ")":
                 break
-            names.append(_ALL_NAME_PATTERN.match(line).group(1))
+            # Extract the actual symbol from the line.
+            # i.e., '  "Foo",\n' -> 'Foo'
+            name_match = _ALL_NAME_PATTERN.match(line)
+            if name_match is not None:
+                names.append(name_match.group(1))
         else:
             if line.strip() == "__all__ = (":
                 found_all = True

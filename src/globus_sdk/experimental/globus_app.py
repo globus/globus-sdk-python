@@ -8,10 +8,6 @@ __all__ = (
     "UserApp",
     "ClientApp",
     "GlobusAppConfig",
-    "AccessTokenAuthorizerFactory",
-    "AuthorizerFactory",
-    "RefreshTokenAuthorizerFactory",
-    "ClientCredentialsAuthorizerFactory",
     "TokenValidationErrorHandler",
 )
 
@@ -19,13 +15,9 @@ __all__ = (
 # (when accessed, these will emit deprecation warnings)
 if t.TYPE_CHECKING:
     from globus_sdk.globus_app import (
-        AccessTokenAuthorizerFactory,
-        AuthorizerFactory,
         ClientApp,
-        ClientCredentialsAuthorizerFactory,
         GlobusApp,
         GlobusAppConfig,
-        RefreshTokenAuthorizerFactory,
         TokenValidationErrorHandler,
         UserApp,
     )

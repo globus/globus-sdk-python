@@ -1,20 +1,21 @@
+.. _globus_apps:
 
 .. currentmodule:: globus_sdk
 
-Globus App
+GlobusApps
 ==========
 
-This page provides reference documentation for ``GlobusApp`` and associated classes.
-
+Reference
+---------
 
 ..  autoclass:: GlobusApp
     :members:
+
+Implementations
+^^^^^^^^^^^^^^^
 
 ..  autoclass:: UserApp
     :members:
 
 ..  autoclass:: ClientApp
-    :members:
-
-.. autoclass:: GlobusAppConfig
     :members:
