@@ -4,6 +4,7 @@ import collections
 import collections.abc
 import hashlib
 import os
+import platform
 import sys
 import typing as t
 import uuid
@@ -68,6 +69,21 @@ def sha256_string(s: str) -> str:
 
 def b64str(s: str) -> str:
     return b64encode(s.encode("utf-8")).decode("utf-8")
+
+
+def get_nice_hostname() -> str | None:
+    """
+    Get the current hostname, with the following added behavior:
+
+    - if it ends in '.local', strip that suffix, as this is a frequent macOS behavior
+      'DereksCoolMacbook.local' -> 'DereksCoolMacbook'
+
+    - if the hostname is undiscoverable, return None
+    """
+    name = platform.node()
+    if name.endswith(".local"):
+        return name[: -len(".local")]
+    return name or None
 
 
 def slash_join(a: str, b: str | None) -> str:

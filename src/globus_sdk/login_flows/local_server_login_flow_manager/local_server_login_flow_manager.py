@@ -15,6 +15,7 @@ from globus_sdk import (
 )
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.login_flows.login_flow_manager import LoginFlowManager
+from globus_sdk.utils import get_nice_hostname
 
 from .errors import LocalServerEnvironmentalLoginError, LocalServerLoginError
 from .local_server import DEFAULT_HTML_TEMPLATE, RedirectHandler, RedirectHTTPServer
@@ -136,10 +137,16 @@ class LocalServerLoginFlowManager(LoginFlowManager):
             msg = "LocalServerLoginFlowManager is only supported for Native Apps."
             raise GlobusSDKUsageError(msg)
 
+        hostname = get_nice_hostname()
+        if hostname:
+            prefill = f"{app_name} on {hostname}"
+        else:
+            prefill = app_name
+
         return cls(
             login_client,
             request_refresh_tokens=config.request_refresh_tokens,
-            native_prefill_named_grant=app_name,
+            native_prefill_named_grant=prefill,
         )
 
     def run_login_flow(

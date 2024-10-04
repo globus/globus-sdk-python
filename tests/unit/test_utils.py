@@ -27,6 +27,25 @@ def test_sha256string():
 
 
 @pytest.mark.parametrize(
+    "platform_value, result",
+    (
+        # platform.node() can return '' when it doesn't know the hostname
+        # turn this into None
+        pytest.param("", None, id="empty-is-none"),
+        # macOS adds '.local' to the user's chosen machine name
+        pytest.param(
+            "VeryCoolMacbook.local", "VeryCoolMacbook", id="remove-local-suffix"
+        ),
+        # the "boring" case is when we do no extra work
+        pytest.param("linux-workstation", "linux-workstation", id="boring"),
+    ),
+)
+def test_get_nice_hostname(platform_value, result, monkeypatch):
+    monkeypatch.setattr("platform.node", lambda: platform_value)
+    assert utils.get_nice_hostname() == result
+
+
+@pytest.mark.parametrize(
     "a, b",
     [(a, b) for a in ["a", "a/"] for b in ["b", "/b"]]
     + [("a/b", c) for c in ["", None]],  # type: ignore

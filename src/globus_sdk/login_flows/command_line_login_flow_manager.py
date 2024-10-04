@@ -10,6 +10,7 @@ from globus_sdk import (
     OAuthTokenResponse,
 )
 from globus_sdk.gare import GlobusAuthorizationParameters
+from globus_sdk.utils import get_nice_hostname
 
 from .login_flow_manager import LoginFlowManager
 
@@ -74,11 +75,17 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         :raises GlobusSDKUsageError: if login_redirect_uri is not set on the config
             but a ConfidentialAppAuthClient is supplied.
         """
+        hostname = get_nice_hostname()
+        if hostname:
+            prefill = f"{app_name} on {hostname}"
+        else:
+            prefill = app_name
+
         return cls(
             login_client,
             redirect_uri=config.login_redirect_uri,
             request_refresh_tokens=config.request_refresh_tokens,
-            native_prefill_named_grant=app_name,
+            native_prefill_named_grant=prefill,
         )
 
     def run_login_flow(
