@@ -4,9 +4,10 @@ import json
 import pathlib
 import typing as t
 
-from globus_sdk.services.auth import OAuthTokenResponse
-from globus_sdk.tokenstorage.v1.base import FileAdapter
+import globus_sdk
 from globus_sdk.version import __version__
+
+from .base import FileAdapter
 
 # use the non-annotation form of TypedDict to apply a non-identifier key
 _JSONFileData_0 = t.TypedDict("_JSONFileData_0", {"globus-sdk.version": str})
@@ -103,7 +104,7 @@ class SimpleJSONFileAdapter(FileAdapter):
             }
         return self._handle_formats(data)
 
-    def store(self, token_response: OAuthTokenResponse) -> None:
+    def store(self, token_response: globus_sdk.OAuthTokenResponse) -> None:
         """
         By default, ``self.on_refresh`` is just an alias for this function.
 

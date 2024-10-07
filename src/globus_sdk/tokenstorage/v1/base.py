@@ -5,12 +5,12 @@ import contextlib
 import os
 import typing as t
 
-from globus_sdk.services.auth import OAuthTokenResponse
+import globus_sdk
 
 
 class StorageAdapter(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def store(self, token_response: OAuthTokenResponse) -> None:
+    def store(self, token_response: globus_sdk.OAuthTokenResponse) -> None:
         """
         Store an `OAuthTokenResponse` in the underlying storage for this adapter.
 
@@ -30,7 +30,7 @@ class StorageAdapter(metaclass=abc.ABCMeta):
             token data to retriever from storage
         """
 
-    def on_refresh(self, token_response: OAuthTokenResponse) -> None:
+    def on_refresh(self, token_response: globus_sdk.OAuthTokenResponse) -> None:
         """
         By default, the on_refresh handler for a token storage adapter simply
         stores the token response.

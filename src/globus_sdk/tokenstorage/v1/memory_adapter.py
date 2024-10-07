@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import typing as t
 
-from globus_sdk.services.auth import OAuthTokenResponse
-from globus_sdk.tokenstorage.v1.base import StorageAdapter
+import globus_sdk
+
+from .base import StorageAdapter
 
 
 class MemoryAdapter(StorageAdapter):
@@ -16,7 +17,7 @@ class MemoryAdapter(StorageAdapter):
     def __init__(self) -> None:
         self._tokens: dict[str, dict[str, t.Any]] = {}
 
-    def store(self, token_response: OAuthTokenResponse) -> None:
+    def store(self, token_response: globus_sdk.OAuthTokenResponse) -> None:
         self._tokens.update(token_response.by_resource_server)
 
     def get_token_data(self, resource_server: str) -> dict[str, t.Any] | None:
