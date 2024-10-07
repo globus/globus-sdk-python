@@ -274,6 +274,52 @@ class TransferClient(client.BaseClient):
         log.info(f"TransferClient.update_endpoint({endpoint_id}, ...)")
         return self.put(f"endpoint/{endpoint_id}", data=data, query_params=query_params)
 
+    def set_subscription_id(
+        self, collection_id: UUIDLike, subscription_id: UUIDLike
+    ) -> response.GlobusHTTPResponse:
+        """
+        Set the ``subscription_id`` on a mapped collection.
+        This is primarily used for subscription management on Globus Connect Personal.
+
+        This operation requires membership in a Globus subscription group and
+        has authorization requirements which depend upon the caller's roles on
+        the subscription group and the endpoint or collection.
+
+        Guest Collections inherit the subscriptions of their Mapped Collections and
+        cannot have a ``subscription_id`` directly set in this way.
+
+        :param collection_id: The collection ID which is having its subscription set.
+        :param subscription_id: The ID of the subscription which is being assigned.
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    import globus_sdk
+
+                    MY_SUBSCRIPTION_ID = "..."
+                    LOCAL_GCP = globus_sdk.LocalGlobusConnectPersonal()
+
+                    tc = globus_sdk.TransferClient(...)
+                    tc.endpoint_set_subscription_id(
+                        LOCAL_GCP.endpoint_id,
+                        MY_SUBSCRIPTION_ID,
+                    )
+
+            .. tab-item:: API Info
+
+                ``PUT /endpoint/<collection_id>/subscription``
+
+                .. extdoclink:: Associate a Globus Connect Personal Mapped Collection with a Subscription
+                    :ref: transfer/gcp_management/#associate_collection_subscription
+        """  # noqa: E501
+        return self.put(
+            f"/endpoint/{collection_id}/subscription",
+            data={"subscription_id": subscription_id},
+        )
+
     def create_endpoint(self, data: dict[str, t.Any]) -> response.GlobusHTTPResponse:
         """
         .. warning::
