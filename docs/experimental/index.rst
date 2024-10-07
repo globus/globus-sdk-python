@@ -15,7 +15,6 @@ Globus SDK Experimental Components
     :maxdepth: 1
 
     scope_parser
-    globus_app
 
 
 Experimental Construct Lifecycle
