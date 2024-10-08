@@ -17,7 +17,7 @@ a client should submit requests on behalf of themselves.
 
 The interfaces of these classes, defined below, intentionally include many
 "sane defaults" (i.e., storing oauth2 access tokens in a json file). These defaults
-however can be overridden if the behavior is not desired. For more information on what
+may be overridden to customize the app's behavior. For more information on what
 you can customize and how, see :ref:`globus_app_config`.
 
 .. note::
@@ -34,6 +34,11 @@ Reference
     :members:
     :exclude-members: scope_requirements
     :member-order: bysource
+
+..
+    In the above class, "scope_requirements" is excluded because it's an `@property`.
+    Sphinx wants to document it as a method but that's not how it's invoked. Instead
+    documentation is included in the class docstring as an `ivar`.
 
 Implementations
 ^^^^^^^^^^^^^^^

@@ -16,6 +16,11 @@ Data Model
     :exclude-members: token_validation_error_handler
     :member-order: bysource
 
+..
+    In the above class, "token_validation_error_handler" is a callable so sphinx wants
+    to document it as a method. Instead, we explicitly exclude it and document it in the
+    class docstring as an `ivar`.
+
 Providers
 ^^^^^^^^^
 
