@@ -28,7 +28,7 @@ class UserApp(GlobusApp):
     clients.
 
     Typically, a ``UserApp`` will use a native client, requiring a **client_id**
-    obtained from the `Globus Developer Console <https://developers.globus.org/>`_.
+    created in a `Globus Project <https://app.globus.org/settings/developers>`_.
     More advanced use cases however, may additionally supply a **client_secret** or
     full **login_client** with confidential client credentials.
 

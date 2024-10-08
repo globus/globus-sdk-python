@@ -10,7 +10,7 @@ of authenticating for Globus service clients.
 
 A ``GlobusApp`` requires a programmatic Globus Auth entity called a "client" to be
 supplied as the requester driving authentication flows. A client can be created and
-managed through the `Globus Developer Console <https://developers.globus.org/>`_.
+managed as a part of a `Globus Project <https://app.globus.org/settings/developers>`_.
 There are two types of GlobusApps; :class:`UserApp`, for contexts in which a client
 should submit requests on behalf of a user, and :class:`ClientApp`, for contexts which
 a client should submit requests on behalf of themselves.

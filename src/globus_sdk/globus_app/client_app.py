@@ -14,10 +14,10 @@ class ClientApp(GlobusApp):
     A ``GlobusApp`` for managing authentication state of a service account for use
     in service clients.
 
-    A ``ClientApp`` requires the use of a confidential client obtained from the
-    `Globus Developer Console <https://developers.globus.org/>`_. Client info should
-    either be passed with the **client_id** and **client_secret** parameters or as
-    a **login_client**.
+    A ``ClientApp`` requires the use of a confidential client created in a
+    `Globus Project <https://app.globus.org/settings/developers>`. Client info may
+    be passed either with the **client_id** and **client_secret** parameters or as
+    a full **login_client**.
 
     ``ClientApps`` are configured by supplying a :class:`GlobusAppConfig` object to the
     **config** parameter. Of note however, **login_flow_manager** must not be set; a

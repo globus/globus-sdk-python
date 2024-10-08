@@ -92,8 +92,8 @@ class GlobusAppConfig:
 
             **login_redirect_url** may be ignored when using a
             :class:`NativeAppAuthClient`.
-            Explicit values must be pre-registered on your client in the
-            `Globus Developers Console <https://developers.globus.org/>`_.
+            Explicit values must be pre-registered on your client
+            `here <https://app.globus.org/settings/developers>`_.
 
     :ivar ``TokenValidationErrorHandler`` token_validation_error_handler: A handler
         invoked to resolve errors raised during token validation.
