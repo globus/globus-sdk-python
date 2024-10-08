@@ -46,19 +46,23 @@ def iter_all_documented_names() -> t.Iterable[str]:
     #   .. autofunction:: <name>
     #   .. autoexception:: <name>
     #   .. autodata:: <name>
-    auto_directive = r"auto(?:class|function|exception|data)"
-    name_capturer = r"(?:\w+\.)*(\w+)(?:\(.*\))?"
     autodoc_pattern = re.compile(
-        rf"^\.\.\s+{auto_directive}::\s+{name_capturer}$",
-        flags=re.MULTILINE,
+        r"""
+        ^\.\.\s+auto(?:class|function|exception|data)::\s+ # auto-directive (uncaptured)
+        (?:\w+\.)*(\w+)(?:\(.*\))?$                        # symbol name (captured)
+        """,
+        flags=re.MULTILINE | re.X,
     )
     # names under these directives
     #
     #   .. class:: <name>
     #   .. py:data:: <name>
     pydoc_pattern = re.compile(
-        r"^\.\.\s+(?:py:data|class)::\s+(?:\w+\.)*(\w+)$",
-        flags=re.MULTILINE,
+        r"""
+        ^\.\.\s+(?:py:data|class)::\s+ # directive
+        (?:\w+\.)*(\w+)(?:\(.*\))?$    # symbol name (captured)
+        """,
+        flags=re.MULTILINE | re.X,
     )
     for data in load_docs().values():
         for match in autodoc_pattern.finditer(data):
