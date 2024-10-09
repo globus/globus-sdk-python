@@ -43,9 +43,9 @@ The following table provides a comparison of these two options:
     *   - **UserApp**
         - **ClientApp**
 
-    *   - Commonly used to perform actions as a specific end user (e.g., the
+    *   - Appropriate for performing actions as a specific end user (e.g., the
           `Globus CLI <https://docs.globus.org/cli/>`_)
-        - Commonly used to automate an action as a service account
+        - Appropriate for automating actions as a service account
 
     *   - Created resources (e.g., collections or flows) by default are owned by an end
           user
