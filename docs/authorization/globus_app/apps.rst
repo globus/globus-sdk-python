@@ -9,7 +9,7 @@ GlobusApps
 .. note::
 
     Currently ``GlobusApp`` can only be used in scripts (e.g., notebooks or automation)
-    and local applications launched directly by a user.
+    and applications directly responsible for a user's login flow.
 
     Web services and other hosted applications operating as resource servers should see
     :ref:`globus_authorizers` instead.
@@ -20,7 +20,8 @@ interactions with :ref:`globus-sdk services <services>`.
 
 A ``GlobusApp`` uses an OAuth2 client to obtain and manage OAuth2 tokens required for
 API interactions. OAuth2 clients must be created external to the SDK by registering an
-application at the `Globus Developer's Console <https://app.globus.org/developers>`_.
+application at the
+`Globus Developer's Console <https://app.globus.org/settings/developers>`_.
 
 The following section provides a comparison of of the specific types of ``GlobusApps``
 to aid in selecting the proper one for your use case.
@@ -28,8 +29,12 @@ to aid in selecting the proper one for your use case.
 Types of GlobusApps
 -------------------
 
-There are two types of ``GlobusApps`` available in the SDK: :class:`UserApp` and
-:class:`ClientApp`, each modeling a different style of service interaction:
+There are two flavors of ``GlobusApp`` available in the SDK: :class:`UserApp`, for
+interactions between an end user and Globus services, and :class:`ClientApp`, for
+interactions between a client (i.e., service account) and Globus services.
+
+The following table provides a comparison of these two options:
+
 
 .. list-table::
     :widths: 50 50
@@ -38,25 +43,28 @@ There are two types of ``GlobusApps`` available in the SDK: :class:`UserApp` and
     *   - **UserApp**
         - **ClientApp**
 
-    *   - Appropriate for simplifying a process otherwise performed by a user (e.g.,
-          the `Globus CLI <https://docs.globus.org/cli/>`_)
-        - Appropriate for automation against non-sensitive data
+    *   - Commonly used to perform actions as a specific end user (e.g., the
+          `Globus CLI <https://docs.globus.org/cli/>`_)
+        - Commonly used to automate an action as a service account
 
-    *   - OAuth2 tokens are obtained by logging a human in (through a web browser)
-        - OAuth2 tokens are obtained by programmatically exchanging an OAuth2 client's
-          secret
-
-    *   - Created resources (e.g., collections or flows) by default are owned by a user
+    *   - Created resources (e.g., collections or flows) by default are owned by an end
+          user
         - Created resources (e.g., collections or flows) by default are owned by the
           OAuth2 client
 
-    *   - Existing resource access is evaluated based on a user's permissions
+    *   - Existing resource access is evaluated based on an end user's permissions
         - Existing resource access is evaluated based on the OAuth2 client's permissions
 
-    *   - Should use a "native" OAuth2 client
+    *   - OAuth2 tokens are obtained by putting an end user through a login flow
+          (this occurs in a web browser)
+        - OAuth2 tokens are obtained by programmatically exchanging an OAuth2 client's
+          secret
 
-          (`Register a thick client
+    *   - Should typically use a "native" OAuth2 client (`Register a thick client
           <https://app.globus.org/settings/developers/registration/public_installed_client>`_)
+
+          May use a "confidential" OAuth2 client (`Register a portal or science gateway
+          <https://app.globus.org/settings/developers/registration/confidential_client>`_)
         - Must use a "confidential" OAuth2 client
 
           (`Register a service account
@@ -69,7 +77,7 @@ There are two types of ``GlobusApps`` available in the SDK: :class:`UserApp` and
 
     Particularly when dealing with sensitive data, services may enforce that a
     a user be the primary data access actor. In these cases, a ``ClientApp``
-    will be rejected, so a ``UserApp`` must be used instead.
+    will be rejected and a ``UserApp`` must be used instead.
 
 Reference
 ---------

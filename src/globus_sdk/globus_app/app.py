@@ -234,7 +234,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         force: bool = False,
     ) -> None:
         """
-        Log an auth entity into the app, if needed, storing the resulting tokens.
+        Log a user or client into the app, if needed, storing the resulting tokens.
 
         A login flow will be performed if any of the following are true:
             * The kwarg ``auth_params`` is provided.
@@ -271,7 +271,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
 
     def logout(self) -> None:
         """
-        Logout an auth entity out from the app.
+        Log the current user or client out of the app.
 
         This will remove and revoke all tokens stored for the current app user.
         """
