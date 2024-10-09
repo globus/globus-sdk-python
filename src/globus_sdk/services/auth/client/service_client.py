@@ -14,7 +14,7 @@ from globus_sdk.response import GlobusHTTPResponse, IterableResponse
 from globus_sdk.scopes import AuthScopes, Scope
 
 if t.TYPE_CHECKING:
-    from globus_sdk.experimental.globus_app import GlobusApp
+    from globus_sdk.globus_app import GlobusApp
 
 from .._common import get_jwk_data, pem_decode_jwk_data
 from ..data import DependentScopeSpec

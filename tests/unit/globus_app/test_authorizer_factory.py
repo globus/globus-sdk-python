@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from globus_sdk.experimental.globus_app import (
+from globus_sdk.globus_app.authorizer_factory import (
     AccessTokenAuthorizerFactory,
     ClientCredentialsAuthorizerFactory,
     RefreshTokenAuthorizerFactory,

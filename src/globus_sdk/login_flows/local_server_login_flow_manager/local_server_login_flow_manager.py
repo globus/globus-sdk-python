@@ -21,7 +21,7 @@ from .errors import LocalServerEnvironmentalLoginError, LocalServerLoginError
 from .local_server import DEFAULT_HTML_TEMPLATE, RedirectHandler, RedirectHTTPServer
 
 if t.TYPE_CHECKING:
-    from globus_sdk.experimental.globus_app import GlobusAppConfig
+    from globus_sdk.globus_app import GlobusAppConfig
 
 # a list of text-only browsers which are not allowed for use because they don't work
 # with Globus Auth login flows and seize control of the terminal

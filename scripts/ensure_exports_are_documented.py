@@ -15,10 +15,11 @@ _ALL_NAME_PATTERN = re.compile(r'\s+"(\w+)",?')
 
 PACKAGE_LOCS_TO_SCAN = (
     "globus_sdk/",
-    "globus_sdk/response.py",
-    "globus_sdk/scopes/",
-    "globus_sdk/gare/",
     "globus_sdk/login_flows/",
+    "globus_sdk/gare/",
+    "globus_sdk/globus_app/",
+    "globus_sdk/scopes/",
+    "globus_sdk/response.py",
     "globus_sdk/_testing/",
 )
 
@@ -41,20 +42,27 @@ def iter_all_documented_names() -> t.Iterable[str]:
     # names under these directives
     #
     #   .. autoclass:: <name>
+    #   .. autoclass:: <name>(<args>)
     #   .. autofunction:: <name>
     #   .. autoexception:: <name>
     #   .. autodata:: <name>
     autodoc_pattern = re.compile(
-        r"^\.\.\s+auto(?:class|function|exception|data)\:\:\s+(?:\w+\.)*(\w+)$",
-        flags=re.MULTILINE,
+        r"""
+        ^\.\.\s+auto(?:class|function|exception|data)::\s+ # auto-directive (uncaptured)
+        (?:\w+\.)*(\w+)(?:\(.*\))?$                        # symbol name (captured)
+        """,
+        flags=re.MULTILINE | re.X,
     )
     # names under these directives
     #
     #   .. class:: <name>
     #   .. py:data:: <name>
     pydoc_pattern = re.compile(
-        r"^\.\.\s+(?:py\:data|class)\:\:\s+(?:\w+\.)*(\w+)$",
-        flags=re.MULTILINE,
+        r"""
+        ^\.\.\s+(?:py:data|class)::\s+ # directive
+        (?:\w+\.)*(\w+)(?:\(.*\))?$    # symbol name (captured)
+        """,
+        flags=re.MULTILINE | re.X,
     )
     for data in load_docs().values():
         for match in autodoc_pattern.finditer(data):
@@ -82,7 +90,11 @@ def get_names_from_all_list(file_path: str) -> list[str]:
         if found_all:
             if line.strip() == ")":
                 break
-            names.append(_ALL_NAME_PATTERN.match(line).group(1))
+            # Extract the actual symbol from the line.
+            # i.e., '  "Foo",\n' -> 'Foo'
+            name_match = _ALL_NAME_PATTERN.match(line)
+            if name_match is not None:
+                names.append(name_match.group(1))
         else:
             if line.strip() == "__all__ = (":
                 found_all = True

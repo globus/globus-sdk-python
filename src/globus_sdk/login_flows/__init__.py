@@ -6,10 +6,10 @@ from .local_server_login_flow_manager import (
 )
 from .login_flow_manager import LoginFlowManager
 
-__all__ = [
+__all__ = (
     "CommandLineLoginFlowManager",
     "LocalServerLoginError",
     "LocalServerEnvironmentalLoginError",
     "LocalServerLoginFlowManager",
     "LoginFlowManager",
-]
+)

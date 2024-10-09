@@ -27,7 +27,7 @@ most objects are actually loaded from a :meth:`globus_sdk.AuthClient.get_consent
     consent_forest: ConsentForest = response.to_forest()
 
 Reference
-=========
+---------
 
 .. autoclass:: ConsentForest
    :members:

@@ -13,7 +13,7 @@ from globus_sdk.scopes import Scope, ScopeBuilder
 from globus_sdk.transport import RequestsTransport
 
 if t.TYPE_CHECKING:
-    from globus_sdk.experimental.globus_app import GlobusApp
+    from globus_sdk.globus_app import GlobusApp
 
 log = logging.getLogger(__name__)
 

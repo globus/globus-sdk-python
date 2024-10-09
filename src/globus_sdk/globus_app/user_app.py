@@ -24,29 +24,40 @@ from .protocols import LoginFlowManagerProvider
 
 class UserApp(GlobusApp):
     """
-    A ``GlobusApp`` for login methods that require an interactive flow with a user.
+    A ``GlobusApp`` for managing authentication state of a user for use in service
+    clients.
 
-    ``UserApp``\\s are most commonly used with native application clients by passing a
-    ``NativeAppAuthClient`` as ``login_client`` or the native application's
-    ``client_id``.
+    Typically, a ``UserApp`` will use a native client, requiring a **client_id**
+    created in a `Globus Project <https://app.globus.org/settings/developers>`_.
+    More advanced use cases however, may additionally supply a **client_secret** or
+    full **login_client** with confidential client credentials.
 
-    If using a templated client, either pass a ``ConfidentialAppAuthClient``
-    as `login_client`` or the templated client's ``client_id`` and ``client_secret``.
-    This will not work for standard confidential clients.
+    ``UserApps`` are configured by supplying a :class:`GlobusAppConfig` object to the
+    **config** parameter. Of note, login flow behavior involves printing and prompting
+    the user for input using std::in and std::out. This behavior can be customized with
+    the **login_flow_manager** config attribute.
 
-    By default a ``UserApp`` will create a ``CommandLineLoginFlowManager`` for
-    running login flows, which can be overridden through ``config``.
+    See :class:`GlobusApp` for method signatures.
 
-    .. tab-set::
+    .. rubric:: Example Usage:
 
-        .. tab-item:: Example Usage
+    .. code-block:: python
 
-            .. code-block:: python
+        app = UserApp("myapp", client_id=NATIVE_CLIENT_ID)
+        transfer_client = TransferClient(app=app)
+        res = transfer_client.endpoint_search("Tutorial Collection")
 
-                app = UserApp("myapp", client_id=NATIVE_APP_CLIENT_ID)
-                client = TransferClient(app=app)
-                res = client.endpoint_search("Tutorial Collection")
-
+    :param app_name: A human-readable string to identify this app.
+    :param login_client: A login client bound to a specific native client id or
+        confidential client id/secret. Mutually exclusive with **client_id** and
+        **client_secret**.
+    :param client_id: A native or confidential client ID. Mutually exclusive with
+        **login_client**.
+    :param client_secret: A confidential client secret. Mutually exclusive with
+        **login_client**.
+    :param scope_requirements: A mapping of resource server to initial scope
+        requirements.
+    :param config: A data class containing configuration parameters for the app.
     """
 
     _login_client: NativeAppAuthClient | ConfidentialAppAuthClient

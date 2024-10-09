@@ -25,39 +25,27 @@ from .protocols import TokenStorageProvider
 
 class GlobusApp(metaclass=abc.ABCMeta):
     """
-    ``GlobusApp`` is an abstract base class providing an interface for simplifying
-    authentication with Globus services.
+    The abstract base class for managing authentication across services.
 
-    A ``GlobusApp`` manages scope requirements across multiple resource servers,
-    runs login flows through its ``LoginFlowManager``, handles token storage and
-    validation through its ``ValidatingTokenStorage``, and provides up-to-date
-    authorizers from its ``AuthorizerFactory`` through ``get_authorizer``.
+    A single ``GlobusApp`` may be bound to many service clients, providing each them
+    with dynamically updated authorization tokens. The app is responsible for ensuring
+    these tokens are up-to-date and validly scoped; including initiating login flows to
+    acquire new tokens when necessary.
 
-    A ``GlobusApp`` is accepted as an initialization parameter to any SDK-provided
-    service client, automatically handling the client's default scope requirements and
-    providing the client with an authorizer.
+    See :class:`UserApp` to oversee interactions with a human.
 
-    :param app_name: A string to identify this app. Used for default tokenstorage
-        location and in the future will be used to set user-agent when this app is
-        attached to a service client
-    :param login_client: An ``AuthLoginCLient`` that will be used for running
-        authentication flows. Different classes of ``GlobusApp`` may require
-        specific classes of ``AuthLoginClient``. ``Mutually exclusive with
-        ``client_id`` and ``client_secret``.
-    :param client_id: A client UUID used to construct an ``AuthLoginCLient`` for running
-        authentication flows. The type of ``AuthLoginCLient`` will depend on the
-        type of ``GlobusApp``. Mutually exclusive with ``login_client``.
-    :param client_secret: The value of the client secret for ``client_id`` if it uses
-        secrets. Mutually exclusive with ``login_client``.
-    :param scope_requirements: A dictionary of scope requirements indexed by
-        resource server. The dict value may be a scope, scope string, or list of
-        scopes or scope strings.
-    :param config: A ``GlobusAppConfig`` used to control various behaviors of this app.
+    See :class:`ClientApp` to oversee interactions with a service account.
 
-    :ivar token_storage: The ``TokenStorage`` containing tokens for the app and
-        capable of validating identity and scope requirements.
-        Authorization mediated by the app will use this object, so modifying this will
-        impact clients which are defined to use the app whenever they fetch tokens.
+    .. warning::
+
+        GlobusApp is **not** thread safe.
+
+    :ivar ValidatingTokenStorage token_storage: The interface used by the app to store,
+        retrieve, and validate Globus Auth-issued tokens.
+    :ivar dict[str, list[Scope]] scope_requirements: A copy of the app's aggregate scope
+        requirements. Modifying the returned dict will not affect the app's internal
+        store. To add scope requirements, instead use the :meth:`add_scope_requirements`
+        method.
     """
 
     _login_client: AuthLoginClient
@@ -246,7 +234,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         force: bool = False,
     ) -> None:
         """
-        Log an auth entity into the app, if needed, storing the resulting tokens.
+        Log a user or client into the app, if needed, storing the resulting tokens.
 
         A login flow will be performed if any of the following are true:
             * The kwarg ``auth_params`` is provided.
@@ -283,7 +271,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
 
     def logout(self) -> None:
         """
-        Logout an auth entity from the app.
+        Log the current user or client out of the app.
 
         This will remove and revoke all tokens stored for the current app user.
         """
@@ -337,29 +325,6 @@ class GlobusApp(metaclass=abc.ABCMeta):
 
         return auth_params
 
-    def get_authorizer(self, resource_server: str) -> GlobusAuthorizer:
-        """
-        Get a ``GlobusAuthorizer`` from the app's authorizer factory for a specified
-        resource server. The type of authorizer is dependent on the app.
-
-        :param resource_server: The resource server for which the requested Authorizer
-            should provide authorization headers.
-        """
-        error_handling_enabled = self._token_validation_error_handling_enabled
-
-        try:
-            # Disable token validation error handling for nested calls.
-            # This will ultimately ensure that the error handler is only called once
-            # by the root `get_authorizer` invocation.
-            with self._disabled_token_validation_error_handler():
-                return self._authorizer_factory.get_authorizer(resource_server)
-        except TokenValidationError as e:
-            if error_handling_enabled and self.config.token_validation_error_handler:
-                # Dispatch to the configured error handler if one is set then retry.
-                self.config.token_validation_error_handler(self, e)
-                return self._authorizer_factory.get_authorizer(resource_server)
-            raise e
-
     @contextlib.contextmanager
     def _disabled_token_validation_error_handler(self) -> t.Iterator[None]:
         """
@@ -380,7 +345,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
     ) -> None:
         """
         Add given scope requirements to the app's scope requirements. Any duplicate
-        requirements will be deduplicated later at authorization url creation time.
+        requirements will be deduplicated with existing requirements.
 
         :param scope_requirements: a dict of Scopes indexed by resource server
             that will be added to this app's scope requirements
@@ -391,6 +356,30 @@ class GlobusApp(metaclass=abc.ABCMeta):
 
         if self._authorizer_factory_initialized:
             self._authorizer_factory.clear_cache(*scope_requirements.keys())
+
+    def get_authorizer(self, resource_server: str) -> GlobusAuthorizer:
+        """
+        Get a ``GlobusAuthorizer`` for a resource server.
+
+        This method will be called by service clients while making HTTP requests.
+
+        :param resource_server: The resource server for which the requested Authorizer
+            should provide authorization headers.
+        """
+        error_handling_enabled = self._token_validation_error_handling_enabled
+
+        try:
+            # Disable token validation error handling for nested calls.
+            # This will ultimately ensure that the error handler is only called once
+            # by the root `get_authorizer` invocation.
+            with self._disabled_token_validation_error_handler():
+                return self._authorizer_factory.get_authorizer(resource_server)
+        except TokenValidationError as e:
+            if error_handling_enabled and self.config.token_validation_error_handler:
+                # Dispatch to the configured error handler if one is set then retry.
+                self.config.token_validation_error_handler(self, e)
+                return self._authorizer_factory.get_authorizer(resource_server)
+            raise e
 
     @property
     def scope_requirements(self) -> dict[str, list[Scope]]:

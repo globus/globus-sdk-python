@@ -11,26 +11,40 @@ from .config import DEFAULT_CONFIG, GlobusAppConfig
 
 class ClientApp(GlobusApp):
     """
-    A ``GlobusApp`` using client credentials - useful for service accounts and
-    automation use cases.
+    A ``GlobusApp`` for managing authentication state of a service account for use
+    in service clients.
 
-    ``ClientApp``\\s are always used with confidential clients either by passing
-    a ``ConfidentialAppAuthClient`` as ``login_client`` or providing the client's
-    ``client_id`` and ``client_secret`` pair.
+    A ``ClientApp`` requires the use of a confidential client created in a
+    `Globus Project <https://app.globus.org/settings/developers>`. Client info may
+    be passed either with the **client_id** and **client_secret** parameters or as
+    a full **login_client**.
 
-    ``ClientApp``\\s do not use a ``LoginFlowManager`` and will raise an error
-    if given one through ``config``.
+    ``ClientApps`` are configured by supplying a :class:`GlobusAppConfig` object to the
+    **config** parameter. Of note however, **login_flow_manager** must not be set; a
+    ``ClientApp`` does not use a login flow manager.
 
-    .. tab-set::
+    See :class:`GlobusApp` for method signatures.
 
-        .. tab-item:: Example Usage
+    .. rubric:: Example Usage:
 
-            .. code-block:: python
+    .. code-block:: python
 
-                app = ClientApp("myapp", CLIENT_ID, CLIENT_SECRET)
-                client = TransferClient(app=app)
-                res = client.endpoint_search("Tutorial Collection")
+        app = ClientApp("myapp", client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
+        transfer_client = TransferClient(app=app)
+        res = transfer_client.endpoint_search("Tutorial Collection")
 
+
+    :param app_name: A human-readable string to identify this app.
+    :param login_client: A login client bound to a specific native client id or
+        confidential client id/secret. Mutually exclusive with **client_id** and
+        **client_secret**.
+    :param client_id: A confidential client ID. Mutually exclusive with
+        **login_client**.
+    :param client_secret: A confidential client secret. Mutually exclusive with
+        **login_client**.
+    :param scope_requirements: A mapping of resource server to initial scope
+        requirements.
+    :param config: A data class containing configuration parameters for the app.
     """
 
     _login_client: ConfidentialAppAuthClient

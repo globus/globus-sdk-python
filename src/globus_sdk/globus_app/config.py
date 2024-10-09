@@ -60,26 +60,49 @@ def resolve_by_login_flow(app: GlobusApp, error: TokenValidationError) -> None:
 @dataclasses.dataclass(frozen=True)
 class GlobusAppConfig:
     """
-    Various configuration options for controlling the behavior of a ``GlobusApp``.
+    An immutable dataclass used to control the behavior of a :class:`GlobusApp`.
 
-    :param login_flow_manager: An optional ``LoginFlowManager`` instance, provider,
-        or identifier ("command-line" or "local-server").
-        For a ``UserApp``, defaults to "command-line".
-        For a ``ClientApp``, this value is not supported.
-    :param login_redirect_uri: The redirect URI to use for login flows.
-        For a "local-server" login flow manager, this value is not supported.
-        For a native client, this value defaults to a globus-hosted helper page.
-        For a confidential client, this value is required.
-    :param request_refresh_tokens: If True, the ``GlobusApp`` will request refresh
-        tokens for long-lived access.
-    :param token_storage: A ``TokenStorage`` instance, provider, or identifier
-        ("json", "sqlite", or "memory").
-        Default: "json"
-    :param token_validation_error_handler: A callable that will be called when a
-        token validation error is encountered. The default behavior is to retry the
-        login flow automatically.
-    :param environment: The Globus environment being targeted by this app. This is
-        predominately for internal use and can be ignored in most cases.
+    :ivar bool request_refresh_tokens: Whether to request ``refresh tokens`` (expire
+        after 6 months of no use) or use exclusively ``access tokens`` (expire 2 hours
+        after issuance). Default: ``False``.
+
+    :ivar str | ``TokenStorage`` | ``TokenStorageProvider`` token_storage:
+        A class responsible for storing and retrieving tokens.
+        This may be either a well-known provider (one of
+        :class:`"json" <globus_sdk.tokenstorage.JSONTokenStorage>`,
+        :class:`"sqlite" <globus_sdk.tokenstorage.SQLiteTokenStorage>`, or
+        :class:`"memory" <globus_sdk.tokenstorage.MemoryTokenStorage>`) or a custom
+        storage/provider. Default: ``"json"``.
+
+    :ivar str | ``LoginFlowManager`` | ``LoginFlowManagerProvider`` login_flow_manager:
+        A class responsible for overseeing Globus Auth login flows.
+        This may be either be a well-known provider (one of
+        :class:`"command-line" <globus_sdk.login_flows.CommandLineLoginFlowManager>` or
+        :class:`"local-server" <globus_sdk.login_flows.LocalServerLoginFlowManager>`)
+        or a custom manager/provider. Default: ``"command-line"``.
+
+        .. note::
+
+            **login_flow_manager** may be ignored when using a :class:`ClientApp`.
+
+    :ivar str | None login_redirect_uri: The destination for Globus Auth to send
+        a user after once completed a login flow. Default: ``None``.
+
+        .. note::
+
+            **login_redirect_url** may be ignored when using a
+            :class:`NativeAppAuthClient`.
+            Explicit values must be pre-registered on your client
+            `here <https://app.globus.org/settings/developers>`_.
+
+    :ivar ``TokenValidationErrorHandler`` token_validation_error_handler: A handler
+        invoked to resolve errors raised during token validation.
+        Default: ``resolve_by_login_flow`` (runs a login flow, storing the resulting
+        tokens).
+
+    :ivar str environment: The Globus environment of services to interact with. This is
+        mostly used for testing purposes. This may additionally be set with the
+        environment variable `GLOBUS_SDK_ENVIRONMENT`. Default: ``"production"``.
     """
 
     login_flow_manager: (

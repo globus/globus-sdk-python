@@ -9,22 +9,22 @@ import pytest
 from globus_sdk import (
     AccessTokenAuthorizer,
     AuthLoginClient,
+    ClientApp,
     ClientCredentialsAuthorizer,
     ConfidentialAppAuthClient,
+    GlobusAppConfig,
     NativeAppAuthClient,
     RefreshTokenAuthorizer,
+    UserApp,
 )
 from globus_sdk._testing import load_response
 from globus_sdk.exc import GlobusSDKUsageError
-from globus_sdk.experimental.globus_app import (
-    AccessTokenAuthorizerFactory,
-    ClientApp,
-    ClientCredentialsAuthorizerFactory,
-    GlobusAppConfig,
-    RefreshTokenAuthorizerFactory,
-    UserApp,
-)
 from globus_sdk.gare import GlobusAuthorizationParameters
+from globus_sdk.globus_app.authorizer_factory import (
+    AccessTokenAuthorizerFactory,
+    ClientCredentialsAuthorizerFactory,
+    RefreshTokenAuthorizerFactory,
+)
 from globus_sdk.login_flows import (
     CommandLineLoginFlowManager,
     LocalServerLoginFlowManager,

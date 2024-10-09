@@ -6,7 +6,7 @@ import typing as t
 from globus_sdk import GlobusHTTPResponse, client, paging, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
-from globus_sdk.experimental.globus_app import GlobusApp
+from globus_sdk.globus_app import GlobusApp
 from globus_sdk.scopes import FlowsScopes, Scope, ScopeBuilder, SpecificFlowScopeBuilder
 from globus_sdk.utils import MISSING, MissingType
 

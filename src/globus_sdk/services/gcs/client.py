@@ -6,7 +6,7 @@ import uuid
 from globus_sdk import client, exc, paging, response, scopes, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
-from globus_sdk.experimental.globus_app import GlobusApp
+from globus_sdk.globus_app import GlobusApp
 from globus_sdk.scopes import Scope
 
 from .connector_table import ConnectorTable

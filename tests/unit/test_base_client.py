@@ -6,9 +6,9 @@ from unittest import mock
 import pytest
 
 import globus_sdk
+from globus_sdk import GlobusApp, GlobusAppConfig, UserApp
 from globus_sdk._testing import RegisteredResponse, get_last_request
 from globus_sdk.authorizers import NullAuthorizer
-from globus_sdk.experimental.globus_app import GlobusApp, GlobusAppConfig, UserApp
 from globus_sdk.scopes import Scope, TransferScopes
 from globus_sdk.tokenstorage import TokenValidationError
 

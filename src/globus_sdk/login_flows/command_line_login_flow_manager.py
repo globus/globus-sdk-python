@@ -15,7 +15,7 @@ from globus_sdk.utils import get_nice_hostname
 from .login_flow_manager import LoginFlowManager
 
 if t.TYPE_CHECKING:
-    from globus_sdk.experimental.globus_app import GlobusAppConfig
+    from globus_sdk.globus_app import GlobusAppConfig
 
 
 class CommandLineLoginFlowManager(LoginFlowManager):
