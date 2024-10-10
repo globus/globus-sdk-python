@@ -71,6 +71,8 @@ _LAZY_IMPORT_TABLE = {
     "services.compute": {
         "ComputeClient",
         "ComputeAPIError",
+        "ComputeFunctionDocument",
+        "ComputeFunctionMetadata",
     },
     "services.gcs": {
         "CollectionDocument",
@@ -198,6 +200,8 @@ if t.TYPE_CHECKING:
     from .services.auth import DependentScopeSpec
     from .services.compute import ComputeClient
     from .services.compute import ComputeAPIError
+    from .services.compute import ComputeFunctionDocument
+    from .services.compute import ComputeFunctionMetadata
     from .services.gcs import CollectionDocument
     from .services.gcs import GCSAPIError
     from .services.gcs import GCSClient
@@ -316,6 +320,8 @@ __all__ = (
     "CollectionPolicies",
     "ComputeAPIError",
     "ComputeClient",
+    "ComputeFunctionDocument",
+    "ComputeFunctionMetadata",
     "ConfidentialAppAuthClient",
     "ConnectorTable",
     "DeleteData",

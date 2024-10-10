@@ -14,6 +14,17 @@ Globus Compute
         ..  listknownscopes:: globus_sdk.scopes.ComputeScopes
             :base_name: ComputeClient.scopes
 
+Helper Objects
+--------------
+
+.. autoclass:: ComputeFunctionDocument
+   :members:
+   :show-inheritance:
+
+.. autoclass:: ComputeFunctionMetadata
+   :members:
+   :show-inheritance:
+
 Client Errors
 -------------
 
