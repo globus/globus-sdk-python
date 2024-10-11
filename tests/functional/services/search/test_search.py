@@ -41,12 +41,7 @@ def test_search_query_simple(search_client):
 
 @pytest.mark.parametrize(
     "query_doc",
-    [
-        {"q": "foo"},
-        {"q": "foo", "limit": 10},
-        globus_sdk.SearchQuery("foo"),
-        globus_sdk.SearchQueryV1("foo"),
-    ],
+    [{"q": "foo"}, {"q": "foo", "limit": 10}, globus_sdk.SearchQuery("foo")],
 )
 def test_search_post_query_simple(search_client, query_doc):
     meta = load_response(search_client.post_search).metadata
@@ -62,6 +57,23 @@ def test_search_post_query_simple(search_client, query_doc):
     assert req.body is not None
     req_body = json.loads(req.body)
     assert req_body == dict(query_doc)
+
+
+def test_search_post_v1_query_simple(search_client):
+    query_doc = globus_sdk.SearchQueryV1(q="foo")
+    meta = load_response(search_client.post_search).metadata
+
+    res = search_client.post_search(meta["index_id"], query_doc)
+    assert res.http_status == 200
+
+    data = res.data
+    assert isinstance(data, dict)
+    assert data["gmeta"][0]["entries"][0]["content"]["foo"] == "bar"
+
+    req = get_last_request()
+    assert req.body is not None
+    req_body = json.loads(req.body)
+    assert req_body == {"@version": "query#1.0.0", "q": "foo"}
 
 
 @pytest.mark.parametrize(

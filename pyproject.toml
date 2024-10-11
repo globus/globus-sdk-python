@@ -67,7 +67,6 @@ testpaths = ["tests"]
 norecursedirs = ["tests/non-pytest"]
 filterwarnings = [
     "error",
-    "ignore:'SearchQuery'*:DeprecationWarning",
 ]
 
 [tool.scriv]
