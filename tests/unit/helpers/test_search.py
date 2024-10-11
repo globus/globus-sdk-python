@@ -4,7 +4,8 @@ Unit tests for globus_sdk.SearchQuery
 
 import pytest
 
-from globus_sdk import SearchQuery, SearchQueryV1
+from globus_sdk import SearchQuery, SearchQueryV1, utils
+from globus_sdk.exc.warnings import RemovedInV4Warning
 
 
 def test_init_legacy():
@@ -28,8 +29,8 @@ def test_init_legacy():
 
 def test_init_legacy_deprecation_warning():
     with pytest.warns(
-        DeprecationWarning,
-        match="'SearchQuery' is a deprecated name. Use 'SearchQueryV1' instead.",
+        RemovedInV4Warning,
+        match="'SearchQuery' is deprecated. Use 'SearchQueryV1' instead.",
     ):
         SearchQuery()
 
@@ -42,7 +43,7 @@ def test_init_v1():
 
     # ensure key attributes initialize to empty lists
     for attribute in ["facets", "filters", "post_facet_filters", "sorts", "boosts"]:
-        assert query[attribute] == []
+        assert query[attribute] == utils.MISSING
 
     # init with supported fields
     params = {"q": "foo", "limit": 10, "offset": 0, "advanced": False}

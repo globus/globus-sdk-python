@@ -115,9 +115,7 @@ class SearchQuery(SearchQueryBase):
         additional_fields: dict[str, t.Any] | None = None,
     ):
         super().__init__()
-        exc.warn_deprecated(
-            "'SearchQuery' is a deprecated name. Use 'SearchQueryV1' instead."
-        )
+        exc.warn_deprecated("'SearchQuery' is deprecated. Use 'SearchQueryV1' instead.")
         if q is not None:
             self["q"] = q
         if limit is not None:
@@ -240,12 +238,17 @@ class SearchQueryV1(utils.PayloadWrapper):
 
     def __init__(
         self,
-        q: str | None = None,
         *,
+        q: str | None = None,
         limit: int | None = None,
         offset: int | None = None,
         advanced: bool | None = None,
         additional_fields: dict[str, t.Any] | None = None,
+        filters: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
+        facets: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
+        post_facet_filters: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
+        boosts: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
+        sorts: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
     ):
         super().__init__()
         self["@version"] = "query#1.0.0"
@@ -260,11 +263,11 @@ class SearchQueryV1(utils.PayloadWrapper):
         if additional_fields is not None:
             self.update(additional_fields)
 
-        self["filters"] = []
-        self["facets"] = []
-        self["post_facet_filters"] = []
-        self["boosts"] = []
-        self["sorts"] = []
+        self["filters"] = filters
+        self["facets"] = facets
+        self["post_facet_filters"] = post_facet_filters
+        self["boosts"] = boosts
+        self["sorts"] = sorts
 
 
 class SearchScrollQuery(SearchQueryBase):
