@@ -1,5 +1,5 @@
-Development
-~~~~~~~~~~~
+Added
+~~~~~
 
 - ``SearchQueryV1`` is a new class for submitting complex queries replacing
 the legacy ``SearchQuery`` class. A deprecation warning has been added to the
