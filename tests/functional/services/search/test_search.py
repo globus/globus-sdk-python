@@ -45,6 +45,7 @@ def test_search_query_simple(search_client):
         {"q": "foo"},
         {"q": "foo", "limit": 10},
         globus_sdk.SearchQuery("foo"),
+        globus_sdk.SearchQueryV1("foo"),
     ],
 )
 def test_search_post_query_simple(search_client, query_doc):

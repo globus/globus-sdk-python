@@ -4,13 +4,13 @@ Unit tests for globus_sdk.SearchQuery
 
 import pytest
 
-from globus_sdk import SearchQuery
+from globus_sdk import SearchQuery, SearchQueryV1
 
 
-def test_init():
+def test_init_legacy():
     """Creates SearchQuery and verifies results"""
-    # default init
     query = SearchQuery()
+
     assert len(query) == 0
 
     # init with supported fields
@@ -22,6 +22,37 @@ def test_init():
     # init with additional_fields
     add_params = {"param1": "value1", "param2": "value2"}
     param_query = SearchQuery(additional_fields=add_params)
+    for par in add_params:
+        assert param_query[par] == add_params[par]
+
+
+def test_init_legacy_deprecation_warning():
+    with pytest.warns(
+        DeprecationWarning,
+        match="'SearchQuery' is a deprecated name. Use 'SearchQueryV1' instead.",
+    ):
+        SearchQuery()
+
+
+def test_init_v1():
+    query = SearchQueryV1()
+
+    # ensure the version is set to query#1.0.0
+    assert query["@version"] == "query#1.0.0"
+
+    # ensure key attributes initialize to empty lists
+    for attribute in ["facets", "filters", "post_facet_filters", "sorts", "boosts"]:
+        assert query[attribute] == []
+
+    # init with supported fields
+    params = {"q": "foo", "limit": 10, "offset": 0, "advanced": False}
+    param_query = SearchQueryV1(**params)
+    for par in params:
+        assert param_query[par] == params[par]
+
+    # init with additional_fields
+    add_params = {"param1": "value1", "param2": "value2"}
+    param_query = SearchQueryV1(additional_fields=add_params)
     for par in add_params:
         assert param_query[par] == add_params[par]
 

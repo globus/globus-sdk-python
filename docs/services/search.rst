@@ -25,6 +25,10 @@ only to document the methods it provides to its subclasses.
    :members:
    :show-inheritance:
 
+.. autoclass:: SearchQueryV1
+    :members:
+    :show-inheritance:
+
 .. autoclass:: SearchScrollQuery
    :members:
    :show-inheritance:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typing as t
 
-from globus_sdk import utils
+from globus_sdk import exc, utils
 
 # workaround for absence of Self type
 # for the workaround and some background, see:
@@ -115,6 +115,9 @@ class SearchQuery(SearchQueryBase):
         additional_fields: dict[str, t.Any] | None = None,
     ):
         super().__init__()
+        exc.warn_deprecated(
+            "'SearchQuery' is a deprecated name. Use 'SearchQueryV1' instead."
+        )
         if q is not None:
             self["q"] = q
         if limit is not None:
@@ -219,6 +222,49 @@ class SearchQuery(SearchQueryBase):
             sort["order"] = order
         self["sort"].append(sort)
         return self
+
+
+class SearchQueryV1(utils.PayloadWrapper):
+    """
+    A specialized dict which has helpers for creating and modifying a Search
+    Query document. Replaces the usage of ``SearchQuery``.
+
+    :param q: The query string. Required unless filters are used.
+    :param limit: A limit on the number of results returned in a single page
+    :param offset: An offset into the set of all results for the query
+    :param advanced: Whether to enable (``True``) or not to enable (``False``) advanced
+        parsing of query strings. The default of ``False`` is robust and guarantees that
+        the query will not error with "bad query string" errors
+    :param additional_fields: additional data to include in the query document
+    """
+
+    def __init__(
+        self,
+        q: str | None = None,
+        *,
+        limit: int | None = None,
+        offset: int | None = None,
+        advanced: bool | None = None,
+        additional_fields: dict[str, t.Any] | None = None,
+    ):
+        super().__init__()
+        self["@version"] = "query#1.0.0"
+        if q is not None:
+            self["q"] = q
+        if limit is not None:
+            self["limit"] = limit
+        if offset is not None:
+            self["offset"] = offset
+        if advanced is not None:
+            self["advanced"] = advanced
+        if additional_fields is not None:
+            self.update(additional_fields)
+
+        self["filters"] = []
+        self["facets"] = []
+        self["post_facet_filters"] = []
+        self["boosts"] = []
+        self["sorts"] = []
 
 
 class SearchScrollQuery(SearchQueryBase):

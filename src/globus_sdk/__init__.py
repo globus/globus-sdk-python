@@ -126,6 +126,7 @@ _LAZY_IMPORT_TABLE = {
         "SearchAPIError",
         "SearchClient",
         "SearchQuery",
+        "SearchQueryV1",
         "SearchScrollQuery",
     },
     "services.timers": {
@@ -245,6 +246,7 @@ if t.TYPE_CHECKING:
     from .services.search import SearchAPIError
     from .services.search import SearchClient
     from .services.search import SearchQuery
+    from .services.search import SearchQueryV1
     from .services.search import SearchScrollQuery
     from .services.timers import TimersAPIError
     from .services.timers import TimersClient
@@ -386,6 +388,7 @@ __all__ = (
     "SearchAPIError",
     "SearchClient",
     "SearchQuery",
+    "SearchQueryV1",
     "SearchScrollQuery",
     "SpecificFlowClient",
     "StorageGatewayDocument",
