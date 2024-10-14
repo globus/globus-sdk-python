@@ -1,8 +1,6 @@
 Changed
 ~~~~~~~
 
-.. rubric:: Experimental
-
 - The mechanisms of token data validation inside of ``GlobusApp`` are now more
   modular and extensible. The ``ValidatingTokenStorage`` class does not define
   built-in validation behaviors, but instead contains a list of validator
