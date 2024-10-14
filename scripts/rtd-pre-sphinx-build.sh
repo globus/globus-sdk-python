@@ -20,6 +20,6 @@ if [ -z "$(find changelog.d -name '*.rst')" ]; then
 fi
 
 SDK_VERSION=$(grep '^__version__' src/globus_sdk/version.py | cut -d '"' -f2)
-DEV_VERSION="${SDK_VERSION}-dev"
+DEV_VERSION="${SDK_VERSION}-pr-${READTHEDOCS_VERSION_NAME}"
 
-scriv collect --keep --version "$DEV_VERSION"
+scriv collect --keep --version "$DEV_VERSION" -v DEBUG
