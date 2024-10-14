@@ -6,7 +6,7 @@
 #
 certifi==2024.8.30
     # via requests
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via requests
 coverage==7.6.1
     # via -r test.in
@@ -41,7 +41,7 @@ requests==2.32.3
     # via responses
 responses==0.25.3
     # via -r test.in
-tomli==2.0.1
+tomli==2.0.2
     # via pytest
 urllib3==2.2.3
     # via

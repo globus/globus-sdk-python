@@ -6,9 +6,9 @@
 #
 certifi==2024.8.30
     # via requests
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via requests
-coverage==7.6.1
+coverage==7.6.3
     # via -r test.in
 execnet==2.1.1
     # via pytest-xdist

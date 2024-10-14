@@ -6,3 +6,6 @@ sphinx-design
 
 # required for testing modules to load
 responses
+
+# required for the PR pre-build step in RTD
+scriv

@@ -8,6 +8,9 @@ build:
   os: "ubuntu-22.04"
   tools:
     python: "3.11"
+  jobs:
+    pre_build:
+      - bash ./scripts/rtd-pre-sphinx-build.sh
 
 python:
   install:

@@ -6,11 +6,11 @@
 #
 certifi==2024.8.30
     # via requests
-charset-normalizer==3.3.2
+charset-normalizer==3.4.0
     # via requests
 idna==3.10
     # via requests
-mypy==1.11.2
+mypy==1.12.0
     # via -r typing.in
 mypy-extensions==1.0.0
     # via mypy
@@ -22,7 +22,7 @@ responses==0.25.3
     # via -r typing.in
 types-cryptography==3.3.23.2
     # via types-jwt
-types-docutils==0.21.0.20240907
+types-docutils==0.21.0.20241005
     # via -r typing.in
 types-jwt==0.1.3
     # via -r typing.in
