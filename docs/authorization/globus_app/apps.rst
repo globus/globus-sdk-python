@@ -11,8 +11,8 @@ GlobusApps
     Currently ``GlobusApp`` can only be used in scripts (e.g., notebooks or automation)
     and applications directly responsible for a user's login flow.
 
-    Web services and other hosted applications operating as resource servers should see
-    :ref:`globus_authorizers` instead.
+    Web services and other hosted applications operating as an OAuth2 resource server
+    should see :ref:`globus_authorizers` instead.
 
 
 :class:`GlobusApp` is a high level construct designed to simplify authentication for
@@ -23,15 +23,18 @@ API interactions. OAuth2 clients must be created external to the SDK by register
 application at the
 `Globus Developer's Console <https://app.globus.org/settings/developers>`_.
 
-The following section provides a comparison of of the specific types of ``GlobusApps``
+The following section provides a comparison of the specific types of ``GlobusApps``
 to aid in selecting the proper one for your use case.
 
 Types of GlobusApps
 -------------------
 
-There are two flavors of ``GlobusApp`` available in the SDK: :class:`UserApp`, for
-interactions between an end user and Globus services, and :class:`ClientApp`, for
-interactions between a client (i.e., service account) and Globus services.
+There are two flavors of ``GlobusApp`` available in the SDK:
+
+*   :class:`UserApp`, for interactions in which an end user communicates with Globus
+    services and
+*   :class:`ClientApp`, for interactions in which an OAuth2 client, operating as a
+    "service account", communicates with Globus services.
 
 The following table provides a comparison of these two options:
 
