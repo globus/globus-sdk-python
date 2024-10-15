@@ -1,3 +1,5 @@
+.. _gares:
+
 Globus Auth Requirements Errors (GAREs)
 =======================================
 

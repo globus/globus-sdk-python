@@ -1,4 +1,0 @@
-Python Support
-~~~~~~~~~~~~~~
-
-- Support Python 3.13. (:pr:`1058`)

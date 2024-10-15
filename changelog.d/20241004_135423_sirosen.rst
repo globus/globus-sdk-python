@@ -1,4 +1,0 @@
-Added
-~~~~~
-
-- Add ``TransferClient.set_subscription_id`` (:pr:`1073`)

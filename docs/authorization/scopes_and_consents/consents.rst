@@ -1,3 +1,4 @@
+.. _consents:
 
 .. py:currentmodule:: globus_sdk.scopes.consents
 

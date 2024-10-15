@@ -12,6 +12,130 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-3.46.0:
+
+v3.46.0 (2024-10-15)
+--------------------
+
+Python Support
+~~~~~~~~~~~~~~
+
+- Support Python 3.13. (:pr:`1058`)
+
+Added
+~~~~~
+
+-   Added an initial Globus Compute client class, :class:`globus_sdk.ComputeClient`.
+    (:pr:`1071`)
+
+    -   Application errors are raised as a :class:`globus_sdk.ComputeAPIError`.
+
+    -   A single method, ``ComputeClient.get_function`` is included initially to get
+        information about a registered function.
+
+    -   Compute scopes are defined at ``globus_sdk.scopes.ComputeScopes`` or
+        ``globus_sdk.ComputeClient.scopes``.
+
+-   Added the ``ComputeClient.register_function()`` and
+    ``ComputeClient.delete_function()`` methods. (:pr:`1085`)
+
+    -   ``ComputeClient.register_function()`` introduces new data model classes:
+        ``ComputeFunctionDocument`` and ``ComputeFunctionMetadata``.
+
+-   Added the ``TransferClient.set_subscription_id()`` method. (:pr:`1073`)
+
+-   Added a new error type, ``globus_sdk.ValidationError``, used in certain cases of
+    ``ValueError``\s caused by invalid content. (:pr:`1044`)
+
+Removed
+~~~~~~~
+
+-   Removed the ``skip_error_handling`` optional kwarg from the
+    ``GlobusApp.get_authorizer(...)`` method interface. (:pr:`1060`)
+
+Changed
+~~~~~~~
+
+-   All previously experimental modules have been moved into main module namespaces
+    and are no longer experimental. Aliases will remain in the experimental namespaces
+    with a deprecation warning until SDKv4.
+
+    -   :ref:`gares` have been moved from
+        ``globus_sdk.experimental.auth_requirements_error`` to ``globus_sdk.gare``.
+        (:pr:`1048`)
+
+        -   The primary document type has been renamed from
+            ``GlobusAuthRequirementsError`` to ``GARE``.
+
+        -   The functions provided by this interface have been renamed to use
+            ``gare`` in their naming: ``to_gare``, ``is_gare``, ``has_gares``, and
+            ``to_gares``.
+
+    -   :ref:`globus_apps` have been moved from ``globus_sdk.experimental.globus_app``
+        to ``globus_sdk`` and ``globus_sdk.globus_app``. (:pr:`1085`)
+
+    -   :ref:`login_flow_managers` have been moved from
+        ``globus_sdk.experimental.login_flow_managers`` to ``globus_sdk.login_flows``.
+        (:pr:`1057`)
+
+    -   :ref:`token_storages` have been moved from
+        ``globus_sdk.experimental.tokenstorage`` to ``globus_sdk.tokenstorage``.
+        (:pr:`1065`)
+
+    -   :ref:`consents` have been moved from ``globus_sdk.experimental.consents`` to
+        ``globus_sdk.scopes.consents``. (:pr:`1047`)
+
+-   The response classes for OAuth2 token grants now vary by the grant type. For
+    example, a ``refresh_token``-type grant now produces a
+    :class:`globus_sdk.OAuthRefreshTokenResponse`. This allows code handling responses
+    to more easily identify which grant type produced a response. (:pr:`1051`)
+
+    -   The following new classes have been introduced:
+        :class:`globus_sdk.OAuthRefreshTokenResponse`,
+        :class:`globus_sdk.OAuthAuthorizationCodeResponse`, and
+        :class:`globus_sdk.OAuthClientCredentialsResponse`.
+
+    -   The ``RenewingAuthorizer`` class is now a generic over the response type
+        which it handles, and the subtypes of authorizers are specialized for their
+        types of responses. e.g.,
+        ``class RefreshTokenAuthorizer(RenewingAuthorizer[OAuthRefreshTokenResponse])``.
+
+-   The mechanisms of token data validation inside of ``GlobusApp`` are now more
+    modular and extensible. The ``ValidatingTokenStorage`` class does not define
+    built-in validation behaviors, but instead contains a list of validator
+    objects, which can be extended and otherwise altered. (:pr:`1061`)
+
+    -   These changes allow more validation criteria around token data to be
+        handled within the ``ValidatingTokenStorage``. This changes error behaviors
+        to avoid situations in which multiple errors are raised serially by
+        different layers of GlobusApp.
+
+-   ``LoginFlowManager``\s built with ``GlobusApp`` now generate a more
+    appropriate value for ``prefill_named_grant``, using the current
+    hostname if possible. (:pr:`1075`)
+
+
+-   Imports of ``globus_sdk.exc`` now defer importing ``requests`` so as to
+    reduce import-time performance impact the library is not needed. (:pr:`1044`)
+
+    The following error classes are now lazily loaded even when
+    ``globus_sdk.exc`` is imported: ``GlobusConnectionError``,
+    ``GlobusConnectionTimeoutError``, ``GlobusTimeoutError``, and ``NetworkError``.
+
+Fixed
+~~~~~
+
+-   Fixed the typing-time attributes of ``globus_sdk`` so that ``mypy`` and other
+    type checkers won't erroneously suppress errors about missing attributes.
+    (:pr:`1052`)
+
+-   Fixed the handling of Dependent Token and Refresh Token responses in
+    ``TokenStorage`` and ``ValidatingTokenStorage`` such that ``id_token`` is only
+    parsed when appropriate. (:pr:`1055`)
+
+-   Fixed a bug where upgrading from access token to refresh token mode in a
+    ``GlobusApp`` could result in multiple login prompts. (:pr:`1060`)
+
 .. _changelog-3.45.0:
 
 v3.45.0 (2024-09-06)
