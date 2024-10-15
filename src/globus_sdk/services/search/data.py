@@ -252,22 +252,19 @@ class SearchQueryV1(utils.PayloadWrapper):
     ):
         super().__init__()
         self["@version"] = "query#1.0.0"
-        if q is not utils.MISSING:
-            self["q"] = q
-        if limit is not utils.MISSING:
-            self["limit"] = limit
-        if offset is not utils.MISSING:
-            self["offset"] = offset
-        if advanced is not utils.MISSING:
-            self["advanced"] = advanced
-        if additional_fields is not utils.MISSING:
-            self.update(additional_fields)
 
+        self["q"] = q
+        self["limit"] = limit
+        self["offset"] = offset
+        self["advanced"] = advanced
         self["filters"] = filters
         self["facets"] = facets
         self["post_facet_filters"] = post_facet_filters
         self["boosts"] = boosts
         self["sorts"] = sorts
+
+        if not isinstance(additional_fields, utils.MissingType):
+            self.update(additional_fields)
 
 
 class SearchScrollQuery(SearchQueryBase):
