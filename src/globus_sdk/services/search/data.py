@@ -239,11 +239,11 @@ class SearchQueryV1(utils.PayloadWrapper):
     def __init__(
         self,
         *,
-        q: str | None = None,
-        limit: int | None = None,
-        offset: int | None = None,
-        advanced: bool | None = None,
-        additional_fields: dict[str, t.Any] | None = None,
+        q: str | utils.MissingType = utils.MISSING,
+        limit: int | utils.MissingType = utils.MISSING,
+        offset: int | utils.MissingType = utils.MISSING,
+        advanced: bool | utils.MissingType = utils.MISSING,
+        additional_fields: dict[str, t.Any] | utils.MissingType = utils.MISSING,
         filters: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
         facets: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
         post_facet_filters: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
@@ -252,15 +252,15 @@ class SearchQueryV1(utils.PayloadWrapper):
     ):
         super().__init__()
         self["@version"] = "query#1.0.0"
-        if q is not None:
+        if q is not utils.MISSING:
             self["q"] = q
-        if limit is not None:
+        if limit is not utils.MISSING:
             self["limit"] = limit
-        if offset is not None:
+        if offset is not utils.MISSING:
             self["offset"] = offset
-        if advanced is not None:
+        if advanced is not utils.MISSING:
             self["advanced"] = advanced
-        if additional_fields is not None:
+        if additional_fields is not utils.MISSING:
             self.update(additional_fields)
 
         self["filters"] = filters
