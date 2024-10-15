@@ -8,6 +8,7 @@ from globus_sdk import SearchQuery, SearchQueryV1, utils
 from globus_sdk.exc.warnings import RemovedInV4Warning
 
 
+@pytest.mark.filterwarnings("ignore:'SearchQuery'*:DeprecationWarning")
 def test_init_legacy():
     """Creates SearchQuery and verifies results"""
     query = SearchQuery()
@@ -59,6 +60,7 @@ def test_init_v1():
 
 
 @pytest.mark.parametrize("attrname", ["q", "limit", "offset", "advanced"])
+@pytest.mark.filterwarnings("ignore:'SearchQuery'*:DeprecationWarning")
 def test_set_method(attrname):
     query = SearchQuery()
     method = getattr(query, "set_{}".format("query" if attrname == "q" else attrname))
@@ -70,6 +72,7 @@ def test_set_method(attrname):
     assert query[attrname] == "foo"
 
 
+@pytest.mark.filterwarnings("ignore:'SearchQuery'*:DeprecationWarning")
 def test_add_facet():
     query = SearchQuery()
     assert "facets" not in query
@@ -125,6 +128,7 @@ def test_add_facet():
     }
 
 
+@pytest.mark.filterwarnings("ignore:'SearchQuery'*:DeprecationWarning")
 def test_add_filter():
     query = SearchQuery()
     assert "filters" not in query
@@ -165,6 +169,7 @@ def test_add_filter():
     }
 
 
+@pytest.mark.filterwarnings("ignore:'SearchQuery'*:DeprecationWarning")
 def test_add_boost():
     query = SearchQuery()
     assert "boosts" not in query
@@ -186,6 +191,7 @@ def test_add_boost():
     }
 
 
+@pytest.mark.filterwarnings("ignore:'SearchQuery'*:DeprecationWarning")
 def test_add_sort():
     query = SearchQuery()
     assert "sort" not in query

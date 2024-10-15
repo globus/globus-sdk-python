@@ -39,10 +39,7 @@ def test_search_query_simple(search_client):
     }
 
 
-@pytest.mark.parametrize(
-    "query_doc",
-    [{"q": "foo"}, {"q": "foo", "limit": 10}, globus_sdk.SearchQuery("foo")],
-)
+@pytest.mark.parametrize("query_doc", [{"q": "foo"}, {"q": "foo", "limit": 10}])
 def test_search_post_query_simple(search_client, query_doc):
     meta = load_response(search_client.post_search).metadata
 
@@ -59,7 +56,25 @@ def test_search_post_query_simple(search_client, query_doc):
     assert req_body == dict(query_doc)
 
 
-def test_search_post_v1_query_simple(search_client):
+@pytest.mark.filterwarnings("ignore:'SearchQuery'*:DeprecationWarning")
+def test_search_post_query_with_legacy_helper(search_client):
+    meta = load_response(search_client.post_search).metadata
+    query_doc = globus_sdk.SearchQuery("foo")
+
+    res = search_client.post_search(meta["index_id"], query_doc)
+    assert res.http_status == 200
+
+    data = res.data
+    assert isinstance(data, dict)
+    assert data["gmeta"][0]["entries"][0]["content"]["foo"] == "bar"
+
+    req = get_last_request()
+    assert req.body is not None
+    req_body = json.loads(req.body)
+    assert req_body == dict(query_doc)
+
+
+def test_search_post_query_simple_with_v1_helper(search_client):
     query_doc = globus_sdk.SearchQueryV1(q="foo")
     meta = load_response(search_client.post_search).metadata
 
@@ -78,13 +93,34 @@ def test_search_post_v1_query_simple(search_client):
 
 @pytest.mark.parametrize(
     "query_doc",
-    [
-        {"q": "foo", "limit": 10, "offset": 0},
-        globus_sdk.SearchQuery("foo", limit=10, offset=0),
-    ],
+    [{"q": "foo", "limit": 10, "offset": 0}],
 )
 def test_search_post_query_arg_overrides(search_client, query_doc):
     meta = load_response(search_client.post_search).metadata
+
+    res = search_client.post_search(meta["index_id"], query_doc, limit=100, offset=150)
+    assert res.http_status == 200
+
+    data = res.data
+    assert isinstance(data, dict)
+    assert data["gmeta"][0]["entries"][0]["content"]["foo"] == "bar"
+
+    req = get_last_request()
+    assert req.body is not None
+    req_body = json.loads(req.body)
+    assert req_body != dict(query_doc)
+    assert req_body["q"] == query_doc["q"]
+    assert req_body["limit"] == 100
+    assert req_body["offset"] == 150
+    # important! these should be unchanged (no side-effects)
+    assert query_doc["limit"] == 10
+    assert query_doc["offset"] == 0
+
+
+@pytest.mark.filterwarnings("ignore:'SearchQuery'*:DeprecationWarning")
+def test_search_post_query_arg_overrides_with_legacy_helper(search_client):
+    meta = load_response(search_client.post_search).metadata
+    query_doc = globus_sdk.SearchQuery("foo", limit=10, offset=0)
 
     res = search_client.post_search(meta["index_id"], query_doc, limit=100, offset=150)
     assert res.http_status == 200
