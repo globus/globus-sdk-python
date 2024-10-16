@@ -238,6 +238,7 @@ class SearchQueryV1(utils.PayloadWrapper):
     :param post_facet_filters: a list of filters to apply after facet
         results are returned
     :param boosts: a list of boosts to apply to the query
+    :param sort: a list of fields to sort results
     :param additional_fields: additional data to include in the query document
     """
 
