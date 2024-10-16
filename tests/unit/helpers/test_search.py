@@ -43,7 +43,7 @@ def test_init_v1():
     assert query["@version"] == "query#1.0.0"
 
     # ensure key attributes initialize to empty lists
-    for attribute in ["facets", "filters", "post_facet_filters", "sorts", "boosts"]:
+    for attribute in ["facets", "filters", "post_facet_filters", "sort", "boosts"]:
         assert query[attribute] == utils.MISSING
 
     # init with supported fields

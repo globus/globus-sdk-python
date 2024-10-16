@@ -252,7 +252,7 @@ class SearchQueryV1(utils.PayloadWrapper):
         facets: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
         post_facet_filters: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
         boosts: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
-        sorts: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
+        sort: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
         additional_fields: dict[str, t.Any] | utils.MissingType = utils.MISSING,
     ):
         super().__init__()
@@ -266,7 +266,7 @@ class SearchQueryV1(utils.PayloadWrapper):
         self["facets"] = facets
         self["post_facet_filters"] = post_facet_filters
         self["boosts"] = boosts
-        self["sorts"] = sorts
+        self["sort"] = sort
 
         if not isinstance(additional_fields, utils.MissingType):
             self.update(additional_fields)
