@@ -57,6 +57,6 @@ or create the release via the GitHub CLI
 ```
 
 - Send an email announcement to the Globus Discuss list with highlighted
-  changes and a link to the Github release page.
+  changes and a link to the GitHub release page.
   (If the Globus CLI is releasing within a short interval,
   combine both announcements into a single email notice.)
