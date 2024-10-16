@@ -233,6 +233,11 @@ class SearchQueryV1(utils.PayloadWrapper):
     :param advanced: Whether to enable (``True``) or not to enable (``False``) advanced
         parsing of query strings. The default of ``False`` is robust and guarantees that
         the query will not error with "bad query string" errors
+    :param filters: a list of filters to apply to the query
+    :param facets: a list of facets to apply to the query
+    :param post_facet_filters: a list of filters to apply after facet
+        results are returned
+    :param boosts: a list of boosts to apply to the query
     :param additional_fields: additional data to include in the query document
     """
 
@@ -243,12 +248,12 @@ class SearchQueryV1(utils.PayloadWrapper):
         limit: int | utils.MissingType = utils.MISSING,
         offset: int | utils.MissingType = utils.MISSING,
         advanced: bool | utils.MissingType = utils.MISSING,
-        additional_fields: dict[str, t.Any] | utils.MissingType = utils.MISSING,
         filters: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
         facets: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
         post_facet_filters: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
         boosts: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
         sorts: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
+        additional_fields: dict[str, t.Any] | utils.MissingType = utils.MISSING,
     ):
         super().__init__()
         self["@version"] = "query#1.0.0"
