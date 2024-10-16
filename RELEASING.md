@@ -55,3 +55,8 @@ or create the release via the GitHub CLI
 ./scripts/changelog2md.py | \
   gh release create $SDK_VERSION --title "v$SDK_VERSION" --notes-file -
 ```
+
+- Send an email announcement to the Globus Discuss list with highlighted
+  changes and a link to the Github release page.
+  (If the Globus CLI is releasing within a short interval,
+  combine both announcements into a single email notice.)
