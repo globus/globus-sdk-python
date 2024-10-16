@@ -6,12 +6,12 @@
 #
 
 # default rule
-* @aaschaer @ada-globus @derek-globus @kurtmckee @MaxTueckeGlobus @sirosen
+* @aaschaer @ada-globus @derek-globus @kurtmckee @m1yag1 @MaxTueckeGlobus @sirosen
 
 # Flows service
-**/flows/ @ada-globus @derek-globus @kurtmckee @MaxTueckeGlobus @sirosen
-docs/services/flows.rst @ada-globus @derek-globus @kurtmckee @MaxTueckeGlobus @sirosen
+**/flows/ @ada-globus @derek-globus @kurtmckee @m1yag1 @MaxTueckeGlobus @sirosen
+docs/services/flows.rst @ada-globus @derek-globus @kurtmckee @m1yag1 @MaxTueckeGlobus @sirosen
 
 # Timer service
-**/timer/ @ada-globus @derek-globus @kurtmckee @MaxTueckeGlobus @sirosen
-docs/services/timer.rst @ada-globus @derek-globus @kurtmckee @MaxTueckeGlobus @sirosen
+**/timer/ @ada-globus @derek-globus @kurtmckee @m1yag1 @MaxTueckeGlobus @sirosen
+docs/services/timer.rst @ada-globus @derek-globus @kurtmckee @m1yag1 @MaxTueckeGlobus @sirosen
