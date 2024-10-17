@@ -18,14 +18,13 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from string import Template
 from urllib.parse import parse_qsl, urlparse
 
+from . import html_files
 from .errors import LocalServerLoginError
 
 if sys.version_info >= (3, 9):
     import importlib.resources as importlib_resources
 else:  # Python < 3.9
     import importlib_resources
-
-import globus_sdk.login_flows.local_server_login_flow_manager.html_files as html_files  # noqa: E501
 
 _IS_WINDOWS = os.name == "nt"
 

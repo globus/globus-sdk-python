@@ -8,9 +8,8 @@ import re
 import sys
 import typing as t
 
-from globus_sdk import GlobusSDKUsageError
+import globus_sdk
 from globus_sdk._types import UUIDLike
-from globus_sdk.services.auth import OAuthDependentTokenResponse, OAuthTokenResponse
 
 from .token_data import TokenStorageData
 
@@ -68,7 +67,9 @@ class TokenStorage(metaclass=abc.ABCMeta):
         :returns: True if token data was deleted, False if none was found to delete.
         """
 
-    def store_token_response(self, token_response: OAuthTokenResponse) -> None:
+    def store_token_response(
+        self, token_response: globus_sdk.OAuthTokenResponse
+    ) -> None:
         """
         Store token data from an :class:`OAuthTokenResponse` in the current namespace.
 
@@ -90,7 +91,9 @@ class TokenStorage(metaclass=abc.ABCMeta):
             )
         self.store_token_data_by_resource_server(token_data_by_resource_server)
 
-    def _extract_identity_id(self, token_response: OAuthTokenResponse) -> str | None:
+    def _extract_identity_id(
+        self, token_response: globus_sdk.OAuthTokenResponse
+    ) -> str | None:
         """
         Get identity_id from id_token if available.
 
@@ -105,7 +108,7 @@ class TokenStorage(metaclass=abc.ABCMeta):
         """
         # dependent token responses cannot contain an `id_token` field, as the
         # top-level data is an array
-        if isinstance(token_response, OAuthDependentTokenResponse):
+        if isinstance(token_response, globus_sdk.OAuthDependentTokenResponse):
             return None
 
         if token_response.get("id_token"):
@@ -268,10 +271,10 @@ def _slugify_app_name(app_name: str) -> str:
             f'App name results in a reserved filename ("{app_name}"). '
             "Please choose a different name."
         )
-        raise GlobusSDKUsageError(msg)
+        raise globus_sdk.GlobusSDKUsageError(msg)
 
     if not app_name:
         msg = "App name results in the empty string. Please choose a different name."
-        raise GlobusSDKUsageError(msg)
+        raise globus_sdk.GlobusSDKUsageError(msg)
 
     return app_name
