@@ -54,7 +54,9 @@ responses==0.23.1
 six==1.16.0
     # via cryptography
 tomli==2.0.2
-    # via pytest
+    # via
+    #   coverage
+    #   pytest
 types-pyyaml==6.0.12.20240917
     # via responses
 typing-extensions==4.0.0

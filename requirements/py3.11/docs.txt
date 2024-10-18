@@ -36,7 +36,7 @@ jinja2==3.1.4
     #   sphinx
 markdown-it-py==3.0.0
     # via scriv
-markupsafe==3.0.1
+markupsafe==3.0.2
     # via jinja2
 mdurl==0.1.2
     # via markdown-it-py
