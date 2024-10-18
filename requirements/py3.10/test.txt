@@ -40,7 +40,9 @@ requests==2.32.3
 responses==0.25.3
     # via -r .test.in
 tomli==2.0.2
-    # via pytest
+    # via
+    #   coverage
+    #   pytest
 urllib3==2.2.3
     # via
     #   requests
