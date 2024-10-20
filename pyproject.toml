@@ -56,8 +56,9 @@ docs = [
     # required for the PR pre-build step in RTD
     "scriv",
 ]
+coverage = ["coverage[toml]"]
 test = [
-    "coverage[toml]",
+    {include-group = "coverage"},
     "pytest", "pytest-xdist", "pytest-randomly", "flaky",
     "responses",
 ]
