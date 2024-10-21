@@ -5,9 +5,10 @@ import pathlib
 import sqlite3
 import typing as t
 
-from globus_sdk.services.auth import OAuthTokenResponse
-from globus_sdk.tokenstorage.v1.base import FileAdapter
+import globus_sdk
 from globus_sdk.version import __version__
+
+from .base import FileAdapter
 
 
 class SQLiteAdapter(FileAdapter):
@@ -164,7 +165,7 @@ CREATE TABLE sdk_storage_adapter_internal (
         self._connection.commit()
         return rowcount != 0
 
-    def store(self, token_response: OAuthTokenResponse) -> None:
+    def store(self, token_response: globus_sdk.OAuthTokenResponse) -> None:
         """
         :param token_response: a globus_sdk.OAuthTokenResponse object containing token
                                data to store

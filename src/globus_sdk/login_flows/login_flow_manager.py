@@ -2,13 +2,7 @@ from __future__ import annotations
 
 import abc
 
-from globus_sdk import (
-    AuthLoginClient,
-    ConfidentialAppAuthClient,
-    GlobusSDKUsageError,
-    NativeAppAuthClient,
-    OAuthTokenResponse,
-)
+import globus_sdk
 from globus_sdk.gare import GlobusAuthorizationParameters
 
 
@@ -30,15 +24,15 @@ class LoginFlowManager(metaclass=abc.ABCMeta):
 
     def __init__(
         self,
-        login_client: AuthLoginClient,
+        login_client: globus_sdk.AuthLoginClient,
         *,
         request_refresh_tokens: bool = False,
         native_prefill_named_grant: str | None = None,
     ) -> None:
-        if not isinstance(login_client, NativeAppAuthClient) and not isinstance(
-            login_client, ConfidentialAppAuthClient
-        ):
-            raise GlobusSDKUsageError(
+        if not isinstance(
+            login_client, globus_sdk.NativeAppAuthClient
+        ) and not isinstance(login_client, globus_sdk.ConfidentialAppAuthClient):
+            raise globus_sdk.GlobusSDKUsageError(
                 f"{type(self).__name__} requires a NativeAppAuthClient or "
                 f"ConfidentialAppAuthClient, but got a {type(login_client).__name__}."
             )
@@ -76,14 +70,14 @@ class LoginFlowManager(metaclass=abc.ABCMeta):
         requested_scopes = auth_parameters.required_scopes
         # Native and Confidential App clients have different signatures for this method,
         # so they must be type checked & called independently.
-        if isinstance(login_client, NativeAppAuthClient):
+        if isinstance(login_client, globus_sdk.NativeAppAuthClient):
             login_client.oauth2_start_flow(
                 requested_scopes,
                 redirect_uri=redirect_uri,
                 refresh_tokens=self.request_refresh_tokens,
                 prefill_named_grant=self.native_prefill_named_grant,
             )
-        elif isinstance(login_client, ConfidentialAppAuthClient):
+        elif isinstance(login_client, globus_sdk.ConfidentialAppAuthClient):
             login_client.oauth2_start_flow(
                 redirect_uri,
                 requested_scopes,
@@ -94,7 +88,7 @@ class LoginFlowManager(metaclass=abc.ABCMeta):
     def run_login_flow(
         self,
         auth_parameters: GlobusAuthorizationParameters,
-    ) -> OAuthTokenResponse:
+    ) -> globus_sdk.OAuthTokenResponse:
         """
         Run a login flow to get tokens for a user.
 

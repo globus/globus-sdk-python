@@ -17,17 +17,26 @@ PYTHON_BINARY = os.environ.get("GLOBUS_TEST_PY", sys.executable)
 @pytest.mark.parametrize(
     "module_name",
     (
-        # experimental modules
-        "experimental",
-        "experimental.scope_parser",
-        # parts which are expected to be standalone
-        "scopes",
-        "gare",
+        # most of the SDK should not pull in 'requests', making the parts which do
+        # not handle request sending easy to use without the perf penalty from
+        # requests/urllib3
+        "authorizers",
         "config",
+        "gare",
+        "local_endpoint",
+        "login_flows",
+        "paging",
+        "response",
+        "scopes",
+        "tokenstorage",
         # the top-level of the 'exc' subpackage (but not necessarily its contents)
+        # should similarly be standalone, for exception handlers
         "exc",
-        # internal bits and bobs
+        # internal components and utilities are a special case:
+        # failing to ensure that these avoid 'requests' can make it more difficult
+        # to ensure that the main parts (above) do not transitively pick it up
         "_guards",
+        "_serializable",
         "_types",
         "utils",
         "version",

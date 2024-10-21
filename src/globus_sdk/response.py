@@ -5,13 +5,13 @@ import json
 import logging
 import typing as t
 
-from requests import Response
-
 from globus_sdk import _guards
 
 log = logging.getLogger(__name__)
 
 if t.TYPE_CHECKING:
+    from requests import Response
+
     import globus_sdk
 
 __all__ = (
