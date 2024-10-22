@@ -6,4 +6,3 @@ Transferring Data
     :maxdepth: 1
 
     submit_transfer/index
-    timer_management/index

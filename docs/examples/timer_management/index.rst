@@ -1,7 +1,9 @@
-Globus Timers Operations
-------------------------
+.. _timer_management_examples:
 
-These examples demonstrate how to create, list, and delete Timers with the SDK.
+Timer Management
+----------------
+
+These examples demonstrate how to create, list, and delete timers with the SDK.
 
 Create a timer
 ~~~~~~~~~~~~~~
@@ -15,6 +17,15 @@ via the command-line. It syncs an input file or directory between the two.
 
 .. literalinclude:: create_timer.py
     :caption: ``create_timer.py`` [:download:`download <create_timer.py>`]
+    :language: python
+
+List timers
+~~~~~~~~~~~
+
+This script lists your current timers.
+
+.. literalinclude:: list_timers.py
+    :caption: ``list_timers.py`` [:download:`download <list_timers.py>`]
     :language: python
 
 Delete a timer
@@ -35,8 +46,7 @@ also handles ``data_access`` scope requirements for the source and destination
 collections.
 
 Discovering ``data_access`` requirements requires the use of a
-``TransferClient`` to look up the collections. Therefore, this example may put
-the user through two login flows.
+``TransferClient`` to look up the collections.
 
 As in the simpler example, this script creates a new timer, on source and
 destination collections provided via the command-line. It syncs an input
