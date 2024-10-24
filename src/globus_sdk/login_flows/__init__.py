@@ -1,4 +1,7 @@
-from .command_line_login_flow_manager import CommandLineLoginFlowManager
+from .command_line_login_flow_manager import (
+    CommandLineLoginFlowEOFError,
+    CommandLineLoginFlowManager,
+)
 from .local_server_login_flow_manager import (
     LocalServerEnvironmentalLoginError,
     LocalServerLoginError,
@@ -8,6 +11,7 @@ from .login_flow_manager import LoginFlowManager
 
 __all__ = (
     "CommandLineLoginFlowManager",
+    "CommandLineLoginFlowEOFError",
     "LocalServerLoginError",
     "LocalServerEnvironmentalLoginError",
     "LocalServerLoginFlowManager",

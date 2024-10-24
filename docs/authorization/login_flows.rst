@@ -52,6 +52,9 @@ Example Code:
     :member-order: bysource
     :show-inheritance:
 
+
+.. autoexception:: CommandLineLoginFlowEOFError
+
 Local Server
 ------------
 

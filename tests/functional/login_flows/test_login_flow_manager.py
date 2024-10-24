@@ -1,11 +1,16 @@
 from unittest.mock import Mock, patch
 
+import pytest
+
 from globus_sdk import ConfidentialAppAuthClient, NativeAppAuthClient
 from globus_sdk._testing import load_response
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.login_flows import (
     CommandLineLoginFlowManager,
     LocalServerLoginFlowManager,
+)
+from globus_sdk.login_flows.command_line_login_flow_manager import (
+    CommandLineLoginFlowEOFError,
 )
 
 
@@ -94,6 +99,28 @@ def test_command_line_login_flower_manager_confidential(monkeypatch, capsys):
     assert "https://auth.globus.org/v2/oauth2/authorize" in captured_output
     assert "client_id=mock_client_id" in captured_output
     assert "&session_required_single_domain=org.edu" in captured_output
+
+
+def test_command_line_login_flow_manager_eof_error(monkeypatch, capsys):
+    """
+    test CommandLineLoginFlowManager with a NativeAppAuthClient
+    """
+    login_client = NativeAppAuthClient("mock_client_id")
+    load_response(login_client.oauth2_exchange_code_for_tokens)
+
+    def broken_input(_s):
+        raise EOFError()
+
+    monkeypatch.setattr("builtins.input", broken_input)
+
+    login_flow_manager = CommandLineLoginFlowManager(login_client)
+    auth_params = GlobusAuthorizationParameters(
+        required_scopes=["urn:globus:auth:scope:transfer.api.globus.org:all"],
+        session_required_identities=["user@org.edu"],
+    )
+
+    with pytest.raises(CommandLineLoginFlowEOFError):
+        login_flow_manager.run_login_flow(auth_params)
 
 
 class MockRedirectServer:

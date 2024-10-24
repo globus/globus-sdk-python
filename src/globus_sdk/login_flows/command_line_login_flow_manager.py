@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import textwrap
 import typing as t
+from contextlib import contextmanager
 
 import globus_sdk
+from globus_sdk.exc.base import GlobusError
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.utils import get_nice_hostname
 
@@ -11,6 +13,13 @@ from .login_flow_manager import LoginFlowManager
 
 if t.TYPE_CHECKING:
     from globus_sdk.globus_app import GlobusAppConfig
+
+
+class CommandLineLoginFlowEOFError(GlobusError):
+    """
+    An error raised when a CommandLineLoginFlowManager reads an EOF when prompting for
+    a code.
+    """
 
 
 class CommandLineLoginFlowManager(LoginFlowManager):
@@ -128,4 +137,16 @@ class CommandLineLoginFlowManager(LoginFlowManager):
         :returns: The authorization code entered by the user.
         """
         code_prompt = "Enter the resulting Authorization Code here: "
-        return input(code_prompt).strip()
+        with self.handle_input_errors():
+            return input(code_prompt).strip()
+
+    @contextmanager
+    def handle_input_errors(self) -> t.Iterator[None]:
+        try:
+            yield
+        except EOFError as e:
+            msg = (
+                "An EOF was read when an authorization code was expected."
+                " (Are you running this in an interactive terminal?)"
+            )
+            raise CommandLineLoginFlowEOFError(msg) from e
