@@ -37,8 +37,9 @@ class TimersClient(client.BaseClient):
         """
         Add a dependent ``data_access`` scope for one or more given ``collection_ids``
         to this client's ``GlobusApp``, under the Transfer ``all`` scope.
-        Useful for resolving ``ConsentRequired`` errors when using Globus Connect
-        Server mapped collections.
+        Useful for preventing ``ConsentRequired`` errors when creating timers
+        that use Globus Connect Server mapped collection(s) as the source or
+        destination.
 
         .. warning::
 

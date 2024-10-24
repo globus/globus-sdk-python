@@ -11,6 +11,9 @@ Create a timer
 This script creates a new timer, on source and destination collections provided
 via the command-line. It syncs an input file or directory between the two.
 
+The script assumes that the path being synced is the same on the source and
+destination for simplicity.
+
 .. note::
     This example does not handle ``data_access`` scope requirements.
     See the later example to handle this.
@@ -31,8 +34,7 @@ This script lists your current timers.
 Delete a timer
 ~~~~~~~~~~~~~~
 
-This script creates a new timer, on source and destination collections provided
-via the command-line. It syncs an input file or directory between the two.
+This script deletes a timer by ID.
 
 .. literalinclude:: delete_timer.py
     :caption: ``delete_timer.py`` [:download:`download <delete_timer.py>`]
@@ -50,7 +52,8 @@ Discovering ``data_access`` requirements requires the use of a
 
 As in the simpler example, this script creates a new timer, on source and
 destination collections provided via the command-line. It syncs an input
-file or directory between the two.
+file or directory between the two, and assumes that the path is the same on the
+source and destination.
 
 .. literalinclude:: create_timer_data_access.py
     :caption: ``create_timer_data_access.py`` [:download:`download <create_timer_data_access.py>`]
