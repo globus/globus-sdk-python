@@ -4,33 +4,20 @@ import argparse
 import datetime
 
 import globus_sdk
+from globus_sdk.experimental.globus_app import UserApp
 
-# tutorial client ID
-# we recommend replacing this with your own client for any production use-cases
-CLIENT_ID = "61338d24-54d5-408f-a10d-66c06b59f6d2"
-NATIVE_CLIENT = globus_sdk.NativeAppAuthClient(CLIENT_ID)
-
-
-def do_login_flow():
-    # we will want to request a 'timer' scope for managing timers
-    scope = globus_sdk.TimersClient.scopes.timer
-
-    # run the login flow, finishing with a token exchange
-    NATIVE_CLIENT.oauth2_start_flow(requested_scopes=scope)
-    authorize_url = NATIVE_CLIENT.oauth2_get_authorize_url()
-    print(f"Please go to this URL and login:\n\n{authorize_url}\n")
-    auth_code = input("Please enter the code here: ").strip()
-    tokens = NATIVE_CLIENT.oauth2_exchange_code_for_tokens(auth_code)
-
-    # pull out the tokens for Globus Timers from the response
-    return tokens.by_resource_server[globus_sdk.TimersClient.resource_server]
+# Tutorial Client ID - <replace this with your own client>
+NATIVE_CLIENT_ID = "61338d24-54d5-408f-a10d-66c06b59f6d2"
+USER_APP = UserApp("manage-timers-example", client_id=NATIVE_CLIENT_ID)
 
 
-def create_timers_client():
-    tokens = do_login_flow()
-    return globus_sdk.TimersClient(
-        authorizer=globus_sdk.AccessTokenAuthorizer(tokens["access_token"])
-    )
+def uses_data_access(transfer_client, collection_id):
+    doc = transfer_client.get_endpoint(collection_id)
+    if doc["entity_type"] != "GCSv5_mapped_collection":
+        return False
+    if doc["high_assurance"]:
+        return False
+    return True
 
 
 def main():
@@ -53,7 +40,21 @@ def main():
     )
     args = parser.parse_args()
 
-    client = create_timers_client()
+    timers_client = globus_sdk.TimersClient(app=USER_APP)
+    transfer_client = globus_sdk.TransferClient(app=USER_APP)
+
+    # check if the source or destination use 'data_access' scopes
+    # if so, register these requirements with the app
+    if uses_data_access(transfer_client, args.SOURCE_COLLECTION):
+        timers_client.add_app_transfer_data_access_scope(args.SOURCE_COLLECTION)
+    if uses_data_access(transfer_client, args.DESTINATION_COLLECTION):
+        timers_client.add_app_transfer_data_access_scope(args.DESTINATION_COLLECTION)
+
+    # from this point onwards, the example is the same as the basic create_timer.py
+    # script -- we've handled the nuance of data_access
+    #
+    # when the timer submission runs, you *may* be prompted to login again, if
+    # 'data_access' requirements were detected
 
     body = globus_sdk.TransferData(
         source_endpoint=args.SOURCE_COLLECTION,
@@ -70,7 +71,7 @@ def main():
         },
     )
 
-    timer = client.create_timer(
+    timer = timers_client.create_timer(
         timer=globus_sdk.TransferTimer(
             name=(
                 "create-timer-example "

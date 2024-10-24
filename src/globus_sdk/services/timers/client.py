@@ -2,10 +2,16 @@ from __future__ import annotations
 
 import logging
 import typing as t
+import uuid
 
-from globus_sdk import client, exc, response
+from globus_sdk import _guards, client, exc, response
 from globus_sdk._types import UUIDLike
-from globus_sdk.scopes import Scope, TimersScopes
+from globus_sdk.scopes import (
+    GCSCollectionScopeBuilder,
+    Scope,
+    TimersScopes,
+    TransferScopes,
+)
 
 from .data import TimerJob, TransferTimer
 from .errors import TimersAPIError
@@ -24,6 +30,74 @@ class TimersClient(client.BaseClient):
     service_name = "timer"
     scopes = TimersScopes
     default_scope_requirements = [Scope(TimersScopes.timer)]
+
+    def add_app_transfer_data_access_scope(
+        self, collection_ids: UUIDLike | t.Iterable[UUIDLike]
+    ) -> TimersClient:
+        """
+        Add a dependent ``data_access`` scope for one or more given ``collection_ids``
+        to this client's ``GlobusApp``, under the Transfer ``all`` scope.
+        Useful for preventing ``ConsentRequired`` errors when creating timers
+        that use Globus Connect Server mapped collection(s) as the source or
+        destination.
+
+        .. warning::
+
+            This method must only be used on ``collection_ids`` for non-High-Assurance
+            GCS Mapped Collections.
+
+            Use on other collection types, e.g., on GCP Mapped Collections or any form
+            of Guest Collection, will result in "Unknown Scope" errors during the login
+            flow.
+
+        Returns ``self`` for chaining.
+
+        Raises ``GlobusSDKUsageError`` if this client was not initialized with an app.
+
+        :param collection_ids: a collection ID or an iterable of IDs.
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    app = UserApp("myapp", client_id=NATIVE_APP_CLIENT_ID)
+                    client = TimersClient(app=app).add_app_transfer_data_access_scope(COLLECTION_ID)
+
+                    transfer_data = TransferData(
+                        source_endpoint=COLLECTION_ID, destination_endpoint=COLLECTION_ID
+                    )
+                    transfer_data.add_item("/staging/", "/active/")
+
+                    daily_timer = TransferTimer(
+                        name="test_timer", schedule=RecurringTimerSchedule(24 * 60 * 60), body=transfer_data
+                    )
+
+                    client.create_timer(daily_timer)
+        """  # noqa: E501
+        if isinstance(collection_ids, (str, uuid.UUID)):
+            _guards.validators.uuidlike("collection_ids", collection_ids)
+            # wrap the collection_ids input in a list for consistent iteration below
+            collection_ids_ = [collection_ids]
+        else:
+            # copy to a list so that ephemeral iterables can be iterated multiple times
+            collection_ids_ = list(collection_ids)
+            for i, c in enumerate(collection_ids_):
+                _guards.validators.uuidlike(f"collection_ids[{i}]", c)
+
+        transfer_scope = Scope(TransferScopes.all)
+        for coll_id in collection_ids_:
+            data_access_scope = Scope(
+                GCSCollectionScopeBuilder(str(coll_id)).data_access,
+                optional=True,
+            )
+            transfer_scope.add_dependency(data_access_scope)
+
+        timers_scope = Scope(TimersScopes.timer)
+        timers_scope.add_dependency(transfer_scope)
+        self.add_app_scope(timers_scope)
+        return self
 
     def list_jobs(
         self, *, query_params: dict[str, t.Any] | None = None

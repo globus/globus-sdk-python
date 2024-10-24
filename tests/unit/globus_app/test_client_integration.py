@@ -3,7 +3,7 @@ import uuid
 import pytest
 
 import globus_sdk
-from globus_sdk import GlobusApp, GlobusAppConfig, GlobusSDKUsageError, UserApp
+from globus_sdk import GlobusApp, GlobusAppConfig, UserApp
 from globus_sdk._testing import load_response
 from globus_sdk.tokenstorage import MemoryTokenStorage
 
@@ -27,7 +27,7 @@ def test_client_environment_does_not_match_the_globus_app_environment():
     config = GlobusAppConfig(token_storage=MemoryTokenStorage(), environment="sandbox")
     app = UserApp("test-app", client_id="client_id", config=config)
 
-    with pytest.raises(GlobusSDKUsageError) as exc:
+    with pytest.raises(globus_sdk.GlobusSDKUsageError) as exc:
         globus_sdk.AuthClient(app=app, environment="preview")
 
     expected = "[Environment Mismatch] AuthClient's environment (preview) does not match the GlobusApp's configured environment (sandbox)."  # noqa: E501
@@ -49,6 +49,18 @@ def test_transfer_client_add_app_data_access_scope(app):
     client.add_app_data_access_scope(collection_id)
     str_list = [str(s) for s in app.scope_requirements["transfer.api.globus.org"]]
     expected = f"urn:globus:auth:scope:transfer.api.globus.org:all[*https://auth.globus.org/scopes/{collection_id}/data_access]"  # noqa: E501
+    assert expected in str_list
+
+
+def test_timers_client_add_app_data_access_scope(app):
+    client = globus_sdk.TimersClient(app=app)
+
+    collection_id = str(uuid.UUID(int=0))
+    client.add_app_transfer_data_access_scope(collection_id)
+    str_list = [
+        str(s) for s in app.scope_requirements[globus_sdk.TimersClient.resource_server]
+    ]
+    expected = f"{globus_sdk.TimersClient.scopes.timer}[urn:globus:auth:scope:transfer.api.globus.org:all[*https://auth.globus.org/scopes/{collection_id}/data_access]]"  # noqa: E501
     assert expected in str_list
 
 
@@ -89,6 +101,30 @@ def test_transfer_client_add_app_data_access_scope_in_iterable(app):
     assert (expected_2, True) in transfer_dependencies
 
 
+def test_timers_client_add_app_data_access_scope_in_iterable(app):
+    collection_id_1 = str(uuid.UUID(int=1))
+    collection_id_2 = str(uuid.UUID(int=2))
+    globus_sdk.TimersClient(app=app).add_app_transfer_data_access_scope(
+        (collection_id_1, collection_id_2)
+    )
+
+    expected_1 = f"https://auth.globus.org/scopes/{collection_id_1}/data_access"
+    expected_2 = f"https://auth.globus.org/scopes/{collection_id_2}/data_access"
+
+    transfer_dependencies = []
+    for scope in app.scope_requirements[globus_sdk.TimersClient.resource_server]:
+        if scope.scope_string != globus_sdk.TimersClient.scopes.timer:
+            continue
+        for dep in scope.dependencies:
+            if dep.scope_string != globus_sdk.TransferClient.scopes.all:
+                continue
+            for subdep in dep.dependencies:
+                transfer_dependencies.append((subdep.scope_string, subdep.optional))
+
+    assert (expected_1, True) in transfer_dependencies
+    assert (expected_2, True) in transfer_dependencies
+
+
 def test_transfer_client_add_app_data_access_scope_catches_bad_uuid(app):
     with pytest.raises(ValueError, match="'collection_ids' must be a valid UUID"):
         globus_sdk.TransferClient(app=app).add_app_data_access_scope("foo")
@@ -98,6 +134,19 @@ def test_transfer_client_add_app_data_access_scope_catches_bad_uuid_in_iterable(
     collection_id_1 = str(uuid.UUID(int=1))
     with pytest.raises(ValueError, match=r"'collection_ids\[1\]' must be a valid UUID"):
         globus_sdk.TransferClient(app=app).add_app_data_access_scope(
+            [collection_id_1, "foo"]
+        )
+
+
+def test_timers_client_add_app_data_access_scope_catches_bad_uuid(app):
+    with pytest.raises(ValueError, match="'collection_ids' must be a valid UUID"):
+        globus_sdk.TimersClient(app=app).add_app_transfer_data_access_scope("foo")
+
+
+def test_timers_client_add_app_data_access_scope_catches_bad_uuid_in_iterable(app):
+    collection_id_1 = str(uuid.UUID(int=1))
+    with pytest.raises(ValueError, match=r"'collection_ids\[1\]' must be a valid UUID"):
+        globus_sdk.TimersClient(app=app).add_app_transfer_data_access_scope(
             [collection_id_1, "foo"]
         )
 
