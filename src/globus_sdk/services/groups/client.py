@@ -22,6 +22,8 @@ class GroupsClient(client.BaseClient):
     .. automethodlist:: globus_sdk.GroupsClient
     """
 
+    # NOTE: setting base_path is no longer considered good practice
+    #       see the BaseClient source for details
     base_path = "/v2/"
     error_class = GroupsAPIError
     service_name = "groups"

@@ -107,6 +107,8 @@ class TransferClient(client.BaseClient):
     """
 
     service_name = "transfer"
+    # NOTE: setting base_path is no longer considered good practice
+    #       see the BaseClient source for details
     base_path = "/v0.10/"
     transport_class: type[TransferRequestsTransport] = TransferRequestsTransport
     error_class = TransferAPIError

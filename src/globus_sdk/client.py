@@ -47,7 +47,11 @@ class BaseClient:
 
     # service name is used to lookup a service URL from config
     service_name: str = "_base"
+
     # path under the client base URL
+    # NOTE: using this attribute is now considered bad practice for client definitions,
+    # as it prevents calls to new routes at the root of an API's base_url
+    # Consider removing in a future release
     base_path: str = "/"
 
     #: the class for errors raised by this client on HTTP 4xx and 5xx errors
