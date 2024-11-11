@@ -392,6 +392,7 @@ class TransferClient(client.BaseClient):
         filter_owner_id: str | None = None,
         filter_host_endpoint: UUIDLike | None = None,
         filter_non_functional: bool | None = None,
+        filter_entity_type: str | None = None,
         limit: int | None = None,
         offset: int | None = None,
         query_params: dict[str, t.Any] | None = None,
@@ -411,7 +412,10 @@ class TransferClient(client.BaseClient):
             endpoint. May cause BadRequest or PermissionDenied errors if the endpoint ID
             given is not valid for this operation.
         :param filter_non_functional: Limit search to endpoints which have the
-            'non_functional' flag set to True or False.
+            'non_functional' flag set to True or False. Mutually exclusive with
+            ``filter_entity_type``.
+        :param filter_entity_type: Limit search to endpoints or collections by their
+            entity type. Mutually exclusive with ``filter_non_functional``.
         :param limit: limit the number of results
         :param offset: offset used in paging
         :param query_params: Any additional parameters will be passed through
@@ -465,6 +469,8 @@ class TransferClient(client.BaseClient):
             query_params["filter_host_endpoint"] = filter_host_endpoint
         if filter_non_functional is not None:  # convert to int (expect bool input)
             query_params["filter_non_functional"] = 1 if filter_non_functional else 0
+        if filter_entity_type is not None:
+            query_params["filter_entity_type"] = filter_entity_type
         if limit is not None:
             query_params["limit"] = limit
         if offset is not None:
