@@ -3,15 +3,23 @@ from __future__ import annotations
 import typing as t
 
 from globus_sdk import (
+    AuthClient,
     AuthLoginClient,
     ConfidentialAppAuthClient,
     GlobusSDKUsageError,
     NativeAppAuthClient,
+    Scope,
 )
 from globus_sdk._types import ScopeCollectionType, UUIDLike
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.login_flows import CommandLineLoginFlowManager, LoginFlowManager
-from globus_sdk.tokenstorage import HasRefreshTokensValidator, NotExpiredValidator
+from globus_sdk.tokenstorage import (
+    HasRefreshTokensValidator,
+    NotExpiredValidator,
+    TokenStorage,
+    UnchangingIdentityIDValidator,
+    ValidatingTokenStorage,
+)
 
 from .app import GlobusApp
 from .authorizer_factory import (
@@ -135,6 +143,18 @@ class UserApp(GlobusApp):
                 client_id=client_id,
                 environment=config.environment,
             )
+
+    def _initialize_validating_token_storage(
+        self,
+        token_storage: TokenStorage,
+        consent_client: AuthClient,
+        scope_requirements: t.Mapping[str, t.Sequence[Scope]],
+    ) -> ValidatingTokenStorage:
+        validating_token_storage = super()._initialize_validating_token_storage(
+            token_storage, consent_client, scope_requirements
+        )
+        validating_token_storage.validators.append(UnchangingIdentityIDValidator())
+        return validating_token_storage
 
     def _initialize_authorizer_factory(self) -> None:
         if self.config.request_refresh_tokens:

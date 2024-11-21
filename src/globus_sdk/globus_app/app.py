@@ -14,7 +14,6 @@ from globus_sdk.tokenstorage import (
     ScopeRequirementsValidator,
     TokenStorage,
     TokenValidationError,
-    UnchangingIdentityIDValidator,
     ValidatingTokenStorage,
 )
 
@@ -92,7 +91,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
 
         # create the requisite token storage for the app, with validation based on
         # the provided parameters
-        self.token_storage = _build_default_validating_token_storage(
+        self.token_storage = self._initialize_validating_token_storage(
             token_storage=self._token_storage,
             consent_client=consent_client,
             scope_requirements=self._scope_requirements,
@@ -177,6 +176,26 @@ class GlobusApp(metaclass=abc.ABCMeta):
         """
         Initializes and returns an AuthLoginClient to be used in authorization requests.
         """
+
+    def _initialize_validating_token_storage(
+        self,
+        token_storage: TokenStorage,
+        consent_client: AuthClient,
+        scope_requirements: t.Mapping[str, t.Sequence[Scope]],
+    ) -> ValidatingTokenStorage:
+        """
+        Initializes the validating token storage for the app.
+        """
+        validating_token_storage = ValidatingTokenStorage(token_storage)
+
+        # construct ValidatingTokenStorage around the TokenStorage and
+        # our initial scope requirements
+        scope_validator = ScopeRequirementsValidator(scope_requirements, consent_client)
+
+        # use validators to enforce invariants about scopes and identity ID
+        validating_token_storage.validators.append(scope_validator)
+
+        return validating_token_storage
 
     def _resolve_token_storage(
         self, app_name: str, client_id: UUIDLike, config: GlobusAppConfig
@@ -391,36 +410,3 @@ class GlobusApp(metaclass=abc.ABCMeta):
         """
         # Scopes are mutable objects so we return a deepcopy
         return copy.deepcopy(self._scope_requirements)
-
-
-def _build_default_validating_token_storage(
-    *,
-    token_storage: TokenStorage,
-    consent_client: AuthClient,
-    scope_requirements: t.Mapping[str, t.Sequence[Scope]],
-) -> ValidatingTokenStorage:
-    """
-    Given the appropriate configuration data, build the default
-    ValidatingTokenStorage for use within GlobusApp.
-
-    :param token_storage: The token storage to wrap in a ValidatingTokenStorage.
-    :param consent_client: The app's internal AuthClient instance which is used
-        to fetch consent information.
-    :param scope_requirements: The scope requirements for the app.
-    """
-    validating_token_storage = ValidatingTokenStorage(token_storage)
-
-    # construct ValidatingTokenStorage around the TokenStorage and
-    # our initial scope requirements
-    scope_validator = ScopeRequirementsValidator(scope_requirements, consent_client)
-    identity_id_validator = UnchangingIdentityIDValidator()
-
-    # use validators to enforce invariants about scopes and identity ID
-    validating_token_storage.validators.extend(
-        (
-            scope_validator,
-            identity_id_validator,
-        )
-    )
-
-    return validating_token_storage

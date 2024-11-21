@@ -462,7 +462,6 @@ def test_user_app_expired_token_triggers_login():
     assert login_flow_manager.counter == 1
 
 
-@pytest.mark.xfail(reason="Identified Bug")
 def test_client_app_expired_token_is_auto_resolved():
     """
     This test exercises ClientApp token grant behavior.
@@ -488,7 +487,11 @@ def test_client_app_expired_token_is_auto_resolved():
 
     transfer = TransferClient(app=client_app, app_scopes=[Scope(meta["scope"])])
 
+    load_response(transfer.task_list)
     transfer.task_list()
+
+    access_token = memory_storage.get_token_data(meta["resource_server"]).access_token
+    assert access_token == meta["access_token"]
 
 
 def test_client_app_get_authorizer():
