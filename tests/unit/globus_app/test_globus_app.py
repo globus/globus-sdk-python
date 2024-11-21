@@ -15,6 +15,7 @@ from globus_sdk import (
     GlobusAppConfig,
     NativeAppAuthClient,
     RefreshTokenAuthorizer,
+    TransferClient,
     UserApp,
 )
 from globus_sdk._testing import load_response
@@ -42,15 +43,20 @@ from globus_sdk.tokenstorage import (
 )
 
 
-def _mock_token_data_by_rs():
+def _mock_token_data_by_rs(
+    resource_server: str = "auth.globus.org",
+    scope: str = "openid",
+    refresh_token: str | None = "mock_refresh_token",
+    expiration_delta: int = 300,
+):
     return {
         "auth.globus.org": TokenStorageData(
-            resource_server="auth.globus.org",
+            resource_server=resource_server,
             identity_id="mock_identity_id",
-            scope="openid",
+            scope=scope,
             access_token="mock_access_token",
-            refresh_token="mock_refresh_token",
-            expires_at_seconds=int(time.time() + 300),
+            refresh_token=refresh_token,
+            expires_at_seconds=int(time.time() + expiration_delta),
             token_type="Bearer",
         )
     }
@@ -434,13 +440,14 @@ class RaisingLoginFlowManagerCounter(LoginFlowManager):
         raise CustomExitException("mock login attempt")
 
 
-def test_user_app_expired_authorizer_triggers_login():
+def test_user_app_expired_token_triggers_login():
     # Set up token data with an expired access token and no refresh token
     client_id = "mock_client_id"
     memory_storage = MemoryTokenStorage()
-    token_data = _mock_token_data_by_rs()
-    token_data["auth.globus.org"].expires_at_seconds = int(time.time() - 3600)
-    token_data["auth.globus.org"].refresh_token = None
+    token_data = _mock_token_data_by_rs(
+        refresh_token=None,
+        expiration_delta=-3600,  # Expired by 1 hour
+    )
     memory_storage.store_token_data_by_resource_server(token_data)
 
     login_flow_manager = RaisingLoginFlowManagerCounter()
@@ -453,6 +460,35 @@ def test_user_app_expired_authorizer_triggers_login():
         user_app.get_authorizer("auth.globus.org")
 
     assert login_flow_manager.counter == 1
+
+
+@pytest.mark.xfail(reason="Identified Bug")
+def test_client_app_expired_token_is_auto_resolved():
+    """
+    This test exercises ClientApp token grant behavior.
+    ClientApps may request updated tokens outside the normal token authorization flow.
+    """
+    client_creds = {
+        "client_id": "mock_client_id",
+        "client_secret": "mock_client_secret",
+    }
+    meta = load_response("auth.oauth2_client_credentials_tokens").metadata
+
+    memory_storage = MemoryTokenStorage()
+    token_data = _mock_token_data_by_rs(
+        resource_server=meta["resource_server"],
+        scope=meta["scope"],
+        refresh_token=None,
+        expiration_delta=-3600,  # Expired by 1 hour
+    )
+    memory_storage.store_token_data_by_resource_server(token_data)
+
+    config = GlobusAppConfig(token_storage=memory_storage)
+    client_app = ClientApp("test-app", **client_creds, config=config)
+
+    transfer = TransferClient(app=client_app, app_scopes=[Scope(meta["scope"])])
+
+    transfer.task_list()
 
 
 def test_client_app_get_authorizer():
