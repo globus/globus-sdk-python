@@ -12,6 +12,29 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-3.48.0:
+
+v3.48.0 (2024-11-21)
+--------------------
+
+Added
+~~~~~
+
+- Added the ``ComputeClientV2.register_endpoint()``, ``ComputeClientV2.get_endpoint()``
+  ``ComputeClientV2.get_endpoint_status()``, ``ComputeClientV2.get_endpoints()``,
+  ``ComputeClientV2.delete_endpoint()``, and ``ComputeClientV2.lock_endpoint()``
+  methods. (:pr:`1110`)
+
+Changed
+~~~~~~~
+
+-   Removed identity ID consistency validation from ``ClientApp``. (:pr:`1111`)
+
+Fixed
+~~~~~
+
+-   Fixed a bug that would cause ``ClientApp`` token refreshes to fail. (:pr:`1111`)
+
 .. _changelog-3.47.0:
 
 v3.47.0 (2024-11-08)
