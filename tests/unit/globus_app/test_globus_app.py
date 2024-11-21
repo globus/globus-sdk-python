@@ -50,7 +50,7 @@ def _mock_token_data_by_rs(
     expiration_delta: int = 300,
 ):
     return {
-        "auth.globus.org": TokenStorageData(
+        resource_server: TokenStorageData(
             resource_server=resource_server,
             identity_id="mock_identity_id",
             scope=scope,
@@ -486,12 +486,16 @@ def test_client_app_expired_token_is_auto_resolved():
     client_app = ClientApp("test-app", **client_creds, config=config)
 
     transfer = TransferClient(app=client_app, app_scopes=[Scope(meta["scope"])])
-
     load_response(transfer.task_list)
+
+    starting_token = memory_storage.get_token_data(meta["resource_server"]).access_token
+    assert starting_token == token_data[meta["resource_server"]].access_token
+
     transfer.task_list()
 
-    access_token = memory_storage.get_token_data(meta["resource_server"]).access_token
-    assert access_token == meta["access_token"]
+    ending_token = memory_storage.get_token_data(meta["resource_server"]).access_token
+    assert starting_token != ending_token
+    assert ending_token == meta["access_token"]
 
 
 def test_client_app_get_authorizer():

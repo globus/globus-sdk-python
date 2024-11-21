@@ -192,7 +192,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         # our initial scope requirements
         scope_validator = ScopeRequirementsValidator(scope_requirements, consent_client)
 
-        # use validators to enforce invariants about scopes and identity ID
+        # use validators to enforce invariants about scopes
         validating_token_storage.validators.append(scope_validator)
 
         return validating_token_storage

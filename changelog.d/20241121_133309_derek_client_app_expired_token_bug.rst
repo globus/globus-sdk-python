@@ -2,7 +2,7 @@
 Changed
 ~~~~~~~
 
--   Removed identity id validation from ``ClientApps``. (:pr:`NUMBER`)
+-   Removed identity ID consistency validation from ``ClientApp``. (:pr:`NUMBER`)
 
 Fixed
 ~~~~~
