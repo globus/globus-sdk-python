@@ -4,7 +4,7 @@ import logging
 import typing as t
 import urllib.parse
 
-from globus_sdk import config, exc, utils
+from globus_sdk import GlobusSDKUsageError, config, exc, utils
 from globus_sdk._types import ScopeCollectionType
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.paging import PaginatorTable
@@ -39,7 +39,8 @@ class BaseClient:
         If both``app`` and ``app_name`` are given, this value takes priority.
     :param base_url: The URL for the service. Most client types initialize this value
         intelligently by default. Set it when inheriting from BaseClient or
-        communicating through a proxy.
+        communicating through a proxy. This value takes precedence over the class
+        attribute of the same name.
     :param transport_params: Options to pass to the transport for this client
 
     All other parameters are for internal use and should be ignored.
@@ -47,6 +48,11 @@ class BaseClient:
 
     # service name is used to lookup a service URL from config
     service_name: str = "_base"
+
+    # the URL for the service
+    # NOTE: this is not the only way to define a base url. See the docstring of the
+    # `BaseClient._resolve_base_url` method for more details.
+    base_url: str = "_base"
 
     # path under the client base URL
     # NOTE: using this attribute is now considered bad practice for client definitions,
@@ -92,31 +98,10 @@ class BaseClient:
             # GLOBUS_SDK_ENVIRONMENT environment variable.
             self.environment = config.get_environment_name(environment)
 
-        if self.service_name == "_base":
-            # service_name=="_base" means that either there was no inheritance (direct
-            # instantiation of BaseClient), or the inheriting class operates outside of
-            # the existing service_name->URL mapping paradigm
-            # in these cases, base_url must be set explicitly
-            log.info(f"Creating client of type {type(self)}")
-            if base_url is None:
-                raise NotImplementedError(
-                    "Cannot instantiate clients which do not set a 'service_name' "
-                    "unless they explicitly set 'base_url'."
-                )
-        else:
-            # if service_name is set, it can be used to deduce a base_url
-            # *if* necessary
-            log.info(
-                f"Creating client of type {type(self)} for "
-                f'service "{self.service_name}"'
-            )
-            if base_url is None:
-                base_url = config.get_service_url(
-                    self.service_name, environment=self.environment
-                )
-
-        # append the base_path to the base URL
-        self.base_url: str = utils.slash_join(base_url, self.base_path)
+        # resolve the base_url for the client (see docstring for resolution precedence)
+        self.base_url = self._resolve_base_url(base_url, self.environment)
+        # append the base_path to the base_url if necessary
+        self.base_url = utils.slash_join(self.base_url, self.base_path)
 
         self.transport = self.transport_class(**(transport_params or {}))
         log.debug(f"initialized transport of type {type(self.transport)}")
@@ -160,6 +145,36 @@ class BaseClient:
         return sane results while the Base Client is being initialized.
         """
         raise NotImplementedError
+
+    @classmethod
+    def _resolve_base_url(cls, init_base_url: str | None, environment: str) -> str:
+        """
+        Resolve the client's base url.
+
+        Precedence (this evaluation will fall through if an option is not set):
+          1. [Highest] Constructor `base_url` value.
+          2. Class `base_url` attribute.
+          3. Class `service_name` attribute (computed).
+
+        :param init_base_url: The `base_url` value supplied to the constructor.
+        :param environment: The environment to use for service URL resolution.
+        :returns: The resolved base URL.
+        :raises: GlobusSDKUsageError if base_url cannot be resolved.
+        """
+        if init_base_url is not None:
+            log.info(f"Creating client of type {cls}")
+            return init_base_url
+        elif cls.base_url != "_base":
+            log.info(f"Creating client of type {cls}")
+            return cls.base_url
+        elif cls.service_name != "_base":
+            log.info(f'Creating client of type {cls} for service "{cls.service_name}"')
+            return config.get_service_url(cls.service_name, environment)
+
+        raise GlobusSDKUsageError(
+            f"Unable to resolve base_url in client {cls}. "
+            f"Clients must define either one or both of 'base_url' and 'service_name'."
+        )
 
     def _finalize_app(self) -> None:
         if self._app:

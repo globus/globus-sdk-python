@@ -6,7 +6,7 @@ from unittest import mock
 import pytest
 
 import globus_sdk
-from globus_sdk import GlobusApp, GlobusAppConfig, UserApp
+from globus_sdk import GlobusApp, GlobusAppConfig, GlobusSDKUsageError, UserApp
 from globus_sdk._testing import RegisteredResponse, get_last_request
 from globus_sdk.authorizers import NullAuthorizer
 from globus_sdk.scopes import Scope, TransferScopes
@@ -42,7 +42,7 @@ ERROR_STATUS_CODES = (400, 404, 405, 409, 500, 503)
 
 def test_cannot_instantiate_plain_base_client():
     # attempting to instantiate a BaseClient errors
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(GlobusSDKUsageError):
         globus_sdk.BaseClient()
 
 
@@ -52,6 +52,34 @@ def test_can_instantiate_base_client_with_explicit_url():
     # this may change in a future major version, to preserve the base_url exactly
     client = globus_sdk.BaseClient(base_url="https://example.org")
     assert client.base_url == "https://example.org/"
+
+
+def test_can_instantiate_with_base_url_class_attribute():
+    class MyCoolClient(globus_sdk.BaseClient):
+        base_url = "https://example.org"
+
+    client = MyCoolClient()
+    assert client.base_url == "https://example.org/"
+
+
+def test_base_url_resolution_precedence():
+    """
+    Base URL can come from one of 3 different places; this test asserts that we maintain
+    a consistent precedence between the three
+        (init-base_url > class-base_url > class-service_name)
+    """
+
+    class BothAttributesClient(globus_sdk.BaseClient):
+        base_url = "class-base"
+        service_name = "service-name"
+
+    class OnlyServiceClient(globus_sdk.BaseClient):
+        service_name = "service-name"
+
+    # All 3 are set
+    assert BothAttributesClient(base_url="init-base").base_url == "init-base/"
+    assert BothAttributesClient().base_url == "class-base/"
+    assert OnlyServiceClient().base_url == "https://service-name.api.globus.org/"
 
 
 def test_set_http_timeout(base_client):
