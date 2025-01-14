@@ -11,8 +11,7 @@ if t.TYPE_CHECKING:
     import globus_sdk
 
 log = logging.getLogger(__name__)
-_StrSyncLevel = t.Literal["exists", "size", "mtime", "checksum"]
-_sync_level_dict: dict[_StrSyncLevel, int] = {
+_sync_level_dict: dict[t.Literal["exists", "size", "mtime", "checksum"], int] = {
     "exists": 0,
     "size": 1,
     "mtime": 2,
@@ -20,7 +19,9 @@ _sync_level_dict: dict[_StrSyncLevel, int] = {
 }
 
 
-def _parse_sync_level(sync_level: _StrSyncLevel | int) -> int:
+def _parse_sync_level(
+    sync_level: t.Literal["exists", "size", "mtime", "checksum"] | int
+) -> int:
     """
     Map sync_level strings to known int values
 
@@ -168,7 +169,9 @@ class TransferData(utils.PayloadWrapper):
         *,
         label: str | None = None,
         submission_id: UUIDLike | None = None,
-        sync_level: _StrSyncLevel | int | None = None,
+        sync_level: (
+            int | None | t.Literal["exists", "size", "mtime", "checksum"]
+        ) = None,
         verify_checksum: bool = False,
         preserve_timestamp: bool = False,
         encrypt_data: bool = False,
