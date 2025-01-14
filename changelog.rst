@@ -12,6 +12,30 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-3.50.0:
+
+v3.50.0 (2025-01-14)
+--------------------
+
+Added
+~~~~~
+
+- Subclasses of ``BaseClient`` may now specify ``base_url`` as class attribute. (:pr:`1125`)
+
+Fixed
+~~~~~
+
+- Fixed an incorrect URL path in ``ComputeClient.get_task_batch``. (:pr:`1117`)
+
+- Fix a bug in ``StorageGatewayDocument`` which stored any ``allowed_domains``
+  argument under an ``"allow_domains"`` key instead of the correct key,
+  ``"allowed_domains"``. (:pr:`1120`)
+
+Documentation
+~~~~~~~~~~~~~
+
+- Updated GlobusAppConfig docs to explain how to disable auto-login. (:pr:`1127`)
+
 .. _changelog-3.49.0:
 
 v3.49.0 (2024-12-04)

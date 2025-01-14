@@ -1,5 +1,0 @@
-Fixed
-~~~~~
-
-- Fixed an incorrect URL path in ``ComputeClient.get_task_batch``. (:pr:`1117`)
-
