@@ -95,8 +95,9 @@ class GlobusAppConfig:
             Explicit values must be pre-registered on your client
             `here <https://app.globus.org/settings/developers>`_.
 
-    :ivar ``TokenValidationErrorHandler`` token_validation_error_handler: A handler
-        invoked to resolve errors raised during token validation.
+    :ivar ``TokenValidationErrorHandler`` | None token_validation_error_handler: A
+        handler invoked to resolve errors raised during token validation. Set this to
+        ``None`` to disable auto-login on service token validation errors.
         Default: ``resolve_by_login_flow`` (runs a login flow, storing the resulting
         tokens).
 
