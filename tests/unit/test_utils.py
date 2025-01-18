@@ -1,3 +1,4 @@
+import textwrap
 import uuid
 
 import pytest
@@ -117,3 +118,51 @@ def test_classproperty_prefers_instance():
 )
 def test_safe_strseq_iter(value, expected_result):
     assert list(utils.safe_strseq_iter(value)) == expected_result
+
+
+def test_read_sphinx_params():
+    docstring = """
+    preamble
+
+    :param param1: some doc on one line
+    :param param2: other doc
+        spanning multiple lines
+    :param param3: a doc
+        spanning
+        many
+        lines
+    :param param4: a doc
+        spanning lines
+
+        with a break in the middle ^
+    :param param5: another
+
+
+    :param param6: and a final one after some whitespace
+
+    epilogue
+    """
+    params = utils.read_sphinx_params(docstring)
+    assert len(params) == 6
+    assert params[0] == ":param param1: some doc on one line"
+    assert params[1] == ":param param2: other doc\n    spanning multiple lines"
+    assert params[2] == textwrap.dedent(
+        """\
+        :param param3: a doc
+            spanning
+            many
+            lines"""
+    )
+    assert params[3] == textwrap.dedent(
+        """\
+        :param param4: a doc
+            spanning lines
+
+            with a break in the middle ^"""
+    )
+    assert params[4] == ":param param5: another"
+    assert params[5] == ":param param6: and a final one after some whitespace"
+
+    # clear the cache after the test
+    # not essential, but reduces the risk that this impacts some future test
+    utils.read_sphinx_params.cache_clear()

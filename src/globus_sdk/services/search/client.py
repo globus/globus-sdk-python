@@ -14,9 +14,12 @@ from .errors import SearchAPIError
 log = logging.getLogger(__name__)
 
 
+@utils.inject_sphinx_params_of(client.BaseClient)
 class SearchClient(client.BaseClient):
     r"""
     Client for the Globus Search API
+
+    .. globus-sdk-inject-doc-params
 
     This class provides helper methods for most common resources in the
     API, and basic ``get``, ``put``, ``post``, and ``delete`` methods

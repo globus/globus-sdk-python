@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import collections
 import collections.abc
+import functools
 import hashlib
 import os
 import platform
 import sys
+import textwrap
 import typing as t
 import uuid
 from base64 import b64encode
@@ -276,3 +278,87 @@ else:
     def classproperty(func: t.Callable[[T], R]) -> _classproperty[T, R]:
         # type cast to convert instance method to class method
         return _classproperty(t.cast(t.Callable[[t.Type[T]], R], func))
+
+
+@functools.lru_cache(maxsize=None)
+def read_sphinx_params(docstring: str) -> tuple[str, ...]:
+    """
+    Given a docstring, extract the `:param:` declarations into a tuple of strings.
+
+    :param docstring: The ``__doc__`` to parse, as it appeared on the original object
+
+    Params start with `:param ...` and end
+    - at the end of the string
+    - at the next param
+    - when a non-indented, non-param line is found
+
+    Whitespace lines within a param doc are supported.
+
+    All produced param strings are dedented.
+    """
+    docstring = textwrap.dedent(docstring)
+
+    result: list[str] = []
+    current: list[str] = []
+    for line in docstring.splitlines():
+        if not current:
+            if line.startswith(":param"):
+                current = [line]
+            else:
+                continue
+        else:
+            # a new param -- flush the current one and restart
+            if line.startswith(":param"):
+                result.append("\n".join(current).strip())
+                current = [line]
+            # a continuation line for the current param (indented)
+            # or a blank line -- it *could* be a continuation of param doc (include it)
+            elif line != line.lstrip() or not line:
+                current.append(line)
+            # otherwise this is a populated line, not indented, and without a `:param`
+            # start -- stop looking for more param doc
+            else:
+                break
+    if current:
+        result.append("\n".join(current).strip())
+
+    return tuple(result)
+
+
+def inject_sphinx_params(doc_params: tuple[str, ...], target: t.Any) -> None:
+    """
+    Given a tuple of sphinx doc params, and a target object with a `__doc__` attribute,
+    inject the params to replace the marker comment 'globus-sdk-inject-doc-params'.
+
+    :param doc_params: Params, as parsed by ``read_sphinx_params``
+    :param target: The object where `__doc__` is being updated
+        (usually a class or function)
+    """
+    target_doc_lines = target.__doc__.splitlines()
+
+    result = []
+    for line in target_doc_lines:
+        stripped_line = line.strip()
+        if stripped_line == ".. globus-sdk-inject-doc-params":
+            indent = len(line) - len(stripped_line)
+            result.append(textwrap.indent("\n".join(doc_params), " " * indent))
+        else:
+            result.append(line)
+
+    target.__doc__ = "\n".join(result)
+
+
+def inject_sphinx_params_of(source: t.Any) -> t.Callable[[T], T]:
+    """
+    Read params from a source object, and inject them into a destination object.
+
+    :param source: An object whose ``__doc__`` attribute is being parsed for
+        parameter docs
+    """
+    params = read_sphinx_params(source.__doc__)
+
+    def apply(target: T) -> T:
+        inject_sphinx_params(params, target)
+        return target
+
+    return apply

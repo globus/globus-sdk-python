@@ -10,10 +10,13 @@ from .data import BatchMembershipActions, GroupPolicies
 from .errors import GroupsAPIError
 
 
+@utils.inject_sphinx_params_of(client.BaseClient)
 class GroupsClient(client.BaseClient):
     """
     Client for the
     `Globus Groups API <https://docs.globus.org/api/groups/>`_.
+
+    .. globus-sdk-inject-doc-params
 
     This provides a relatively low level client to public groups API endpoints.
     You may also consider looking at the GroupsManager as a simpler interface

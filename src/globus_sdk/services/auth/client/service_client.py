@@ -71,10 +71,13 @@ def _create_policy_compat(f: F) -> F:
     return t.cast(F, wrapper)
 
 
+@utils.inject_sphinx_params_of(client.BaseClient)
 class AuthClient(client.BaseClient):
     """
     A client for using the
     `Globus Auth API <https://docs.globus.org/api/auth/>`_
+
+    .. globus-sdk-inject-doc-params
 
     This class provides helper methods for most common resources in the
     Auth API, and the common low-level interface from
