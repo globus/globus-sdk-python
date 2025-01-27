@@ -335,6 +335,36 @@ class PaginatedUsage(AddContentDirective):
         yield ":ref:`how to make paginated calls <making_paginated_calls>`."
 
 
+class CopyParams(AddContentDirective):
+    has_content = True
+    required_arguments = 1
+    optional_arguments = 0
+
+    def gen_rst(self):
+        import globus_sdk
+
+        source_object_name: str = self.arguments[0]
+        path = source_object_name.split(".")
+        cur = globus_sdk
+        for element in path:
+            cur = getattr(cur, element)
+
+        if self.content:
+            content = iter(self.content)
+        else:
+            content = ()
+
+        for line in content:
+            if line.strip() == "<YIELD>":
+                break
+            yield line
+
+        yield from globus_sdk.utils.read_sphinx_params(cur.__doc__)
+
+        for line in content:
+            yield line
+
+
 def after_autodoc_signature_replace_MISSING_repr(  # pylint: disable=missing-param-doc,missing-type-doc  # noqa: E501
     app,  # pylint: disable=unused-argument
     what,  # pylint: disable=unused-argument
@@ -365,6 +395,7 @@ def setup(app):
     app.add_directive("expandtestfixture", ExpandTestingFixture)
     app.add_directive("extdoclink", ExternalDocLink)
     app.add_directive("paginatedusage", PaginatedUsage)
+    app.add_directive("sdk-sphinx-copy-params", CopyParams)
 
     app.add_role("extdoclink", extdoclink_role)
 

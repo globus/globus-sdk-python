@@ -4,7 +4,7 @@ import logging
 import typing as t
 import uuid
 
-from globus_sdk import _guards, client, exc, response, utils
+from globus_sdk import _guards, client, exc, response
 from globus_sdk._types import UUIDLike
 from globus_sdk.scopes import (
     GCSCollectionScopeBuilder,
@@ -19,12 +19,11 @@ from .errors import TimersAPIError
 log = logging.getLogger(__name__)
 
 
-@utils.inject_sphinx_params_of(client.BaseClient)
 class TimersClient(client.BaseClient):
     r"""
     Client for the Globus Timer API.
 
-    .. globus-sdk-inject-doc-params
+    .. sdk-sphinx-copy-params:: BaseClient
 
     .. automethodlist:: globus_sdk.TimersClient
     """

@@ -41,13 +41,12 @@ def _get_page_size(paged_result: IterableTransferResponse) -> int:
     return len(paged_result["DATA"])
 
 
-@utils.inject_sphinx_params_of(client.BaseClient)
 class TransferClient(client.BaseClient):
     r"""
     Client for the
     `Globus Transfer API <https://docs.globus.org/api/transfer/>`_.
 
-    .. globus-sdk-inject-doc-params
+    .. sdk-sphinx-copy-params:: BaseClient
 
     This class provides helper methods for most common resources in the
     REST API, and basic ``get``, ``put``, ``post``, and ``delete`` methods

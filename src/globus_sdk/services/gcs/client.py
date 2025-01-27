@@ -23,7 +23,6 @@ from .response import IterableGCSResponse, UnpackingGCSResponse
 C = t.TypeVar("C", bound=t.Callable[..., t.Any])
 
 
-@utils.inject_sphinx_params_of(client.BaseClient)
 class GCSClient(client.BaseClient):
     """
     A GCSClient provides communication with the GCS Manager API of a Globus Connect
@@ -35,8 +34,9 @@ class GCSClient(client.BaseClient):
     Manager. All other arguments are the same as those for
     :class:`~globus_sdk.BaseClient`.
 
-    :param gcs_address: The FQDN (DNS name) or HTTPS URL for the GCS Manager API.
-    .. globus-sdk-inject-doc-params
+    .. sdk-sphinx-copy-params:: BaseClient
+
+        :param gcs_address: The FQDN (DNS name) or HTTPS URL for the GCS Manager API.
 
     .. automethodlist:: globus_sdk.GCSClient
     """

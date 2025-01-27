@@ -12,12 +12,11 @@ from .errors import ComputeAPIError
 log = logging.getLogger(__name__)
 
 
-@utils.inject_sphinx_params_of(client.BaseClient)
 class ComputeClientV2(client.BaseClient):
     r"""
     Client for the Globus Compute API, version 2.
 
-    .. globus-sdk-inject-doc-params
+    .. sdk-sphinx-copy-params:: BaseClient
 
     .. automethodlist:: globus_sdk.ComputeClientV2
     """
@@ -351,13 +350,12 @@ class ComputeClientV3(client.BaseClient):
         return self.post(f"/v3/endpoints/{endpoint_id}/submit", data=data)
 
 
-@utils.inject_sphinx_params_of(client.BaseClient)
 class ComputeClient(ComputeClientV2):
     r"""
     Canonical client for the Globus Compute API, with support exclusively for
     API version 2.
 
-    .. globus-sdk-inject-doc-params
+    .. sdk-sphinx-copy-params:: BaseClient
 
     .. automethodlist:: globus_sdk.ComputeClient
     """

@@ -20,12 +20,11 @@ from .response import (
 log = logging.getLogger(__name__)
 
 
-@utils.inject_sphinx_params_of(client.BaseClient)
 class FlowsClient(client.BaseClient):
     r"""
     Client for the Globus Flows API.
 
-    .. globus-sdk-inject-doc-params
+    .. sdk-sphinx-copy-params:: BaseClient
 
     .. automethodlist:: globus_sdk.FlowsClient
     """
@@ -829,7 +828,6 @@ class FlowsClient(client.BaseClient):
         return self.post(f"/runs/{run_id}/release")
 
 
-@utils.inject_sphinx_params_of(client.BaseClient)
 class SpecificFlowClient(client.BaseClient):
     r"""
     Client for interacting with a specific flow through the Globus Flows API.
@@ -837,8 +835,9 @@ class SpecificFlowClient(client.BaseClient):
     Unlike other client types, this must be provided with a specific flow id. All other
         arguments are the same as those for :class:`~globus_sdk.BaseClient`.
 
-    :param flow_id: The generated UUID associated with a flow
-    .. globus-sdk-inject-doc-params
+    .. sdk-sphinx-copy-params:: BaseClient
+
+        :param flow_id: The generated UUID associated with a flow
 
     .. automethodlist:: globus_sdk.SpecificFlowClient
     """
