@@ -1,12 +1,10 @@
-# type: ignore
 """
 A Globus SDK Sphinx Extension for Autodoc of Class Methods
 """
+
 from __future__ import annotations
 
-import inspect
 import json
-from pydoc import locate
 
 from docutils import nodes
 from docutils.parsers.rst import Directive, directives
@@ -15,45 +13,12 @@ from sphinx.util.nodes import nested_parse_with_titles
 
 from globus_sdk._testing import ResponseList
 
-
-def _extract_known_scopes(scope_builder_name):
-    sb = locate(scope_builder_name)
-    return sb.scope_names
-
-
-def _locate_class(classname):
-    cls = locate(classname)
-    if not inspect.isclass(cls):
-        raise RuntimeError(
-            f"uh-oh, {classname} is not a class name? type(classname)={type(cls)}"
-        )
-    return cls
-
-
-def _classname2methods(classname, include_methods):
-    """resolve a class name to a list of (public) method names
-    takes a classname and a list of method names to avoid filtering out"""
-    cls = _locate_class(classname)
-
-    # get methods of the object as [(name, <unbound method>), ...]
-    methods = inspect.getmembers(cls, predicate=inspect.isfunction)
-
-    def _methodname_is_good(m):
-        if m in include_methods:
-            return True
-        # filter out dunder-methods and `_private` methods
-        if m.startswith("_"):
-            return False
-        # filter out any inherited methods which are not overloaded
-        if m not in cls.__dict__:
-            return False
-        return True
-
-    return [(name, value) for name, value in methods if _methodname_is_good(name)]
-
-
-def _is_paginated(func):
-    return getattr(func, "_has_paginator", False)
+from .utils import (
+    classname2methods,
+    extract_known_scopes,
+    is_paginated_method,
+    locate_class,
+)
 
 
 class AddContentDirective(Directive):
@@ -107,8 +72,8 @@ class AutoMethodList(AddContentDirective):
         yield ""
         yield "**Methods**"
         yield ""
-        for methodname, method in _classname2methods(classname, include_methods):
-            if not _is_paginated(method):
+        for methodname, method in classname2methods(classname, include_methods):
+            if not is_paginated_method(method):
                 yield f"* :py:meth:`~{classname}.{methodname}`"
             else:
                 yield (
@@ -138,7 +103,7 @@ class ListKnownScopes(AddContentDirective):
         example_scope = None
         if "example_scope" in self.options:
             example_scope = self.options["example_scope"].strip()
-        known_scopes = _extract_known_scopes(sb_name)
+        known_scopes = extract_known_scopes(sb_name)
         if example_scope is None:
             example_scope = known_scopes[0]
 
@@ -170,7 +135,7 @@ class EnumerateTestingFixtures(AddContentDirective):
         underline_char = self.options.get("header_underline_char", "-")
 
         classname = self.arguments[0]
-        cls = _locate_class(classname)
+        cls = locate_class(classname)
         service_name = cls.service_name
 
         yield classname
@@ -181,7 +146,7 @@ class EnumerateTestingFixtures(AddContentDirective):
             "for the following methods:"
         )
         yield ""
-        for methodname, method in _classname2methods(classname, []):
+        for methodname, method in classname2methods(classname, []):
             try:
                 rset = get_response_set(method)
                 # success -> has a response
