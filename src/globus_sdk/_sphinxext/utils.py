@@ -5,8 +5,6 @@ import types
 import typing as t
 from pydoc import locate
 
-from globus_sdk.scopes import ScopeBuilder
-
 
 def locate_class(classname: str) -> type:
     cls = locate(classname)
@@ -39,16 +37,3 @@ def classname2methods(
         return True
 
     return [(name, value) for name, value in methods if methodname_is_good(name)]
-
-
-def is_paginated_method(func: types.FunctionType) -> bool:
-    return getattr(func, "_has_paginator", False)
-
-
-def extract_known_scopes(scope_builder_name: str) -> list[str]:
-    sb = locate(scope_builder_name)
-    if not isinstance(sb, ScopeBuilder):
-        raise RuntimeError(
-            f"Expected {sb} to be a ScopeBuilder, but got {type(sb)} instead"
-        )
-    return sb.scope_names

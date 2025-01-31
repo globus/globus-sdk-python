@@ -1,8 +1,9 @@
+import types
 import typing as t
 
 from docutils.parsers.rst import directives
 
-from ..utils import classname2methods, is_paginated_method
+from ..utils import classname2methods
 from .add_content_directive import AddContentDirective
 
 
@@ -32,3 +33,7 @@ class AutoMethodList(AddContentDirective):
                 )
 
         yield ""
+
+
+def is_paginated_method(func: types.FunctionType) -> bool:
+    return getattr(func, "_has_paginator", False)

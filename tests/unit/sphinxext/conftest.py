@@ -1,8 +1,7 @@
-import contextlib
-import os
 import pathlib
 import shutil
 import tempfile
+import textwrap
 from xml.etree import ElementTree
 
 import pytest
@@ -10,14 +9,6 @@ import responses
 
 HERE = pathlib.Path(__file__).parent
 REPO_ROOT = HERE.parent.parent.parent
-
-
-@contextlib.contextmanager
-def _in_root():
-    oldcwd = os.getcwd()
-    os.chdir(REPO_ROOT)
-    yield
-    os.chdir(oldcwd)
 
 
 #
@@ -57,8 +48,11 @@ class SingleFileSphinxRunner:
     see in your test outputs.
     """
 
-    def to_etree(self, content, debug=False):
+    def to_etree(self, content, dedent=True, debug=False):
         from sphinx.cmd.build import build_main as sphinx_main
+
+        if dedent:
+            content = textwrap.dedent(content)
 
         with (
             tempfile.TemporaryDirectory() as source_dir,
@@ -67,8 +61,9 @@ class SingleFileSphinxRunner:
             self._prepare_file(source_dir, content, "index.rst")
             self._prepare_sphinx_config(source_dir)
 
-            with _in_root():
-                sphinx_main([source_dir, out_dir, "-b", "xml"])
+            sphinx_rc = sphinx_main([source_dir, out_dir, "-b", "xml"])
+
+            assert sphinx_rc == 0
 
             output_xml = pathlib.Path(out_dir) / "index.xml"
             xml_text = output_xml.read_text()
@@ -79,6 +74,22 @@ class SingleFileSphinxRunner:
                 print()
                 print("--- end debug from sphinx runner ---")
             return ElementTree.fromstring(xml_text)
+
+    def ensure_failure(self, content, dedent=True, debug=False):
+        from sphinx.cmd.build import build_main as sphinx_main
+
+        if dedent:
+            content = textwrap.dedent(content)
+
+        with (
+            tempfile.TemporaryDirectory() as source_dir,
+            tempfile.TemporaryDirectory() as out_dir,
+        ):
+            self._prepare_file(source_dir, content, "index.rst")
+            self._prepare_sphinx_config(source_dir)
+
+            sphinx_rc = sphinx_main([source_dir, out_dir, "-b", "xml"])
+            assert sphinx_rc != 0
 
     def _prepare_file(self, source_dir, content, filename):
         source_path = pathlib.Path(source_dir) / filename
@@ -120,7 +131,11 @@ class DocutilsRunner:
         #   https://docutils.sourceforge.io/docs/user/config.html#halt-level
         self.settings.halt_level = 2
 
-    def to_etree(self, content, debug=False):
+    def to_etree(self, content, dedent=True, debug=False):
+
+        if dedent:
+            content = textwrap.dedent(content)
+
         doc = self.new_doc()
         xml_string = self.make_xml(content, doc)
         if debug:
