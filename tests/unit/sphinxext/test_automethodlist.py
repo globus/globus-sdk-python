@@ -18,7 +18,7 @@ def test_automethodlist_requires_an_argument(
 # choose an arbitrary object from the SDK and confirm that `automethodlist`
 # will render one of its public methods
 # for this case, we're using `GlobusApp.login_required()`
-def test_automethodlist_of_globus_app_shows_login(sphinxext, sphinx_runner):
+def test_automethodlist_of_globus_app_shows_login(sphinx_runner):
     etree = sphinx_runner.to_etree(".. automethodlist:: globus_sdk.GlobusApp")
 
     assert etree.tag == "document"

@@ -9,9 +9,7 @@ import globus_sdk
 
 def test_enumerate_fixtures_rejects_wrong_object_type(sphinx_runner, capsys):
     sphinx_runner.ensure_failure(
-        """\
-        .. enumeratetestingfixtures:: globus_sdk.NullAuthorizer
-        """,
+        ".. enumeratetestingfixtures:: globus_sdk.NullAuthorizer",
     )
 
     captured = capsys.readouterr()
@@ -34,7 +32,7 @@ def test_enumerate_fixtures_rejects_wrong_object_type(sphinx_runner, capsys):
 # choose an arbitrary client to test against
 def test_enumerate_fixtures_of_search_client(sphinx_runner):
     etree = sphinx_runner.to_etree(
-        ".. enumeratetestingfixtures:: globus_sdk.SearchClient"
+        ".. enumeratetestingfixtures:: globus_sdk.SearchClient",
     )
     assert etree.tag == "document"
 

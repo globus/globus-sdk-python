@@ -46,8 +46,4 @@ def test_addcontent_generating_warning(
     assert note_element is not None
     paragraph_element = note_element.find("paragraph")
     assert paragraph_element is not None
-    assert paragraph_element.text == textwrap.dedent(
-        """\
-        Some note content here.
-        Multiline."""
-    )
+    assert paragraph_element.text == "Some note content here.\nMultiline."

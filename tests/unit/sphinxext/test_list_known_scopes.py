@@ -5,9 +5,7 @@ import pytest
 
 def test_listknownscopes_rejects_wrong_object_type(sphinx_runner, capsys):
     sphinx_runner.ensure_failure(
-        """\
-        .. listknownscopes:: globus_sdk.BaseClient
-        """,
+        ".. listknownscopes:: globus_sdk.BaseClient",
     )
 
     captured = capsys.readouterr()
@@ -31,7 +29,7 @@ def test_listknownscopes_rejects_wrong_object_type(sphinx_runner, capsys):
 # for this case, we're using `TimersScopes`
 def test_listknownscopes_of_timers(sphinx_runner):
     etree = sphinx_runner.to_etree(
-        ".. listknownscopes:: globus_sdk.scopes.TimersScopes"
+        ".. listknownscopes:: globus_sdk.scopes.TimersScopes",
     )
 
     assert etree.tag == "document"
@@ -64,7 +62,7 @@ def test_listknownscopes_of_timers_with_forced_example(sphinx_runner):
         """\
         .. listknownscopes:: globus_sdk.scopes.TimersScopes
             :example_scope: frobulate
-        """
+        """,
     )
 
     assert etree.tag == "document"
@@ -79,7 +77,7 @@ def test_listknownscopes_of_timers_with_altered_basename(sphinx_runner):
         """\
         .. listknownscopes:: globus_sdk.scopes.TimersScopes
             :base_name: ScopeMuddler
-        """
+        """,
     )
 
     assert etree.tag == "document"
