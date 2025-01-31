@@ -48,10 +48,6 @@ FlowsScopes = _FlowsScopeBuilder(
         "run_manage",
     ],
 )
-"""Globus Flows scopes.
-
-.. listknownscopes:: globus_sdk.scopes.FlowsScopes
-"""
 
 
 class _SpecificFlowScopesClassStub(ScopeBuilder):

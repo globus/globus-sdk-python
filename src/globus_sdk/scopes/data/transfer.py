@@ -7,7 +7,3 @@ TransferScopes = ScopeBuilder(
         "gcp_install",
     ],
 )
-"""Globus Transfer scopes.
-
-.. listknownscopes:: globus_sdk.scopes.TransferScopes
-"""

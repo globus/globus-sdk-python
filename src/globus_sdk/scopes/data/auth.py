@@ -21,8 +21,3 @@ AuthScopes = _AuthScopesBuilder(
         "view_identity_set",
     ],
 )
-"""Globus Auth scopes.
-
-.. listknownscopes:: globus_sdk.scopes.AuthScopes
-    :example_scope: view_identity_set
-"""

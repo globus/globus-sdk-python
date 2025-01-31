@@ -229,30 +229,66 @@ ScopeBuilder Types
 ScopeBuilder Constants
 ~~~~~~~~~~~~~~~~~~~~~~
 
-.. autodata:: globus_sdk.scopes.data.AuthScopes
-    :annotation:
+.. py:data:: globus_sdk.scopes.data.AuthScopes
 
-.. autodata:: globus_sdk.scopes.data.ComputeScopes
-    :annotation:
+    Globus Auth scopes.
 
-.. autodata:: globus_sdk.scopes.data.FlowsScopes
-    :annotation:
+    .. listknownscopes:: globus_sdk.scopes.AuthScopes
+        :example_scope: view_identity_set
 
-.. autodata:: globus_sdk.scopes.data.GroupsScopes
-    :annotation:
 
-.. autodata:: globus_sdk.scopes.data.NexusScopes
-    :annotation:
+.. py:data:: globus_sdk.scopes.data.ComputeScopes
 
-.. autodata:: globus_sdk.scopes.data.SearchScopes
-    :annotation:
+    Compute scopes.
 
-.. note::
+    .. listknownscopes:: globus_sdk.scopes.ComputeScopes
 
-    ``TimersScopes`` is also available under the legacy name ``TimerScopes``.
 
-.. autodata:: globus_sdk.scopes.data.TimersScopes
-    :annotation:
+.. py:data:: globus_sdk.scopes.data.FlowsScopes
 
-.. autodata:: globus_sdk.scopes.data.TransferScopes
-    :annotation:
+    Globus Flows scopes.
+
+    .. listknownscopes:: globus_sdk.scopes.FlowsScopes
+
+
+.. py:data:: globus_sdk.scopes.data.GroupsScopes
+
+    Groups scopes.
+
+    .. listknownscopes:: globus_sdk.scopes.GroupsScopes
+
+
+.. py:data:: globus_sdk.scopes.data.NexusScopes
+
+    Nexus scopes.
+
+    .. listknownscopes:: globus_sdk.scopes.NexusScopes
+
+    .. warning::
+
+        Use of Nexus is deprecated. Users should use Groups instead.
+
+
+.. py:data:: globus_sdk.scopes.data.SearchScopes
+
+    Globus Search scopes.
+
+    .. listknownscopes:: globus_sdk.scopes.SearchScopes
+
+
+.. py:data:: globus_sdk.scopes.data.TimersScopes
+
+    Globus Timers scopes.
+
+    .. listknownscopes:: globus_sdk.scopes.TimersScopes
+
+    .. note::
+
+        ``TimersScopes`` is also available under the legacy name ``TimerScopes``.
+
+
+.. py:data:: globus_sdk.scopes.data.TransferScopes
+
+    Globus Transfer scopes.
+
+    .. listknownscopes:: globus_sdk.scopes.TransferScopes

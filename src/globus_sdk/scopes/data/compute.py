@@ -34,7 +34,3 @@ ComputeScopes = _ComputeScopeBuilder(
     "facd7ccc-c5f4-42aa-916b-a0e270e2c2a9",
     known_url_scopes=["all"],
 )
-"""Compute scopes.
-
-.. listknownscopes:: globus_sdk.scopes.ComputeScopes
-"""

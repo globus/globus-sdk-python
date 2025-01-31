@@ -9,7 +9,3 @@ SearchScopes = ScopeBuilder(
         "search",
     ],
 )
-"""Globus Search scopes.
-
-.. listknownscopes:: globus_sdk.scopes.SearchScopes
-"""
