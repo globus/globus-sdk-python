@@ -117,9 +117,7 @@ source = ["globus_sdk"]
 # omit must be specified in a way which matches the
 # tox environment installations, so lead with `**`
 omit = [
-    "**/globus_sdk/_sphinxext.py",
     "**/globus_sdk/_testing/*",
-    "**/globus_sdk/_generate_init.py",
 ]
 
 [tool.coverage.paths]

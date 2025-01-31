@@ -5,6 +5,8 @@ import types
 import typing as t
 from pydoc import locate
 
+from globus_sdk.scopes import ScopeBuilder
+
 
 def locate_class(classname: str) -> type:
     cls = locate(classname)
@@ -25,7 +27,7 @@ def classname2methods(
     # get methods of the object as [(name, <unbound method>), ...]
     methods = inspect.getmembers(cls, predicate=inspect.isfunction)
 
-    def methodname_is_good(m):
+    def methodname_is_good(m: str) -> bool:
         if m in include_methods:
             return True
         # filter out dunder-methods and `_private` methods
@@ -45,4 +47,8 @@ def is_paginated_method(func: types.FunctionType) -> bool:
 
 def extract_known_scopes(scope_builder_name: str) -> list[str]:
     sb = locate(scope_builder_name)
+    if not isinstance(sb, ScopeBuilder):
+        raise RuntimeError(
+            f"Expected {sb} to be a ScopeBuilder, but got {type(sb)} instead"
+        )
     return sb.scope_names
