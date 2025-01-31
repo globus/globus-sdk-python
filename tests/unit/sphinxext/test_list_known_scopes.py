@@ -3,7 +3,7 @@ import re
 import pytest
 
 
-def test_listknownscopes_rejects_wrong_object_type(sphinxext, sphinx_runner, capsys):
+def test_listknownscopes_rejects_wrong_object_type(sphinx_runner, capsys):
     sphinx_runner.ensure_failure(
         """\
         .. listknownscopes:: globus_sdk.BaseClient
@@ -29,7 +29,7 @@ def test_listknownscopes_rejects_wrong_object_type(sphinxext, sphinx_runner, cap
 # choose an arbitrary scope builder from the SDK and confirm that listknownscopes
 # will render its list of members
 # for this case, we're using `TimersScopes`
-def test_listknownscopes_of_timers(sphinxext, sphinx_runner):
+def test_listknownscopes_of_timers(sphinx_runner):
     etree = sphinx_runner.to_etree(
         ".. listknownscopes:: globus_sdk.scopes.TimersScopes"
     )
@@ -59,7 +59,7 @@ def test_listknownscopes_of_timers(sphinxext, sphinx_runner):
     assert scope_items[0].text == "timer"
 
 
-def test_listknownscopes_of_timers_with_forced_example(sphinxext, sphinx_runner):
+def test_listknownscopes_of_timers_with_forced_example(sphinx_runner):
     etree = sphinx_runner.to_etree(
         """\
         .. listknownscopes:: globus_sdk.scopes.TimersScopes
@@ -74,7 +74,7 @@ def test_listknownscopes_of_timers_with_forced_example(sphinxext, sphinx_runner)
     assert console_block.text == ">>> TimersScopes.frobulate"
 
 
-def test_listknownscopes_of_timers_with_altered_basename(sphinxext, sphinx_runner):
+def test_listknownscopes_of_timers_with_altered_basename(sphinx_runner):
     etree = sphinx_runner.to_etree(
         """\
         .. listknownscopes:: globus_sdk.scopes.TimersScopes
