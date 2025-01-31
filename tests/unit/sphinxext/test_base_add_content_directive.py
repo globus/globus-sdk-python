@@ -5,15 +5,14 @@ def test_addcontent_generating_text(
     sphinxext, docutils_runner, register_temporary_directive
 ):
 
-    class MyDirective(sphinxext.add_content_directive.AddContentDirective):
+    class MyDirective(sphinxext.custom_directives.AddContentDirective):
         def gen_rst(self):
             yield "a"
             yield "b"
 
     register_temporary_directive("mydirective", MyDirective)
 
-    doc = docutils_runner.new_doc()
-    etree = docutils_runner.parse_as_etree(".. mydirective::", doc)
+    etree = docutils_runner.to_etree(".. mydirective::")
 
     assert etree.tag == "document"
     assert etree.get("source") == "TEST"
@@ -30,7 +29,7 @@ def test_addcontent_generating_warning(
     sphinxext, docutils_runner, register_temporary_directive
 ):
 
-    class MyDirective(sphinxext.add_content_directive.AddContentDirective):
+    class MyDirective(sphinxext.custom_directives.AddContentDirective):
         def gen_rst(self):
             yield ".. note::"
             yield ""
@@ -39,8 +38,7 @@ def test_addcontent_generating_warning(
 
     register_temporary_directive("mydirective", MyDirective)
 
-    doc = docutils_runner.new_doc()
-    etree = docutils_runner.parse_as_etree(".. mydirective::", doc)
+    etree = docutils_runner.to_etree(".. mydirective::")
 
     assert etree.tag == "document"
     assert etree.get("source") == "TEST"

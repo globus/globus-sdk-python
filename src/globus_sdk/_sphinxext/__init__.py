@@ -11,41 +11,8 @@ from docutils.parsers.rst import directives
 
 from globus_sdk._testing import ResponseList
 
-from .add_content_directive import AddContentDirective
-from .utils import (
-    classname2methods,
-    extract_known_scopes,
-    is_paginated_method,
-    locate_class,
-)
-
-
-class AutoMethodList(AddContentDirective):
-    has_content = False
-    required_arguments = 1
-    optional_arguments = 0
-    option_spec = {"include_methods": directives.unchanged}
-
-    def gen_rst(self):
-        classname = self.arguments[0]
-
-        include_methods = []
-        if "include_methods" in self.options:
-            include_methods = self.options["include_methods"].strip().split(",")
-
-        yield ""
-        yield "**Methods**"
-        yield ""
-        for methodname, method in classname2methods(classname, include_methods):
-            if not is_paginated_method(method):
-                yield f"* :py:meth:`~{classname}.{methodname}`"
-            else:
-                yield (
-                    f"* :py:meth:`~{classname}.{methodname}`, "
-                    f"``paginated.{methodname}()``"
-                )
-
-        yield ""
+from .custom_directives import AddContentDirective, AutoMethodList
+from .utils import classname2methods, extract_known_scopes, locate_class
 
 
 class ListKnownScopes(AddContentDirective):
