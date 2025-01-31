@@ -81,6 +81,8 @@ typing = [
     # although 'responses' is provided by the test requirements, it also
     # must be installed for proper type-checking on globus_sdk._testing
     "responses",
+    # similarly, sphinx is needed to type-check our sphinx extension
+    "sphinx",
 ]
 typing-mindeps = [
     {include-group = "typing"},
