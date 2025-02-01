@@ -1,4 +1,5 @@
 import json
+import typing as t
 
 from docutils.parsers.rst import directives
 
@@ -15,7 +16,7 @@ class ExpandTestingFixture(AddContentDirective):
         "case": directives.unchanged,
     }
 
-    def gen_rst(self):
+    def gen_rst(self) -> t.Iterator[str]:
         from globus_sdk._testing import get_response_set
 
         response_set_name = self.arguments[0]

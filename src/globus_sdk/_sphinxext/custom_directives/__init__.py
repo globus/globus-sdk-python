@@ -4,6 +4,7 @@ from .enumerate_testing_fixtures import EnumerateTestingFixtures
 from .expand_testing_fixture import ExpandTestingFixture
 from .externaldoclink import ExternalDocLink
 from .list_known_scopes import ListKnownScopes
+from .paginated_usage import PaginatedUsage
 
 __all__ = (
     "AddContentDirective",
@@ -12,4 +13,5 @@ __all__ = (
     "ExpandTestingFixture",
     "ExternalDocLink",
     "ListKnownScopes",
+    "PaginatedUsage",
 )
