@@ -37,3 +37,18 @@ def classname2methods(
         return True
 
     return [(name, value) for name, value in methods if methodname_is_good(name)]
+
+
+def derive_doc_url_base(service: str | None) -> str:
+    if service is None:
+        return "https://docs.globus.org/api"
+    elif service == "groups":
+        return "https://groups.api.globus.org/redoc#operation"
+    elif service == "gcs":
+        return "https://docs.globus.org/globus-connect-server/v5/api"
+    elif service == "flows":
+        return "https://globusonline.github.io/globus-flows#tag"
+    elif service == "compute":
+        return "https://compute.api.globus.org/redoc#tag"
+    else:
+        raise ValueError(f"Unsupported extdoclink service '{service}'")

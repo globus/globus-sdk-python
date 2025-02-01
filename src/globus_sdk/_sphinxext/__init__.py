@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import json
 
-from docutils import nodes
 from docutils.parsers.rst import directives
 
 from globus_sdk._testing import ResponseList
@@ -15,81 +14,10 @@ from .custom_directives import (
     AddContentDirective,
     AutoMethodList,
     EnumerateTestingFixtures,
+    ExternalDocLink,
     ListKnownScopes,
 )
-
-
-def _derive_doc_url_base(service: str | None) -> str:
-    if service is None:
-        return "https://docs.globus.org/api"
-    elif service == "groups":
-        return "https://groups.api.globus.org/redoc#operation"
-    elif service == "gcs":
-        return "https://docs.globus.org/globus-connect-server/v5/api"
-    elif service == "flows":
-        return "https://globusonline.github.io/globus-flows#tag"
-    elif service == "compute":
-        return "https://compute.api.globus.org/redoc#tag"
-    else:
-        raise ValueError(f"Unsupported extdoclink service '{service}'")
-
-
-def extdoclink_role(
-    name,  # pylint: disable=unused-argument
-    rawtext,
-    text,
-    lineno,  # pylint: disable=unused-argument
-    inliner,  # pylint: disable=unused-argument
-    options=None,  # pylint: disable=unused-argument
-    content=None,  # pylint: disable=unused-argument
-):
-    if " " not in text:
-        raise ValueError("extdoclink role must contain space-separated text")
-    linktext, _, ref = text.rpartition(" ")
-    if not ref.startswith("<") and ref.endswith(">"):
-        raise ValueError("extdoclink role reference must be in angle brackets")
-    ref = ref[1:-1]
-    base_url = _derive_doc_url_base(None)
-    node = nodes.reference(rawtext, linktext, refuri=f"{base_url}/{ref}")
-    return [node], []
-
-
-class ExternalDocLink(AddContentDirective):
-    has_content = False
-    required_arguments = 1
-    optional_arguments = 0
-    # allow for spaces in the argument string
-    final_argument_whitespace = True
-    option_spec = {
-        "base_url": directives.unchanged,
-        "service": directives.unchanged,
-        "ref": directives.unchanged_required,
-    }
-
-    def gen_rst(self):
-        message = self.arguments[0].strip()
-
-        service: str | None = self.options.get("service")
-        default_base_url: str = _derive_doc_url_base(service)
-
-        base_url = self.options.get("base_url", default_base_url)
-        relative_link = self.options["ref"]
-        # use a trailing `__` to make the hyperlink an "anonymous hyperlink"
-        #
-        # the reason for this is that sphinx will warn (error with -W) if we generate
-        # rst with duplicate target names, as when an autodoc method name matches the
-        # (snake_cased) message for a hyperlink, a common scenario
-        # the conflicts are stipulated by docutils to cause warnings, along with a
-        # conflict resolution procedure specified under the implicit hyperlink section
-        # of the spec:
-        # https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#implicit-hyperlink-targets
-        #
-        # for details on anonymous hyperlinks, see also:
-        # https://docutils.sourceforge.io/docs/ref/rst/restructuredtext.html#anonymous-hyperlinks
-        yield (
-            f"See `{message} <{base_url}/{relative_link}>`__ in the "
-            "API documentation for details."
-        )
+from .roles import extdoclink_role
 
 
 class ExpandTestingFixture(AddContentDirective):
