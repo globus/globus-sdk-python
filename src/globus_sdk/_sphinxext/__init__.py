@@ -4,8 +4,12 @@ A Globus SDK Sphinx Extension for Autodoc of Class Methods
 
 from __future__ import annotations
 
+import typing as t
+
+from sphinx.application import Sphinx
+
 from .autodoc_hooks import after_autodoc_signature_replace_MISSING_repr
-from .custom_directives import (
+from .directives import (
     AutoMethodList,
     CopyParams,
     EnumerateTestingFixtures,
@@ -17,7 +21,7 @@ from .custom_directives import (
 from .roles import extdoclink_role
 
 
-def setup(app):
+def setup(app: Sphinx) -> dict[str, t.Any]:
     app.add_directive("automethodlist", AutoMethodList)
     app.add_directive("listknownscopes", ListKnownScopes)
     app.add_directive("enumeratetestingfixtures", EnumerateTestingFixtures)

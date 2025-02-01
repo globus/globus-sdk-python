@@ -7,9 +7,7 @@ def test_automethodlist_requires_an_argument(
     sphinxext, docutils_runner, register_temporary_directive
 ):
 
-    register_temporary_directive(
-        "automethodlist", sphinxext.custom_directives.AutoMethodList
-    )
+    register_temporary_directive("automethodlist", sphinxext.directives.AutoMethodList)
 
     with pytest.raises(Exception, match=r"1 argument\(s\) required, 0 supplied\."):
         docutils_runner.to_etree(".. automethodlist::")

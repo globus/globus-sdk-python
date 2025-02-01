@@ -54,18 +54,17 @@ class SingleFileSphinxRunner:
         if dedent:
             content = textwrap.dedent(content)
 
-        with (
-            tempfile.TemporaryDirectory() as source_dir,
-            tempfile.TemporaryDirectory() as out_dir,
-        ):
-            self._prepare_file(source_dir, content, "index.rst")
-            self._prepare_sphinx_config(source_dir)
+        source_dir = tempfile.TemporaryDirectory()
+        out_dir = tempfile.TemporaryDirectory()
+        with source_dir, out_dir:
+            self._prepare_file(source_dir.name, content, "index.rst")
+            self._prepare_sphinx_config(source_dir.name)
 
-            sphinx_rc = sphinx_main([source_dir, out_dir, "-b", "xml"])
+            sphinx_rc = sphinx_main([source_dir.name, out_dir.name, "-b", "xml"])
 
             assert sphinx_rc == 0
 
-            output_xml = pathlib.Path(out_dir) / "index.xml"
+            output_xml = pathlib.Path(out_dir.name) / "index.xml"
             xml_text = output_xml.read_text()
             if debug:
                 print("--- debug from sphinx runner ---")
@@ -81,14 +80,13 @@ class SingleFileSphinxRunner:
         if dedent:
             content = textwrap.dedent(content)
 
-        with (
-            tempfile.TemporaryDirectory() as source_dir,
-            tempfile.TemporaryDirectory() as out_dir,
-        ):
-            self._prepare_file(source_dir, content, "index.rst")
-            self._prepare_sphinx_config(source_dir)
+        source_dir = tempfile.TemporaryDirectory()
+        out_dir = tempfile.TemporaryDirectory()
+        with source_dir, out_dir:
+            self._prepare_file(source_dir.name, content, "index.rst")
+            self._prepare_sphinx_config(source_dir.name)
 
-            sphinx_rc = sphinx_main([source_dir, out_dir, "-b", "xml"])
+            sphinx_rc = sphinx_main([source_dir.name, out_dir.name, "-b", "xml"])
             assert sphinx_rc != 0
 
     def _prepare_file(self, source_dir, content, filename):

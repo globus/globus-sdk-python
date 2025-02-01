@@ -20,8 +20,13 @@ def locate_class(classname: str) -> type:
 def classname2methods(
     classname: str, include_methods: t.Sequence[str]
 ) -> list[tuple[str, types.FunctionType]]:
-    """resolve a class name to a list of (public) method names
-    takes a classname and a list of method names to avoid filtering out"""
+    """Resolve a class name to a list of (public) method names + function objects.
+    Takes a classname and a list of method names to avoid filtering out.
+
+    :param classname: The name to resolve to a class
+    :param include_methods: A list or tuple of method names which would normally be
+        excluded as private, but which should be included in the result
+    """
     cls = locate_class(classname)
 
     # get methods of the object as [(name, <unbound method>), ...]

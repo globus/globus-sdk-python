@@ -19,9 +19,7 @@ def test_copy_params_requires_an_argument(
     sphinxext, docutils_runner, register_temporary_directive
 ):
 
-    register_temporary_directive(
-        "sdk-copy-params", sphinxext.custom_directives.CopyParams
-    )
+    register_temporary_directive("sdk-copy-params", sphinxext.directives.CopyParams)
 
     with pytest.raises(Exception, match=r"1 argument\(s\) required, 0 supplied\."):
         docutils_runner.to_etree(".. sdk-copy-params::")

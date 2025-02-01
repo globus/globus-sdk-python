@@ -4,9 +4,7 @@ import pytest
 def test_paginated_usage_requires_an_argument(
     sphinxext, docutils_runner, register_temporary_directive
 ):
-    register_temporary_directive(
-        "paginatedusage", sphinxext.custom_directives.PaginatedUsage
-    )
+    register_temporary_directive("paginatedusage", sphinxext.directives.PaginatedUsage)
 
     with pytest.raises(Exception, match=r"1 argument\(s\) required, 0 supplied\."):
         docutils_runner.to_etree(".. paginatedusage::")

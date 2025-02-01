@@ -5,7 +5,7 @@ def test_addcontent_generating_text(
     sphinxext, docutils_runner, register_temporary_directive
 ):
 
-    class MyDirective(sphinxext.custom_directives.AddContentDirective):
+    class MyDirective(sphinxext.directives.AddContentDirective):
         def gen_rst(self):
             yield "a"
             yield "b"
@@ -29,7 +29,7 @@ def test_addcontent_generating_warning(
     sphinxext, docutils_runner, register_temporary_directive
 ):
 
-    class MyDirective(sphinxext.custom_directives.AddContentDirective):
+    class MyDirective(sphinxext.directives.AddContentDirective):
         def gen_rst(self):
             yield ".. note::"
             yield ""
