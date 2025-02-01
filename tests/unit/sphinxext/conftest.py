@@ -65,7 +65,7 @@ class SingleFileSphinxRunner:
             assert sphinx_rc == 0
 
             output_xml = pathlib.Path(out_dir.name) / "index.xml"
-            xml_text = output_xml.read_text()
+            xml_text = output_xml.read_text(encoding="utf-8")
             if debug:
                 print("--- debug from sphinx runner ---")
                 print()
@@ -91,7 +91,7 @@ class SingleFileSphinxRunner:
 
     def _prepare_file(self, source_dir, content, filename):
         source_path = pathlib.Path(source_dir) / filename
-        source_path.write_text(content)
+        source_path.write_text(content, encoding="utf-8")
 
     def _prepare_sphinx_config(self, source_dir):
         shutil.copy(
