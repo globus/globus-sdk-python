@@ -4,6 +4,7 @@ A Globus SDK Sphinx Extension for Autodoc of Class Methods
 
 from __future__ import annotations
 
+from .autodoc_hooks import after_autodoc_signature_replace_MISSING_repr
 from .custom_directives import (
     AddContentDirective,
     AutoMethodList,
@@ -63,29 +64,6 @@ class CopyParams(AddContentDirective):
 
         for line in content:
             yield line
-
-
-def after_autodoc_signature_replace_MISSING_repr(  # pylint: disable=missing-param-doc,missing-type-doc  # noqa: E501
-    app,  # pylint: disable=unused-argument
-    what,  # pylint: disable=unused-argument
-    name,  # pylint: disable=unused-argument
-    obj,  # pylint: disable=unused-argument
-    options,  # pylint: disable=unused-argument
-    signature: str,
-    return_annotation: str,
-):
-    """
-    convert <globus_sdk.MISSING> to MISSING in autodoc signatures
-
-    :param signature: the signature after autodoc parsing/rendering
-    :param return_annotation: the return type annotation, including the leading `->`,
-        after autodoc parsing/rendering
-    """
-    if signature is not None:
-        signature = signature.replace("<globus_sdk.MISSING>", "MISSING")
-    if return_annotation is not None:
-        return_annotation = return_annotation.replace("<globus_sdk.MISSING>", "MISSING")
-    return signature, return_annotation
 
 
 def setup(app):
