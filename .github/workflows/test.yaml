@@ -52,7 +52,6 @@ jobs:
             cpythons:
               - "3.11"
             tox-post-environments:
-              - "py3.8-mindeps"
               - "py3.11-sphinxext"
               - "coverage_report"
 
