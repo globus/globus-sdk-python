@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import functools
 import inspect
+import textwrap
 import types
 import typing as t
 from pydoc import locate
@@ -52,3 +54,48 @@ def derive_doc_url_base(service: str | None) -> str:
         return "https://compute.api.globus.org/redoc#tag"
     else:
         raise ValueError(f"Unsupported extdoclink service '{service}'")
+
+
+@functools.lru_cache(maxsize=None)
+def read_sphinx_params(docstring: str) -> tuple[str, ...]:
+    """
+    Given a docstring, extract the `:param:` declarations into a tuple of strings.
+
+    :param docstring: The ``__doc__`` to parse, as it appeared on the original object
+
+    Params start with `:param ...` and end
+    - at the end of the string
+    - at the next param
+    - when a non-indented, non-param line is found
+
+    Whitespace lines within a param doc are supported.
+
+    All produced param strings are dedented.
+    """
+    docstring = textwrap.dedent(docstring)
+
+    result: list[str] = []
+    current: list[str] = []
+    for line in docstring.splitlines():
+        if not current:
+            if line.startswith(":param"):
+                current = [line]
+            else:
+                continue
+        else:
+            # a new param -- flush the current one and restart
+            if line.startswith(":param"):
+                result.append("\n".join(current).strip())
+                current = [line]
+            # a continuation line for the current param (indented)
+            # or a blank line -- it *could* be a continuation of param doc (include it)
+            elif line != line.lstrip() or not line:
+                current.append(line)
+            # otherwise this is a populated line, not indented, and without a `:param`
+            # start -- stop looking for more param doc
+            else:
+                break
+    if current:
+        result.append("\n".join(current).strip())
+
+    return tuple(result)
