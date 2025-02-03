@@ -203,7 +203,21 @@ class OAuthTokenResponse(GlobusHTTPResponse):
 
         jwt_params = jwt_params or {}
 
-        jwt_leeway: float | datetime.timedelta = 0.5
+        # default to 300 seconds
+        #
+        # valuable inputs to this number:
+        # - expected clock drift per day (6s for a bad clock)
+        # - Windows time sync interval (64s)
+        # - Windows' stated goal of meeting the Kerberos 5 clock skew requirement (5m)
+        # - ntp panic threshold (1000s of drift)
+        # - the knowledge that VM clocks typically run slower and may skew significantly
+        #
+        # NTP panic should be understood as a critical error; 1000s of drift is
+        # therefore too high for us to allow.
+        #
+        # 300s (5m) is therefore chosen to match the Windows desired maximum for
+        # clock drift, and the underlying Kerberos requirement.
+        jwt_leeway: float | datetime.timedelta = 300.0
         if "leeway" in jwt_params:
             jwt_params = jwt_params.copy()
             jwt_leeway = jwt_params.pop("leeway")
