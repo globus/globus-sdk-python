@@ -2,12 +2,10 @@ from __future__ import annotations
 
 import collections
 import collections.abc
-import functools
 import hashlib
 import os
 import platform
 import sys
-import textwrap
 import typing as t
 import uuid
 from base64 import b64encode
@@ -278,48 +276,3 @@ else:
     def classproperty(func: t.Callable[[T], R]) -> _classproperty[T, R]:
         # type cast to convert instance method to class method
         return _classproperty(t.cast(t.Callable[[t.Type[T]], R], func))
-
-
-@functools.lru_cache(maxsize=None)
-def read_sphinx_params(docstring: str) -> tuple[str, ...]:
-    """
-    Given a docstring, extract the `:param:` declarations into a tuple of strings.
-
-    :param docstring: The ``__doc__`` to parse, as it appeared on the original object
-
-    Params start with `:param ...` and end
-    - at the end of the string
-    - at the next param
-    - when a non-indented, non-param line is found
-
-    Whitespace lines within a param doc are supported.
-
-    All produced param strings are dedented.
-    """
-    docstring = textwrap.dedent(docstring)
-
-    result: list[str] = []
-    current: list[str] = []
-    for line in docstring.splitlines():
-        if not current:
-            if line.startswith(":param"):
-                current = [line]
-            else:
-                continue
-        else:
-            # a new param -- flush the current one and restart
-            if line.startswith(":param"):
-                result.append("\n".join(current).strip())
-                current = [line]
-            # a continuation line for the current param (indented)
-            # or a blank line -- it *could* be a continuation of param doc (include it)
-            elif line != line.lstrip() or not line:
-                current.append(line)
-            # otherwise this is a populated line, not indented, and without a `:param`
-            # start -- stop looking for more param doc
-            else:
-                break
-    if current:
-        result.append("\n".join(current).strip())
-
-    return tuple(result)
