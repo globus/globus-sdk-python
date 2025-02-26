@@ -81,6 +81,16 @@ class BaseClient:
         app_name: str | None = None,
         transport_params: dict[str, t.Any] | None = None,
     ) -> None:
+        # check for input parameter conflicts
+        if app_scopes and not app:
+            raise exc.GlobusSDKUsageError(
+                f"A {type(self).__name__} must have an 'app' to use 'app_scopes'."
+            )
+        if app and authorizer:
+            raise exc.GlobusSDKUsageError(
+                f"A {type(self).__name__} cannot use both an 'app' and an 'authorizer'."
+            )
+
         # Determine the client's environment.
         if app is not None:
             # If we're using a GlobusApp, the client's environment must either match the
@@ -106,33 +116,22 @@ class BaseClient:
         self.transport = self.transport_class(**(transport_params or {}))
         log.debug(f"initialized transport of type {type(self.transport)}")
 
-        if app and authorizer:
-            raise exc.GlobusSDKUsageError(
-                f"A {type(self).__name__} cannot use both an 'app' and an 'authorizer'."
-            )
-
-        self._app = app
-        self.authorizer = authorizer
-
-        if app_scopes and not app:
-            raise exc.GlobusSDKUsageError(
-                f"A {type(self).__name__} must have an 'app' to use 'app_scopes'."
-            )
-
-        self.app_scopes = app_scopes
-
-        # set application name if available from app_name or app with app_name
-        # taking precedence if both are present
-        self._app_name: str | None = None
-        if app_name is not None:
-            self.app_name = app_name
-        elif app is not None:
-            self.app_name = app.app_name
-
         # setup paginated methods
         self.paginated = PaginatorTable(self)
 
-        self._finalize_app()
+        # set application name if available from app_name
+        # if this is not set, `app.app_name` may be applied below
+        self._app_name: str | None = None
+        if app_name is not None:
+            self.app_name = app_name
+
+        # attach the app or authorizer provided
+        # starting app attributes as `None` and calling the attachment method
+        self.authorizer = authorizer
+        self._app: GlobusApp | None = None
+        self.app_scopes: list[Scope] | None = None
+        if app:
+            self.attach_globus_app(app, app_scopes=app_scopes)
 
     @property
     def default_scope_requirements(self) -> list[Scope]:
@@ -176,20 +175,89 @@ class BaseClient:
             f"Clients must define either one or both of 'base_url' and 'service_name'."
         )
 
-    def _finalize_app(self) -> None:
+    def attach_globus_app(
+        self, app: GlobusApp, app_scopes: list[Scope] | None = None
+    ) -> None:
+        """
+        Attach a ``GlobusApp`` to this client and, conversely, register this client with
+        that app. The client's default scopes will be added to the app's scope
+        requirements unless ``app_scopes`` is used to override this.
+
+        If the ``app_name`` is not set on the client, it will be set to match that of
+        the app.
+
+        .. note::
+
+            This method is only safe to call once per client object. It is implicitly
+            called if the client is initialized with an app.
+
+        :param app: The ``GlobusApp`` to attach to this client.
+        :param app_scopes: Optional list of ``Scope`` objects to be added to ``app``'s
+            scope requirements instead of ``default_scope_requirements``. These will be
+            stored in the ``app_scopes`` attribute of the client.
+
+        :raises GlobusSDKUsageError: If the attachment appears to conflict with the
+            state of the client. e.g., an app or authorizer is already in place.
+        """
+        # If there are any incompatible or ambiguous data, usage error.
+        # "In the face of ambiguity, refuse the temptation to guess."
         if self._app:
-            if self.resource_server is None:
-                raise ValueError(
-                    "Unable to use an 'app' with a client with no "
-                    "'resource_server' defined."
-                )
+            raise exc.GlobusSDKUsageError(
+                f"Cannot attach GlobusApp to {type(self).__name__} when one is "
+                "already attached."
+            )
+        if self.app_scopes:
+            # technically, we *could* allow for this, but it's not clear what
+            # it would mean if a user wrote the following:
+            #
+            #   c = ClientClass()
+            #   c.app_scopes = [foo]
+            #   c.attach_globus_app(app, app_scopes=[bar])
+            #
+            # did the user expect a merge, overwrite, or other behavior?
+            raise exc.GlobusSDKUsageError(
+                f"Cannot attach GlobusApp to {type(self).__name__} when `app_scopes` "
+                "is already set. "
+                "The scopes for this client cannot be consistently resolved."
+            )
+        if self.authorizer:
+            raise exc.GlobusSDKUsageError(
+                f"Cannot attach GlobusApp to {type(self).__name__} when it "
+                "has an authorizer assigned."
+            )
+        if self.resource_server is None:
+            raise exc.GlobusSDKUsageError(
+                "Unable to use an 'app' with a client with no "
+                "'resource_server' defined."
+            )
+        # the client's environment must match the app's -- we can't tell which of these
+        # were set explicitly programmatically and which were implicit (e.g., from the
+        # env var), so erroring is the safest option
+        #
+        # although we can track the value used in init (e.g., add
+        # `self._init_environment = environment` to init), it's harder to keep track of
+        # usages like
+        # `client = FooClient(); client.environment = "test"; client.base_url = ...`
+        if self.environment != app.config.environment:
+            raise exc.GlobusSDKUsageError(
+                f"[Environment Mismatch] {type(self).__name__}'s environment "
+                f"({self.environment}) does not match the GlobusApp's configured "
+                f"environment ({app.config.environment})."
+            )
 
-            if self.app_scopes:
-                scope_requirements = self.app_scopes
-            else:
-                scope_requirements = self.default_scope_requirements
+        # now, assign the app, app_name, and scopes
+        self._app = app
+        self.app_scopes = app_scopes
+        if self.app_name is None:
+            self.app_name = app.app_name
 
-            self._app.add_scope_requirements({self.resource_server: scope_requirements})
+        if self.app_scopes:
+            scope_requirements = self.app_scopes
+        else:
+            scope_requirements = self.default_scope_requirements
+
+        # finally, register the scope requirements on the app side
+        self._app.add_scope_requirements({self.resource_server: scope_requirements})
 
     def add_app_scope(self, scope_collection: ScopeCollectionType) -> BaseClient:
         """
