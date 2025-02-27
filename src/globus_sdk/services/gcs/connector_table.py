@@ -50,7 +50,7 @@ class ConnectorTable:
         '9436da0c-a444-11eb-af93-12704e0d6a4d'
     """
 
-    _connectors: tuple[tuple[str, str, str], ...] = (
+    _connectors: t.ClassVar[tuple[tuple[str, str, str], ...]] = (
         ("ACTIVESCALE", "ActiveScale", "7251f6c8-93c9-11eb-95ba-12704e0d6a4d"),
         ("AZURE_BLOB", "Azure Blob", "9436da0c-a444-11eb-af93-12704e0d6a4d"),
         ("BLACKPEARL", "BlackPearl", "7e3f3f5e-350c-4717-891a-2f451c24b0d4"),
@@ -96,7 +96,7 @@ class ConnectorTable:
             yield item
 
     @classmethod
-    def lookup(cls, name_or_id: str | UUIDLike) -> GlobusConnectServerConnector | None:
+    def lookup(cls, name_or_id: UUIDLike) -> GlobusConnectServerConnector | None:
         """
         Convert a name or ID into a connector object.
         Returns None if the name or ID is not recognized.
@@ -115,6 +115,54 @@ class ConnectorTable:
             ):
                 return connector
         return None
+
+    @classmethod
+    def extend(
+        cls,
+        *,
+        connector_name: str,
+        connector_id: UUIDLike,
+        attribute_name: str | None = None,
+    ) -> type[ConnectorTable]:
+        """
+        Extend the ConnectorTable class with a new connector, returning a new
+        ConnectorTable subclass.
+
+        Usage example:
+
+        .. code-block:: pycon
+
+            >>> MyTable = ConnectorTable.extend(
+            ...     connector_name="Star Trek Transporter",
+            ...     connector_id="0b19772d-729a-4c8f-93e1-59d5778cecf3",
+            ... )
+            >>> obj = MyTable.STAR_TREK_TRANSPORTER
+            >>> obj.connector_id
+            '0b19772d-729a-4c8f-93e1-59d5778cecf3'
+            >>> obj.name
+            'Star Trek Transporter'
+
+        :param connector_name: The name of the connector to add
+        :param connector_id: The ID of the connector to add
+        :param attribute_name: The attribute name with which the connector will be
+            attached to the new subclass. Defaults to the connector name uppercased and
+            with spaces converted to underscores.
+        """
+        if attribute_name is None:
+            attribute_name = connector_name.upper().replace(" ", "_")
+        connector_id_str = str(connector_id)
+
+        connectors = cls._connectors + (
+            (attribute_name, connector_name, connector_id_str),
+        )
+        connector_obj = GlobusConnectServerConnector(
+            name=connector_name, connector_id=connector_id_str
+        )
+        return type(
+            "ExtendedConnectorTable",
+            (cls,),
+            {"_connectors": connectors, attribute_name: connector_obj},
+        )
 
 
 # "render" the _connectors to live attributes of the ConnectorTable
