@@ -73,7 +73,6 @@ class GlobusApp(metaclass=abc.ABCMeta):
         self.app_name = app_name
         self.config = config
         self._token_validation_error_handling_enabled = True
-        self._authorizer_factory_initialized = False
 
         self.client_id, self._login_client = self._resolve_client_info(
             app_name=self.app_name,
@@ -90,10 +89,9 @@ class GlobusApp(metaclass=abc.ABCMeta):
         )
 
         # create a consent client for token validation
-        # reducing the scope requirements to barebones openid (user identification)
-        # additionally, this will ensure that openid scope requirement is always
-        # registered (it's required for token identity validation).
-        consent_client = AuthClient(app=self, app_scopes=[Scope(AuthScopes.openid)])
+        # this client won't be ready for immediate use, but will have the app attached
+        # at the end of init
+        consent_client = AuthClient(environment=config.environment)
 
         # create the requisite token storage for the app, with validation based on
         # the provided parameters
@@ -111,6 +109,15 @@ class GlobusApp(metaclass=abc.ABCMeta):
         # initialize our authorizer factory
         self._initialize_authorizer_factory()
         self._authorizer_factory_initialized = True
+
+        # finally, attach the app to the internal consent client
+        # this needs to wait until the very end of the app initialization process so
+        # that the authorizer factory is all ready to accept the client
+        # registering its scope requirements
+        #
+        # additionally, this will ensure that openid scope requirement is always
+        # registered (it's required for token identity validation).
+        consent_client.attach_globus_app(self, app_scopes=[Scope(AuthScopes.openid)])
 
     def _resolve_scope_requirements(
         self, scope_requirements: t.Mapping[str, ScopeCollectionType] | None
@@ -412,8 +419,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
             curr = self._scope_requirements.setdefault(resource_server, [])
             curr.extend(scopes_to_scope_list(scopes))
 
-        if self._authorizer_factory_initialized:
-            self._authorizer_factory.clear_cache(*scope_requirements.keys())
+        self._authorizer_factory.clear_cache(*scope_requirements.keys())
 
     def get_authorizer(self, resource_server: str) -> GlobusAuthorizer:
         """
