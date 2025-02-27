@@ -90,22 +90,21 @@ class BaseClient:
             raise exc.GlobusSDKUsageError(
                 f"A {type(self).__name__} cannot use both an 'app' and an 'authorizer'."
             )
+        if app and environment and environment != app.config.environment:
+            raise exc.GlobusSDKUsageError(
+                f"[Environment Mismatch] {type(self).__name__}'s environment "
+                f"({environment}) does not match the GlobusApp's configured "
+                f"environment ({app.config.environment})."
+            )
 
-        # Determine the client's environment.
-        if app is not None:
-            # If we're using a GlobusApp, the client's environment must either match the
-            # app's or be omitted.
-            if environment is not None and environment != app.config.environment:
-                raise exc.GlobusSDKUsageError(
-                    f"[Environment Mismatch] {type(self).__name__}'s environment "
-                    f"({environment}) does not match the GlobusApp's configured "
-                    f"environment ({app.config.environment})."
-                )
-
+        # Determine the client's environment
+        # Either derived from the app used, or else from the provided kwarg
+        #
+        # If neither is specified, fallback to the GLOBUS_SDK_ENVIRONMENT environment
+        # variable.
+        if app:
             self.environment = app.config.environment
         else:
-            # Otherwise, figure out the environment from the provided kwarg or the
-            # GLOBUS_SDK_ENVIRONMENT environment variable.
             self.environment = config.get_environment_name(environment)
 
         # resolve the base_url for the client (see docstring for resolution precedence)
