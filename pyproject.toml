@@ -81,6 +81,8 @@ typing = [
     # although 'responses' is provided by the test requirements, it also
     # must be installed for proper type-checking on globus_sdk._testing
     "responses",
+    # similarly, sphinx is needed to type-check our sphinx extension
+    "sphinx",
 ]
 typing-mindeps = [
     {include-group = "typing"},
@@ -117,9 +119,7 @@ source = ["globus_sdk"]
 # omit must be specified in a way which matches the
 # tox environment installations, so lead with `**`
 omit = [
-    "**/globus_sdk/_sphinxext.py",
     "**/globus_sdk/_testing/*",
-    "**/globus_sdk/_generate_init.py",
 ]
 
 [tool.coverage.paths]

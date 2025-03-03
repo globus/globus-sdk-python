@@ -24,8 +24,6 @@ class SearchClient(client.BaseClient):
     API, and basic ``get``, ``put``, ``post``, and ``delete`` methods
     from the base client that can be used to access any API resource.
 
-    **Methods**
-
     .. automethodlist:: globus_sdk.SearchClient
     """
 
