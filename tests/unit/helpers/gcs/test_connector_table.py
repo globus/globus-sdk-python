@@ -90,3 +90,51 @@ def test_all_connector_attributes_are_assigned():
     for attribute in annotated_attributes:
         instance = getattr(ConnectorTable, attribute)
         assert isinstance(instance, GlobusConnectServerConnector)
+
+
+def test_table_can_be_extended_with_simple_item():
+    # don't think too hard about the ethical implications of transporter clones
+    connector_name = "Star Trek Transporter"
+    connector_id = uuid.uuid1()
+
+    ExtendedTable = ConnectorTable.extend(
+        connector_name=connector_name, connector_id=connector_id
+    )
+
+    # we get a new subclass named 'ExtendedConnectorTable'
+    assert issubclass(ExtendedTable, ConnectorTable)
+    assert ExtendedTable.__name__ == "ExtendedConnectorTable"
+
+    # access via name, attribute, and ID all resolve to the same object
+    data_object = ExtendedTable.lookup(connector_id)
+    assert isinstance(data_object, GlobusConnectServerConnector)
+    assert ExtendedTable.STAR_TREK_TRANSPORTER is data_object
+    assert ExtendedTable.lookup(connector_name) is data_object
+
+
+def test_table_extended_twice():
+    connector_id1 = uuid.uuid1()
+    connector_id2 = uuid.uuid1()
+
+    ExtendedTable1 = ConnectorTable.extend(
+        connector_name="Star Trek Transporter", connector_id=connector_id1
+    )
+    ExtendedTable2 = ExtendedTable1.extend(
+        connector_name="Battlestar Galactica FTL", connector_id=connector_id2
+    )
+
+    # we get new subclasses named 'ExtendedConnectorTable'
+    assert issubclass(ExtendedTable1, ConnectorTable)
+    assert ExtendedTable1.__name__ == "ExtendedConnectorTable"
+    assert issubclass(ExtendedTable2, ExtendedTable1)
+    assert ExtendedTable2.__name__ == "ExtendedConnectorTable"
+
+    # both tables get the same object for connector1
+    # only table2 has connector2
+    data_object = ExtendedTable1.lookup(connector_id1)
+    assert isinstance(data_object, GlobusConnectServerConnector)
+    assert ExtendedTable2.lookup(connector_id1) is data_object
+
+    assert ExtendedTable1.lookup(connector_id2) is None
+    data_object2 = ExtendedTable2.lookup(connector_id2)
+    assert isinstance(data_object2, GlobusConnectServerConnector)
