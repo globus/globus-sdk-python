@@ -25,7 +25,7 @@ def test_clientinfo_header_can_be_supressed(client):
     ).add()
 
     # clear the X-Globus-Client-Info header
-    client.transport.globus_client_info.infos = []
+    client.transport.globus_client_info.clear()
 
     res = client.request("GET", "/bar")
     assert res.http_status == 200

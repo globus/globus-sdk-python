@@ -58,11 +58,21 @@ class GlobusClientInfo:
         The ``GlobusClientInfo`` object is not guaranteed to reject all invalid usages.
         For example, ``product`` is required to be unique per header, and users are
         expected to enforce this in their usage.
+
+    :param update_callback: A callback function to be invoked each time the content of
+        the GlobusClientInfo changes via ``add()`` or ``clear()``.
     """  # noqa: E501
 
-    def __init__(self) -> None:
+    def __init__(
+        self, *, update_callback: t.Callable[[GlobusClientInfo], None] | None = None
+    ) -> None:
         self.infos: list[str] = []
+
+        # set `update_callback` to `None` at first so that `add()` can run without
+        # triggering it during `__init__`
+        self.update_callback = None
         self.add({"product": "python-sdk", "version": __version__})
+        self.update_callback = update_callback
 
     def __bool__(self) -> bool:
         """Check if there are any values present."""
@@ -90,6 +100,15 @@ class GlobusClientInfo:
                 f"Bad usage: '{value}'"
             )
         self.infos.append(value)
+
+        if self.update_callback is not None:
+            self.update_callback(self)
+
+    def clear(self) -> None:
+        """Empty the list of info strings and trigger the update callback."""
+        self.infos = []
+        if self.update_callback is not None:
+            self.update_callback(self)
 
 
 def _format_items(info: dict[str, str]) -> t.Iterable[str]:
