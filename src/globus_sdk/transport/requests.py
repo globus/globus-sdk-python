@@ -81,6 +81,9 @@ class RequestsTransport:
         computed sleep time or the backoff requested by a retry check exceeds this
         value, this amount of time will be used instead
     :param max_retries: The maximum number of retries allowed by this transport
+
+    :ivar dict[str, str] headers: The headers which are sent on every request. These
+        may be augmented by the transport when sending requests.
     """
 
     #: default maximum number of retries
@@ -115,7 +118,14 @@ class RequestsTransport:
         self.verify_ssl = config.get_ssl_verify(verify_ssl)
         self.http_timeout = config.get_http_timeout(http_timeout)
         self._user_agent = self.BASE_USER_AGENT
-        self.globus_client_info: GlobusClientInfo = GlobusClientInfo()
+        self.globus_client_info: GlobusClientInfo = GlobusClientInfo(
+            update_callback=self._handle_clientinfo_update
+        )
+        self.headers: dict[str, str] = {
+            "Accept": "application/json",
+            "User-Agent": self.user_agent,
+            "X-Globus-Client-Info": self.globus_client_info.format(),
+        }
 
         # retry parameters
         self.retry_backoff = retry_backoff
@@ -133,14 +143,30 @@ class RequestsTransport:
 
     @user_agent.setter
     def user_agent(self, value: str) -> None:
-        self._user_agent = f"{self.BASE_USER_AGENT}/{value}"
+        """
+        Set the ``user_agent`` and update the ``User-Agent`` header in ``headers``.
 
-    @property
-    def _headers(self) -> dict[str, str]:
-        headers = {"Accept": "application/json", "User-Agent": self.user_agent}
-        if self.globus_client_info:
-            headers["X-Globus-Client-Info"] = self.globus_client_info.format()
-        return headers
+        :param value: The new user-agent string to set (after the base user-agent)
+        """
+        self._user_agent = f"{self.BASE_USER_AGENT}/{value}"
+        self.headers["User-Agent"] = self._user_agent
+
+    def _handle_clientinfo_update(
+        self,
+        info: GlobusClientInfo,  # pylint: disable=unused-argument
+    ) -> None:
+        """
+        When the attached ``GlobusClientInfo`` is updated, write it back into
+        ``headers``.
+
+        If the client info is cleared, it will be removed from the headers.
+        """
+        formatted = self.globus_client_info.format()
+        if formatted:
+            self.headers["X-Globus-Client-Info"] = formatted
+        else:
+            # discard the element, so that this can be invoked multiple times
+            self.headers.pop("X-Globus-Client-Info", None)
 
     @contextlib.contextmanager
     def tune(
@@ -227,9 +253,10 @@ class RequestsTransport:
         headers: dict[str, str] | None = None,
         encoding: str | None = None,
     ) -> requests.Request:
-        if not headers:
-            headers = {}
-        headers = {**self._headers, **headers}
+        if headers:
+            headers = {**self.headers, **headers}
+        else:
+            headers = self.headers
 
         if encoding is None:
             if isinstance(data, (bytes, str)):
