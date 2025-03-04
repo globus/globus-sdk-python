@@ -144,13 +144,17 @@ class RequestsTransport:
     @user_agent.setter
     def user_agent(self, value: str) -> None:
         """
-        Setting the ``user_agent`` also updates the ``User-Agent`` header in
-        ``headers``.
+        Set the ``user_agent`` and update the ``User-Agent`` header in ``headers``.
+
+        :param value: The new user-agent string to set (after the base user-agent)
         """
         self._user_agent = f"{self.BASE_USER_AGENT}/{value}"
         self.headers["User-Agent"] = self._user_agent
 
-    def _handle_clientinfo_update(self, info: GlobusClientInfo) -> None:
+    def _handle_clientinfo_update(
+        self,
+        info: GlobusClientInfo,  # pylint: disable=unused-argument
+    ) -> None:
         """
         When the attached ``GlobusClientInfo`` is updated, write it back into
         ``headers``.
