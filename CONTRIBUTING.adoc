@@ -42,6 +42,24 @@ to setup the hooks.
 
 The configured linters and fixers can be seen in `.pre-commit-config.yaml`.
 
+Writing changelog fragments
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you are contributing a significant change -- e.g., a new feature -- it's
+best to include a changelog fragment which documents the change. This will be
+included in the next SDK release's changelog.
+Changelog fragments are written using `scriv`.
+
+First, make sure you have scriv installed with `toml` support, for example:
+
+    $ pipx install 'scriv[toml]'
+
+Then use `scriv create --edit` to create a changelog fragment. Comments in the
+template should give you further guidance.
+
+Not all changes need a changelog! If it's a minor tweak (e.g., a doc typo),
+we'll label the PR to skip our changelog requirement.
+
 Contributing Documentation
 --------------------------
 
