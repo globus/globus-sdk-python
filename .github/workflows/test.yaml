@@ -44,6 +44,7 @@ jobs:
               - "3.13"
             tox-post-environments:
               - "py3.8-mindeps"
+              - "py3.11-sphinxext"
               - "coverage_report"
 
           - name: "macOS"
@@ -51,6 +52,7 @@ jobs:
             cpythons:
               - "3.11"
             tox-post-environments:
+              - "py3.11-sphinxext"
               - "coverage_report"
 
           - name: "Windows"
@@ -58,6 +60,8 @@ jobs:
             cpythons:
               - "3.11"
             tox-post-environments:
+              - "py3.8-mindeps"
+              - "py3.11-sphinxext"
               - "coverage_report"
 
           - name: "Quality"
