@@ -25,7 +25,7 @@ Table of Contents
     :maxdepth: 1
 
     installation
-    tutorial
+    tutorials/index
 
 .. toctree::
     :caption: Full Reference

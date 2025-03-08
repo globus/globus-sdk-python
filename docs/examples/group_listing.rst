@@ -6,7 +6,7 @@ Group Listing Script
 This example script provides a CSV-formatted listing of the current user's
 groups.
 
-It uses the tutorial client ID from the :ref:`tutorial <tutorial>`.
+It uses the tutorial client ID from the :ref:`tutorials <tutorials>`.
 For simplicity, the script will prompt for login on each use.
 
 .. code-block:: python

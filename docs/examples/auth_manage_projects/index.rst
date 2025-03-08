@@ -12,7 +12,7 @@ List Projects via the Auth API
 The following is a very small and simple script using the Globus Auth Developer
 APIs.
 
-It uses the tutorial client ID from the :ref:`tutorial <tutorial>`.
+It uses the tutorial client ID from the :ref:`tutorials <tutorials>`.
 For simplicity, the script will prompt for login on each use.
 
 .. literalinclude:: list_projects.py

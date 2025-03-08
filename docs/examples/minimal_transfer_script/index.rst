@@ -9,7 +9,7 @@ Minimal File Transfer Script
 The following is an extremely minimal script to demonstrate a file transfer
 using the :class:`TransferClient <globus_sdk.TransferClient>`.
 
-It uses the tutorial client ID from the :ref:`tutorial <tutorial>`.
+It uses the tutorial client ID from the :ref:`tutorials <tutorials>`.
 For simplicity, the script will prompt for login on each use.
 
 .. note::
