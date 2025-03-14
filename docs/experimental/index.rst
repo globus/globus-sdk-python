@@ -10,12 +10,6 @@ Globus SDK Experimental Components
 
     **Use at your own risk.**
 
-.. toctree::
-    :caption: Contents
-    :maxdepth: 1
-
-    scope_parser
-
 
 Experimental Construct Lifecycle
 --------------------------------

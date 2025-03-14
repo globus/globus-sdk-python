@@ -42,7 +42,7 @@ Table of Contents
     :maxdepth: 1
 
     testing/index
-    experimental/index
+    Experimental Components <experimental/index>
     experimental/examples/index
 
 
