@@ -16,3 +16,4 @@ Timers is covered.
     :maxdepth: 1
 
     Initiating a Transfer <submit_transfer/index>
+    Scheduling a Repeating Transfer <scheduled_transfers/index>
