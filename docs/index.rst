@@ -45,18 +45,22 @@ Table of Contents
     Experimental Components <experimental/index>
     experimental/examples/index
 
-
-.. toctree::
-    :caption: Additional Info
-    :maxdepth: 1
-
-    versioning
-    license
-    changelog
-    upgrading
-
 .. toctree::
     :caption: Examples
     :maxdepth: 1
 
     examples/index
+
+.. toctree::
+    :caption: Changes
+    :maxdepth: 1
+
+    versioning
+    changelog
+    upgrading
+
+.. toctree::
+    :caption: Additional Info
+    :maxdepth: 1
+
+    license
