@@ -28,7 +28,7 @@ Table of Contents
     user_guide/getting_started/index
 
 .. toctree::
-    :caption: Full Reference
+    :caption: Reference
     :maxdepth: 2
 
     services/index
