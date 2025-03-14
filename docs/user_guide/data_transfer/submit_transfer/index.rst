@@ -1,3 +1,4 @@
+.. _userguide_submit_transfer:
 
 Initiating a Transfer
 =====================
