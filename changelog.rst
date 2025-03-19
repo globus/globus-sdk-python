@@ -12,6 +12,36 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-3.52.0:
+
+v3.52.0 (2025-03-19)
+--------------------
+
+Added
+~~~~~
+
+- The ``transport`` attached to clients now exposes ``headers`` as a readable
+  and writable dict of headers which will be included in every request.
+  Headers provided to the transport's ``request()`` method overwrite these, as
+  before. (:pr:`1140`)
+
+Changed
+~~~~~~~
+
+- Updates to ``X-Globus-Client-Info`` in ``RequestsTransport.headers`` are now
+  synchronized via a callback mechanism. Direct manipulations of the ``infos``
+  list will not result in headers being updated -- callers wishing to modify
+  these data should rely only on the ``add()`` and ``clear()`` methods of the
+  ``GlobusClientInfo`` object. (:pr:`1140`)
+
+- ``globus_sdk`` logging no longer emits any INFO-level log messages. All INFO
+  messages have been downgraded to DEBUG. (:pr:`1146`)
+
+Documentation
+~~~~~~~~~~~~~
+
+- The tutorial documentation has been rewritten. (:pr:`1145`)
+
 .. _changelog-3.51.0:
 
 v3.51.0 (2025-03-06)
