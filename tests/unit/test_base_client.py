@@ -307,3 +307,78 @@ def test_app_name_override(base_client_class):
     app = UserApp("SDK Test", client_id="client_id")
     c = base_client_class(app=app, app_name="foo")
     assert c.app_name == "foo"
+
+
+def test_app_scopes_requires_app(base_client_class):
+    with pytest.raises(
+        globus_sdk.exc.GlobusSDKUsageError,
+        match=r"A CustomClient must have an 'app' to use 'app_scopes'\.",
+    ):
+        base_client_class(app_scopes=[Scope("foo")])
+
+
+def test_cannot_double_attach_app(base_client_class):
+    app = UserApp("SDK Test", client_id="client_id")
+    c = base_client_class(app=app)
+    with pytest.raises(
+        globus_sdk.exc.GlobusSDKUsageError,
+        match=r"Cannot attach GlobusApp to CustomClient when one is already attached\.",
+    ):
+        c.attach_globus_app(app)
+
+
+def test_cannot_attach_app_after_manually_setting_app_scopes(base_client_class):
+    c = base_client_class()
+    c.app_scopes = [Scope("foo")]
+    app = UserApp("SDK Test", client_id="client_id")
+    with pytest.raises(
+        globus_sdk.exc.GlobusSDKUsageError,
+        match=(
+            r"Cannot attach GlobusApp to CustomClient when `app_scopes` is already "
+            r"set\."
+        ),
+    ):
+        c.attach_globus_app(app)
+
+
+def test_cannot_attach_app_when_authorizer_was_provided(base_client_class):
+    c = base_client_class(authorizer=NullAuthorizer())
+    app = UserApp("SDK Test", client_id="client_id")
+    with pytest.raises(
+        globus_sdk.exc.GlobusSDKUsageError,
+        match=(
+            r"Cannot attach GlobusApp to CustomClient when it has an authorizer "
+            r"assigned\."
+        ),
+    ):
+        c.attach_globus_app(app)
+
+
+def test_cannot_attach_app_when_resource_server_is_not_resolvable():
+    class CustomClient(globus_sdk.BaseClient):
+        base_path = "/v0.10/"
+        service_name = "transfer"
+        default_scope_requirements = [Scope(TransferScopes.all)]
+
+    c = CustomClient()
+    app = UserApp("SDK Test", client_id="client_id")
+    with pytest.raises(
+        globus_sdk.exc.GlobusSDKUsageError,
+        match=(
+            r"Unable to use an 'app' with a client with no 'resource_server' defined\."
+        ),
+    ):
+        c.attach_globus_app(app)
+
+
+def test_cannot_attach_app_with_mismatched_environment(base_client_class):
+    c = base_client_class(environment="preview")
+    app = UserApp("SDK Test", client_id="client_id")
+    with pytest.raises(
+        globus_sdk.exc.GlobusSDKUsageError,
+        match=(
+            r"\[Environment Mismatch\] CustomClient's environment \(preview\) does not "
+            r"match the GlobusApp's configured environment \(production\)\."
+        ),
+    ):
+        c.attach_globus_app(app)
