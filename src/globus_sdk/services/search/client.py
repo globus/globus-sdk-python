@@ -10,6 +10,7 @@ from globus_sdk.scopes import Scope, SearchScopes
 
 from .data import SearchQuery, SearchScrollQuery
 from .errors import SearchAPIError
+from .response import IndexListResponse
 
 log = logging.getLogger(__name__)
 
@@ -181,6 +182,41 @@ class SearchClient(client.BaseClient):
         """  # noqa: E501
         log.debug(f"SearchClient.get_index({index_id})")
         return self.get(f"/v1/index/{index_id}", query_params=query_params)
+
+    def index_list(
+        self,
+        *,
+        query_params: dict[str, t.Any] | None = None,
+    ) -> response.IterableResponse:
+        """
+        Get a list of indices on which the caller has permissions.
+
+        :param query_params: additional parameters to pass as query params
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    sc = globus_sdk.SearchClient(...)
+                    for index_doc in sc.index_list():
+                        print(index_doc["display_name"], f"({index_doc['id']}):")
+                        print("  permissions:", ", ".join(index_doc["permissions"]))
+
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: search.index_list
+
+            .. tab-item:: API Info
+
+                ``GET /v1/index_list``
+
+                .. extdoclink:: Index List
+                    :ref: search/reference/index_list/
+        """  # noqa: E501
+        log.debug("SearchClient.index_list()")
+        return IndexListResponse(self.get("/v1/index_list", query_params=query_params))
 
     #
     # Search queries
