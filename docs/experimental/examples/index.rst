@@ -15,5 +15,4 @@ existing examples section.
 .. toctree::
     :maxdepth: 2
 
-    endpoints_and_collections/index
     oauth2/index

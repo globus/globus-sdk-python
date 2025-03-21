@@ -15,7 +15,6 @@ Each of these pages contains an example of a piece of SDK functionality.
    native_app
    client_credentials
    three_legged_oauth
-   transfer_relative_deadlines
    recursive_ls
    endpoint_type_enum
    timer_management/index
