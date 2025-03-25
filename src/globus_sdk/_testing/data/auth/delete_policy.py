@@ -11,6 +11,7 @@ POLICY = {
     "domain_constraints_exclude": None,
     "project_id": "da84e531-1afb-43cb-8c87-135ab580516a",
     "authentication_assurance_timeout": 35,
+    "required_mfa": False,
 }
 
 RESPONSES = ResponseSet(
