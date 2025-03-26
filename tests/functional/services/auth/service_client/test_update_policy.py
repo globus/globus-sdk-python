@@ -11,6 +11,8 @@ from globus_sdk._testing import load_response
         "project_id_str",
         "project_id_uuid",
         "authentication_assurance_timeout",
+        "required_mfa",
+        "not_required_mfa",
         "display_name",
         "description",
         "no_domain_constrants_include",

@@ -15,6 +15,7 @@ from globus_sdk._testing import get_last_request, load_response
         "project_id_uuid",
         "high_assurance",
         "not_high_assurance",
+        "required_mfa",
         "authentication_assurance_timeout",
         "display_name",
         "description",
