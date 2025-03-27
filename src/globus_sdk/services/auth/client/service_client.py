@@ -54,6 +54,7 @@ def _create_policy_compat(f: F) -> F:
                     "project_id",
                     "high_assurance",
                     "authentication_assurance_timeout",
+                    "required_mfa",
                     "display_name",
                     "description",
                 ),
@@ -735,7 +736,8 @@ class AuthClient(client.BaseClient):
                         'id': 'f5eaae7e-807f-41be-891a-ec86ff88df8f',
                         'domain_constraints_exclude': None,
                         'project_id': 'da84e531-1afb-43cb-8c87-135ab580516a',
-                        'authentication_assurance_timeout': 35
+                        'authentication_assurance_timeout': 35,
+                        'required_mfa": False
                       }
                     }
 
@@ -777,6 +779,7 @@ class AuthClient(client.BaseClient):
                           'domain_constraints_exclude': None,
                           'project_id': 'da84e531-1afb-43cb-8c87-135ab580516a',
                           'authentication_assurance_timeout': 35,
+                          'required_mfa': False
                         },
                         {
                           'high_assurance': True,
@@ -787,6 +790,7 @@ class AuthClient(client.BaseClient):
                           'domain_constraints_exclude': ['redlight.org'],
                           'project_id': 'da84e531-1afb-43cb-8c87-135ab580516a',
                           'authentication_assurance_timeout': 35,
+                          'required_mfa': True
                         }
                       ]
                     }
@@ -813,6 +817,7 @@ class AuthClient(client.BaseClient):
         description: str,
         high_assurance: bool | utils.MissingType = utils.MISSING,
         authentication_assurance_timeout: int | utils.MissingType = utils.MISSING,
+        required_mfa: bool | utils.MissingType = utils.MISSING,
         domain_constraints_include: (
             t.Iterable[str] | None | utils.MissingType
         ) = utils.MISSING,
@@ -827,6 +832,9 @@ class AuthClient(client.BaseClient):
         :param high_assurance: Whether or not this policy is applied to sessions.
         :param authentication_assurance_timeout: Number of seconds within which someone
             must have authenticated to satisfy the policy
+        :param required_mfa: If True, then multi-factor authentication is required.
+            This can only be set to True for high-assurance policies. The default
+            is False.
         :param display_name: A user-friendly name for the policy
         :param description: A user-friendly description to explain the purpose of the
             policy
@@ -854,6 +862,7 @@ class AuthClient(client.BaseClient):
                     ...     project_id="da84e531-1afb-43cb-8c87-135ab580516a",
                     ...     high_assurance=True,
                     ...     authentication_assurance_timeout=35,
+                    ...     required_mfa=True,
                     ...     display_name="No RedLight domain Policy",
                     ...     description="Disallow access from @redlight.org",
                     ...     domain_constraints_exclude=["redlight.org"],
@@ -875,6 +884,7 @@ class AuthClient(client.BaseClient):
             "project_id": project_id,
             "high_assurance": high_assurance,
             "authentication_assurance_timeout": authentication_assurance_timeout,
+            "required_mfa": required_mfa,
             "display_name": display_name,
             "description": description,
             "domain_constraints_include": domain_constraints_include,
@@ -889,6 +899,7 @@ class AuthClient(client.BaseClient):
         *,
         project_id: UUIDLike | utils.MissingType = utils.MISSING,
         authentication_assurance_timeout: int | utils.MissingType = utils.MISSING,
+        required_mfa: bool | utils.MissingType = utils.MISSING,
         display_name: str | utils.MissingType = utils.MISSING,
         description: str | utils.MissingType = utils.MISSING,
         domain_constraints_include: (
@@ -905,6 +916,9 @@ class AuthClient(client.BaseClient):
         :param project_id: ID of the project for the new policy
         :param authentication_assurance_timeout: Number of seconds within which someone
             must have authenticated to satisfy the policy
+        :param required_mfa: If True, then multi-factor authentication is required.
+            This can only be set to True for high-assurance policies. The default
+            is False.
         :param display_name: A user-friendly name for the policy
         :param description: A user-friendly description to explain the purpose of the
             policy
@@ -935,6 +949,7 @@ class AuthClient(client.BaseClient):
         """
         body: dict[str, t.Any] = {
             "authentication_assurance_timeout": authentication_assurance_timeout,
+            "required_mfa": required_mfa,
             "display_name": display_name,
             "description": description,
             "domain_constraints_include": domain_constraints_include,

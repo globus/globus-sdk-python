@@ -15,6 +15,7 @@ def make_request_body(request_args: t.Mapping[str, t.Any]) -> t.Dict[str, t.Any]
 
     for field in [
         "authentication_assurance_timeout",
+        "required_mfa",
         "display_name",
         "description",
         "domain_constraints_include",
@@ -33,6 +34,7 @@ def make_response_body(request_args: t.Mapping[str, t.Any]) -> t.Dict[str, t.Any
     return {
         "project_id": str(request_args.get("project_id", uuid.uuid1())),
         "high_assurance": request_args.get("high_assurance", True),
+        "required_mfa": request_args.get("required_mfa", False),
         "authentication_assurance_timeout": request_args.get(
             "authentication_assurance_timeout", 25
         ),
@@ -76,6 +78,8 @@ RESPONSES = ResponseSet(
     authentication_assurance_timeout=register_response(
         {"authentication_assurance_timeout": 9100}
     ),
+    required_mfa=register_response({"required_mfa": True}),
+    not_required_mfa=register_response({"required_mfa": False}),
     display_name=register_response(
         {"display_name": str(uuid.uuid4()).replace("-", "")}
     ),

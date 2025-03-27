@@ -71,9 +71,22 @@ RESPONSES = ResponseSet(
     project_id_str=register_response({"project_id": str(uuid.uuid1())}),
     project_id_uuid=register_response({"project_id": uuid.uuid1()}),
     high_assurance=register_response(
-        {"high_assurance": True, "authentication_assurance_timeout": 35}
+        {
+            "high_assurance": True,
+            "authentication_assurance_timeout": 35,
+            "required_mfa": False,
+        }
     ),
-    not_high_assurance=register_response({"high_assurance": False}),
+    not_high_assurance=register_response(
+        {"high_assurance": False, "required_mfa": False}
+    ),
+    required_mfa=register_response(
+        {
+            "high_assurance": True,
+            "authentication_assurance_timeout": 45,
+            "required_mfa": True,
+        }
+    ),
     authentication_assurance_timeout=register_response(
         {"authentication_assurance_timeout": 23}
     ),
