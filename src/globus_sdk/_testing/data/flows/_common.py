@@ -123,6 +123,12 @@ TWO_HOP_TRANSFER_FLOW_DOC = {
     "flow_administrators": [
         "urn:globus:auth:identity:05d29dab-bd26-4510-9290-468972e8ac01"
     ],
+    "run_managers": [
+        "urn:globus:auth:identity:7d6064ef-5368-473a-b15b-e99c3561aa9b",
+    ],
+    "run_monitors": [
+        "urn:globus:auth:identity:57088a17-d5cb-4cfa-871a-c5cce48f2aec",
+    ],
 }
 
 TWO_HOP_TRANSFER_RUN_ID = "36ad9f9a-ad29-488f-beb4-c22ab729643a"
