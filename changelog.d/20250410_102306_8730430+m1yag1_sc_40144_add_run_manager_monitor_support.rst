@@ -1,5 +1,5 @@
 Added
 ~~~~~
 
-- Added support to the create and update operations of the ``FlowsClient`` for
-  including ``run_managers`` and/or ``run_monitors`` principals. (:pr:`NUMBER`)
+- ``FlowsClient.create_flow`` and ``FlowsClient.update_flow`` now support ``run_managers``
+  and ``run_monitors``. (:pr:`NUMBER`)
