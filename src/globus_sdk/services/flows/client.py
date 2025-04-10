@@ -44,6 +44,8 @@ class FlowsClient(client.BaseClient):
         flow_viewers: list[str] | None = None,
         flow_starters: list[str] | None = None,
         flow_administrators: list[str] | None = None,
+        run_managers: list[str] | None = None,
+        run_monitors: list[str] | None = None,
         keywords: list[str] | None = None,
         subscription_id: UUIDLike | None = None,
         additional_fields: dict[str, t.Any] | None = None,
@@ -108,6 +110,30 @@ class FlowsClient(client.BaseClient):
                         "urn:globus:groups:id:c1dcd951-3f35-4ea3-9f28-a7cdeaf8b68f"
                     ]
 
+        :param run_managers: A set of Principal URN values indicating entities who can
+            perform management operations on the flow's *runs*.
+
+            .. dropdown:: Example Values
+
+                .. code-block:: json
+
+                    [
+                        "urn:globus:auth:identity:b44bddda-d274-11e5-978a-9f15789a8150",
+                        "urn:globus:groups:id:c1dcd951-3f35-4ea3-9f28-a7cdeaf8b68f"
+                    ]
+
+        :param run_monitors: A set of Principal URN values indicating entities who can
+            monitor the flow's *runs*.
+
+            .. dropdown:: Example Values
+
+                .. code-block:: json
+
+                    [
+                        "urn:globus:auth:identity:b44bddda-d274-11e5-978a-9f15789a8150",
+                        "urn:globus:groups:id:c1dcd951-3f35-4ea3-9f28-a7cdeaf8b68f"
+                    ]
+
         :param keywords: A set of terms used to categorize the flow used in query and
             discovery operations (0 - 1024 items)
         :param subscription_id: The ID of the subscription to associate with the flow,
@@ -162,6 +188,8 @@ class FlowsClient(client.BaseClient):
                 "flow_viewers": flow_viewers,
                 "flow_starters": flow_starters,
                 "flow_administrators": flow_administrators,
+                "run_managers": run_managers,
+                "run_monitors": run_monitors,
                 "keywords": keywords,
                 "subscription_id": subscription_id,
             }.items()
@@ -327,6 +355,8 @@ class FlowsClient(client.BaseClient):
         flow_viewers: list[str] | None = None,
         flow_starters: list[str] | None = None,
         flow_administrators: list[str] | None = None,
+        run_managers: list[str] | None = None,
+        run_monitors: list[str] | None = None,
         keywords: list[str] | None = None,
         subscription_id: UUIDLike | t.Literal["DEFAULT"] | MissingType = MISSING,
         additional_fields: dict[str, t.Any] | None = None,
@@ -396,6 +426,30 @@ class FlowsClient(client.BaseClient):
                         "urn:globus:groups:id:c1dcd951-3f35-4ea3-9f28-a7cdeaf8b68f"
                     ]
 
+        :param run_managers: A set of Principal URN values indicating entities who can
+            perform management operations on the flow's *runs*.
+
+            .. dropdown:: Example Values
+
+                .. code-block:: json
+
+                    [
+                        "urn:globus:auth:identity:b44bddda-d274-11e5-978a-9f15789a8150",
+                        "urn:globus:groups:id:c1dcd951-3f35-4ea3-9f28-a7cdeaf8b68f"
+                    ]
+
+        :param run_monitors: A set of Principal URN values indicating entities who can
+            monitor the flow's *runs*.
+
+            .. dropdown:: Example Values
+
+                .. code-block:: json
+
+                    [
+                        "urn:globus:auth:identity:b44bddda-d274-11e5-978a-9f15789a8150",
+                        "urn:globus:groups:id:c1dcd951-3f35-4ea3-9f28-a7cdeaf8b68f"
+                    ]
+
         :param keywords: A set of terms used to categorize the flow used in query and
             discovery operations (0 - 1024 items)
         :param subscription_id: A subscription ID to assign to the flow.
@@ -438,6 +492,8 @@ class FlowsClient(client.BaseClient):
                 "flow_viewers": flow_viewers,
                 "flow_starters": flow_starters,
                 "flow_administrators": flow_administrators,
+                "run_managers": run_managers,
+                "run_monitors": run_monitors,
                 "keywords": keywords,
                 "subscription_id": subscription_id,
             }.items()
