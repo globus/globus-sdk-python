@@ -23,6 +23,29 @@ def test_create_flow(flows_client, subscription_id):
         assert "subscription_id" not in req_body
 
 
+@pytest.mark.parametrize("value", [None, [], ["dummy_value"]])
+@pytest.mark.parametrize("key", ["run_managers", "run_monitors"])
+def test_create_flow_run_role_serialization(flows_client, key, value):
+    metadata = load_response(flows_client.create_flow).metadata
+    params = metadata["params"]
+
+    # Remove the key or set as empty list
+    if value is None:
+        params.pop(key)
+    else:
+        params[key] = value
+
+    flows_client.create_flow(**params)
+
+    last_req = get_last_request()
+    req_body = json.loads(last_req.body)
+
+    if value is None:
+        assert key not in req_body
+    else:
+        assert req_body[key] == value
+
+
 def test_create_flow_error_parsing(flows_client):
     metadata = load_response(
         flows_client.create_flow, case="bad_admin_principal_error"
@@ -57,6 +80,23 @@ def test_update_flow(flows_client):
     for k, v in meta["params"].items():
         assert k in resp
         assert resp[k] == v
+
+
+@pytest.mark.parametrize("value", [None, [], ["dummy_value"]])
+@pytest.mark.parametrize("key", ["run_managers", "run_monitors"])
+def test_update_flow_run_role_serialization(flows_client, key, value):
+    metadata = load_response(flows_client.update_flow).metadata
+    params = {**metadata["params"], key: value}
+
+    flows_client.update_flow(metadata["flow_id"], **params)
+
+    last_req = get_last_request()
+    req_body = json.loads(last_req.body)
+
+    if value is None:
+        assert key not in req_body
+    else:
+        assert req_body[key] == value
 
 
 def test_delete_flow(flows_client):
