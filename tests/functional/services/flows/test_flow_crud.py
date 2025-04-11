@@ -29,9 +29,8 @@ def test_create_flow_run_role_serialization(flows_client, key, value):
     metadata = load_response(flows_client.create_flow).metadata
     params = metadata["params"].copy()
 
-    # Remove the key or set as empty list
     if value is None:
-        params.pop(key, None)  # Use pop with default to avoid KeyError
+        params.pop(key, None)
     else:
         params[key] = value
 
