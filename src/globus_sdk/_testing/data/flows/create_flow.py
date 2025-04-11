@@ -15,6 +15,8 @@ _two_hop_transfer_create_request = {
         "flow_viewers",
         "flow_starters",
         "flow_administrators",
+        "run_managers",
+        "run_monitors",
         "keywords",
     ]
 }

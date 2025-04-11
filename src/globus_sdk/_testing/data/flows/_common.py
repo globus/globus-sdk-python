@@ -11,6 +11,8 @@ RUN_ID = str(uuid.uuid1())
 USER1 = f"urn:globus:auth:identity:{uuid.uuid1()}"
 USER2 = f"urn:globus:auth:identity:{uuid.uuid1()}"
 GROUP = f"urn:globus:groups:id:{uuid.uuid1()}"
+RUN_MANAGER_PRINCIPAL = f"urn:globus:auth:identity:{str(uuid.uuid1())}"
+RUN_MONITOR_PRINCIPAL = f"urn:globus:auth:identity:{str(uuid.uuid1())}"
 
 TWO_HOP_TRANSFER_FLOW_USER_SCOPE = (
     "https://auth.globus.org/scopes/"
@@ -123,6 +125,8 @@ TWO_HOP_TRANSFER_FLOW_DOC = {
     "flow_administrators": [
         "urn:globus:auth:identity:05d29dab-bd26-4510-9290-468972e8ac01"
     ],
+    "run_managers": [RUN_MANAGER_PRINCIPAL],
+    "run_monitors": [RUN_MONITOR_PRINCIPAL],
 }
 
 TWO_HOP_TRANSFER_RUN_ID = "36ad9f9a-ad29-488f-beb4-c22ab729643a"
