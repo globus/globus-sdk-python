@@ -1,9 +1,11 @@
 import json
 
 import pytest
+from responses import matchers
 
 from globus_sdk import FlowsAPIError
 from globus_sdk._testing import get_last_request, load_response
+from globus_sdk._testing.models import RegisteredResponse
 
 
 @pytest.mark.parametrize("subscription_id", [None, "dummy_subscription_id"])
@@ -26,15 +28,40 @@ def test_create_flow(flows_client, subscription_id):
 @pytest.mark.parametrize("value", [None, [], ["dummy_value"]])
 @pytest.mark.parametrize("key", ["run_managers", "run_monitors"])
 def test_create_flow_run_role_serialization(flows_client, key, value):
-    metadata = load_response(flows_client.create_flow).metadata
-    params = metadata["params"].copy()
 
-    if value is None:
-        params.pop(key, None)
-    else:
-        params[key] = value
+    request_body = {
+        "title": "Multi Step Transfer",
+        "definition": {
+            "StartAt": "Transfer1",
+            "States": {
+                "Transfer1": {"Type": "Pass", "End": True},
+            },
+        },
+        "input_schema": {},
+    }
 
-    flows_client.create_flow(**params)
+    request_body[key] = value
+
+    load_response(
+        RegisteredResponse(
+            service="flows",
+            path="/flows",
+            method="POST",
+            json=request_body,
+            match=[
+                matchers.json_params_matcher(
+                    params={
+                        "title": request_body["title"],
+                        "definition": request_body["definition"],
+                        "input_schema": request_body["input_schema"],
+                    },
+                    strict_match=False,
+                )
+            ],
+        )
+    )
+
+    flows_client.create_flow(**request_body)
 
     last_req = get_last_request()
     req_body = json.loads(last_req.body)
