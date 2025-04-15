@@ -1,13 +1,22 @@
 from __future__ import annotations
 
 import logging
+import sys
 import typing as t
+import uuid
 
-from globus_sdk import GlobusHTTPResponse, client, paging, utils
+from globus_sdk import GlobusHTTPResponse, _guards, client, paging, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.globus_app import GlobusApp
-from globus_sdk.scopes import FlowsScopes, Scope, ScopeBuilder, SpecificFlowScopeBuilder
+from globus_sdk.scopes import (
+    FlowsScopes,
+    GCSCollectionScopeBuilder,
+    Scope,
+    ScopeBuilder,
+    SpecificFlowScopeBuilder,
+    TransferScopes,
+)
 from globus_sdk.utils import MISSING, MissingType
 
 from .errors import FlowsAPIError
@@ -16,6 +25,11 @@ from .response import (
     IterableRunLogsResponse,
     IterableRunsResponse,
 )
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 log = logging.getLogger(__name__)
 
@@ -871,6 +885,68 @@ class SpecificFlowClient(client.BaseClient):
     @property
     def default_scope_requirements(self) -> list[Scope]:
         return [Scope(self.scopes.user)]
+
+    def add_app_transfer_data_access_scope(
+        self, collection_ids: UUIDLike | t.Iterable[UUIDLike]
+    ) -> Self:
+        """
+        Add a dependent ``data_access`` scope for one or more given ``collection_ids``
+        to this client's ``GlobusApp``, under the Transfer ``all`` scope.
+        Useful for preventing ``ConsentRequired`` errors when starting or resuming runs
+        of flows that use Globus Connect Server mapped collection(s).
+
+        .. warning::
+
+            This method must only be used on ``collection_ids`` for non-High-Assurance
+            GCS Mapped Collections.
+
+            Use on other collection types, e.g., on GCP Mapped Collections or any form
+            of Guest Collection, will result in "Unknown Scope" errors during the login
+            flow.
+
+        Returns ``self`` for chaining.
+
+        Raises ``GlobusSDKUsageError`` if this client was not initialized with an app.
+
+        :param collection_ids: a collection ID or an iterable of IDs.
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    flow_id = ...
+                    COLLECTION_ID = ...
+                    app = UserApp("myapp", client_id=NATIVE_APP_CLIENT_ID)
+                    client = SpecificFlowClient(FLOW_ID, app=app).add_app_transfer_data_access_scope(
+                        COLLECTION_ID
+                    )
+
+                    client.run_flow({"collection": COLLECTION_ID})
+        """  # noqa: E501
+        if isinstance(collection_ids, (str, uuid.UUID)):
+            _guards.validators.uuidlike("collection_ids", collection_ids)
+            # wrap the collection_ids input in a list for consistent iteration below
+            collection_ids_ = [collection_ids]
+        else:
+            # copy to a list so that ephemeral iterables can be iterated multiple times
+            collection_ids_ = list(collection_ids)
+            for i, c in enumerate(collection_ids_):
+                _guards.validators.uuidlike(f"collection_ids[{i}]", c)
+
+        transfer_scope = Scope(TransferScopes.all, optional=True)
+        for coll_id in collection_ids_:
+            data_access_scope = Scope(
+                GCSCollectionScopeBuilder(str(coll_id)).data_access,
+                optional=True,
+            )
+            transfer_scope.add_dependency(data_access_scope)
+
+        specific_flow_scope = Scope(self.scopes.user)
+        specific_flow_scope.add_dependency(transfer_scope)
+        self.add_app_scope(specific_flow_scope)
+        return self
 
     def run_flow(
         self,
