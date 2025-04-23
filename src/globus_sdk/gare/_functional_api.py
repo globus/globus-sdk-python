@@ -13,12 +13,14 @@ from ._variants import (
     LegacyConsentRequiredTransferError,
 )
 
+AnyErrorDocumentType: t.TypeAlias = (
+    "exc.GlobusAPIError | exc.ErrorSubdocument | dict[str, t.Any]"
+)
+
 log = logging.getLogger(__name__)
 
 
-def to_gare(
-    error: exc.GlobusAPIError | exc.ErrorSubdocument | dict[str, t.Any],
-) -> GARE | None:
+def to_gare(error: AnyErrorDocumentType) -> GARE | None:
     """
     Converts a GlobusAPIError, ErrorSubdocument, or dict into a
     GARE by attempting to match to GARE (preferred) or legacy variants.
@@ -38,18 +40,78 @@ def to_gare(
     # GlobusAPIErrors may contain more than one error, so we consider all of them
     # even though we only return the first.
     if isinstance(error, GlobusAPIError):
+        # first, try to parse a GARE from the root document,
+        # and if we can do so, return it
+        authreq_error = _lenient_dict2gare(error.raw_json)
+        if authreq_error is not None:
+            return authreq_error
+
         # Iterate over ErrorSubdocuments
         for subdoc in error.errors:
-            authreq_error = to_gare(subdoc)
+            authreq_error = _lenient_dict2gare(subdoc.raw)
             if authreq_error is not None:
                 # Return only the first auth requirements error we encounter
                 return authreq_error
+
         # We failed to find a Globus Auth Requirements Error
         return None
     elif isinstance(error, ErrorSubdocument):
-        error_dict = error.raw
+        return _lenient_dict2gare(error.raw)
     else:
-        error_dict = error
+        return _lenient_dict2gare(error)
+
+
+def to_gares(errors: list[AnyErrorDocumentType]) -> list[GARE]:
+    """
+    Converts a list of GlobusAPIErrors, ErrorSubdocuments, or dicts into a list of
+    GAREs by attempting to match each error to GARE (preferred) or legacy variants.
+
+    .. note::
+
+        A GlobusAPIError may contain multiple errors, so the result
+        list could be longer than the provided list.
+
+    If no errors match any known formats, an empty list is returned.
+
+    :param errors: The errors to convert.
+    """
+    from globus_sdk.exc import GlobusAPIError
+
+    maybe_gares: list[GARE | None] = []
+    for error in errors:
+        # when handling an API error, avoid `to_gare(error)` because that will
+        # only unpack a single result
+        if isinstance(error, GlobusAPIError):
+            # Use the ErrorSubdocuments when handling API error types
+            maybe_gares.extend(to_gare(e) for e in error.errors)
+            # Also use the root document, but only if there is an `"errors"`
+            # key inside of the error document
+            # Why? Because the *default* for `.errors` when there is no inner
+            # `"errors"` array is an array containing the root document as a
+            # subdocument
+            if isinstance(error.raw_json, dict) and "errors" in error.raw_json:
+                # use dict parsing directly so that the native descent in 'to_gare'
+                # to subdocuments does not apply in this case
+                maybe_gares.append(_lenient_dict2gare(error.raw_json))
+        else:
+            maybe_gares.append(to_gare(error))
+
+    # Remove any errors that did not resolve to a Globus Auth Requirements Error
+    return [error for error in maybe_gares if error is not None]
+
+
+def _lenient_dict2gare(error_dict: dict[str, t.Any] | None) -> GARE | None:
+    """
+    Parse a GARE from a dict, accepting legacy variants.
+
+    If given ``None``, returns ``None``. This allows this to accept inputs
+    which are themselves dict|None.
+
+    :param error_dict: the error input
+    :eturns: ``None`` on a failed parse
+    """
+    if error_dict is None:
+        return None
 
     # Prefer a proper auth requirements error, if possible
     try:
@@ -71,42 +133,7 @@ def to_gare(
     return None
 
 
-def to_gares(
-    errors: list[exc.GlobusAPIError | exc.ErrorSubdocument | dict[str, t.Any]],
-) -> list[GARE]:
-    """
-    Converts a list of GlobusAPIErrors, ErrorSubdocuments, or dicts into a list of
-    GAREs by attempting to match each error to GARE (preferred) or legacy variants.
-
-    .. note::
-
-        A GlobusAPIError may contain multiple errors, so the result
-        list could be longer than the provided list.
-
-    If no errors match any known formats, an empty list is returned.
-
-    :param errors: The errors to convert.
-    """
-    from globus_sdk.exc import GlobusAPIError
-
-    candidate_errors: list[exc.ErrorSubdocument | dict[str, t.Any]] = []
-    for error in errors:
-        if isinstance(error, GlobusAPIError):
-            # Use the ErrorSubdocuments
-            candidate_errors.extend(error.errors)
-        else:
-            candidate_errors.append(error)
-
-    # Try to convert all candidate errors to auth requirements errors
-    all_errors = [to_gare(error) for error in candidate_errors]
-
-    # Remove any errors that did not resolve to a Globus Auth Requirements Error
-    return [error for error in all_errors if error is not None]
-
-
-def is_gare(
-    error: exc.GlobusAPIError | exc.ErrorSubdocument | dict[str, t.Any],
-) -> bool:
+def is_gare(error: AnyErrorDocumentType) -> bool:
     """
     Return True if the provided error matches a known
     Globus Auth Requirements Error format.
@@ -116,9 +143,7 @@ def is_gare(
     return to_gare(error) is not None
 
 
-def has_gares(
-    errors: list[exc.GlobusAPIError | exc.ErrorSubdocument | dict[str, t.Any]],
-) -> bool:
+def has_gares(errors: list[AnyErrorDocumentType]) -> bool:
     """
     Return True if any of the provided errors match a known
     Globus Auth Requirements Error format.

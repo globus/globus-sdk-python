@@ -1,3 +1,5 @@
+import uuid
+
 import pytest
 
 from globus_sdk._testing import construct_error
@@ -511,3 +513,57 @@ def test_authorization_parameters_repr_indicates_presence_of_extra():
 
     assert "extra=..." not in repr(params_no_extra)
     assert "extra=..." in repr(params_with_extra)
+
+
+@pytest.mark.parametrize("method", (to_gare, to_gares))
+def test_create_gare_from_policy_error_when_non_gare_subdocuments_are_present(
+    method,
+):
+    # this error data is based on a real API error shape from Auth
+    # the top-level error is a GARE; but the subdocuments are not
+    policy_id = str(uuid.uuid1())
+    error_dict = {
+        "errors": [
+            {
+                "detail": (
+                    "To access this project you must have an identity with admin "
+                    "privileges in session within the last 30 minutes."
+                ),
+                "id": "4a156297-a2e5-4095-a13c-ba9486035f79",
+                "title": "Forbidden",
+                "status": "403",
+                "code": "FORBIDDEN",
+            }
+        ],
+        "error": "forbidden",
+        "error_description": "Forbidden",
+        "authorization_parameters": {
+            "session_required_policies": [policy_id],
+            "session_message": (
+                "To access this project you must have an identity with admin "
+                "privileges in session within the last 30 minutes."
+            ),
+        },
+    }
+    api_error = construct_error(body=error_dict, http_status=403)
+
+    # pass singular or plural, to match the relevant method
+    if method is to_gare:
+        gare = method(api_error)
+    else:
+        all_gares = method([api_error])
+        assert len(all_gares) == 1
+        gare = all_gares[0]
+
+    assert isinstance(gare, GARE)
+    # no 'code' was provided in the original error data, so the default will be induced
+    assert gare.code == "AuthorizationRequired"
+    # there are no scopes
+    assert gare.authorization_parameters.required_scopes is None
+    # the message matches the input doc
+    assert (
+        gare.authorization_parameters.session_message
+        == error_dict["authorization_parameters"]["session_message"]
+    )
+    # and the policy ID is provided in the required policies field
+    assert gare.authorization_parameters.session_required_policies == [policy_id]
