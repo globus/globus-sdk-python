@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import sys
 import typing as t
 
 from globus_sdk import exc
@@ -13,7 +14,13 @@ from ._variants import (
     LegacyConsentRequiredTransferError,
 )
 
-AnyErrorDocumentType: t.TypeAlias = (
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
+
+
+AnyErrorDocumentType: TypeAlias = (
     "exc.GlobusAPIError | exc.ErrorSubdocument | dict[str, t.Any]"
 )
 
