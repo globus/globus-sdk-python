@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import typing as t
 
-from globus_sdk import GlobusHTTPResponse, client, paging, utils
+from globus_sdk import GlobusHTTPResponse, GlobusSDKUsageError, client, paging, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.globus_app import GlobusApp
@@ -231,6 +231,7 @@ class FlowsClient(client.BaseClient):
         self,
         *,
         filter_role: str | None = None,
+        filter_roles: str | list[str] | None = None,
         filter_fulltext: str | None = None,
         orderby: str | t.Iterable[str] | None = None,
         marker: str | None = None,
@@ -240,14 +241,18 @@ class FlowsClient(client.BaseClient):
         List deployed flows
 
         :param filter_role: A role name specifying the minimum permissions required for
-            a flow to be included in the response.
+            a flow to be included in the response. Mutually exclusive with
+            **filter_roles**.
+        :param filter_roles: A list of role names specifying the roles the user must
+            have for a flow to be included in the response. Mutually exclusive with
+            **filter_role**.
         :param filter_fulltext: A string to use in a full-text search to filter results
         :param orderby: A criterion for ordering flows in the listing
         :param marker: A marker for pagination
         :param query_params: Any additional parameters to be passed through
             as query params.
 
-        **Role Values**
+        **Filter Role Values**
 
         The valid values for ``role`` are, in order of precedence for ``filter_role``:
 
@@ -259,6 +264,16 @@ class FlowsClient(client.BaseClient):
         For example, if ``flow_starter`` is specified then flows for which the user has
         the ``flow_starter``, ``flow_administrator`` or ``flow_owner`` roles will be
         returned.
+
+        The role values ``run_manager`` and ``run_monitor`` are also supported but do
+        not follow an order of precedence.
+
+        **Filter Roles Values**
+
+        The valid values for ``filter_roles`` are the same as those for ``filter_role``.
+        However, unlike ``filter_role``, no order of precedence is evaluated. Only flows
+        where the user has one or more of the specified roles will be included in the
+        results.
 
         **OrderBy Values**
 
@@ -327,8 +342,15 @@ class FlowsClient(client.BaseClient):
             query_params = {}
         if filter_role is not None:
             query_params["filter_role"] = filter_role
+        if filter_roles is not None:
+            query_params["filter_roles"] = filter_roles
         if filter_fulltext is not None:
             query_params["filter_fulltext"] = filter_fulltext
+
+        if filter_role and filter_roles:
+            msg = "Mutually exclusive parameters: filter_role and filter_roles."
+            raise GlobusSDKUsageError(msg)
+
         if orderby is not None:
             if isinstance(orderby, str):
                 query_params["orderby"] = orderby
@@ -587,6 +609,7 @@ class FlowsClient(client.BaseClient):
         self,
         *,
         filter_flow_id: t.Iterable[UUIDLike] | UUIDLike | None = None,
+        filter_roles: str | list[str] | None = None,
         marker: str | None = None,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableRunsResponse:
@@ -594,8 +617,19 @@ class FlowsClient(client.BaseClient):
         List all runs.
 
         :param filter_flow_id: One or more flow IDs used to filter the results
+        :param filter_roles: A list of role names used to filter the results
         :param marker: A pagination marker, used to get the next page of results.
         :param query_params: Any additional parameters to be passed through
+
+        **Filter Roles Values**
+
+        The valid values for ``role`` are:
+
+          - ``run_owner``
+          - ``run_manager``
+          - ``run_monitor``
+          - ``flow_run_manager``
+          - ``flow_run_monitor``
 
         .. tab-set::
 
@@ -623,6 +657,8 @@ class FlowsClient(client.BaseClient):
             query_params["filter_flow_id"] = ",".join(
                 utils.safe_strseq_iter(filter_flow_id)
             )
+        if filter_roles:
+            query_params["filter_roles"] = filter_roles
         if marker is not None:
             query_params["marker"] = marker
         return IterableRunsResponse(self.get("/runs", query_params=query_params))
