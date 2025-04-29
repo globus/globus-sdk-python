@@ -1,8 +1,9 @@
+import urllib.parse
 import uuid
 
 import pytest
 
-from globus_sdk._testing import load_response
+from globus_sdk._testing import get_last_request, load_response
 
 
 def test_list_runs_simple(flows_client):
@@ -68,3 +69,19 @@ def test_list_runs_filter_flow_id(flows_client, pass_as_uuids):
     )
     for run in res_combined:
         assert run["flow_id"] in {str(flow_id_one), str(flow_id_two)}
+
+
+@pytest.mark.parametrize("filter_roles", [None, ["run_manager", "run_monitor"]])
+def test_list_runs_filter_roles(flows_client, filter_roles):
+    load_response(flows_client.list_runs).metadata
+    res = flows_client.list_runs(filter_roles=filter_roles)
+    assert res.http_status == 200
+
+    req = get_last_request()
+    assert req.body is None
+    parsed_qs = urllib.parse.parse_qs(urllib.parse.urlparse(req.url).query)
+
+    if filter_roles:
+        assert parsed_qs["filter_roles"] == filter_roles
+    else:
+        assert "filter_roles" not in parsed_qs

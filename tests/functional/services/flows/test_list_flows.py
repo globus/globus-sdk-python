@@ -2,6 +2,7 @@ import urllib.parse
 
 import pytest
 
+from globus_sdk import GlobusSDKUsageError
 from globus_sdk._testing import get_last_request, load_response
 
 
@@ -109,3 +110,25 @@ def test_list_flows_orderby_multi(flows_client, orderby_style, orderby_value):
         assert set(parsed_qs["orderby"]) == expected_orderby_value
     else:
         assert parsed_qs["orderby"] == expected_orderby_value
+
+
+def test_list_flows_mutually_exclusive_roles(flows_client):
+    with pytest.raises(GlobusSDKUsageError):
+        flows_client.list_flows(filter_role="bar", filter_roles="baz,qux")
+
+
+@pytest.mark.parametrize("filter_roles", [None, ["run_manager", "run_monitor"]])
+def test_list_flows_with_filter_roles(flows_client, filter_roles):
+    load_response(flows_client.list_flows).metadata
+
+    res = flows_client.list_flows(filter_roles=filter_roles)
+    assert res.http_status == 200
+
+    req = get_last_request()
+    assert req.body is None
+    parsed_qs = urllib.parse.parse_qs(urllib.parse.urlparse(req.url).query)
+
+    if filter_roles:
+        assert parsed_qs["filter_roles"] == filter_roles
+    else:
+        assert "filter_roles" not in parsed_qs
