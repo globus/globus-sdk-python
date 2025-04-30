@@ -71,8 +71,26 @@ def test_list_runs_filter_flow_id(flows_client, pass_as_uuids):
         assert run["flow_id"] in {str(flow_id_one), str(flow_id_two)}
 
 
-@pytest.mark.parametrize("filter_roles", [None, ["run_manager", "run_monitor"]])
-def test_list_runs_filter_roles(flows_client, filter_roles):
+@pytest.mark.parametrize(
+    "filter_roles, expected_filter_roles",
+    [
+        # empty list
+        ([], []),
+        # list with empty string
+        ([""], [""]),
+        # None
+        (None, None),
+        # single role as string
+        ("foo", ["foo"]),
+        # single role as list
+        (["foo"], ["foo"]),
+        # multiple roles as comma-separated string
+        ("foo,bar", ["foo,bar"]),
+        # multiple roles as list
+        (["foo", "bar"], ["foo,bar"]),
+    ],
+)
+def test_list_runs_filter_roles(flows_client, filter_roles, expected_filter_roles):
     load_response(flows_client.list_runs).metadata
     res = flows_client.list_runs(filter_roles=filter_roles)
     assert res.http_status == 200
@@ -81,7 +99,7 @@ def test_list_runs_filter_roles(flows_client, filter_roles):
     assert req.body is None
     parsed_qs = urllib.parse.parse_qs(urllib.parse.urlparse(req.url).query)
 
-    if filter_roles:
-        assert parsed_qs["filter_roles"] == filter_roles
+    if expected_filter_roles and any(role for role in expected_filter_roles):
+        assert parsed_qs["filter_roles"] == expected_filter_roles
     else:
         assert "filter_roles" not in parsed_qs

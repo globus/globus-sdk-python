@@ -252,28 +252,28 @@ class FlowsClient(client.BaseClient):
         :param query_params: Any additional parameters to be passed through
             as query params.
 
-        **Filter Role Values**
+        **Role Filters**
 
-        The valid values for ``role`` are, in order of precedence for ``filter_role``:
+        ``filter_roles`` accepts a list of roles which are used to filter the results to
+        flows where the caller has any of the specified roles.
 
-          - ``flow_viewer``
-          - ``flow_starter``
-          - ``flow_administrator``
-          - ``flow_owner``
+        The valid role values are:
 
-        For example, if ``flow_starter`` is specified then flows for which the user has
-        the ``flow_starter``, ``flow_administrator`` or ``flow_owner`` roles will be
-        returned.
+        - ``flow_viewer``
+        - ``flow_starter``
+        - ``flow_administrator``
+        - ``flow_owner``
+        - ``run_monitor``
+        - ``run_manager``
 
-        The role values ``run_manager`` and ``run_monitor`` are also supported but do
-        not follow an order of precedence.
+        .. note::
 
-        **Filter Roles Values**
+            The deprecated ``filter_role`` parameter has similar behavior.
 
-        The valid values for ``filter_roles`` are the same as those for ``filter_role``.
-        However, unlike ``filter_role``, no order of precedence is evaluated. Only flows
-        where the user has one or more of the specified roles will be included in the
-        results.
+            ``filter_role`` accepts exactly one role name, and filters to flows
+            where the caller has the specified role or a strictly weaker role.
+            For example, ``filter_role="flow_administrator"`` will include flows
+            where the caller has the ``flow_starter`` role.
 
         **OrderBy Values**
 
@@ -343,11 +343,11 @@ class FlowsClient(client.BaseClient):
         if filter_role is not None:
             query_params["filter_role"] = filter_role
         if filter_roles is not None:
-            query_params["filter_roles"] = filter_roles
+            query_params["filter_roles"] = utils.commajoin(filter_roles)
         if filter_fulltext is not None:
             query_params["filter_fulltext"] = filter_fulltext
 
-        if filter_role and filter_roles:
+        if filter_role is not None and filter_roles is not None:
             msg = "Mutually exclusive parameters: filter_role and filter_roles."
             raise GlobusSDKUsageError(msg)
 
@@ -658,7 +658,7 @@ class FlowsClient(client.BaseClient):
                 utils.safe_strseq_iter(filter_flow_id)
             )
         if filter_roles:
-            query_params["filter_roles"] = filter_roles
+            query_params["filter_roles"] = utils.commajoin(filter_roles)
         if marker is not None:
             query_params["marker"] = marker
         return IterableRunsResponse(self.get("/runs", query_params=query_params))

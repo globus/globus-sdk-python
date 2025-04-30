@@ -112,13 +112,57 @@ def test_list_flows_orderby_multi(flows_client, orderby_style, orderby_value):
         assert parsed_qs["orderby"] == expected_orderby_value
 
 
-def test_list_flows_mutually_exclusive_roles(flows_client):
+@pytest.mark.parametrize(
+    "filter_role, filter_roles",
+    [
+        # empty string values
+        ("", ""),
+        ("", []),
+        ("", [""]),
+        # single string values
+        ("bar", "baz"),
+        # list values
+        ("bar", ["baz"]),
+        ("bar", ["baz", "qux"]),
+        # comma-separated string
+        ("bar", "baz,qux"),
+        # empty list
+        ("bar", []),
+        # list containing empty string
+        ("bar", [""]),
+        # list containing multiple empty strings
+        ("bar", ["", ""]),
+        # list containing mixed values
+        ("bar", ["baz", "", "qux"]),
+    ],
+)
+def test_list_flows_mutually_exclusive_roles(flows_client, filter_role, filter_roles):
     with pytest.raises(GlobusSDKUsageError):
-        flows_client.list_flows(filter_role="bar", filter_roles="baz,qux")
+        flows_client.list_flows(filter_role=filter_role, filter_roles=filter_roles)
 
 
-@pytest.mark.parametrize("filter_roles", [None, ["run_manager", "run_monitor"]])
-def test_list_flows_with_filter_roles(flows_client, filter_roles):
+@pytest.mark.parametrize(
+    "filter_roles, expected_filter_roles",
+    [
+        # empty list
+        ([], []),
+        # list with empty string
+        ([""], [""]),
+        # None
+        (None, None),
+        # single role as string
+        ("foo", ["foo"]),
+        # single role as list
+        (["foo"], ["foo"]),
+        # multiple roles as comma-separated string
+        ("foo,bar", ["foo,bar"]),
+        # multiple roles as list
+        (["foo", "bar"], ["foo,bar"]),
+    ],
+)
+def test_list_flows_with_filter_roles_parameter(
+    flows_client, filter_roles, expected_filter_roles
+):
     load_response(flows_client.list_flows).metadata
 
     res = flows_client.list_flows(filter_roles=filter_roles)
@@ -128,7 +172,8 @@ def test_list_flows_with_filter_roles(flows_client, filter_roles):
     assert req.body is None
     parsed_qs = urllib.parse.parse_qs(urllib.parse.urlparse(req.url).query)
 
-    if filter_roles:
-        assert parsed_qs["filter_roles"] == filter_roles
+    # Only check filter_roles in parsed_qs if we expect a non-empty value
+    if expected_filter_roles and any(role for role in expected_filter_roles):
+        assert parsed_qs["filter_roles"] == expected_filter_roles
     else:
         assert "filter_roles" not in parsed_qs
