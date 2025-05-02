@@ -60,3 +60,19 @@ or create the release via the GitHub CLI
   changes and a link to the GitHub release page.
   (If the Globus CLI is releasing within a short interval,
   combine both announcements into a single email notice.)
+
+- Ensure the 4.x-dev branch is updated with the latest changes from main
+    ```
+    git checkout 4.x-dev
+    git pull
+    git merge origin/main
+    git push origin 4.x-dev
+    ```
+
+## Publish Pre-release 4.x packages to PyPi
+
+The steps above for deploying a package to PyPI can be used to push pre-release packages by:
+
+* Using the 4.x-dev branch instead of the main branch
+* Creating and pushing a tag on the 4.x-dev branch
+* Publishing the release through GitHub using the 4.x-dev branch
