@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - 4.x-dev
 
 jobs:
   update_pr_numbers_in_change_fragments:
