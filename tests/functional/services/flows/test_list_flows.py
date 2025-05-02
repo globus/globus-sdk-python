@@ -2,7 +2,7 @@ import urllib.parse
 
 import pytest
 
-from globus_sdk import GlobusSDKUsageError
+from globus_sdk import GlobusSDKUsageError, RemovedInV4Warning
 from globus_sdk._testing import get_last_request, load_response
 
 
@@ -20,7 +20,15 @@ def test_list_flows_simple(flows_client, filter_fulltext, filter_role, orderby):
     if orderby:
         add_kwargs["orderby"] = orderby
 
-    res = flows_client.list_flows(**add_kwargs)
+    if filter_role:
+        with pytest.warns(
+            RemovedInV4Warning,
+            match=r"The `filter_role` parameter is deprecated.*",
+        ):
+            res = flows_client.list_flows(**add_kwargs)
+    else:
+        res = flows_client.list_flows(**add_kwargs)
+
     assert res.http_status == 200
     # dict-like indexing
     assert meta["first_flow_id"] == res["flows"][0]["id"]

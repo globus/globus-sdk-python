@@ -3,7 +3,14 @@ from __future__ import annotations
 import logging
 import typing as t
 
-from globus_sdk import GlobusHTTPResponse, GlobusSDKUsageError, client, paging, utils
+from globus_sdk import (
+    GlobusHTTPResponse,
+    GlobusSDKUsageError,
+    client,
+    exc,
+    paging,
+    utils,
+)
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.globus_app import GlobusApp
@@ -341,6 +348,9 @@ class FlowsClient(client.BaseClient):
         if query_params is None:
             query_params = {}
         if filter_role is not None:
+            exc.warn_deprecated(
+                "The `filter_role` parameter is deprecated. Use `filter_roles` instead."
+            )
             query_params["filter_role"] = filter_role
         if filter_roles is not None:
             query_params["filter_roles"] = utils.commajoin(filter_roles)
