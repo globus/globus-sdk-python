@@ -145,18 +145,16 @@ def test_list_flows_orderby_multi(flows_client, orderby_style, orderby_value):
     ],
 )
 def test_list_flows_mutually_exclusive_roles(flows_client, filter_role, filter_roles):
-    with pytest.raises(GlobusSDKUsageError):
+    with pytest.raises(GlobusSDKUsageError), pytest.warns(RemovedInV4Warning):
         flows_client.list_flows(filter_role=filter_role, filter_roles=filter_roles)
 
 
 @pytest.mark.parametrize(
     "filter_roles, expected_filter_roles",
     [
-        # empty list
-        ([], []),
-        # list with empty string
-        ([""], [""]),
-        # None
+        # empty list, list with empty string, and None do not send the param
+        ([], None),
+        ([""], None),
         (None, None),
         # single role as string
         ("foo", ["foo"]),
@@ -181,7 +179,7 @@ def test_list_flows_with_filter_roles_parameter(
     parsed_qs = urllib.parse.parse_qs(urllib.parse.urlparse(req.url).query)
 
     # Only check filter_roles in parsed_qs if we expect a non-empty value
-    if expected_filter_roles and any(role for role in expected_filter_roles):
+    if expected_filter_roles:
         assert parsed_qs["filter_roles"] == expected_filter_roles
     else:
         assert "filter_roles" not in parsed_qs
