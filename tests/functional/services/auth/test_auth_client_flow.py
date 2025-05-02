@@ -35,6 +35,7 @@ def confidential_client(no_retry_transport):
 #   identities: uuid | str | list[uuid] | list[str] | list[str | uuid]
 #   policies: uuid | str | list[uuid] | list[str] | list[str | uuid]
 #   mfa: True | False
+#   message: str | None
 #   prompt: Literal["prompt"] | None
 #
 # The order of these options is consequential.
@@ -56,16 +57,24 @@ policy_options = (
     ["baz-id", "quux-id"],
     ["baz-id", uuid.UUID(int=5)],
 )
+message_options = ("Test message",)
 mfa_options = (True, False)
 prompt_options = ("login",)
 # Seed an all-`None` option test, then use a loop to fill in the rest.
 # The number of parameters here must match the test parameters:
-_ALL_SESSION_PARAM_COMBINATIONS = [(None,) * 5]
+_ALL_SESSION_PARAM_COMBINATIONS = [(None,) * 6]
 for idx, options in enumerate(
-    (domain_options, identity_options, policy_options, mfa_options, prompt_options)
+    (
+        domain_options,
+        identity_options,
+        policy_options,
+        mfa_options,
+        message_options,
+        prompt_options,
+    )
 ):
     for option in options:
-        parameters = [None] * 5
+        parameters = [None] * 6
         parameters[idx] = option
         _ALL_SESSION_PARAM_COMBINATIONS.append(tuple(parameters))
 
@@ -73,7 +82,14 @@ for idx, options in enumerate(
 @pytest.mark.parametrize("flow_type", ("native_app", "confidential_app"))
 # parametrize over both what is and what *is not* passed as a parameter
 @pytest.mark.parametrize(
-    "domain_option, identity_option, policy_option, mfa_option, prompt_option",
+    [
+        "domain_option",
+        "identity_option",
+        "policy_option",
+        "mfa_option",
+        "message_option",
+        "prompt_option",
+    ],
     _ALL_SESSION_PARAM_COMBINATIONS,
 )
 def test_oauth2_get_authorize_url_supports_session_params(
@@ -84,6 +100,7 @@ def test_oauth2_get_authorize_url_supports_session_params(
     identity_option,
     policy_option,
     mfa_option,
+    message_option,
     prompt_option,
 ):
     if flow_type == "native_app":
@@ -100,6 +117,7 @@ def test_oauth2_get_authorize_url_supports_session_params(
         session_required_identities=identity_option,
         session_required_policies=policy_option,
         session_required_mfa=mfa_option,
+        session_message=message_option,
         prompt=prompt_option,
     )
 

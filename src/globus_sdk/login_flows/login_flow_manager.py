@@ -57,6 +57,7 @@ class LoginFlowManager(metaclass=abc.ABCMeta):
             session_required_single_domain=session_required_single_domain,
             session_required_policies=auth_parameters.session_required_policies,
             session_required_mfa=auth_parameters.session_required_mfa,
+            session_message=auth_parameters.session_message,
             prompt=auth_parameters.prompt,  # type: ignore
         )
 

@@ -18,6 +18,7 @@ def generate_strs() -> t.Iterator[str]:
 url = ac.oauth2_get_authorize_url(session_required_identities="foo")
 url = ac.oauth2_get_authorize_url(session_required_single_domain="foo")
 url = ac.oauth2_get_authorize_url(session_required_policies="foo")
+url = ac.oauth2_get_authorize_url(session_message="foo")
 
 # or any iterable of strings
 url = ac.oauth2_get_authorize_url(session_required_identities=generate_strs())
@@ -32,6 +33,9 @@ url = ac.oauth2_get_authorize_url(session_required_policies=uuid.uuid4())
 url = ac.oauth2_get_authorize_url(
     session_required_single_domain=uuid.uuid4()  # type: ignore[arg-type]
 )
+url = ac.oauth2_get_authorize_url(
+    session_message=uuid.uuid4(),  # type: ignore[arg-type]
+)
 
 # integers and other non-str data are not acceptable
 url = ac.oauth2_get_authorize_url(
@@ -41,3 +45,4 @@ url = ac.oauth2_get_authorize_url(
     session_required_single_domain=1  # type: ignore[arg-type]
 )
 url = ac.oauth2_get_authorize_url(session_required_policies=1)  # type: ignore[arg-type]
+url = ac.oauth2_get_authorize_url(session_message=1)  # type: ignore[arg-type]
