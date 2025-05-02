@@ -249,7 +249,7 @@ class FlowsClient(client.BaseClient):
 
         :param filter_role: A role name specifying the minimum permissions required for
             a flow to be included in the response. Mutually exclusive with
-            **filter_roles**.
+            **filter_roles**. (deprecated)
         :param filter_roles: A list of role names specifying the roles the user must
             have for a flow to be included in the response. Mutually exclusive with
             **filter_role**.
