@@ -8,4 +8,4 @@ Deprecated
 ~~~~~~~~~~
 
 - ``filter_role`` parameter for ``FlowsClient.list_flows`` is deprecated. Use
-  ``filter_roles`` instead (:pr:`NUMBER`)
+  ``filter_roles`` instead (:pr:`NUMBER`).
