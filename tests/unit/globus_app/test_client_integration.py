@@ -64,6 +64,17 @@ def test_timers_client_add_app_data_access_scope(app):
     assert expected in str_list
 
 
+def test_specific_flow_client_add_app_data_access_scope(app):
+    flow_id = str(uuid.UUID(int=1))
+    client = globus_sdk.SpecificFlowClient(flow_id, app=app)
+
+    collection_id = str(uuid.UUID(int=0))
+    client.add_app_transfer_data_access_scope(collection_id)
+    str_list = [str(s) for s in app.scope_requirements[client.resource_server]]
+    expected = f"{client.scopes.user}[*urn:globus:auth:scope:transfer.api.globus.org:all[*https://auth.globus.org/scopes/{collection_id}/data_access]]"  # noqa: E501
+    assert expected in str_list
+
+
 def test_transfer_client_add_app_data_access_scope_chaining(app):
     collection_id_1 = str(uuid.UUID(int=1))
     collection_id_2 = str(uuid.UUID(int=2))
