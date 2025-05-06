@@ -231,7 +231,7 @@ class AuthClient(client.BaseClient):
                 .. code-block:: python
 
                     ac = AuthClient(...)
-                    info = ac.oauth2_userinfo()
+                    info = ac.userinfo()
                     print(
                         'Effective Identity "{info["sub"]}" has '
                         f'Full Name "{info["name"]}" and '
