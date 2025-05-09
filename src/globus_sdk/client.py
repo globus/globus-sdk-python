@@ -54,12 +54,6 @@ class BaseClient:
     # `BaseClient._resolve_base_url` method for more details.
     base_url: str = "_base"
 
-    # path under the client base URL
-    # NOTE: using this attribute is now considered bad practice for client definitions,
-    # as it prevents calls to new routes at the root of an API's base_url
-    # Consider removing in a future release
-    base_path: str = "/"
-
     #: the class for errors raised by this client on HTTP 4xx and 5xx errors
     #: this can be set in subclasses, but must always be a subclass of GlobusError
     error_class: type[exc.GlobusAPIError] = exc.GlobusAPIError
@@ -105,8 +99,9 @@ class BaseClient:
 
         # resolve the base_url for the client (see docstring for resolution precedence)
         self.base_url = self._resolve_base_url(base_url, self.environment)
-        # append the base_path to the base_url if necessary
-        self.base_url = utils.slash_join(self.base_url, self.base_path)
+
+        # ensure base_url always has a trailing slash
+        self.base_url = utils.slash_join(self.base_url, "/")
 
         self.transport = self.transport_class(**(transport_params or {}))
         log.debug(f"initialized transport of type {type(self.transport)}")
@@ -484,11 +479,6 @@ class BaseClient:
         if path.startswith("https://") or path.startswith("http://"):
             url = path
         else:
-            # if passed a path which has a prefix matching the base_path, strip it
-            # this means that if a client has a base path of `/v1/`, a request for
-            # `/v1/foo` will hit `/v1/foo` rather than `/v1/v1/foo`
-            if path.startswith(self.base_path):
-                path = path[len(self.base_path) :]
             url = utils.slash_join(self.base_url, urllib.parse.quote(path))
 
         # either use given authorizer or get one from app

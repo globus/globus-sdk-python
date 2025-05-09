@@ -37,15 +37,15 @@ class RegisteredResponse:
     _url_map = {
         "auth": "https://auth.globus.org/",
         "nexus": "https://nexus.api.globusonline.org/",
-        "transfer": "https://transfer.api.globus.org/v0.10",
+        "transfer": "https://transfer.api.globus.org/",
         "search": "https://search.api.globus.org/",
         "gcs": "https://abc.xyz.data.globus.org/api",
-        "groups": "https://groups.api.globus.org/v2/",
+        "groups": "https://groups.api.globus.org/",
         "timer": "https://timer.automate.globus.org/",
         "flows": "https://flows.automate.globus.org/",
         "compute": "https://compute.api.globus.org/",
     }
-    _base_path_map = {
+    _path_prefix_map = {
         "transfer": "/v0.10/",
         "groups": "/v2/",
     }
@@ -105,13 +105,12 @@ class RegisteredResponse:
         self.service = service
 
         if service:
-            # strip base_paths to match the behavior of clients
-            # this allows a registered response to use a path like `/v2/groups` with
-            # the GroupsClient, rather than *requiring* that it use `/groups`
-            base_path = self._base_path_map.get(service)
-            if base_path and path.startswith(base_path):
-                path = path[len(base_path) :]
-
+            # ensure a registered response path is prefixed by _path_prefix_map
+            # this allows a registered response to use a path like `/groups` with
+            # the GroupsClient, rather than *requiring* it use the full `/v2/groups`
+            path_prefix = self._path_prefix_map.get(service)
+            if path_prefix and not path.startswith(path_prefix):
+                path = slash_join(path_prefix, path)
             self.full_url = slash_join(self._url_map[service], path)
         else:
             self.full_url = path
