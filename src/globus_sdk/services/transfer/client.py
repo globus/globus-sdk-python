@@ -103,9 +103,6 @@ class TransferClient(client.BaseClient):
     """
 
     service_name = "transfer"
-    # NOTE: setting base_path is no longer considered good practice
-    #       see the BaseClient source for details
-    base_path = "/v0.10/"
     transport_class: type[TransferRequestsTransport] = TransferRequestsTransport
     error_class = TransferAPIError
     scopes = TransferScopes
@@ -222,7 +219,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/endpoints_and_collections/#get_endpoint_or_collection_by_id
         """  # noqa: E501
         log.debug(f"TransferClient.get_endpoint({endpoint_id})")
-        return self.get(f"endpoint/{endpoint_id}", query_params=query_params)
+        return self.get(f"/v0.10/endpoint/{endpoint_id}", query_params=query_params)
 
     def update_endpoint(
         self,
@@ -270,7 +267,9 @@ class TransferClient(client.BaseClient):
             data["myproxy_server"] = None
 
         log.debug(f"TransferClient.update_endpoint({endpoint_id}, ...)")
-        return self.put(f"endpoint/{endpoint_id}", data=data, query_params=query_params)
+        return self.put(
+            f"/v0.10/endpoint/{endpoint_id}", data=data, query_params=query_params
+        )
 
     def set_subscription_id(
         self,
@@ -327,7 +326,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/gcp_management/#associate_collection_subscription
         """  # noqa: E501
         return self.put(
-            f"/endpoint/{collection_id}/subscription",
+            f"/v0.10/endpoint/{collection_id}/subscription",
             data={"subscription_id": subscription_id},
         )
 
@@ -348,7 +347,7 @@ class TransferClient(client.BaseClient):
             )
 
         log.debug("TransferClient.create_endpoint(...)")
-        return self.post("endpoint", data=data)
+        return self.post("/v0.10/endpoint", data=data)
 
     def delete_endpoint(self, endpoint_id: UUIDLike) -> response.GlobusHTTPResponse:
         """
@@ -371,7 +370,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/gcp_management/#delete_collection_by_id
         """
         log.debug(f"TransferClient.delete_endpoint({endpoint_id})")
-        return self.delete(f"endpoint/{endpoint_id}")
+        return self.delete(f"/v0.10/endpoint/{endpoint_id}")
 
     @paging.has_paginator(
         paging.HasNextPaginator,
@@ -482,7 +481,7 @@ class TransferClient(client.BaseClient):
             query_params["offset"] = offset
         log.debug(f"TransferClient.endpoint_search({query_params})")
         return IterableTransferResponse(
-            self.get("endpoint_search", query_params=query_params)
+            self.get("/v0.10/endpoint_search", query_params=query_params)
         )
 
     def endpoint_autoactivate(
@@ -511,7 +510,7 @@ class TransferClient(client.BaseClient):
             query_params["if_expires_in"] = if_expires_in
         log.debug(f"TransferClient.endpoint_autoactivate({endpoint_id})")
         return self.post(
-            f"endpoint/{endpoint_id}/autoactivate", query_params=query_params
+            f"/v0.10/endpoint/{endpoint_id}/autoactivate", query_params=query_params
         )
 
     def endpoint_deactivate(
@@ -532,7 +531,7 @@ class TransferClient(client.BaseClient):
         """
         log.debug(f"TransferClient.endpoint_deactivate({endpoint_id})")
         return self.post(
-            f"endpoint/{endpoint_id}/deactivate", query_params=query_params
+            f"/v0.10/endpoint/{endpoint_id}/deactivate", query_params=query_params
         )
 
     def endpoint_activate(
@@ -558,7 +557,7 @@ class TransferClient(client.BaseClient):
         """
         log.debug(f"TransferClient.endpoint_activate({endpoint_id})")
         return self.post(
-            f"endpoint/{endpoint_id}/activate",
+            f"/v0.10/endpoint/{endpoint_id}/activate",
             data=requirements_data,
             query_params=query_params,
         )
@@ -582,7 +581,7 @@ class TransferClient(client.BaseClient):
         """
         return ActivationRequirementsResponse(
             self.get(
-                f"endpoint/{endpoint_id}/activation_requirements",
+                f"/v0.10/endpoint/{endpoint_id}/activation_requirements",
                 query_params=query_params,
             )
         )
@@ -610,7 +609,7 @@ class TransferClient(client.BaseClient):
         log.debug(f"TransferClient.my_effective_pause_rule_list({endpoint_id}, ...)")
         return IterableTransferResponse(
             self.get(
-                f"endpoint/{endpoint_id}/my_effective_pause_rule_list",
+                f"/v0.10/endpoint/{endpoint_id}/my_effective_pause_rule_list",
                 query_params=query_params,
             )
         )
@@ -642,7 +641,7 @@ class TransferClient(client.BaseClient):
         log.debug(f"TransferClient.my_shared_endpoint_list({endpoint_id}, ...)")
         return IterableTransferResponse(
             self.get(
-                f"endpoint/{endpoint_id}/my_shared_endpoint_list",
+                f"/v0.10/endpoint/{endpoint_id}/my_shared_endpoint_list",
                 query_params=query_params,
             )
         )
@@ -687,7 +686,7 @@ class TransferClient(client.BaseClient):
             query_params["next_token"] = next_token
         return IterableTransferResponse(
             self.get(
-                f"endpoint/{endpoint_id}/shared_endpoint_list",
+                f"/v0.10/endpoint/{endpoint_id}/shared_endpoint_list",
                 query_params=query_params,
             ),
             iter_key="shared_endpoints",
@@ -725,7 +724,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/gcp_management/#create_guest_collection
         """
         log.debug("TransferClient.create_shared_endpoint(...)")
-        return self.post("shared_endpoint", data=data)
+        return self.post("/v0.10/shared_endpoint", data=data)
 
     # Endpoint servers
 
@@ -751,7 +750,9 @@ class TransferClient(client.BaseClient):
         """  # noqa: E501
         log.debug(f"TransferClient.endpoint_server_list({endpoint_id}, ...)")
         return IterableTransferResponse(
-            self.get(f"endpoint/{endpoint_id}/server_list", query_params=query_params)
+            self.get(
+                f"/v0.10/endpoint/{endpoint_id}/server_list", query_params=query_params
+            )
         )
 
     def get_endpoint_server(
@@ -779,7 +780,8 @@ class TransferClient(client.BaseClient):
             "TransferClient.get_endpoint_server(%s, %s, ...)", endpoint_id, server_id
         )
         return self.get(
-            f"endpoint/{endpoint_id}/server/{server_id}", query_params=query_params
+            f"/v0.10/endpoint/{endpoint_id}/server/{server_id}",
+            query_params=query_params,
         )
 
     def add_endpoint_server(
@@ -795,7 +797,7 @@ class TransferClient(client.BaseClient):
         :param server_data: Fields for the new server, as a server document
         """
         log.debug(f"TransferClient.add_endpoint_server({endpoint_id}, ...)")
-        return self.post(f"endpoint/{endpoint_id}/server", data=server_data)
+        return self.post(f"/v0.10/endpoint/{endpoint_id}/server", data=server_data)
 
     def update_endpoint_server(
         self,
@@ -818,7 +820,9 @@ class TransferClient(client.BaseClient):
             endpoint_id,
             server_id,
         )
-        return self.put(f"endpoint/{endpoint_id}/server/{server_id}", data=server_data)
+        return self.put(
+            f"/v0.10/endpoint/{endpoint_id}/server/{server_id}", data=server_data
+        )
 
     def delete_endpoint_server(
         self, endpoint_id: UUIDLike, server_id: IntLike
@@ -835,7 +839,7 @@ class TransferClient(client.BaseClient):
         log.debug(
             "TransferClient.delete_endpoint_server(%s, %s)", endpoint_id, server_id
         )
-        return self.delete(f"endpoint/{endpoint_id}/server/{server_id}")
+        return self.delete(f"/v0.10/endpoint/{endpoint_id}/server/{server_id}")
 
     #
     # Roles
@@ -863,7 +867,9 @@ class TransferClient(client.BaseClient):
         """
         log.debug(f"TransferClient.endpoint_role_list({endpoint_id}, ...)")
         return IterableTransferResponse(
-            self.get(f"endpoint/{endpoint_id}/role_list", query_params=query_params)
+            self.get(
+                f"/v0.10/endpoint/{endpoint_id}/role_list", query_params=query_params
+            )
         )
 
     def add_endpoint_role(
@@ -883,7 +889,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/roles/#create_role
         """
         log.debug(f"TransferClient.add_endpoint_role({endpoint_id}, ...)")
-        return self.post(f"endpoint/{endpoint_id}/role", data=role_data)
+        return self.post(f"/v0.10/endpoint/{endpoint_id}/role", data=role_data)
 
     def get_endpoint_role(
         self,
@@ -908,7 +914,7 @@ class TransferClient(client.BaseClient):
         """
         log.debug(f"TransferClient.get_endpoint_role({endpoint_id}, {role_id}, ...)")
         return self.get(
-            f"endpoint/{endpoint_id}/role/{role_id}", query_params=query_params
+            f"/v0.10/endpoint/{endpoint_id}/role/{role_id}", query_params=query_params
         )
 
     def delete_endpoint_role(
@@ -928,7 +934,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/roles/#delete_role_by_id
         """
         log.debug(f"TransferClient.delete_endpoint_role({endpoint_id}, {role_id})")
-        return self.delete(f"endpoint/{endpoint_id}/role/{role_id}")
+        return self.delete(f"/v0.10/endpoint/{endpoint_id}/role/{role_id}")
 
     #
     # ACLs
@@ -955,7 +961,9 @@ class TransferClient(client.BaseClient):
         """
         log.debug(f"TransferClient.endpoint_acl_list({endpoint_id}, ...)")
         return IterableTransferResponse(
-            self.get(f"endpoint/{endpoint_id}/access_list", query_params=query_params)
+            self.get(
+                f"/v0.10/endpoint/{endpoint_id}/access_list", query_params=query_params
+            )
         )
 
     def get_endpoint_acl_rule(
@@ -983,7 +991,7 @@ class TransferClient(client.BaseClient):
             "TransferClient.get_endpoint_acl_rule(%s, %s, ...)", endpoint_id, rule_id
         )
         return self.get(
-            f"endpoint/{endpoint_id}/access/{rule_id}", query_params=query_params
+            f"/v0.10/endpoint/{endpoint_id}/access/{rule_id}", query_params=query_params
         )
 
     def add_endpoint_acl_rule(
@@ -1021,7 +1029,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/acl/#rest_access_create
         """
         log.debug(f"TransferClient.add_endpoint_acl_rule({endpoint_id}, ...)")
-        return self.post(f"endpoint/{endpoint_id}/access", data=rule_data)
+        return self.post(f"/v0.10/endpoint/{endpoint_id}/access", data=rule_data)
 
     def update_endpoint_acl_rule(
         self,
@@ -1048,7 +1056,9 @@ class TransferClient(client.BaseClient):
             endpoint_id,
             rule_id,
         )
-        return self.put(f"endpoint/{endpoint_id}/access/{rule_id}", data=rule_data)
+        return self.put(
+            f"/v0.10/endpoint/{endpoint_id}/access/{rule_id}", data=rule_data
+        )
 
     def delete_endpoint_acl_rule(
         self, endpoint_id: UUIDLike, rule_id: str
@@ -1069,7 +1079,7 @@ class TransferClient(client.BaseClient):
         log.debug(
             "TransferClient.delete_endpoint_acl_rule(%s, %s)", endpoint_id, rule_id
         )
-        return self.delete(f"endpoint/{endpoint_id}/access/{rule_id}")
+        return self.delete(f"/v0.10/endpoint/{endpoint_id}/access/{rule_id}")
 
     #
     # Bookmarks
@@ -1092,7 +1102,7 @@ class TransferClient(client.BaseClient):
         """
         log.debug(f"TransferClient.bookmark_list({query_params})")
         return IterableTransferResponse(
-            self.get("bookmark_list", query_params=query_params)
+            self.get("/v0.10/bookmark_list", query_params=query_params)
         )
 
     def create_bookmark(
@@ -1111,7 +1121,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/collection_bookmarks/#create_bookmark
         """
         log.debug(f"TransferClient.create_bookmark({bookmark_data})")
-        return self.post("bookmark", data=bookmark_data)
+        return self.post("/v0.10/bookmark", data=bookmark_data)
 
     def get_bookmark(
         self,
@@ -1133,7 +1143,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/collection_bookmarks/#get_bookmark_by_id
         """
         log.debug(f"TransferClient.get_bookmark({bookmark_id})")
-        return self.get(f"bookmark/{bookmark_id}", query_params=query_params)
+        return self.get(f"/v0.10/bookmark/{bookmark_id}", query_params=query_params)
 
     def update_bookmark(
         self, bookmark_id: UUIDLike, bookmark_data: dict[str, t.Any]
@@ -1152,7 +1162,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/collection_bookmarks/#update_bookmark
         """
         log.debug(f"TransferClient.update_bookmark({bookmark_id})")
-        return self.put(f"bookmark/{bookmark_id}", data=bookmark_data)
+        return self.put(f"/v0.10/bookmark/{bookmark_id}", data=bookmark_data)
 
     def delete_bookmark(self, bookmark_id: UUIDLike) -> response.GlobusHTTPResponse:
         """
@@ -1168,7 +1178,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/collection_bookmarks/#delete_bookmark_by_id
         """
         log.debug(f"TransferClient.delete_bookmark({bookmark_id})")
-        return self.delete(f"bookmark/{bookmark_id}")
+        return self.delete(f"/v0.10/bookmark/{bookmark_id}")
 
     #
     # Synchronous Filesys Operations
@@ -1283,7 +1293,9 @@ class TransferClient(client.BaseClient):
 
         log.debug(f"TransferClient.operation_ls({endpoint_id}, {query_params})")
         return IterableTransferResponse(
-            self.get(f"operation/endpoint/{endpoint_id}/ls", query_params=query_params)
+            self.get(
+                f"/v0.10/operation/endpoint/{endpoint_id}/ls", query_params=query_params
+            )
         )
 
     def operation_mkdir(
@@ -1327,7 +1339,7 @@ class TransferClient(client.BaseClient):
         if local_user is not None:
             json_body["local_user"] = local_user
         return self.post(
-            f"operation/endpoint/{endpoint_id}/mkdir",
+            f"/v0.10/operation/endpoint/{endpoint_id}/mkdir",
             data=json_body,
             query_params=query_params,
         )
@@ -1379,7 +1391,7 @@ class TransferClient(client.BaseClient):
         if local_user is not None:
             json_body["local_user"] = local_user
         return self.post(
-            f"operation/endpoint/{endpoint_id}/rename",
+            f"/v0.10/operation/endpoint/{endpoint_id}/rename",
             data=json_body,
             query_params=query_params,
         )
@@ -1429,7 +1441,7 @@ class TransferClient(client.BaseClient):
 
         log.debug(f"TransferClient.operation_stat({endpoint_id}, {query_params})")
         return self.get(
-            f"operation/endpoint/{endpoint_id}/stat", query_params=query_params
+            f"/v0.10/operation/endpoint/{endpoint_id}/stat", query_params=query_params
         )
 
     def operation_symlink(
@@ -1465,7 +1477,7 @@ class TransferClient(client.BaseClient):
             "path": path,
         }
         return self.post(
-            f"operation/endpoint/{endpoint_id}/symlink",
+            f"/v0.10/operation/endpoint/{endpoint_id}/symlink",
             data=data,
             query_params=query_params,
         )
@@ -1502,7 +1514,7 @@ class TransferClient(client.BaseClient):
                 .. expandtestfixture:: transfer.get_submission_id
         """
         log.debug(f"TransferClient.get_submission_id({query_params})")
-        return self.get("submission_id", query_params=query_params)
+        return self.get("/v0.10/submission_id", query_params=query_params)
 
     def submit_transfer(
         self, data: dict[str, t.Any] | TransferData
@@ -1551,7 +1563,7 @@ class TransferClient(client.BaseClient):
         if "submission_id" not in data:
             log.debug("submit_transfer autofetching submission_id")
             data["submission_id"] = self.get_submission_id()["value"]
-        return self.post("/transfer", data=data)
+        return self.post("/v0.10/transfer", data=data)
 
     def submit_delete(
         self, data: dict[str, t.Any] | DeleteData
@@ -1594,7 +1606,7 @@ class TransferClient(client.BaseClient):
         if "submission_id" not in data:
             log.debug("submit_delete autofetching submission_id")
             data["submission_id"] = self.get_submission_id()["value"]
-        return self.post("/delete", data=data)
+        return self.post("/v0.10/delete", data=data)
 
     #
     # Task inspection and management
@@ -1704,7 +1716,7 @@ class TransferClient(client.BaseClient):
         if filter is not None:
             query_params["filter"] = _format_filter_item(filter)
         return IterableTransferResponse(
-            self.get("task_list", query_params=query_params)
+            self.get("/v0.10/task_list", query_params=query_params)
         )
 
     @paging.has_paginator(
@@ -1762,7 +1774,7 @@ class TransferClient(client.BaseClient):
         if offset is not None:
             query_params["offset"] = offset
         return IterableTransferResponse(
-            self.get(f"task/{task_id}/event_list", query_params=query_params)
+            self.get(f"/v0.10/task/{task_id}/event_list", query_params=query_params)
         )
 
     def get_task(
@@ -1785,7 +1797,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/task/#get_task_by_id
         """
         log.debug(f"TransferClient.get_task({task_id}, ...)")
-        return self.get(f"task/{task_id}", query_params=query_params)
+        return self.get(f"/v0.10/task/{task_id}", query_params=query_params)
 
     def update_task(
         self,
@@ -1812,7 +1824,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/task/#update_task_by_id
         """
         log.debug(f"TransferClient.update_task({task_id}, ...)")
-        return self.put(f"task/{task_id}", data=data, query_params=query_params)
+        return self.put(f"/v0.10/task/{task_id}", data=data, query_params=query_params)
 
     def cancel_task(self, task_id: UUIDLike) -> response.GlobusHTTPResponse:
         """
@@ -1830,7 +1842,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/task/#cancel_task_by_id
         """
         log.debug(f"TransferClient.cancel_task({task_id})")
-        return self.post(f"task/{task_id}/cancel")
+        return self.post(f"/v0.10/task/{task_id}/cancel")
 
     def task_wait(
         self, task_id: UUIDLike, *, timeout: int = 10, polling_interval: int = 10
@@ -1957,7 +1969,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/task/#get_task_pause_info
         """
         log.debug(f"TransferClient.task_pause_info({task_id}, ...)")
-        return self.get(f"task/{task_id}/pause_info", query_params=query_params)
+        return self.get(f"/v0.10/task/{task_id}/pause_info", query_params=query_params)
 
     @paging.has_paginator(
         paging.NullableMarkerPaginator, items_key="DATA", marker_key="next_marker"
@@ -2013,7 +2025,9 @@ class TransferClient(client.BaseClient):
         if marker is not None:
             query_params["marker"] = marker
         return IterableTransferResponse(
-            self.get(f"task/{task_id}/successful_transfers", query_params=query_params)
+            self.get(
+                f"/v0.10/task/{task_id}/successful_transfers", query_params=query_params
+            )
         )
 
     @paging.has_paginator(
@@ -2064,7 +2078,7 @@ class TransferClient(client.BaseClient):
         if marker is not None:
             query_params["marker"] = marker
         return IterableTransferResponse(
-            self.get(f"task/{task_id}/skipped_errors", query_params=query_params)
+            self.get(f"/v0.10/task/{task_id}/skipped_errors", query_params=query_params)
         )
 
     #
@@ -2092,7 +2106,9 @@ class TransferClient(client.BaseClient):
             f"TransferClient.endpoint_manager_monitored_endpoints({query_params})"
         )
         return IterableTransferResponse(
-            self.get("endpoint_manager/monitored_endpoints", query_params=query_params)
+            self.get(
+                "/v0.10/endpoint_manager/monitored_endpoints", query_params=query_params
+            )
         )
 
     def endpoint_manager_hosted_endpoint_list(
@@ -2121,7 +2137,7 @@ class TransferClient(client.BaseClient):
         )
         return IterableTransferResponse(
             self.get(
-                f"endpoint_manager/endpoint/{endpoint_id}/hosted_endpoint_list",
+                f"/v0.10/endpoint_manager/endpoint/{endpoint_id}/hosted_endpoint_list",
                 query_params=query_params,
             )
         )
@@ -2149,7 +2165,7 @@ class TransferClient(client.BaseClient):
         """  # noqa: E501
         log.debug(f"TransferClient.endpoint_manager_get_endpoint({endpoint_id})")
         return self.get(
-            f"endpoint_manager/endpoint/{endpoint_id}", query_params=query_params
+            f"/v0.10/endpoint_manager/endpoint/{endpoint_id}", query_params=query_params
         )
 
     def endpoint_manager_acl_list(
@@ -2178,7 +2194,7 @@ class TransferClient(client.BaseClient):
         )
         return IterableTransferResponse(
             self.get(
-                f"endpoint_manager/endpoint/{endpoint_id}/access_list",
+                f"/v0.10/endpoint_manager/endpoint/{endpoint_id}/access_list",
                 query_params=query_params,
             )
         )
@@ -2342,7 +2358,7 @@ class TransferClient(client.BaseClient):
         if last_key is not None:
             query_params["last_key"] = last_key
         return IterableTransferResponse(
-            self.get("endpoint_manager/task_list", query_params=query_params)
+            self.get("/v0.10/endpoint_manager/task_list", query_params=query_params)
         )
 
     def endpoint_manager_get_task(
@@ -2368,7 +2384,9 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/advanced_collection_management/#get_task
         """
         log.debug(f"TransferClient.endpoint_manager_get_task({task_id}, ...)")
-        return self.get(f"endpoint_manager/task/{task_id}", query_params=query_params)
+        return self.get(
+            f"/v0.10/endpoint_manager/task/{task_id}", query_params=query_params
+        )
 
     @paging.has_paginator(
         paging.LimitOffsetTotalPaginator,
@@ -2423,7 +2441,8 @@ class TransferClient(client.BaseClient):
             query_params["filter_is_error"] = 1 if filter_is_error else 0
         return IterableTransferResponse(
             self.get(
-                f"endpoint_manager/task/{task_id}/event_list", query_params=query_params
+                f"/v0.10/endpoint_manager/task/{task_id}/event_list",
+                query_params=query_params,
             )
         )
 
@@ -2451,7 +2470,8 @@ class TransferClient(client.BaseClient):
         """  # noqa: E501
         log.debug(f"TransferClient.endpoint_manager_task_pause_info({task_id}, ...)")
         return self.get(
-            f"endpoint_manager/task/{task_id}/pause_info", query_params=query_params
+            f"/v0.10/endpoint_manager/task/{task_id}/pause_info",
+            query_params=query_params,
         )
 
     @paging.has_paginator(
@@ -2495,7 +2515,7 @@ class TransferClient(client.BaseClient):
             query_params["marker"] = marker
         return IterableTransferResponse(
             self.get(
-                f"endpoint_manager/task/{task_id}/successful_transfers",
+                f"/v0.10/endpoint_manager/task/{task_id}/successful_transfers",
                 query_params=query_params,
             )
         )
@@ -2540,7 +2560,7 @@ class TransferClient(client.BaseClient):
             query_params["marker"] = marker
         return IterableTransferResponse(
             self.get(
-                f"endpoint_manager/task/{task_id}/skipped_errors",
+                f"/v0.10/endpoint_manager/task/{task_id}/skipped_errors",
                 query_params=query_params,
             )
         )
@@ -2575,7 +2595,7 @@ class TransferClient(client.BaseClient):
         )
         data = {"message": message, "task_id_list": str_task_ids}
         return self.post(
-            "endpoint_manager/admin_cancel", data=data, query_params=query_params
+            "/v0.10/endpoint_manager/admin_cancel", data=data, query_params=query_params
         )
 
     def endpoint_manager_cancel_status(
@@ -2602,7 +2622,7 @@ class TransferClient(client.BaseClient):
         """  # noqa: E501
         log.debug(f"TransferClient.endpoint_manager_cancel_status({admin_cancel_id})")
         return self.get(
-            f"endpoint_manager/admin_cancel/{admin_cancel_id}",
+            f"/v0.10/endpoint_manager/admin_cancel/{admin_cancel_id}",
             query_params=query_params,
         )
 
@@ -2636,7 +2656,7 @@ class TransferClient(client.BaseClient):
         )
         data = {"message": message, "task_id_list": str_task_ids}
         return self.post(
-            "endpoint_manager/admin_pause", data=data, query_params=query_params
+            "/v0.10/endpoint_manager/admin_pause", data=data, query_params=query_params
         )
 
     def endpoint_manager_resume_tasks(
@@ -2665,7 +2685,7 @@ class TransferClient(client.BaseClient):
         log.debug(f"TransferClient.endpoint_manager_resume_tasks({str_task_ids})")
         data = {"task_id_list": str_task_ids}
         return self.post(
-            "endpoint_manager/admin_resume", data=data, query_params=query_params
+            "/v0.10/endpoint_manager/admin_resume", data=data, query_params=query_params
         )
 
     #
@@ -2702,7 +2722,9 @@ class TransferClient(client.BaseClient):
         if filter_endpoint is not None:
             query_params["filter_endpoint"] = filter_endpoint
         return IterableTransferResponse(
-            self.get("endpoint_manager/pause_rule_list", query_params=query_params)
+            self.get(
+                "/v0.10/endpoint_manager/pause_rule_list", query_params=query_params
+            )
         )
 
     def endpoint_manager_create_pause_rule(
@@ -2739,7 +2761,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/advanced_collection_management/#create_pause_rule
         """
         log.debug("TransferClient.endpoint_manager_create_pause_rule(...)")
-        return self.post("endpoint_manager/pause_rule", data=data)
+        return self.post("/v0.10/endpoint_manager/pause_rule", data=data)
 
     def endpoint_manager_get_pause_rule(
         self,
@@ -2765,7 +2787,8 @@ class TransferClient(client.BaseClient):
         """
         log.debug(f"TransferClient.endpoint_manager_get_pause_rule({pause_rule_id})")
         return self.get(
-            f"endpoint_manager/pause_rule/{pause_rule_id}", query_params=query_params
+            f"/v0.10/endpoint_manager/pause_rule/{pause_rule_id}",
+            query_params=query_params,
         )
 
     def endpoint_manager_update_pause_rule(
@@ -2803,7 +2826,9 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/advanced_collection_management/#update_pause_rule
         """
         log.debug(f"TransferClient.endpoint_manager_update_pause_rule({pause_rule_id})")
-        return self.put(f"endpoint_manager/pause_rule/{pause_rule_id}", data=data)
+        return self.put(
+            f"/v0.10/endpoint_manager/pause_rule/{pause_rule_id}", data=data
+        )
 
     def endpoint_manager_delete_pause_rule(
         self,
@@ -2830,5 +2855,6 @@ class TransferClient(client.BaseClient):
         """
         log.debug(f"TransferClient.endpoint_manager_delete_pause_rule({pause_rule_id})")
         return self.delete(
-            f"endpoint_manager/pause_rule/{pause_rule_id}", query_params=query_params
+            f"/v0.10/endpoint_manager/pause_rule/{pause_rule_id}",
+            query_params=query_params,
         )

@@ -21,7 +21,6 @@ def auth_client():
 @pytest.fixture
 def base_client_class(no_retry_transport):
     class CustomClient(globus_sdk.BaseClient):
-        base_path = "/v0.10/"
         service_name = "transfer"
         transport_class = no_retry_transport
         scopes = TransferScopes
@@ -47,9 +46,6 @@ def test_cannot_instantiate_plain_base_client():
 
 
 def test_can_instantiate_base_client_with_explicit_url():
-    # note how a trailing slash is added due to the default
-    # base_path of '/'
-    # this may change in a future major version, to preserve the base_url exactly
     client = globus_sdk.BaseClient(base_url="https://example.org")
     assert client.base_url == "https://example.org/"
 
@@ -142,7 +138,7 @@ def test_http_methods(method, allows_body, base_client):
     """
     methodname = method.upper()
     resolved_method = getattr(base_client, method)
-    path = "/madeuppath/objectname"
+    path = "/v0.10/madeuppath/objectname"
     RegisteredResponse(
         service="transfer", path=path, method=methodname, json={"x": "y"}
     ).add()
@@ -196,7 +192,7 @@ def test_http_methods(method, allows_body, base_client):
 def test_handle_url_unsafe_chars(base_client):
     # make sure this path (escaped) and the request path (unescaped) match
     RegisteredResponse(service="transfer", path="/foo/foo%20bar", json={"x": "y"}).add()
-    res = base_client.get("foo/foo bar")
+    res = base_client.get("/v0.10/foo/foo bar")
     assert "x" in res
     assert res["x"] == "y"
 
@@ -209,33 +205,6 @@ def test_access_resource_server_property_via_instance(base_client):
 def test_access_resource_server_property_via_class(base_client_class):
     # get works (and returns accurate info)
     assert base_client_class.resource_server == TransferScopes.resource_server
-
-
-@pytest.mark.parametrize("leading_slash", (True, False))
-@pytest.mark.parametrize("test_fixture_uses_base_path", (True, False))
-def test_base_path_matching_prefix(
-    base_client, leading_slash, test_fixture_uses_base_path
-):
-    # self-check/sanity check
-    base_path = base_client.base_path
-    assert base_path == "/v0.10/"
-
-    # construct the path and confirm it (sanity check)
-    req_path = f"{base_client.base_path}foo"
-    if not leading_slash:
-        req_path.lstrip("/")
-
-    # register a response under the target path
-    # this is parametrized so that we are also testing the matching of our
-    # test fixtures against the same path construction
-    test_fixture_path = f"{base_path}foo" if test_fixture_uses_base_path else "foo"
-    RegisteredResponse(
-        service="transfer", path=test_fixture_path, json={"x": "y"}
-    ).add()
-
-    # confirm that a "GET" works
-    res = base_client.get(req_path)
-    assert res["x"] == "y"
 
 
 def test_app_integration(base_client_class):
@@ -356,7 +325,6 @@ def test_cannot_attach_app_when_authorizer_was_provided(base_client_class):
 
 def test_cannot_attach_app_when_resource_server_is_not_resolvable():
     class CustomClient(globus_sdk.BaseClient):
-        base_path = "/v0.10/"
         service_name = "transfer"
         default_scope_requirements = [Scope(TransferScopes.all)]
 
