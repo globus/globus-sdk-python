@@ -7,7 +7,7 @@ RESPONSES = ResponseSet(
     default=RegisteredResponse(
         service="transfer",
         method="GET",
-        path=f"/endpoint_manager/task/{TASK_ID}/successful_transfers",
+        path=f"/v0.10/endpoint_manager/task/{TASK_ID}/successful_transfers",
         json={
             "DATA_TYPE": "successful_transfers",
             "marker": 0,

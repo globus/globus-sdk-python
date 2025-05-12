@@ -6,7 +6,7 @@ RESPONSES = ResponseSet(
     metadata={"group_id": GROUP_ID},
     default=RegisteredResponse(
         service="groups",
-        path=f"/groups/{GROUP_ID}/policies",
+        path=f"/v2/groups/{GROUP_ID}/policies",
         method="PUT",
         json={
             "is_high_assurance": False,

@@ -40,7 +40,7 @@ def _setup_ls_response():
     load_response(
         RegisteredResponse(
             service="transfer",
-            path=f"/operation/endpoint/{GO_EP1_ID}/ls",
+            path=f"/v0.10/operation/endpoint/{GO_EP1_ID}/ls",
             json=_mk_ls_data(),
         ),
     )

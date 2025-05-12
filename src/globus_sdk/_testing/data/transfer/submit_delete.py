@@ -7,7 +7,7 @@ RESPONSES = ResponseSet(
     default=RegisteredResponse(
         service="transfer",
         method="POST",
-        path="/delete",
+        path="/v0.10/delete",
         json={
             "DATA_TYPE": "delete_result",
             "code": "Accepted",
@@ -16,12 +16,12 @@ RESPONSES = ResponseSet(
                 "and queued for execution"
             ),
             "request_id": "NS2QXhLZ7",
-            "resource": "/delete",
+            "resource": "/v0.10/delete",
             "submission_id": SUBMISSION_ID,
             "task_id": TASK_ID,
             "task_link": {
                 "DATA_TYPE": "link",
-                "href": f"task/{TASK_ID}?format=json",
+                "href": f"/v0.10/task/{TASK_ID}?format=json",
                 "rel": "related",
                 "resource": "task",
                 "title": "related task",

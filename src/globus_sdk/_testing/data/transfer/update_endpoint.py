@@ -7,13 +7,13 @@ RESPONSES = ResponseSet(
     default=RegisteredResponse(
         service="transfer",
         method="PUT",
-        path=f"/endpoint/{ENDPOINT_ID}",
+        path=f"/v0.10/endpoint/{ENDPOINT_ID}",
         json={
             "DATA_TYPE": "result",
             "code": "Updated",
             "message": "Endpoint updated successfully",
             "request_id": "6aZjzldyM",
-            "resource": f"/endpoint/{ENDPOINT_ID}",
+            "resource": f"/v0.10/endpoint/{ENDPOINT_ID}",
         },
     ),
 )

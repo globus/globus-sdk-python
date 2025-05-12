@@ -57,7 +57,7 @@ RESPONSES = ResponseSet(
     metadata={"endpoint_id": ENDPOINT_ID},
     default=RegisteredResponse(
         service="transfer",
-        path=f"/endpoint/{ENDPOINT_ID}",
+        path=f"/v0.10/endpoint/{ENDPOINT_ID}",
         json=ENDPOINT_DOC,
     ),
 )

@@ -16,7 +16,7 @@ def _setup_symlink_response(symlink_endpoint_id):
     RegisteredResponse(
         service="transfer",
         method="POST",
-        path=f"/operation/endpoint/{symlink_endpoint_id}/symlink",
+        path=f"/v0.10/operation/endpoint/{symlink_endpoint_id}/symlink",
         json={},
     ).add()
 

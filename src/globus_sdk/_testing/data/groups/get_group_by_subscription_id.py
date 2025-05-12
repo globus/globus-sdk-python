@@ -6,7 +6,7 @@ RESPONSES = ResponseSet(
     metadata={"group_id": SUBSCRIPTION_GROUP_ID, "subscription_id": SUBSCRIPTION_ID},
     default=RegisteredResponse(
         service="groups",
-        path=f"/subscription_info/{SUBSCRIPTION_ID}",
+        path=f"/v2/subscription_info/{SUBSCRIPTION_ID}",
         json={
             "group_id": SUBSCRIPTION_GROUP_ID,
             "subscription_id": SUBSCRIPTION_ID,

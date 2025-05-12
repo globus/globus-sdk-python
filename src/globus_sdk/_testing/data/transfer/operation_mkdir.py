@@ -7,13 +7,13 @@ RESPONSES = ResponseSet(
     default=RegisteredResponse(
         service="transfer",
         method="POST",
-        path=f"/operation/endpoint/{ENDPOINT_ID}/mkdir",
+        path=f"/v0.10/operation/endpoint/{ENDPOINT_ID}/mkdir",
         json={
             "DATA_TYPE": "mkdir_result",
             "code": "DirectoryCreated",
             "message": "The directory was created successfully",
             "request_id": "ShbIUzrWT",
-            "resource": f"/operation/endpoint/{ENDPOINT_ID}/mkdir",
+            "resource": f"/v0.10/operation/endpoint/{ENDPOINT_ID}/mkdir",
         },
     ),
 )

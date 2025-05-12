@@ -7,7 +7,7 @@ RESPONSES = ResponseSet(
     default=RegisteredResponse(
         service="transfer",
         method="POST",
-        path="/endpoint",
+        path="/v0.10/endpoint",
         json={
             "DATA_TYPE": "endpoint_create_result",
             "display_name": "my cool endpoint",
@@ -16,7 +16,7 @@ RESPONSES = ResponseSet(
             "id": ENDPOINT_ID,
             "message": "Endpoint created successfully",
             "request_id": "d4MqMwFJ9",
-            "resource": "/endpoint",
+            "resource": "/v0.10/endpoint",
         },
     ),
 )

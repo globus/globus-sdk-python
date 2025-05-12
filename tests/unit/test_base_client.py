@@ -191,7 +191,9 @@ def test_http_methods(method, allows_body, base_client):
 
 def test_handle_url_unsafe_chars(base_client):
     # make sure this path (escaped) and the request path (unescaped) match
-    RegisteredResponse(service="transfer", path="/foo/foo%20bar", json={"x": "y"}).add()
+    RegisteredResponse(
+        service="transfer", path="/v0.10/foo/foo%20bar", json={"x": "y"}
+    ).add()
     res = base_client.get("/v0.10/foo/foo bar")
     assert "x" in res
     assert res["x"] == "y"

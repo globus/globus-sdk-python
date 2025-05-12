@@ -85,7 +85,7 @@ RESPONSES = ResponseSet(
     },
     default=RegisteredResponse(
         service="transfer",
-        path="/task_list",
+        path="/v0.10/task_list",
         json=TASK_LIST_DOC,
     ),
 )

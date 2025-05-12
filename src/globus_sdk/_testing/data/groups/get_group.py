@@ -12,12 +12,12 @@ RESPONSES = ResponseSet(
     metadata={"group_id": GROUP_ID},
     default=RegisteredResponse(
         service="groups",
-        path=f"/groups/{GROUP_ID}",
+        path=f"/v2/groups/{GROUP_ID}",
         json=BASE_GROUP_DOC,
     ),
     subscription=RegisteredResponse(
         service="groups",
-        path=f"/groups/{SUBSCRIPTION_GROUP_ID}",
+        path=f"/v2/groups/{SUBSCRIPTION_GROUP_ID}",
         json=SUBSCRIPTION_GROUP_DOC,
         metadata={
             "group_id": SUBSCRIPTION_GROUP_ID,

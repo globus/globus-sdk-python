@@ -13,7 +13,7 @@ RESPONSES = ResponseSet(
     default=RegisteredResponse(
         service="transfer",
         method="GET",
-        path="/endpoint_manager/task_list",
+        path="/v0.10/endpoint_manager/task_list",
         metadata={
             "task_id": TASK_ID,
             "source": SRC_ENDPOINT_ID,
