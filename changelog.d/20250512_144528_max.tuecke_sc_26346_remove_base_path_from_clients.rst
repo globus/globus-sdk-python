@@ -1,0 +1,5 @@
+Removed
+~~~~~~~
+
+- SDK clients no longer define a ``base_path`` attribute which they prefix to paths.
+  Make sure to use the full path now when using client methods. (:pr:`1185`)
