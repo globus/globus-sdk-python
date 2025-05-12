@@ -47,12 +47,12 @@ def test_cannot_instantiate_plain_base_client():
 
 def test_can_instantiate_base_client_with_explicit_url():
     client = globus_sdk.BaseClient(base_url="https://example.org")
-    assert client.base_url == "https://example.org/"
+    assert client.base_url == "https://example.org"
 
 
 def test_can_instantiate_with_base_url_class_attribute():
     class MyCoolClient(globus_sdk.BaseClient):
-        base_url = "https://example.org"
+        base_url = "https://example.org/"
 
     client = MyCoolClient()
     assert client.base_url == "https://example.org/"
@@ -73,8 +73,8 @@ def test_base_url_resolution_precedence():
         service_name = "service-name"
 
     # All 3 are set
-    assert BothAttributesClient(base_url="init-base").base_url == "init-base/"
-    assert BothAttributesClient().base_url == "class-base/"
+    assert BothAttributesClient(base_url="init-base").base_url == "init-base"
+    assert BothAttributesClient().base_url == "class-base"
     assert OnlyServiceClient().base_url == "https://service-name.api.globus.org/"
 
 

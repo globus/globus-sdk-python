@@ -100,9 +100,6 @@ class BaseClient:
         # resolve the base_url for the client (see docstring for resolution precedence)
         self.base_url = self._resolve_base_url(base_url, self.environment)
 
-        # ensure base_url always has a trailing slash
-        self.base_url = utils.slash_join(self.base_url, "/")
-
         self.transport = self.transport_class(**(transport_params or {}))
         log.debug(f"initialized transport of type {type(self.transport)}")
 
