@@ -10,9 +10,8 @@ class TimersAPIError(GlobusAPIError):
     """
     Error class to represent error responses from Timers.
 
-    Has no particular additions to the base ``GlobusAPIError``, but implements a
-    different method for parsing error responses from Timers due to the differences
-    between various error formats used.
+    Implements a dedicated method for parsing error responses from Timers due
+    to the differences between various error formats used.
     """
 
     def _parse_undefined_error_format(self) -> bool:
@@ -48,42 +47,38 @@ class TimersAPIError(GlobusAPIError):
         # but before that fallback, try the two relevant branches
 
         # if 'error' is present, use it to populate the errors array
-        # extract 'code' from it
-        # and extract 'messages' from it
+        # extract 'code' and 'messages' from it
         if isinstance(self._dict_data.get("error"), dict):
             self.errors = [ErrorSubdocument(self._dict_data["error"])]
             self.code = self._extract_code_from_error_array(self.errors)
             self.messages = self._extract_messages_from_error_array(self.errors)
             return True
         elif _guards.is_list_of(self._dict_data.get("detail"), dict):
-            # FIXME:
-            # the 'code' is currently being set explicitly by the
-            # SDK in this case even though none was provided by
-            # the service
-            # in a future version of the SDK, the code should be `None`
-            self.code = "Validation Error"
-
             # collect the errors array from details
-            self.errors = [ErrorSubdocument(d) for d in self._dict_data["detail"]]
+            self.errors = [
+                ErrorSubdocument(d, message_fields=("msg",))
+                for d in self._dict_data["detail"]
+            ]
+            # extract a 'code' if there is one
+            self.code = self._extract_code_from_error_array(self.errors)
 
-            # drop error objects which don't have the relevant fields
-            # and then build custom 'messages' for Globus Timers errors
-            details = list(_details_from_errors(self.errors))
+            # build custom 'messages' for this case
             self.messages = [
-                f"{e['msg']}: {'.'.join(k for k in e['loc'])}" for e in details
+                f"{message}: {loc}"
+                for (message, loc) in _parse_detail_docs(self.errors)
             ]
             return True
         else:
             return super()._parse_undefined_error_format()
 
 
-def _details_from_errors(
+def _parse_detail_docs(
     errors: list[ErrorSubdocument],
-) -> t.Iterator[dict[str, t.Any]]:
+) -> t.Iterator[tuple[str, str]]:
     for d in errors:
-        if not isinstance(d.get("msg"), str):
+        if d.message is None:
             continue
         loc_list = d.get("loc")
         if not _guards.is_list_of(loc_list, str):
             continue
-        yield d.raw
+        yield (d.message, ".".join(loc_list))

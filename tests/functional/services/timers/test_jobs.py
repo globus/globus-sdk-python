@@ -80,7 +80,7 @@ def test_create_job_validation_error(client):
 
     err = excinfo.value
     assert err.http_status == 422
-    assert err.code == "Validation Error"
+    assert err.code is None
     assert err.messages == meta["expect_messages"]
 
 

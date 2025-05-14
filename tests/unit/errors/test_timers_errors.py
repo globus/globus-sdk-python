@@ -33,7 +33,7 @@ def test_timer_error_load_nested():
         http_status=422,
     )
 
-    assert err.code == "Validation Error"
+    assert err.code is None
     assert err.message == "field required: body.start; field required: body.end"
 
 
