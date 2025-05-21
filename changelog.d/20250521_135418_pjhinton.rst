@@ -1,0 +1,4 @@
+Added
+~~~~~
+
+- Globus Connect Server collection document classes now support attributes up to document version 1.15.0. (:pr:`NUMBER`)
