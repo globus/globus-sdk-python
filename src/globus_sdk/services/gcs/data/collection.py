@@ -35,6 +35,7 @@ from ._common import (
 # - strings, sorted alphabetically
 # - string lists, sorted alphabetically
 # - bools, sorted alphabetically
+# - ints, sorted alphabetically
 # - dicts and other types, sorted alphabetically
 #
 # This makes it possible to do side-by-side comparison of common arguments, to ensure
@@ -85,6 +86,9 @@ class CollectionDocument(utils.PayloadWrapper, abc.ABC):
         collection
     :param info_link: Link for more info about the collection
     :param organization: The organization which maintains the collection
+    :param restrict_transfers_to_high_assurance: Require that transfers of the
+        given type involve only collections that are high assurance.
+        Valid values: "inbound", "outbound", "all", None
     :param user_message: A message to display to users when interacting with this
         collection
     :param user_message_link: A link to additional messaging for users when interacting
@@ -101,11 +105,27 @@ class CollectionDocument(utils.PayloadWrapper, abc.ABC):
         collection
     :param public: If True, the collection will be visible to other Globus users
 
+    :param acl_expiration_mins: Length of time that guest collection permissions are
+        valid. Only settable on HA guest collections and HA mapped collections and
+        used by guest collections attached to it. When set on both the mapped and guest
+        collections, the lesser value is in effect.
+
+    :param associated_flow_policy: Policy describing Globus flows to run when the
+        collection is accessed. See
+        https://docs.globus.org/api/transfer/endpoints_and_collections/#associated_flow_policy
+        for expected shape.
+
     :param additional_fields: Additional data for inclusion in the collection document
     """
 
     DATATYPE_BASE: str = "collection"
     DATATYPE_VERSION_IMPLICATIONS: dict[str, tuple[int, int, int]] = {
+        "associated_flow_policy": (1, 15, 0),
+        "activity_notification_policy": (1, 14, 0),
+        "auto_delete_timeout": (1, 13, 0),
+        "skip_auto_delete": (1, 13, 0),
+        "restrict_transfers_to_high_assurance": (1, 12, 0),
+        "acl_expiration_mins": (1, 10, 0),
         "delete_protected": (1, 8, 0),
         "guest_auth_policy_id": (1, 6, 0),
         "disable_anonymous_writes": (1, 5, 0),
@@ -115,7 +135,6 @@ class CollectionDocument(utils.PayloadWrapper, abc.ABC):
         "enable_https": (1, 1, 0),
         "user_message": (1, 1, 0),
         "user_message_link": (1, 1, 0),
-        "activity_notification_policy": (1, 14, 0),
     }
     DATATYPE_VERSION_CALLBACKS: tuple[DatatypeCallback, ...] = (
         _user_message_length_callback,
@@ -137,6 +156,9 @@ class CollectionDocument(utils.PayloadWrapper, abc.ABC):
         identity_id: UUIDLike | None = None,
         info_link: str | None = None,
         organization: str | None = None,
+        restrict_transfers_to_high_assurance: (
+            t.Literal["inbound", "outbound", "all"] | None
+        ) = None,
         user_message: str | None = None,
         user_message_link: str | None = None,
         # str lists
@@ -147,6 +169,10 @@ class CollectionDocument(utils.PayloadWrapper, abc.ABC):
         force_encryption: bool | None = None,
         force_verify: bool | None = None,
         public: bool | None = None,
+        # ints
+        acl_expiration_mins: int | None = None,
+        # dicts
+        associated_flow_policy: dict[str, t.Any] | None = None,
         # additional fields
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
@@ -164,6 +190,7 @@ class CollectionDocument(utils.PayloadWrapper, abc.ABC):
             identity_id=identity_id,
             info_link=info_link,
             organization=organization,
+            restrict_transfers_to_high_assuranc=restrict_transfers_to_high_assurance,
             user_message=user_message,
             user_message_link=user_message_link,
         )
@@ -177,6 +204,8 @@ class CollectionDocument(utils.PayloadWrapper, abc.ABC):
             force_verify=force_verify,
             public=public,
         )
+        self._set_optints(acl_expiration_mins=acl_expiration_mins)
+        self._set_value("associated_flow_policy", associated_flow_policy)
         if additional_fields is not None:
             self.update(additional_fields)
 
@@ -222,6 +251,9 @@ class MappedCollectionDocument(CollectionDocument):
         attached to this Mapped Collection. This option is only usable on non
         high-assurance collections
 
+    :param auto_delete_timeout: Delete child guest collections that have not been
+        accessed within the specified timeout period in days.
+
     :param policies: Connector-specific collection policies
     :param sharing_restrict_paths: A PathRestrictions document
     """
@@ -247,6 +279,9 @@ class MappedCollectionDocument(CollectionDocument):
         identity_id: UUIDLike | None = None,
         info_link: str | None = None,
         organization: str | None = None,
+        restrict_transfers_to_high_assurance: (
+            t.Literal["inbound", "outbound", "all"] | None
+        ) = None,
         user_message: str | None = None,
         user_message_link: str | None = None,
         # str lists
@@ -257,6 +292,8 @@ class MappedCollectionDocument(CollectionDocument):
         force_encryption: bool | None = None,
         force_verify: bool | None = None,
         public: bool | None = None,
+        # ints
+        acl_expiration_mins: int | None = None,
         # > common args end <
         # > specific args start <
         # strs
@@ -271,7 +308,10 @@ class MappedCollectionDocument(CollectionDocument):
         delete_protected: bool | None = None,
         allow_guest_collections: bool | None = None,
         disable_anonymous_writes: bool | None = None,
+        # ints
+        auto_delete_timeout: int | None = None,
         # dicts
+        associated_flow_policy: dict[str, t.Any] | None = None,
         policies: CollectionPolicies | dict[str, t.Any] | None = None,
         # > specific args end <
         # additional fields
@@ -291,6 +331,7 @@ class MappedCollectionDocument(CollectionDocument):
             identity_id=identity_id,
             info_link=info_link,
             organization=organization,
+            restrict_transfers_to_high_assurance=restrict_transfers_to_high_assurance,
             user_message=user_message,
             user_message_link=user_message_link,
             # bools
@@ -299,13 +340,18 @@ class MappedCollectionDocument(CollectionDocument):
             force_encryption=force_encryption,
             force_verify=force_verify,
             public=public,
+            # ints
+            acl_expiration_mins=acl_expiration_mins,
             # str lists
             keywords=keywords,
+            # str dicts
+            associated_flow_policy=associated_flow_policy,
             # additional fields
             additional_fields=additional_fields,
         )
         self._set_optstrs(
             domain_name=domain_name,
+            restrict_transfers_to_high_assurance=restrict_transfers_to_high_assurance,
             guest_auth_policy_id=guest_auth_policy_id,
             storage_gateway_id=storage_gateway_id,
         )
@@ -317,6 +363,9 @@ class MappedCollectionDocument(CollectionDocument):
             delete_protected=delete_protected,
             allow_guest_collections=allow_guest_collections,
             disable_anonymous_writes=disable_anonymous_writes,
+        )
+        self._set_optints(
+            auto_delete_timeout=auto_delete_timeout,
         )
         self._set_value("sharing_restrict_paths", sharing_restrict_paths)
         self._set_value("policies", policies)
@@ -344,6 +393,10 @@ class GuestCollectionDocument(CollectionDocument):
     :param user_credential_id: The ID of the User Credential which is used to access
         data on this collection. This credential must be owned by the collection’s
         ``identity_id``.
+
+    :param skip_auto_delete: Indicates whether the collection is exempt from its
+        parent mapped collection's automatic deletion policy.
+
     :param activity_notification_policy: Specification for when a notification email
         should be sent to a guest collection ``administrator``, ``activity_manager``,
         and ``activity_monitor`` roles when a transfer task reaches completion.
@@ -370,6 +423,9 @@ class GuestCollectionDocument(CollectionDocument):
         identity_id: UUIDLike | None = None,
         info_link: str | None = None,
         organization: str | None = None,
+        restrict_transfers_to_high_assurance: (
+            t.Literal["inbound", "outbound", "all"] | None
+        ) = None,
         user_message: str | None = None,
         user_message_link: str | None = None,
         # str lists
@@ -380,10 +436,15 @@ class GuestCollectionDocument(CollectionDocument):
         force_encryption: bool | None = None,
         force_verify: bool | None = None,
         public: bool | None = None,
+        # ints
+        acl_expiration_mins: int | None = None,
+        # dicts
+        associated_flow_policy: dict[str, t.Any] | None = None,
         # > common args end <
         # > specific args start <
         mapped_collection_id: UUIDLike | None = None,
         user_credential_id: UUIDLike | None = None,
+        skip_auto_delete: bool | None = None,
         activity_notification_policy: dict[str, list[str]] | None = None,
         # > specific args end <
         # additional fields
@@ -403,6 +464,7 @@ class GuestCollectionDocument(CollectionDocument):
             identity_id=identity_id,
             info_link=info_link,
             organization=organization,
+            restrict_transfers_to_high_assurance=restrict_transfers_to_high_assurance,
             user_message=user_message,
             user_message_link=user_message_link,
             # bools
@@ -411,14 +473,21 @@ class GuestCollectionDocument(CollectionDocument):
             force_encryption=force_encryption,
             force_verify=force_verify,
             public=public,
+            # ints
+            acl_expiration_mins=acl_expiration_mins,
             # str lists
             keywords=keywords,
+            # dicts
+            associated_flow_policy=associated_flow_policy,
             # additional fields
             additional_fields=additional_fields,
         )
         self._set_optstrs(
             mapped_collection_id=mapped_collection_id,
             user_credential_id=user_credential_id,
+        )
+        self._set_optbools(
+            skip_auto_delete=skip_auto_delete,
         )
         self._set_value("activity_notification_policy", activity_notification_policy)
 
