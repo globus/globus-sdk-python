@@ -7,6 +7,7 @@ from globus_sdk import client, paging, response, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.exc.warnings import warn_deprecated
 from globus_sdk.scopes import Scope, SearchScopes
+from globus_sdk.utils import MISSING, MissingType
 
 from .data import SearchQuery, SearchScrollQuery
 from .errors import SearchAPIError
@@ -153,7 +154,7 @@ class SearchClient(client.BaseClient):
         self,
         index_id: UUIDLike,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Get descriptive data about a Search index, including its title and description
@@ -186,7 +187,7 @@ class SearchClient(client.BaseClient):
     def index_list(
         self,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.IterableResponse:
         """
         Get a list of indices on which the caller has permissions.
@@ -237,7 +238,7 @@ class SearchClient(client.BaseClient):
         offset: int = 0,
         limit: int = 10,
         advanced: bool = False,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Execute a simple Search Query, described by the query string ``q``.
@@ -278,7 +279,7 @@ class SearchClient(client.BaseClient):
 
                 .. expandtestfixture:: search.search
         """  # noqa: E501
-        if query_params is None:
+        if isinstance(query_params, MissingType):
             query_params = {}
         query_params.update(
             {
@@ -304,8 +305,8 @@ class SearchClient(client.BaseClient):
         index_id: UUIDLike,
         data: dict[str, t.Any] | SearchQuery,
         *,
-        offset: int | None = None,
-        limit: int | None = None,
+        offset: int | MissingType = MISSING,
+        limit: int | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Execute a complex Search Query, using a query document to express filters,
@@ -360,9 +361,9 @@ class SearchClient(client.BaseClient):
         """
         log.debug(f"SearchClient.post_search({index_id}, ...)")
         add_kwargs = {}
-        if offset is not None:
+        if not isinstance(offset, MissingType):
             add_kwargs["offset"] = offset
-        if limit is not None:
+        if not isinstance(limit, MissingType):
             add_kwargs["limit"] = limit
         if add_kwargs:
             data = {**data, **add_kwargs}
@@ -374,7 +375,7 @@ class SearchClient(client.BaseClient):
         index_id: UUIDLike,
         data: dict[str, t.Any] | SearchScrollQuery,
         *,
-        marker: str | None = None,
+        marker: str | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Scroll all data in a Search index. The paginated version of this API should
@@ -412,7 +413,7 @@ class SearchClient(client.BaseClient):
         """
         log.debug(f"SearchClient.scroll({index_id}, ...)")
         add_kwargs = {}
-        if marker is not None:
+        if not isinstance(marker, MissingType):
             add_kwargs["marker"] = marker
         if add_kwargs:
             data = {**data, **add_kwargs}
@@ -536,7 +537,7 @@ class SearchClient(client.BaseClient):
         self,
         index_id: UUIDLike,
         subjects: t.Iterable[str],
-        additional_params: dict[str, t.Any] | None = None,
+        additional_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Delete data in a Search index as an asynchronous task, deleting multiple
@@ -580,7 +581,7 @@ class SearchClient(client.BaseClient):
         # ensure that a single string is *not* treated as an iterable of strings,
         # which is usually not intentional
         body = {"subjects": list(utils.safe_strseq_iter(subjects))}
-        if additional_params:
+        if not isinstance(additional_params, MissingType):
             body.update(additional_params)
         return self.post(f"/v1/index/{index_id}/batch_delete_by_subject", data=body)
 
@@ -593,7 +594,7 @@ class SearchClient(client.BaseClient):
         index_id: UUIDLike,
         subject: str,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Fetch exactly one Subject document from Search, containing one or more Entries.
@@ -621,7 +622,7 @@ class SearchClient(client.BaseClient):
                 .. extdoclink:: Get By Subject
                     :ref: search/reference/get_subject/
         """
-        if query_params is None:
+        if isinstance(query_params, MissingType):
             query_params = {}
         query_params["subject"] = subject
         log.debug(f"SearchClient.get_subject({index_id}, {subject}, ...)")
@@ -632,7 +633,7 @@ class SearchClient(client.BaseClient):
         index_id: UUIDLike,
         subject: str,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Delete exactly one Subject document from Search, containing one or more Entries,
@@ -664,7 +665,7 @@ class SearchClient(client.BaseClient):
                 .. extdoclink:: Delete By Subject
                     :ref: search/reference/delete_subject/
         """
-        if query_params is None:
+        if isinstance(query_params, MissingType):
             query_params = {}
         query_params["subject"] = subject
 
@@ -680,8 +681,8 @@ class SearchClient(client.BaseClient):
         index_id: UUIDLike,
         subject: str,
         *,
-        entry_id: str | None = None,
-        query_params: dict[str, t.Any] | None = None,
+        entry_id: str | MissingType = MISSING,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Fetch exactly one Entry document from Search, identified by the combination of
@@ -720,10 +721,10 @@ class SearchClient(client.BaseClient):
                 .. extdoclink:: Get Entry
                     :ref: search/reference/get_entry/
         """  # noqa: E501
-        if query_params is None:
+        if isinstance(query_params, MissingType):
             query_params = {}
         query_params["subject"] = subject
-        if entry_id is not None:
+        if not isinstance(entry_id, MissingType):
             query_params["entry_id"] = entry_id
 
         log.debug(
@@ -849,8 +850,8 @@ class SearchClient(client.BaseClient):
         index_id: UUIDLike,
         subject: str,
         *,
-        entry_id: str | None = None,
-        query_params: dict[str, t.Any] | None = None,
+        entry_id: str | MissingType = MISSING,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Delete exactly one Entry document in Search as an asynchronous task.
@@ -889,10 +890,10 @@ class SearchClient(client.BaseClient):
                 .. extdoclink:: Delete Entry
                     :ref: search/reference/delete_entry/
         """  # noqa: E501
-        if query_params is None:
+        if isinstance(query_params, MissingType):
             query_params = {}
         query_params["subject"] = subject
-        if entry_id is not None:
+        if not isinstance(entry_id, MissingType):
             query_params["entry_id"] = entry_id
         log.debug(
             "SearchClient.delete_entry({}, {}, {}, ...)".format(
@@ -909,7 +910,7 @@ class SearchClient(client.BaseClient):
         self,
         task_id: UUIDLike,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Fetch a Task document by ID, getting task details and status.
@@ -942,7 +943,7 @@ class SearchClient(client.BaseClient):
         self,
         index_id: UUIDLike,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Fetch a list of recent Task documents for an index, getting task details and
@@ -981,7 +982,7 @@ class SearchClient(client.BaseClient):
         index_id: UUIDLike,
         data: dict[str, t.Any],
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Create a new role on an index. You must already have the ``owner`` or
@@ -1024,7 +1025,7 @@ class SearchClient(client.BaseClient):
         self,
         index_id: UUIDLike,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         List all roles on an index. You must have the ``owner`` or ``admin``
@@ -1050,7 +1051,7 @@ class SearchClient(client.BaseClient):
         index_id: UUIDLike,
         role_id: str,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Delete a role from an index. You must have the ``owner`` or ``admin``

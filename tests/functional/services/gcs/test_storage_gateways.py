@@ -4,11 +4,12 @@ import pytest
 
 import globus_sdk
 from globus_sdk._testing import get_last_request, load_response
+from globus_sdk.utils import MISSING
 
 
 @pytest.mark.parametrize(
     "include_param",
-    [None, "private_policies", "private_policies,foo", ("private_policies", "foo")],
+    [MISSING, "private_policies", "private_policies,foo", ("private_policies", "foo")],
 )
 def test_get_storage_gateway_list(client, include_param):
     meta = load_response(client.get_storage_gateway_list).metadata
@@ -28,7 +29,7 @@ def test_get_storage_gateway_list(client, include_param):
     req = get_last_request()
     assert req.body is None
     parsed_qs = urllib.parse.parse_qs(urllib.parse.urlparse(req.url).query)
-    if include_param is None:
+    if include_param is MISSING:
         assert parsed_qs == {}
     elif isinstance(include_param, str):
         assert parsed_qs == {"include": [include_param]}
@@ -65,7 +66,7 @@ def test_create_storage_gateway_validation_error(client):
 
 @pytest.mark.parametrize(
     "include_param",
-    [None, "private_policies", "private_policies,foo", ("private_policies", "foo")],
+    [MISSING, "private_policies", "private_policies,foo", ("private_policies", "foo")],
 )
 def test_get_storage_gateway(client, include_param):
     meta = load_response(client.get_storage_gateway).metadata
@@ -80,7 +81,7 @@ def test_get_storage_gateway(client, include_param):
     req = get_last_request()
     assert req.body is None
     parsed_qs = urllib.parse.parse_qs(urllib.parse.urlparse(req.url).query)
-    if include_param is None:
+    if include_param is MISSING:
         assert parsed_qs == {}
     elif isinstance(include_param, str):
         assert parsed_qs == {"include": [include_param]}

@@ -12,6 +12,7 @@ from globus_sdk.scopes import (
     TimersScopes,
     TransferScopes,
 )
+from globus_sdk.utils import MISSING, MissingType
 
 from .data import TimerJob, TransferTimer
 from .errors import TimersAPIError
@@ -102,7 +103,7 @@ class TimersClient(client.BaseClient):
         return self
 
     def list_jobs(
-        self, *, query_params: dict[str, t.Any] | None = None
+        self, *, query_params: dict[str, t.Any] | MissingType = MISSING
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /jobs/``
@@ -115,13 +116,15 @@ class TimersClient(client.BaseClient):
         >>> jobs = timer_client.list_jobs()
         """
         log.debug(f"TimersClient.list_jobs({query_params})")
+        if query_params is MISSING:
+            query_params = {}
         return self.get("/jobs/", query_params=query_params)
 
     def get_job(
         self,
         job_id: UUIDLike,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         ``GET /jobs/<job_id>``
@@ -136,6 +139,8 @@ class TimersClient(client.BaseClient):
         >>> assert job["job_id"] == job_id
         """
         log.debug(f"TimersClient.get_job({job_id})")
+        if query_params is MISSING:
+            query_params = {}
         return self.get(f"/jobs/{job_id}", query_params=query_params)
 
     def create_timer(
@@ -266,7 +271,7 @@ class TimersClient(client.BaseClient):
         self,
         job_id: UUIDLike,
         *,
-        update_credentials: bool | None = None,
+        update_credentials: bool | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Resume an inactive timer job, optionally replacing credentials to resolve
@@ -289,6 +294,6 @@ class TimersClient(client.BaseClient):
         """
         log.debug(f"TimersClient.resume_job({job_id})")
         data = {}
-        if update_credentials is not None:
+        if not isinstance(update_credentials, MissingType):
             data["update_credentials"] = update_credentials
         return self.post(f"/jobs/{job_id}/resume", data=data)

@@ -3,6 +3,7 @@ from __future__ import annotations
 import typing as t
 
 from globus_sdk import exc, utils
+from globus_sdk.utils import MISSING, MissingType
 
 # workaround for absence of Self type
 # for the workaround and some background, see:
@@ -60,7 +61,7 @@ class SearchQueryBase(utils.PayloadWrapper):
         *,
         # pylint: disable=redefined-builtin
         type: str = "match_all",
-        additional_fields: dict[str, t.Any] | None = None,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> SearchQueryT:
         """
         Add a filter subdocument to the query.
@@ -75,8 +76,9 @@ class SearchQueryBase(utils.PayloadWrapper):
             "field_name": field_name,
             "values": values,
             "type": type,
-            **(additional_fields or {}),
         }
+        if not isinstance(additional_fields, MissingType):
+            new_filter.update(additional_fields)
         self["filters"].append(new_filter)
         return self
 
@@ -107,24 +109,24 @@ class SearchQuery(SearchQueryBase):
 
     def __init__(
         self,
-        q: str | None = None,
+        q: str | MissingType = MISSING,
         *,
-        limit: int | None = None,
-        offset: int | None = None,
-        advanced: bool | None = None,
-        additional_fields: dict[str, t.Any] | None = None,
+        limit: int | MissingType = MISSING,
+        offset: int | MissingType = MISSING,
+        advanced: bool | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> None:
         super().__init__()
         exc.warn_deprecated("'SearchQuery' is deprecated. Use 'SearchQueryV1' instead.")
-        if q is not None:
+        if not isinstance(q, MissingType):
             self["q"] = q
-        if limit is not None:
+        if not isinstance(limit, MissingType):
             self["limit"] = limit
-        if offset is not None:
+        if not isinstance(offset, MissingType):
             self["offset"] = offset
-        if advanced is not None:
+        if not isinstance(advanced, MissingType):
             self["advanced"] = advanced
-        if additional_fields is not None:
+        if not isinstance(additional_fields, MissingType):
             self.update(additional_fields)
 
     def set_offset(self, offset: int) -> SearchQuery:
@@ -143,10 +145,10 @@ class SearchQuery(SearchQueryBase):
         *,
         # pylint: disable=redefined-builtin
         type: str = "terms",
-        size: int | None = None,
-        date_interval: str | None = None,
-        histogram_range: tuple[t.Any, t.Any] | None = None,
-        additional_fields: dict[str, t.Any] | None = None,
+        size: int | MissingType = MISSING,
+        date_interval: str | MissingType = MISSING,
+        histogram_range: tuple[t.Any, t.Any] | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> SearchQuery:
         """
         Add a facet subdocument to the query.
@@ -164,13 +166,14 @@ class SearchQuery(SearchQueryBase):
             "name": name,
             "field_name": field_name,
             "type": type,
-            **(additional_fields or {}),
         }
-        if size is not None:
+        if not isinstance(additional_fields, MissingType):
+            facet.update(additional_fields)
+        if not isinstance(size, MissingType):
             facet["size"] = size
-        if date_interval is not None:
+        if not isinstance(date_interval, MissingType):
             facet["date_interval"] = date_interval
-        if histogram_range is not None:
+        if not isinstance(histogram_range, MissingType):
             low, high = histogram_range
             facet["histogram_range"] = {"low": low, "high": high}
         self["facets"].append(facet)
@@ -181,7 +184,7 @@ class SearchQuery(SearchQueryBase):
         field_name: str,
         factor: str | int | float,
         *,
-        additional_fields: dict[str, t.Any] | None = None,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> SearchQuery:
         """
         Add a boost subdocument to the query.
@@ -195,17 +198,19 @@ class SearchQuery(SearchQueryBase):
         boost = {
             "field_name": field_name,
             "factor": factor,
-            **(additional_fields or {}),
         }
+        if not isinstance(additional_fields, MissingType):
+            boost.update(additional_fields)
         self["boosts"].append(boost)
+
         return self
 
     def add_sort(
         self,
         field_name: str,
         *,
-        order: str | None = None,
-        additional_fields: dict[str, t.Any] | None = None,
+        order: str | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> SearchQuery:
         """
         Add a sort subdocument to the query.
@@ -215,8 +220,10 @@ class SearchQuery(SearchQueryBase):
         :param additional_fields: additional data to include in the sort document
         """
         self["sort"] = self.get("sort", [])
-        sort = {"field_name": field_name, **(additional_fields or {})}
-        if order is not None:
+        sort = {"field_name": field_name}
+        if not isinstance(additional_fields, MissingType):
+            sort.update(additional_fields)
+        if not isinstance(order, MissingType):
             sort["order"] = order
         self["sort"].append(sort)
         return self
@@ -245,16 +252,16 @@ class SearchQueryV1(utils.PayloadWrapper):
     def __init__(
         self,
         *,
-        q: str | utils.MissingType = utils.MISSING,
-        limit: int | utils.MissingType = utils.MISSING,
-        offset: int | utils.MissingType = utils.MISSING,
-        advanced: bool | utils.MissingType = utils.MISSING,
-        filters: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
-        facets: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
-        post_facet_filters: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
-        boosts: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
-        sort: list[dict[str, t.Any]] | utils.MissingType = utils.MISSING,
-        additional_fields: dict[str, t.Any] | utils.MissingType = utils.MISSING,
+        q: str | MissingType = MISSING,
+        limit: int | MissingType = MISSING,
+        offset: int | MissingType = MISSING,
+        advanced: bool | MissingType = MISSING,
+        filters: list[dict[str, t.Any]] | MissingType = MISSING,
+        facets: list[dict[str, t.Any]] | MissingType = MISSING,
+        post_facet_filters: list[dict[str, t.Any]] | MissingType = MISSING,
+        boosts: list[dict[str, t.Any]] | MissingType = MISSING,
+        sort: list[dict[str, t.Any]] | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> None:
         super().__init__()
         self["@version"] = "query#1.0.0"
@@ -269,7 +276,7 @@ class SearchQueryV1(utils.PayloadWrapper):
         self["boosts"] = boosts
         self["sort"] = sort
 
-        if not isinstance(additional_fields, utils.MissingType):
+        if not isinstance(additional_fields, MissingType):
             self.update(additional_fields)
 
 
@@ -295,23 +302,23 @@ class SearchScrollQuery(SearchQueryBase):
 
     def __init__(
         self,
-        q: str | None = None,
+        q: str | MissingType = MISSING,
         *,
-        limit: int | None = None,
-        advanced: bool | None = None,
-        marker: str | None = None,
-        additional_fields: dict[str, t.Any] | None = None,
+        limit: int | MissingType = MISSING,
+        advanced: bool | MissingType = MISSING,
+        marker: str | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> None:
         super().__init__()
-        if q is not None:
+        if not isinstance(q, MissingType):
             self["q"] = q
-        if limit is not None:
+        if not isinstance(limit, MissingType):
             self["limit"] = limit
-        if advanced is not None:
+        if not isinstance(advanced, MissingType):
             self["advanced"] = advanced
-        if marker is not None:
+        if not isinstance(marker, MissingType):
             self["marker"] = marker
-        if additional_fields is not None:
+        if not isinstance(additional_fields, MissingType):
             self.update(additional_fields)
 
     def set_marker(self, marker: str) -> SearchScrollQuery:

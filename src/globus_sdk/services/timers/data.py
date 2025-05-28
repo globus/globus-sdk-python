@@ -239,10 +239,10 @@ class TimerJob(PayloadWrapper):
         start: dt.datetime | str,
         interval: dt.timedelta | int | None,
         *,
-        name: str | None = None,
-        stop_after: dt.datetime | None = None,
-        stop_after_n: int | None = None,
-        scope: str | None = None,
+        name: str | MissingType = MISSING,
+        stop_after: dt.datetime | MissingType = MISSING,
+        stop_after_n: int | MissingType = MISSING,
+        scope: str | MissingType = MISSING,
     ) -> None:
         super().__init__()
         self["callback_url"] = callback_url
@@ -255,13 +255,13 @@ class TimerJob(PayloadWrapper):
             self["interval"] = int(interval.total_seconds())
         else:
             self["interval"] = interval
-        if name is not None:
+        if not isinstance(name, MissingType):
             self["name"] = name
-        if stop_after is not None:
+        if not isinstance(stop_after, MissingType):
             self["stop_after"] = stop_after.isoformat()
-        if stop_after_n is not None:
+        if not isinstance(stop_after_n, MissingType):
             self["stop_after_n"] = stop_after_n
-        if scope is not None:
+        if not isinstance(scope, MissingType):
             self["scope"] = scope
 
     @classmethod
@@ -271,10 +271,10 @@ class TimerJob(PayloadWrapper):
         start: dt.datetime | str,
         interval: dt.timedelta | int | None,
         *,
-        name: str | None = None,
-        stop_after: dt.datetime | None = None,
-        stop_after_n: int | None = None,
-        scope: str | None = None,
+        name: str | MissingType = MISSING,
+        stop_after: dt.datetime | MissingType = MISSING,
+        stop_after_n: int | MissingType = MISSING,
+        scope: str | MissingType = MISSING,
         environment: str | None = None,
     ) -> TimerJob:
         r"""

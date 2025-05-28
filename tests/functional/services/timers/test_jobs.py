@@ -5,6 +5,7 @@ import pytest
 
 from globus_sdk import TimerJob, TimersAPIError, TransferData, config, exc, utils
 from globus_sdk._testing import get_last_request, load_response
+from globus_sdk.utils import MISSING
 from tests.common import GO_EP1_ID, GO_EP2_ID
 
 
@@ -106,12 +107,12 @@ def test_pause_job(client):
     assert "Successfully paused" in response.data["message"]
 
 
-@pytest.mark.parametrize("update_credentials", [True, False, None])
+@pytest.mark.parametrize("update_credentials", [True, False, MISSING])
 def test_resume_job(update_credentials, client):
     meta = load_response(client.resume_job).metadata
 
     kwargs = {}
-    if update_credentials is not None:
+    if update_credentials is not MISSING:
         kwargs["update_credentials"] = update_credentials
 
     response = client.resume_job(meta["job_id"], **kwargs)

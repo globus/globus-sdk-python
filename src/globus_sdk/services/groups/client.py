@@ -5,6 +5,7 @@ import typing as t
 from globus_sdk import client, response, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.scopes import GroupsScopes, Scope
+from globus_sdk.utils import MISSING, MissingType
 
 from .data import BatchMembershipActions, GroupPolicies
 from .errors import GroupsAPIError
@@ -33,7 +34,7 @@ class GroupsClient(client.BaseClient):
         return [Scope(GroupsScopes.view_my_groups_and_memberships)]
 
     def get_my_groups(
-        self, *, query_params: dict[str, t.Any] | None = None
+        self, *, query_params: dict[str, t.Any] | MissingType = MISSING
     ) -> response.ArrayResponse:
         """
         Return a list of groups your identity belongs to.
@@ -58,8 +59,8 @@ class GroupsClient(client.BaseClient):
         self,
         group_id: UUIDLike,
         *,
-        include: None | str | t.Iterable[str] = None,
-        query_params: dict[str, t.Any] | None = None,
+        include: str | t.Iterable[str] | MissingType = MISSING,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Get details about a specific group
@@ -80,9 +81,9 @@ class GroupsClient(client.BaseClient):
                     :service: groups
                     :ref: get_group_v2_groups__group_id__get
         """
-        if query_params is None:
+        if isinstance(query_params, MissingType):
             query_params = {}
-        if include is not None:
+        if not isinstance(include, MissingType):
             query_params["include"] = ",".join(utils.safe_strseq_iter(include))
         return self.get(f"/v2/groups/{group_id}", query_params=query_params)
 
@@ -123,7 +124,7 @@ class GroupsClient(client.BaseClient):
         self,
         group_id: UUIDLike,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Delete a group.
@@ -147,7 +148,7 @@ class GroupsClient(client.BaseClient):
         self,
         data: dict[str, t.Any],
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Create a group.
@@ -172,7 +173,7 @@ class GroupsClient(client.BaseClient):
         group_id: UUIDLike,
         data: dict[str, t.Any],
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Update a given group.
@@ -197,7 +198,7 @@ class GroupsClient(client.BaseClient):
         self,
         group_id: UUIDLike,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Get policies for the given group
@@ -222,7 +223,7 @@ class GroupsClient(client.BaseClient):
         group_id: UUIDLike,
         data: dict[str, t.Any] | GroupPolicies,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Set policies for the group.
@@ -246,7 +247,7 @@ class GroupsClient(client.BaseClient):
         )
 
     def get_identity_preferences(
-        self, *, query_params: dict[str, t.Any] | None = None
+        self, *, query_params: dict[str, t.Any] | MissingType = MISSING
     ) -> response.GlobusHTTPResponse:
         """
         Get identity preferences.  Currently this only includes whether the
@@ -270,7 +271,7 @@ class GroupsClient(client.BaseClient):
         self,
         data: dict[str, t.Any],
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Set identity preferences.  Currently this only includes whether the
@@ -302,7 +303,7 @@ class GroupsClient(client.BaseClient):
         self,
         group_id: UUIDLike,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Get membership fields for your identities.
@@ -329,7 +330,7 @@ class GroupsClient(client.BaseClient):
         group_id: UUIDLike,
         data: dict[t.Any, str],
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Set membership fields for your identities.
@@ -359,7 +360,7 @@ class GroupsClient(client.BaseClient):
         group_id: UUIDLike,
         actions: dict[str, t.Any] | BatchMembershipActions,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Execute a batch of actions against several group memberships.

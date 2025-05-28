@@ -131,9 +131,11 @@ def safe_strseq_iter(
             yield str(x)
 
 
-def commajoin(val: UUIDLike | t.Iterable[UUIDLike]) -> str:
+def commajoin(val: UUIDLike | t.Iterable[UUIDLike] | None) -> str | None:
     # note that this explicit handling of Iterable allows for string-like objects to be
     # passed to this function and be stringified by the `str()` call
+    if val is None:
+        return None
     if isinstance(val, collections.abc.Iterable):
         return ",".join(safe_strseq_iter(val))
     return str(val)
@@ -181,7 +183,7 @@ class PayloadWrapper(PayloadWrapperBase):
         :param callback: An optional callback to apply to the value immediately
             before it is set.
         """
-        if val is not None:
+        if val is not None and val is not MISSING:
             self[key] = callback(val) if callback else val
 
     def _set_optstrs(self, **kwargs: t.Any) -> None:
@@ -193,7 +195,9 @@ class PayloadWrapper(PayloadWrapperBase):
         for k, v in kwargs.items():
             self._set_value(k, v, callback=str)
 
-    def _set_optstrlists(self, **kwargs: t.Iterable[t.Any] | None) -> None:
+    def _set_optstrlists(
+        self, **kwargs: t.Iterable[t.Any] | None | MissingType
+    ) -> None:
         """
         Convenience function for setting a collection of omittable string list values.
 
@@ -202,7 +206,7 @@ class PayloadWrapper(PayloadWrapperBase):
         for k, v in kwargs.items():
             self._set_value(k, v, callback=lambda x: list(safe_strseq_iter(x)))
 
-    def _set_optbools(self, **kwargs: bool | None) -> None:
+    def _set_optbools(self, **kwargs: bool | None | MissingType) -> None:
         """
         Convenience function for setting a collection of omittable bool values.
 

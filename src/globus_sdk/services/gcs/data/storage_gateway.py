@@ -5,6 +5,7 @@ import typing as t
 
 from globus_sdk import utils
 from globus_sdk._types import UUIDLike
+from globus_sdk.utils import MISSING, MissingType
 
 from ._common import DatatypeCallback, ensure_datatype
 
@@ -56,19 +57,19 @@ class StorageGatewayDocument(utils.PayloadWrapper):
 
     def __init__(
         self,
-        DATA_TYPE: str | None = None,
-        display_name: str | None = None,
-        connector_id: UUIDLike | None = None,
-        root: str | None = None,
-        identity_mappings: None | t.Iterable[dict[str, t.Any]] = None,
-        policies: StorageGatewayPolicies | dict[str, t.Any] | None = None,
-        allowed_domains: t.Iterable[str] | None = None,
-        high_assurance: bool | None = None,
-        require_mfa: bool | None = None,
-        authentication_timeout_mins: int | None = None,
-        users_allow: t.Iterable[str] | None = None,
-        users_deny: t.Iterable[str] | None = None,
-        additional_fields: dict[str, t.Any] | None = None,
+        DATA_TYPE: str | MissingType = MISSING,
+        display_name: str | MissingType = MISSING,
+        connector_id: UUIDLike | MissingType = MISSING,
+        root: str | MissingType = MISSING,
+        identity_mappings: t.Iterable[dict[str, t.Any]] | MissingType = MISSING,
+        policies: StorageGatewayPolicies | dict[str, t.Any] | MissingType = MISSING,
+        allowed_domains: t.Iterable[str] | MissingType = MISSING,
+        high_assurance: bool | MissingType = MISSING,
+        require_mfa: bool | MissingType = MISSING,
+        authentication_timeout_mins: int | MissingType = MISSING,
+        users_allow: t.Iterable[str] | MissingType = MISSING,
+        users_deny: t.Iterable[str] | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> None:
         super().__init__()
         self._set_optstrs(
@@ -86,7 +87,7 @@ class StorageGatewayDocument(utils.PayloadWrapper):
         self._set_optints(authentication_timeout_mins=authentication_timeout_mins)
         self._set_value("identity_mappings", identity_mappings, callback=list)
         self._set_value("policies", policies)
-        if additional_fields is not None:
+        if not isinstance(additional_fields, MissingType):
             self.update(additional_fields)
         ensure_datatype(self)
 
@@ -118,14 +119,14 @@ class POSIXStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "posix_storage_policies#1.0.0",
-        groups_allow: t.Iterable[str] | None = None,
-        groups_deny: t.Iterable[str] | None = None,
-        additional_fields: dict[str, t.Any] | None = None,
+        groups_allow: t.Iterable[str] | MissingType = MISSING,
+        groups_deny: t.Iterable[str] | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> None:
         super().__init__()
         self._set_optstrs(DATA_TYPE=DATA_TYPE)
         self._set_optstrlists(groups_allow=groups_allow, groups_deny=groups_deny)
-        if additional_fields is not None:
+        if not isinstance(additional_fields, MissingType):
             self.update(additional_fields)
 
 
@@ -149,11 +150,11 @@ class POSIXStagingStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "posix_staging_storage_policies#1.0.0",
-        groups_allow: t.Iterable[str] | None = None,
-        groups_deny: t.Iterable[str] | None = None,
-        stage_app: str | None = None,
-        environment: t.Iterable[dict[str, str]] | None = None,
-        additional_fields: dict[str, t.Any] | None = None,
+        groups_allow: t.Iterable[str] | MissingType = MISSING,
+        groups_deny: t.Iterable[str] | MissingType = MISSING,
+        stage_app: str | MissingType = MISSING,
+        environment: t.Iterable[dict[str, str]] | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> None:
         super().__init__()
         self._set_optstrs(DATA_TYPE=DATA_TYPE, stage_app=stage_app)
@@ -163,7 +164,7 @@ class POSIXStagingStoragePolicies(StorageGatewayPolicies):
             environment,
             callback=lambda env_iter: [{**e} for e in env_iter],
         )
-        if additional_fields is not None:
+        if not isinstance(additional_fields, MissingType):
             self.update(additional_fields)
 
 
@@ -185,9 +186,9 @@ class BlackPearlStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "blackpearl_storage_policies#1.0.0",
-        s3_endpoint: str | None = None,
-        bp_access_id_file: str | None = None,
-        additional_fields: dict[str, t.Any] | None = None,
+        s3_endpoint: str | MissingType = MISSING,
+        bp_access_id_file: str | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> None:
         super().__init__()
         self._set_optstrs(
@@ -195,7 +196,7 @@ class BlackPearlStoragePolicies(StorageGatewayPolicies):
             s3_endpoint=s3_endpoint,
             bp_access_id_file=bp_access_id_file,
         )
-        if additional_fields is not None:
+        if not isinstance(additional_fields, MissingType):
             self.update(additional_fields)
 
 
@@ -216,14 +217,14 @@ class BoxStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "box_storage_policies#1.0.0",
-        enterpriseID: str | None = None,
-        boxAppSettings: dict[str, t.Any] | None = None,
-        additional_fields: dict[str, t.Any] | None = None,
+        enterpriseID: str | MissingType = MISSING,
+        boxAppSettings: dict[str, t.Any] | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> None:
         super().__init__()
         self._set_optstrs(DATA_TYPE=DATA_TYPE, enterpriseID=enterpriseID)
         self._set_value("boxAppSettings", boxAppSettings)
-        if additional_fields is not None:
+        if not isinstance(additional_fields, MissingType):
             self.update(additional_fields)
 
 
@@ -247,11 +248,11 @@ class CephStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "ceph_storage_policies#1.0.0",
-        s3_endpoint: str | None = None,
-        s3_buckets: t.Iterable[str] | None = None,
-        ceph_admin_key_id: str | None = None,
-        ceph_admin_secret_key: str | None = None,
-        additional_fields: dict[str, t.Any] | None = None,
+        s3_endpoint: str | MissingType = MISSING,
+        s3_buckets: t.Iterable[str] | MissingType = MISSING,
+        ceph_admin_key_id: str | MissingType = MISSING,
+        ceph_admin_secret_key: str | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> None:
         super().__init__()
         self._set_optstrs(
@@ -261,7 +262,7 @@ class CephStoragePolicies(StorageGatewayPolicies):
             ceph_admin_secret_key=ceph_admin_secret_key,
         )
         self._set_optstrlists(s3_buckets=s3_buckets)
-        if additional_fields is not None:
+        if not isinstance(additional_fields, MissingType):
             self.update(additional_fields)
 
 
@@ -283,15 +284,15 @@ class GoogleDriveStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "google_drive_storage_policies#1.0.0",
-        client_id: str | None = None,
-        secret: str | None = None,
-        user_api_rate_quota: int | None = None,
-        additional_fields: dict[str, t.Any] | None = None,
+        client_id: str | MissingType = MISSING,
+        secret: str | MissingType = MISSING,
+        user_api_rate_quota: int | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> None:
         super().__init__()
         self._set_optstrs(DATA_TYPE=DATA_TYPE, client_id=client_id, secret=secret)
         self._set_optints(user_api_rate_quota=user_api_rate_quota)
-        if additional_fields is not None:
+        if not isinstance(additional_fields, MissingType):
             self.update(additional_fields)
 
 
@@ -323,18 +324,18 @@ class GoogleCloudStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "google_cloud_storage_policies#1.0.0",
-        client_id: str | None = None,
-        secret: str | None = None,
-        service_account_key: dict[str, t.Any] | None = None,
-        buckets: t.Iterable[str] | None = None,
-        projects: t.Iterable[str] | None = None,
-        additional_fields: dict[str, t.Any] | None = None,
+        client_id: str | MissingType = MISSING,
+        secret: str | MissingType = MISSING,
+        service_account_key: dict[str, t.Any] | MissingType = MISSING,
+        buckets: t.Iterable[str] | MissingType = MISSING,
+        projects: t.Iterable[str] | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> None:
         super().__init__()
         self._set_optstrs(DATA_TYPE=DATA_TYPE, client_id=client_id, secret=secret)
         self._set_optstrlists(buckets=buckets, projects=projects)
         self._set_value("service_account_key", service_account_key)
-        if additional_fields is not None:
+        if not isinstance(additional_fields, MissingType):
             self.update(additional_fields)
 
 
@@ -357,18 +358,18 @@ class OneDriveStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "onedrive_storage_policies#1.0.0",
-        client_id: str | None = None,
-        secret: str | None = None,
-        tenant: str | None = None,
-        user_api_rate_limit: int | None = None,
-        additional_fields: dict[str, t.Any] | None = None,
+        client_id: str | MissingType = MISSING,
+        secret: str | MissingType = MISSING,
+        tenant: str | MissingType = MISSING,
+        user_api_rate_limit: int | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> None:
         super().__init__()
         self._set_optstrs(
             DATA_TYPE=DATA_TYPE, client_id=client_id, secret=secret, tenant=tenant
         )
         self._set_optints(user_api_rate_limit=user_api_rate_limit)
-        if additional_fields is not None:
+        if not isinstance(additional_fields, MissingType):
             self.update(additional_fields)
 
 
@@ -393,13 +394,13 @@ class AzureBlobStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "azure_blob_storage_policies#1.0.0",
-        client_id: str | None = None,
-        secret: str | None = None,
-        tenant: str | None = None,
-        account: str | None = None,
-        auth_type: str | None = None,
-        adls: bool | None = None,
-        additional_fields: dict[str, t.Any] | None = None,
+        client_id: str | MissingType = MISSING,
+        secret: str | MissingType = MISSING,
+        tenant: str | MissingType = MISSING,
+        account: str | MissingType = MISSING,
+        auth_type: str | MissingType = MISSING,
+        adls: bool | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> None:
         super().__init__()
         self._set_optstrs(
@@ -411,7 +412,7 @@ class AzureBlobStoragePolicies(StorageGatewayPolicies):
             auth_type=auth_type,
         )
         self._set_optbools(adls=adls)
-        if additional_fields is not None:
+        if not isinstance(additional_fields, MissingType):
             self.update(additional_fields)
 
 
@@ -435,16 +436,16 @@ class S3StoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "s3_storage_policies#1.0.0",
-        s3_endpoint: str | None = None,
-        s3_buckets: t.Iterable[str] | None = None,
-        s3_user_credential_required: bool | None = None,
-        additional_fields: dict[str, t.Any] | None = None,
+        s3_endpoint: str | MissingType = MISSING,
+        s3_buckets: t.Iterable[str] | MissingType = MISSING,
+        s3_user_credential_required: bool | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> None:
         super().__init__()
         self._set_optstrs(DATA_TYPE=DATA_TYPE, s3_endpoint=s3_endpoint)
         self._set_optbools(s3_user_credential_required=s3_user_credential_required)
         self._set_optstrlists(s3_buckets=s3_buckets)
-        if additional_fields is not None:
+        if not isinstance(additional_fields, MissingType):
             self.update(additional_fields)
 
 
@@ -470,9 +471,9 @@ class IrodsStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "irods_storage_policies#1.0.0",
-        irods_environment_file: str | None = None,
-        irods_authentication_file: str | None = None,
-        additional_fields: dict[str, t.Any] | None = None,
+        irods_environment_file: str | MissingType = MISSING,
+        irods_authentication_file: str | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> None:
         super().__init__()
         self._set_optstrs(
@@ -480,7 +481,7 @@ class IrodsStoragePolicies(StorageGatewayPolicies):
             irods_environment_file=irods_environment_file,
             irods_authentication_file=irods_authentication_file,
         )
-        if additional_fields is not None:
+        if not isinstance(additional_fields, MissingType):
             self.update(additional_fields)
 
 
@@ -501,10 +502,10 @@ class HPSSStoragePolicies(StorageGatewayPolicies):
     def __init__(
         self,
         DATA_TYPE: str = "hpss_storage_policies#1.0.0",
-        authentication_mech: str | None = None,
-        authenticator: str | None = None,
-        uda_checksum_support: bool | None = None,
-        additional_fields: dict[str, t.Any] | None = None,
+        authentication_mech: str | MissingType = MISSING,
+        authenticator: str | MissingType = MISSING,
+        uda_checksum_support: bool | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | MissingType = MISSING,
     ) -> None:
         super().__init__()
         self._set_optstrs(
@@ -513,5 +514,5 @@ class HPSSStoragePolicies(StorageGatewayPolicies):
             authenticator=authenticator,
         )
         self._set_optbools(uda_checksum_support=uda_checksum_support)
-        if additional_fields is not None:
+        if not isinstance(additional_fields, MissingType):
             self.update(additional_fields)

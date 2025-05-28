@@ -4,15 +4,16 @@ import pytest
 
 from globus_sdk import FlowsAPIError
 from globus_sdk._testing import get_last_request, load_response
+from globus_sdk.utils import MISSING
 
 
-@pytest.mark.parametrize("input_schema", [None, {}])
+@pytest.mark.parametrize("input_schema", [MISSING, {}])
 def test_validate_flow(flows_client, input_schema):
     metadata = load_response(flows_client.validate_flow).metadata
 
     # Prepare the payload
     payload = {"definition": metadata["success"]}
-    if input_schema is not None:
+    if input_schema is not MISSING:
         payload["input_schema"] = input_schema
 
     resp = flows_client.validate_flow(**payload)

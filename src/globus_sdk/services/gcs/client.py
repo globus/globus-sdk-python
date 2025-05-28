@@ -8,6 +8,7 @@ from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.globus_app import GlobusApp
 from globus_sdk.scopes import Scope
+from globus_sdk.utils import MISSING, MissingType
 
 from .connector_table import ConnectorTable
 from .data import (
@@ -183,7 +184,7 @@ class GCSClient(client.BaseClient):
     #
 
     def get_gcs_info(
-        self, query_params: dict[str, t.Any] | None = None
+        self, query_params: dict[str, t.Any] | MissingType = MISSING
     ) -> UnpackingGCSResponse:
         """
         Get information about the GCS Manager service this client is configured for.
@@ -207,7 +208,7 @@ class GCSClient(client.BaseClient):
         )
 
     def get_endpoint(
-        self, query_params: dict[str, t.Any] | None = None
+        self, query_params: dict[str, t.Any] | MissingType = MISSING
     ) -> UnpackingGCSResponse:
         """
         Get the details of the Endpoint that this client is configured to talk to.
@@ -234,9 +235,9 @@ class GCSClient(client.BaseClient):
         endpoint_data: dict[str, t.Any] | EndpointDocument,
         *,
         include: (
-            t.Iterable[t.Literal["endpoint"]] | t.Literal["endpoint"] | None
-        ) = None,
-        query_params: dict[str, t.Any] | None = None,
+            t.Iterable[t.Literal["endpoint"]] | t.Literal["endpoint"] | MissingType
+        ) = MISSING,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> UnpackingGCSResponse:
         """
         Update a GCSv5 Endpoint
@@ -256,8 +257,9 @@ class GCSClient(client.BaseClient):
                     :ref: openapi_Endpoint/#patchEndpoint
                     :service: gcs
         """
-        query_params = query_params or {}
-        if include is not None:
+        if isinstance(query_params, MissingType):
+            query_params = {}
+        if not isinstance(include, MissingType):
             query_params["include"] = utils.commajoin(include)
 
         return UnpackingGCSResponse(
@@ -280,14 +282,14 @@ class GCSClient(client.BaseClient):
     def get_collection_list(
         self,
         *,
-        mapped_collection_id: UUIDLike | None = None,
+        mapped_collection_id: UUIDLike | MissingType = MISSING,
         filter: (  # pylint: disable=redefined-builtin
-            str | t.Iterable[str] | None
-        ) = None,
-        include: str | t.Iterable[str] | None = None,
-        page_size: int | None = None,
-        marker: str | None = None,
-        query_params: dict[str, t.Any] | None = None,
+            str | t.Iterable[str] | MissingType
+        ) = MISSING,
+        include: str | t.Iterable[str] | MissingType = MISSING,
+        page_size: int | MissingType = MISSING,
+        marker: str | MissingType = MISSING,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> IterableGCSResponse:
         """
         List the Collections on an Endpoint
@@ -313,17 +315,17 @@ class GCSClient(client.BaseClient):
                     :ref: openapi_Collections/#ListCollections
                     :service: gcs
         """
-        if query_params is None:
+        if isinstance(query_params, MissingType):
             query_params = {}
-        if include is not None:
+        if not isinstance(include, MissingType):
             query_params["include"] = ",".join(utils.safe_strseq_iter(include))
-        if page_size is not None:
+        if not isinstance(page_size, MissingType):
             query_params["page_size"] = page_size
-        if marker is not None:
+        if not isinstance(marker, MissingType):
             query_params["marker"] = marker
-        if mapped_collection_id is not None:
+        if not isinstance(mapped_collection_id, MissingType):
             query_params["mapped_collection_id"] = mapped_collection_id
-        if filter is not None:
+        if not isinstance(filter, MissingType):
             if isinstance(filter, str):
                 filter = [filter]
             query_params["filter"] = ",".join(filter)
@@ -333,7 +335,7 @@ class GCSClient(client.BaseClient):
         self,
         collection_id: UUIDLike,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> UnpackingGCSResponse:
         """
         Lookup a Collection on an Endpoint
@@ -392,7 +394,7 @@ class GCSClient(client.BaseClient):
         collection_id: UUIDLike,
         collection_data: dict[str, t.Any] | CollectionDocument,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> UnpackingGCSResponse:
         """
         Update a Collection
@@ -424,7 +426,7 @@ class GCSClient(client.BaseClient):
         self,
         collection_id: UUIDLike,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Delete a Collection
@@ -455,10 +457,10 @@ class GCSClient(client.BaseClient):
     def get_storage_gateway_list(
         self,
         *,
-        include: None | str | t.Iterable[str] = None,
-        page_size: int | None = None,
-        marker: str | None = None,
-        query_params: dict[str, t.Any] | None = None,
+        include: str | t.Iterable[str] | MissingType = MISSING,
+        page_size: int | MissingType = MISSING,
+        marker: str | MissingType = MISSING,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> IterableGCSResponse:
         """
         List Storage Gateways
@@ -486,13 +488,13 @@ class GCSClient(client.BaseClient):
                     :ref: openapi_Storage_Gateways/#getStorageGateways
                     :service: gcs
         """
-        if query_params is None:
+        if isinstance(query_params, MissingType):
             query_params = {}
-        if include is not None:
+        if not isinstance(include, MissingType):
             query_params["include"] = ",".join(utils.safe_strseq_iter(include))
-        if page_size is not None:
+        if not isinstance(page_size, MissingType):
             query_params["page_size"] = page_size
-        if marker is not None:
+        if not isinstance(marker, MissingType):
             query_params["marker"] = marker
         return IterableGCSResponse(
             self.get("/storage_gateways", query_params=query_params)
@@ -502,7 +504,7 @@ class GCSClient(client.BaseClient):
         self,
         data: dict[str, t.Any] | StorageGatewayDocument,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> UnpackingGCSResponse:
         """
         Create a Storage Gateway
@@ -530,8 +532,8 @@ class GCSClient(client.BaseClient):
         self,
         storage_gateway_id: UUIDLike,
         *,
-        include: None | str | t.Iterable[str] = None,
-        query_params: dict[str, t.Any] | None = None,
+        include: str | t.Iterable[str] | MissingType = MISSING,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> UnpackingGCSResponse:
         """
         Lookup a Storage Gateway by ID
@@ -553,9 +555,9 @@ class GCSClient(client.BaseClient):
                     :ref: openapi_Storage_Gateways/#getStorageGateway
                     :service: gcs
         """
-        if query_params is None:
+        if isinstance(query_params, MissingType):
             query_params = {}
-        if include is not None:
+        if not isinstance(include, MissingType):
             query_params["include"] = ",".join(utils.safe_strseq_iter(include))
 
         return UnpackingGCSResponse(
@@ -571,7 +573,7 @@ class GCSClient(client.BaseClient):
         storage_gateway_id: UUIDLike,
         data: dict[str, t.Any] | StorageGatewayDocument,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Update a Storage Gateway
@@ -601,7 +603,7 @@ class GCSClient(client.BaseClient):
         self,
         storage_gateway_id: str | uuid.UUID,
         *,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Delete a Storage Gateway
@@ -633,11 +635,11 @@ class GCSClient(client.BaseClient):
     )
     def get_role_list(
         self,
-        collection_id: UUIDLike | None = None,
-        include: str | None = None,
-        page_size: int | None = None,
-        marker: str | None = None,
-        query_params: dict[str, t.Any] | None = None,
+        collection_id: UUIDLike | MissingType = MISSING,
+        include: str | MissingType = MISSING,
+        page_size: int | MissingType = MISSING,
+        marker: str | MissingType = MISSING,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> IterableGCSResponse:
         """
         List Roles
@@ -663,15 +665,15 @@ class GCSClient(client.BaseClient):
                     :ref: openapi_Roles/#listRoles
                     :service: gcs
         """
-        if query_params is None:
+        if isinstance(query_params, MissingType):
             query_params = {}
-        if include is not None:
+        if not isinstance(include, MissingType):
             query_params["include"] = include
-        if page_size is not None:
+        if not isinstance(page_size, MissingType):
             query_params["page_size"] = page_size
-        if marker is not None:
+        if not isinstance(marker, MissingType):
             query_params["marker"] = marker
-        if collection_id is not None:
+        if not isinstance(collection_id, MissingType):
             query_params["collection_id"] = collection_id
 
         path = "/roles"
@@ -680,7 +682,7 @@ class GCSClient(client.BaseClient):
     def create_role(
         self,
         data: dict[str, t.Any] | GCSRoleDocument,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> UnpackingGCSResponse:
         """
         Create a Role
@@ -708,7 +710,7 @@ class GCSClient(client.BaseClient):
     def get_role(
         self,
         role_id: UUIDLike,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> UnpackingGCSResponse:
         """
         Get a Role by ID
@@ -732,7 +734,7 @@ class GCSClient(client.BaseClient):
     def delete_role(
         self,
         role_id: UUIDLike,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Delete a Role
@@ -759,10 +761,10 @@ class GCSClient(client.BaseClient):
     )
     def get_user_credential_list(
         self,
-        storage_gateway: UUIDLike | None = None,
-        query_params: dict[str, t.Any] | None = None,
-        page_size: int | None = None,
-        marker: str | None = None,
+        storage_gateway: UUIDLike | MissingType = MISSING,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
+        page_size: int | MissingType = MISSING,
+        marker: str | MissingType = MISSING,
     ) -> IterableGCSResponse:
         """
         List User Credentials
@@ -783,13 +785,13 @@ class GCSClient(client.BaseClient):
                     :ref: openapi_User_Credentials/#getUserCredentials
                     :service: gcs
         """
-        if query_params is None:
+        if isinstance(query_params, MissingType):
             query_params = {}
-        if storage_gateway is not None:
+        if not isinstance(storage_gateway, MissingType):
             query_params["storage_gateway"] = storage_gateway
-        if page_size is not None:
+        if not isinstance(page_size, MissingType):
             query_params["page_size"] = page_size
-        if marker is not None:
+        if not isinstance(marker, MissingType):
             query_params["marker"] = marker
 
         path = "/user_credentials"
@@ -798,7 +800,7 @@ class GCSClient(client.BaseClient):
     def create_user_credential(
         self,
         data: dict[str, t.Any] | UserCredentialDocument,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> UnpackingGCSResponse:
         """
         Create a User Credential
@@ -826,7 +828,7 @@ class GCSClient(client.BaseClient):
     def get_user_credential(
         self,
         user_credential_id: UUIDLike,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> UnpackingGCSResponse:
         """
         Get a User Credential by ID
@@ -853,7 +855,7 @@ class GCSClient(client.BaseClient):
         self,
         user_credential_id: UUIDLike,
         data: dict[str, t.Any] | UserCredentialDocument,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> UnpackingGCSResponse:
         """
         Update a User Credential
@@ -881,7 +883,7 @@ class GCSClient(client.BaseClient):
     def delete_user_credential(
         self,
         user_credential_id: UUIDLike,
-        query_params: dict[str, t.Any] | None = None,
+        query_params: dict[str, t.Any] | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Delete a User Credential
