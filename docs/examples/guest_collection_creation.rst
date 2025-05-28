@@ -39,7 +39,7 @@ policy documents passed to create the user credential.
 
     # The scope the client will need, note that primary scope is for the endpoint,
     # but it has a dependency on the mapped collection's data_access scope
-    scope = scopes.GCSEndpointScopeBuilder(endpoint_id).make_mutable("manage_collections")
+    scope = scopes.Scope(scopes.GCSEndpointScopeBuilder(endpoint_id).manage_collections)
     scope.add_dependency(scopes.GCSCollectionScopeBuilder(mapped_collection_id).data_access)
 
     # Build a GCSClient to act as the client by using a ClientCredentialsAuthorizor

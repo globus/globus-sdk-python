@@ -18,11 +18,9 @@ from .data import (
 )
 from .errors import ScopeCycleError, ScopeParseError
 from .representation import Scope
-from .scope_definition import MutableScope
 
 __all__ = (
     "ScopeBuilder",
-    "MutableScope",
     "Scope",
     "ScopeParseError",
     "ScopeCycleError",

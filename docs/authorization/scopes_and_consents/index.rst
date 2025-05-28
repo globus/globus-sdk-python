@@ -30,5 +30,4 @@ which make learning about and manipulating these data easier.
     :maxdepth: 1
 
     scopes
-    mutable_scopes
     consents

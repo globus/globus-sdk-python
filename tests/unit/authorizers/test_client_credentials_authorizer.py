@@ -3,7 +3,7 @@ from unittest import mock
 import pytest
 
 from globus_sdk.authorizers import ClientCredentialsAuthorizer
-from globus_sdk.scopes import MutableScope
+from globus_sdk.scopes import Scope
 
 ACCESS_TOKEN = "access_token_1"
 EXPIRES_AT = -1
@@ -62,11 +62,11 @@ def test_multiple_resource_servers(authorizer, response):
     assert SCOPES in str(excinfo.value)
 
 
-def test_can_create_authorizer_from_mutable_scopes(client):
-    a1 = ClientCredentialsAuthorizer(client, MutableScope("foo"))
+def test_can_create_authorizer_from_scope_objects(client):
+    a1 = ClientCredentialsAuthorizer(client, Scope("foo"))
     assert a1.scopes == "foo"
 
     a2 = ClientCredentialsAuthorizer(
-        client, [MutableScope("foo"), "bar", MutableScope("baz").add_dependency("buzz")]
+        client, [Scope("foo"), "bar", Scope("baz").add_dependency("buzz")]
     )
     assert a2.scopes == "foo bar baz[buzz]"

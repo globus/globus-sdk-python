@@ -3,7 +3,6 @@ from __future__ import annotations
 import typing as t
 
 from .representation import Scope
-from .scope_definition import MutableScope
 
 if t.TYPE_CHECKING:
     from globus_sdk._types import ScopeCollectionType
@@ -22,7 +21,7 @@ def scopes_to_str(scopes: ScopeCollectionType) -> str:
 
         >>> scopes_to_str(Scope("foo"))
         'foo'
-        >>> scopes_to_str(Scope("foo"), "bar", MutableScope("qux"))
+        >>> scopes_to_str(Scope("foo"), "bar", Scope("qux"))
         'foo bar qux'
     """
     scope_iter = _iter_scope_collection(scopes, split_root_scopes=False)
@@ -42,15 +41,13 @@ def scopes_to_scope_list(scopes: ScopeCollectionType) -> list[Scope]:
 
         >>> scopes_to_scope_list(Scope("foo"))
         [Scope('foo')]
-        >>> scopes_to_scope_list(Scope("foo"), "bar baz", MutableScope("qux"))
+        >>> scopes_to_scope_list(Scope("foo"), "bar baz", Scope("qux"))
         [Scope('foo'), Scope('bar'), Scope('baz'), Scope('qux')]
     """
     scope_list: list[Scope] = []
     for scope in _iter_scope_collection(scopes):
         if isinstance(scope, str):
             scope_list.extend(Scope.parse(scope))
-        elif isinstance(scope, MutableScope):
-            scope_list.extend(Scope.parse(str(scope)))
         else:
             scope_list.append(scope)
     return scope_list
@@ -60,7 +57,7 @@ def _iter_scope_collection(
     obj: ScopeCollectionType,
     *,
     split_root_scopes: bool = True,
-) -> t.Iterator[str | MutableScope | Scope]:
+) -> t.Iterator[str | Scope]:
     """
     Provide an iterator over a scope collection type, flattening nested scope
     collections as encountered.
@@ -88,7 +85,7 @@ def _iter_scope_collection(
     """
     if isinstance(obj, str):
         yield from _iter_scope_string(obj, split_root_scopes)
-    elif isinstance(obj, MutableScope) or isinstance(obj, Scope):
+    elif isinstance(obj, Scope):
         yield obj
     else:
         for item in obj:

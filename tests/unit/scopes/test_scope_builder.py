@@ -77,17 +77,6 @@ def test_sb_allowed_inputs_types():
     assert list_sb.do_a_thing == scope_1_urn
 
 
-def test_scopebuilder_make_mutable_produces_same_strings():
-    sb = ScopeBuilder(str(uuid.UUID(int=0)), known_scopes="foo", known_url_scopes="bar")
-    assert str(sb.make_mutable("foo")) == sb.foo
-    assert str(sb.make_mutable("bar")) == sb.bar
-
-
-def test_scopebuilder_make_mutable_can_be_optional():
-    sb = ScopeBuilder(str(uuid.UUID(int=0)), known_scopes="foo")
-    assert str(sb.make_mutable("foo", optional=True)) == "*" + sb.foo
-
-
 def test_flows_scopes_creation():
     assert FlowsScopes.resource_server == "flows.globus.org"
     assert (

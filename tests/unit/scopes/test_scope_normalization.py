@@ -1,6 +1,6 @@
 import pytest
 
-from globus_sdk.scopes import MutableScope, Scope, scopes_to_scope_list, scopes_to_str
+from globus_sdk.scopes import Scope, scopes_to_scope_list, scopes_to_str
 
 
 def test_scopes_to_str_roundtrip_simple_str():
@@ -28,9 +28,8 @@ def test_scopes_to_str_roundtrip_simple_str_in_collection(scope_collection):
     "scope_collection, expect_str",
     (
         (("scope1", Scope("scope2")), "scope1 scope2"),
-        (("scope1", MutableScope("scope2")), "scope1 scope2"),
-        ((Scope("scope1"), MutableScope("scope2")), "scope1 scope2"),
-        ((Scope("scope1"), MutableScope("scope2"), "scope3"), "scope1 scope2 scope3"),
+        ((Scope("scope1"), Scope("scope2")), "scope1 scope2"),
+        ((Scope("scope1"), Scope("scope2"), "scope3"), "scope1 scope2 scope3"),
         (
             ((Scope("scope1"), Scope("scope2")), "scope3 scope4"),
             "scope1 scope2 scope3 scope4",
@@ -44,7 +43,7 @@ def test_scopes_to_str_handles_mixed_data(scope_collection, expect_str):
 
 @pytest.mark.parametrize(
     "scope_collection",
-    ([Scope("scope1")], Scope("scope1"), "scope1", MutableScope("scope1")),
+    ([Scope("scope1")], Scope("scope1"), "scope1"),
 )
 def test_scopes_to_scope_list_simple(scope_collection):
     actual_list = scopes_to_scope_list(scope_collection)
@@ -58,9 +57,9 @@ def test_scopes_to_scope_list_simple(scope_collection):
     "scope_collection, expect_str",
     (
         (("scope1", "scope2"), "scope1 scope2"),
-        (("scope1", MutableScope("scope2")), "scope1 scope2"),
-        ((Scope("scope1"), MutableScope("scope2")), "scope1 scope2"),
-        ((Scope("scope1"), MutableScope("scope2"), "scope3"), "scope1 scope2 scope3"),
+        (("scope1", Scope("scope2")), "scope1 scope2"),
+        ((Scope("scope1"), Scope("scope2")), "scope1 scope2"),
+        ((Scope("scope1"), Scope("scope2"), "scope3"), "scope1 scope2 scope3"),
         (
             ((Scope("scope1"), Scope("scope2")), "scope3 scope4"),
             "scope1 scope2 scope3 scope4",

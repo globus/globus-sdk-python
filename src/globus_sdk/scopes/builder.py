@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import typing as t
 
-from .scope_definition import MutableScope
-
 ScopeBuilderScopes = t.Union[
     None,
     str,
@@ -125,34 +123,6 @@ class ScopeBuilder:
         :param scope_name: The short name for the scope involved.
         """
         return f"https://auth.globus.org/scopes/{self.resource_server}/{scope_name}"
-
-    def make_mutable(self, scope: str, *, optional: bool = False) -> MutableScope:
-        """
-        For a given scope, create a MutableScope object.
-
-        The ``scope`` name given refers to the name of a scope attached to the
-        ScopeBuilder. It is given by attribute name, not by the full scope string.
-
-        **Examples**
-
-        Using the ``TransferScopes`` object, one could reference ``all`` as follows:
-
-        >>> TransferScopes.all
-        'urn:globus:auth:scope:transfer.api.globus.org:all'
-        >>> TransferScopes.make_mutable("all")
-        Scope('urn:globus:auth:scope:transfer.api.globus.org:all')
-
-        This is equivalent to constructing a Scope object from the resolved
-        scope string, as in
-
-        >>> Scope(TransferScopes.all)
-        Scope('urn:globus:auth:scope:transfer.api.globus.org:all')
-
-        :param scope: The name of the scope to convert to a MutableScope
-        :param optional: If true, the created MutableScope object will be marked
-            optional
-        """
-        return MutableScope(getattr(self, scope), optional=optional)
 
     def __str__(self) -> str:
         return f"{self.__class__.__name__}[{self.resource_server}]\n" + "\n".join(

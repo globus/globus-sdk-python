@@ -1,6 +1,6 @@
 import globus_sdk
 from globus_sdk._types import ScopeCollectionType
-from globus_sdk.scopes import MutableScope, scopes_to_str
+from globus_sdk.scopes import Scope, scopes_to_str
 from globus_sdk.services.auth import (
     GlobusAuthorizationCodeFlowManager,
     GlobusNativeAppFlowManager,
@@ -23,7 +23,7 @@ cc_client = globus_sdk.ConfidentialAppAuthClient(
 
 # these functions should type-check okay
 def foo(x: ScopeCollectionType) -> str:
-    return MutableScope.scopes2str(x)
+    return Scope.scopes2str(x)
 
 
 def foo2(x: ScopeCollectionType) -> str:
@@ -32,9 +32,9 @@ def foo2(x: ScopeCollectionType) -> str:
 
 foo("somestring")
 foo(["somestring", "otherstring"])
-foo(MutableScope("bar"))
-foo((MutableScope("bar"),))
-foo({MutableScope("bar"), "baz"})
+foo(Scope("bar"))
+foo((Scope("bar"),))
+foo({Scope("bar"), "baz"})
 # bad usages
 foo(1)  # type: ignore[arg-type]
 foo((False,))  # type: ignore[arg-type]
@@ -62,29 +62,29 @@ GlobusNativeAppFlowManager(
 GlobusAuthorizationCodeFlowManager(
     cc_client,
     "https://example.org/redirect-uri",
-    requested_scopes=MutableScope("foo"),
+    requested_scopes=Scope("foo"),
 )
 GlobusNativeAppFlowManager(
     native_client,
-    requested_scopes=MutableScope("foo"),
+    requested_scopes=Scope("foo"),
 )
 GlobusAuthorizationCodeFlowManager(
     cc_client,
     "https://example.org/redirect-uri",
-    requested_scopes=[MutableScope("foo")],
+    requested_scopes=[Scope("foo")],
 )
 GlobusNativeAppFlowManager(
     native_client,
-    requested_scopes=[MutableScope("foo")],
+    requested_scopes=[Scope("foo")],
 )
 GlobusAuthorizationCodeFlowManager(
     cc_client,
     "https://example.org/redirect-uri",
-    requested_scopes=[MutableScope("foo"), "bar"],
+    requested_scopes=[Scope("foo"), "bar"],
 )
 GlobusNativeAppFlowManager(
     native_client,
-    requested_scopes=[MutableScope("foo"), "bar"],
+    requested_scopes=[Scope("foo"), "bar"],
 )
 # bad usages
 GlobusAuthorizationCodeFlowManager(
@@ -120,19 +120,17 @@ native_client.oauth2_start_flow(requested_scopes=("foo", "bar"))
 cc_client.oauth2_start_flow(
     "https://example.org/redirect-uri", requested_scopes=("foo", "bar")
 )
-native_client.oauth2_start_flow(MutableScope("foo"))
-cc_client.oauth2_start_flow("https://example.org/redirect-uri", MutableScope("foo"))
-native_client.oauth2_start_flow(requested_scopes=MutableScope("foo"))
+native_client.oauth2_start_flow(Scope("foo"))
+cc_client.oauth2_start_flow("https://example.org/redirect-uri", Scope("foo"))
+native_client.oauth2_start_flow(requested_scopes=Scope("foo"))
 cc_client.oauth2_start_flow(
-    "https://example.org/redirect-uri", requested_scopes=MutableScope("foo")
+    "https://example.org/redirect-uri", requested_scopes=Scope("foo")
 )
-native_client.oauth2_start_flow([MutableScope("foo"), "bar"])
+native_client.oauth2_start_flow([Scope("foo"), "bar"])
+cc_client.oauth2_start_flow("https://example.org/redirect-uri", [Scope("foo"), "bar"])
+native_client.oauth2_start_flow(requested_scopes=[Scope("foo"), "bar"])
 cc_client.oauth2_start_flow(
-    "https://example.org/redirect-uri", [MutableScope("foo"), "bar"]
-)
-native_client.oauth2_start_flow(requested_scopes=[MutableScope("foo"), "bar"])
-cc_client.oauth2_start_flow(
-    "https://example.org/redirect-uri", requested_scopes=[MutableScope("foo"), "bar"]
+    "https://example.org/redirect-uri", requested_scopes=[Scope("foo"), "bar"]
 )
 # bad usages
 native_client.oauth2_start_flow(1)  # type: ignore[arg-type]
@@ -153,12 +151,10 @@ cc_client.oauth2_client_credentials_tokens("foo")
 cc_client.oauth2_client_credentials_tokens(requested_scopes="foo")
 cc_client.oauth2_client_credentials_tokens(("foo", "bar"))
 cc_client.oauth2_client_credentials_tokens(requested_scopes=("foo", "bar"))
-cc_client.oauth2_client_credentials_tokens(MutableScope("foo"))
-cc_client.oauth2_client_credentials_tokens(requested_scopes=MutableScope("foo"))
-cc_client.oauth2_client_credentials_tokens([MutableScope("foo"), "bar"])
-cc_client.oauth2_client_credentials_tokens(
-    requested_scopes=[MutableScope("foo"), "bar"]
-)
+cc_client.oauth2_client_credentials_tokens(Scope("foo"))
+cc_client.oauth2_client_credentials_tokens(requested_scopes=Scope("foo"))
+cc_client.oauth2_client_credentials_tokens([Scope("foo"), "bar"])
+cc_client.oauth2_client_credentials_tokens(requested_scopes=[Scope("foo"), "bar"])
 cc_client.oauth2_client_credentials_tokens(1)  # type: ignore[arg-type]
 cc_client.oauth2_client_credentials_tokens(
     requested_scopes=none_list,  # type: ignore[arg-type]

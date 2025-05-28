@@ -5,7 +5,7 @@ import typing as t
 import uuid
 
 if t.TYPE_CHECKING:
-    from globus_sdk.scopes import MutableScope, Scope
+    from globus_sdk.scopes import Scope
 
 
 # these types are aliases meant for internal use
@@ -15,7 +15,6 @@ DateLike = t.Union[str, datetime.datetime]
 
 ScopeCollectionType = t.Union[
     str,
-    "MutableScope",
     "Scope",
     t.Iterable["ScopeCollectionType"],
 ]
