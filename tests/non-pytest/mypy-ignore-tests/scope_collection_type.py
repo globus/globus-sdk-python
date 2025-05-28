@@ -21,12 +21,8 @@ cc_client = globus_sdk.ConfidentialAppAuthClient(
 )
 
 
-# these functions should type-check okay
+# this function should type-check okay
 def foo(x: ScopeCollectionType) -> str:
-    return Scope.scopes2str(x)
-
-
-def foo2(x: ScopeCollectionType) -> str:
     return scopes_to_str(x)
 
 
