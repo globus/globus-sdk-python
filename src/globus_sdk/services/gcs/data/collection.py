@@ -88,6 +88,7 @@ class CollectionDocument(utils.PayloadWrapper, abc.ABC):
     :param organization: The organization which maintains the collection
     :param restrict_transfers_to_high_assurance: Require that transfers of the
         given type involve only collections that are high assurance.
+        Valid values: "inbound", "outbound", "all", None
     :param user_message: A message to display to users when interacting with this
         collection
     :param user_message_link: A link to additional messaging for users when interacting
@@ -110,7 +111,9 @@ class CollectionDocument(utils.PayloadWrapper, abc.ABC):
         collections, the lesser value is in effect.
 
     :param associated_flow_policy: Policy describing Globus flows to run when the
-        collection is accessed.
+        collection is accessed. See
+        https://docs.globus.org/api/transfer/endpoints_and_collections/#endpoint_or_collection_fields
+        for expected shape.
 
     :param additional_fields: Additional data for inclusion in the collection document
     """
@@ -153,7 +156,9 @@ class CollectionDocument(utils.PayloadWrapper, abc.ABC):
         identity_id: UUIDLike | None = None,
         info_link: str | None = None,
         organization: str | None = None,
-        restrict_transfers_to_high_assurance: str | None = None,
+        restrict_transfers_to_high_assurance: (
+            t.Literal["inbound", "outbound", "all"] | None
+        ) = None,
         user_message: str | None = None,
         user_message_link: str | None = None,
         # str lists
@@ -274,7 +279,9 @@ class MappedCollectionDocument(CollectionDocument):
         identity_id: UUIDLike | None = None,
         info_link: str | None = None,
         organization: str | None = None,
-        restrict_transfers_to_high_assurance: str | None = None,
+        restrict_transfers_to_high_assurance: (
+            t.Literal["inbound", "outbound", "all"] | None
+        ) = None,
         user_message: str | None = None,
         user_message_link: str | None = None,
         # str lists
@@ -416,7 +423,9 @@ class GuestCollectionDocument(CollectionDocument):
         identity_id: UUIDLike | None = None,
         info_link: str | None = None,
         organization: str | None = None,
-        restrict_transfers_to_high_assurance: str | None = None,
+        restrict_transfers_to_high_assurance: (
+            t.Literal["inbound", "outbound", "all"] | None
+        ) = None,
         user_message: str | None = None,
         user_message_link: str | None = None,
         # str lists
