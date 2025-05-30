@@ -1,9 +1,10 @@
 import pytest
 
 from globus_sdk._testing import get_last_request, load_response
+from globus_sdk.utils import MISSING
 
 
-@pytest.mark.parametrize("include_flow_description", (None, False, True))
+@pytest.mark.parametrize("include_flow_description", (MISSING, False, True))
 def test_get_run(flows_client, include_flow_description):
     metadata = load_response(flows_client.get_run).metadata
 
@@ -14,7 +15,7 @@ def test_get_run(flows_client, include_flow_description):
     assert response.http_status == 200
 
     request = get_last_request()
-    if include_flow_description is None:
+    if include_flow_description is MISSING:
         assert "flow_description" not in response
         assert "include_flow_description" not in request.url
     elif include_flow_description is False:

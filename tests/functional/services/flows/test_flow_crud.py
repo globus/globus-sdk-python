@@ -6,9 +6,10 @@ from responses import matchers
 from globus_sdk import FlowsAPIError
 from globus_sdk._testing import get_last_request, load_response
 from globus_sdk._testing.models import RegisteredResponse
+from globus_sdk.utils import MISSING
 
 
-@pytest.mark.parametrize("subscription_id", [None, "dummy_subscription_id"])
+@pytest.mark.parametrize("subscription_id", [MISSING, None, "dummy_subscription_id"])
 def test_create_flow(flows_client, subscription_id):
     metadata = load_response(flows_client.create_flow).metadata
 
@@ -19,13 +20,13 @@ def test_create_flow(flows_client, subscription_id):
 
     last_req = get_last_request()
     req_body = json.loads(last_req.body)
-    if subscription_id:
+    if subscription_id is not MISSING:
         assert req_body["subscription_id"] == subscription_id
     else:
         assert "subscription_id" not in req_body
 
 
-@pytest.mark.parametrize("value", [None, [], ["dummy_value"]])
+@pytest.mark.parametrize("value", [MISSING, [], ["dummy_value"]])
 @pytest.mark.parametrize("key", ["run_managers", "run_monitors"])
 def test_create_flow_run_role_serialization(flows_client, key, value):
 
@@ -40,7 +41,8 @@ def test_create_flow_run_role_serialization(flows_client, key, value):
         "input_schema": {},
     }
 
-    request_body[key] = value
+    if value is not MISSING:
+        request_body[key] = value
 
     load_response(
         RegisteredResponse(
@@ -66,7 +68,7 @@ def test_create_flow_run_role_serialization(flows_client, key, value):
     last_req = get_last_request()
     req_body = json.loads(last_req.body)
 
-    if value is None:
+    if value is MISSING:
         assert key not in req_body
     else:
         assert req_body[key] == value
@@ -108,7 +110,7 @@ def test_update_flow(flows_client):
         assert resp[k] == v
 
 
-@pytest.mark.parametrize("value", [None, [], ["dummy_value"]])
+@pytest.mark.parametrize("value", [MISSING, [], ["dummy_value"]])
 @pytest.mark.parametrize("key", ["run_managers", "run_monitors"])
 def test_update_flow_run_role_serialization(flows_client, key, value):
     metadata = load_response(flows_client.update_flow).metadata
@@ -119,7 +121,7 @@ def test_update_flow_run_role_serialization(flows_client, key, value):
     last_req = get_last_request()
     req_body = json.loads(last_req.body)
 
-    if value is None:
+    if value is MISSING:
         assert key not in req_body
     else:
         assert req_body[key] == value
