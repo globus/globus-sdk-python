@@ -4,11 +4,12 @@ import pytest
 
 from globus_sdk import GlobusSDKUsageError, RemovedInV4Warning
 from globus_sdk._testing import get_last_request, load_response
+from globus_sdk.utils import MISSING
 
 
-@pytest.mark.parametrize("filter_fulltext", [None, "foo"])
-@pytest.mark.parametrize("filter_role", [None, "bar"])
-@pytest.mark.parametrize("orderby", [None, "created_at ASC"])
+@pytest.mark.parametrize("filter_fulltext", [MISSING, "foo"])
+@pytest.mark.parametrize("filter_role", [MISSING, "bar"])
+@pytest.mark.parametrize("orderby", [MISSING, "created_at ASC"])
 def test_list_flows_simple(flows_client, filter_fulltext, filter_role, orderby):
     meta = load_response(flows_client.list_flows).metadata
 
@@ -45,7 +46,7 @@ def test_list_flows_simple(flows_client, filter_fulltext, filter_role, orderby):
             ("filter_role", filter_role),
             ("orderby", orderby),
         )
-        if v is not None
+        if v is not MISSING
     }
     assert parsed_qs == expect_query_params
 
@@ -157,7 +158,7 @@ def test_list_flows_mutually_exclusive_roles(flows_client, filter_role, filter_r
         ([], None),
         ([""], None),
         (("",), None),
-        (None, None),
+        (MISSING, None),
         # single role as string
         ("foo", ["foo"]),
         # single role as list/tuple
