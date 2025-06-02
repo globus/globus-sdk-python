@@ -11,7 +11,6 @@ from globus_sdk.paging import PaginatorTable
 from globus_sdk.response import GlobusHTTPResponse
 from globus_sdk.scopes import Scope, ScopeBuilder
 from globus_sdk.transport import RequestsTransport
-from globus_sdk.utils import MissingType
 
 if t.TYPE_CHECKING:
     from globus_sdk.globus_app import GlobusApp
@@ -314,7 +313,7 @@ class BaseClient:
         self,
         path: str,
         *,
-        query_params: dict[str, t.Any] | MissingType | None = None,
+        query_params: dict[str, t.Any] | None = None,
         headers: dict[str, str] | None = None,
         automatic_authorization: bool = True,
     ) -> GlobusHTTPResponse:
@@ -336,7 +335,7 @@ class BaseClient:
         self,
         path: str,
         *,
-        query_params: dict[str, t.Any] | MissingType | None = None,
+        query_params: dict[str, t.Any] | None = None,
         data: _DataParamType = None,
         headers: dict[str, str] | None = None,
         encoding: str | None = None,
@@ -362,7 +361,7 @@ class BaseClient:
         self,
         path: str,
         *,
-        query_params: dict[str, t.Any] | MissingType | None = None,
+        query_params: dict[str, t.Any] | None = None,
         headers: dict[str, str] | None = None,
         automatic_authorization: bool = True,
     ) -> GlobusHTTPResponse:
@@ -384,7 +383,7 @@ class BaseClient:
         self,
         path: str,
         *,
-        query_params: dict[str, t.Any] | MissingType | None = None,
+        query_params: dict[str, t.Any] | None = None,
         data: _DataParamType = None,
         headers: dict[str, str] | None = None,
         encoding: str | None = None,
@@ -410,7 +409,7 @@ class BaseClient:
         self,
         path: str,
         *,
-        query_params: dict[str, t.Any] | MissingType | None = None,
+        query_params: dict[str, t.Any] | None = None,
         data: _DataParamType = None,
         headers: dict[str, str] | None = None,
         encoding: str | None = None,
@@ -437,7 +436,7 @@ class BaseClient:
         method: str,
         path: str,
         *,
-        query_params: dict[str, t.Any] | MissingType | None = None,
+        query_params: dict[str, t.Any] | None = None,
         data: _DataParamType = None,
         headers: dict[str, str] | None = None,
         encoding: str | None = None,
@@ -471,9 +470,6 @@ class BaseClient:
         # prepare data...
         # copy headers if present
         rheaders = {**headers} if headers else {}
-
-        if isinstance(query_params, MissingType):
-            query_params = None
 
         # if a client is asked to make a request against a full URL, not just the path
         # component, then do not resolve the path, simply pass it through as the URL
