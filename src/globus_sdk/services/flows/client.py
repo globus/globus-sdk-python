@@ -348,6 +348,8 @@ class FlowsClient(client.BaseClient):
             "filter_role": filter_role,
             "filter_roles": utils.commajoin(filter_roles),
             "filter_fulltext": filter_fulltext,
+            # if `orderby` is an iterable (e.g., generator expression), it gets
+            # converted to a list in this step
             "orderby": (
                 orderby if isinstance(orderby, (str, MissingType)) else list(orderby)
             ),
