@@ -165,7 +165,7 @@ class SearchQuery(SearchQueryBase):
             "date_interval": date_interval,
             "histogram_range": (
                 dict(zip(["low", "high"], histogram_range))
-                if histogram_range
+                if not isinstance(histogram_range, MissingType)
                 else histogram_range
             ),
             **(additional_fields or {}),

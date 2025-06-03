@@ -57,6 +57,14 @@ class MissingType:
 MISSING = MissingType()
 
 
+@t.overload
+def filter_missing(data: dict[str, t.Any]) -> dict[str, t.Any]: ...
+
+
+@t.overload
+def filter_missing(data: None) -> None: ...
+
+
 def filter_missing(data: dict[str, t.Any] | None) -> dict[str, t.Any] | None:
     if data is None:
         return None
