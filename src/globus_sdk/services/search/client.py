@@ -7,6 +7,7 @@ from globus_sdk import client, paging, response, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.exc.warnings import warn_deprecated
 from globus_sdk.scopes import Scope, SearchScopes
+from globus_sdk.utils import MISSING, MissingType, filter_missing
 
 from .data import SearchQuery, SearchScrollQuery
 from .errors import SearchAPIError
@@ -278,17 +279,13 @@ class SearchClient(client.BaseClient):
 
                 .. expandtestfixture:: search.search
         """  # noqa: E501
-        if query_params is None:
-            query_params = {}
-        query_params.update(
-            {
-                "q": q,
-                "offset": offset,
-                "limit": limit,
-                "advanced": advanced,
-            }
-        )
-
+        query_params = {
+            **(query_params or {}),
+            "q": q,
+            "offset": offset,
+            "limit": limit,
+            "advanced": advanced,
+        }
         log.debug(f"SearchClient.search({index_id}, ...)")
         return self.get(f"/v1/index/{index_id}/search", query_params=query_params)
 
@@ -304,8 +301,8 @@ class SearchClient(client.BaseClient):
         index_id: UUIDLike,
         data: dict[str, t.Any] | SearchQuery,
         *,
-        offset: int | None = None,
-        limit: int | None = None,
+        offset: int | MissingType = MISSING,
+        limit: int | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Execute a complex Search Query, using a query document to express filters,
@@ -359,13 +356,16 @@ class SearchClient(client.BaseClient):
                     :ref: search/reference/post_query/
         """
         log.debug(f"SearchClient.post_search({index_id}, ...)")
-        add_kwargs = {}
-        if offset is not None:
-            add_kwargs["offset"] = offset
-        if limit is not None:
-            add_kwargs["limit"] = limit
-        if add_kwargs:
-            data = {**data, **add_kwargs}
+        add_kwargs = filter_missing(
+            {
+                "offset": offset,
+                "limit": limit,
+            }
+        )
+        data = {
+            **data,
+            **add_kwargs,
+        }
         return self.post(f"v1/index/{index_id}/search", data=data)
 
     @paging.has_paginator(paging.MarkerPaginator, items_key="gmeta")
@@ -374,7 +374,7 @@ class SearchClient(client.BaseClient):
         index_id: UUIDLike,
         data: dict[str, t.Any] | SearchScrollQuery,
         *,
-        marker: str | None = None,
+        marker: str | MissingType = MISSING,
     ) -> response.GlobusHTTPResponse:
         """
         Scroll all data in a Search index. The paginated version of this API should
@@ -411,11 +411,15 @@ class SearchClient(client.BaseClient):
                     :ref: search/reference/scroll_query/
         """
         log.debug(f"SearchClient.scroll({index_id}, ...)")
-        add_kwargs = {}
-        if marker is not None:
-            add_kwargs["marker"] = marker
-        if add_kwargs:
-            data = {**data, **add_kwargs}
+        add_kwargs = filter_missing(
+            {
+                "marker": marker,
+            }
+        )
+        data = {
+            **data,
+            **add_kwargs,
+        }
         return self.post(f"v1/index/{index_id}/scroll", data=data)
 
     #
@@ -579,9 +583,10 @@ class SearchClient(client.BaseClient):
         # convert the provided subjects to a list and use the "safe iter" helper to
         # ensure that a single string is *not* treated as an iterable of strings,
         # which is usually not intentional
-        body = {"subjects": list(utils.safe_strseq_iter(subjects))}
-        if additional_params:
-            body.update(additional_params)
+        body = {
+            "subjects": list(utils.safe_strseq_iter(subjects)),
+            **(additional_params or {}),
+        }
         return self.post(f"/v1/index/{index_id}/batch_delete_by_subject", data=body)
 
     #
@@ -621,10 +626,11 @@ class SearchClient(client.BaseClient):
                 .. extdoclink:: Get By Subject
                     :ref: search/reference/get_subject/
         """
-        if query_params is None:
-            query_params = {}
-        query_params["subject"] = subject
         log.debug(f"SearchClient.get_subject({index_id}, {subject}, ...)")
+        query_params = {
+            **(query_params or {}),
+            "subject": subject,
+        }
         return self.get(f"/v1/index/{index_id}/subject", query_params=query_params)
 
     def delete_subject(
@@ -664,11 +670,11 @@ class SearchClient(client.BaseClient):
                 .. extdoclink:: Delete By Subject
                     :ref: search/reference/delete_subject/
         """
-        if query_params is None:
-            query_params = {}
-        query_params["subject"] = subject
-
         log.debug(f"SearchClient.delete_subject({index_id}, {subject}, ...)")
+        query_params = {
+            **(query_params or {}),
+            "subject": subject,
+        }
         return self.delete(f"/v1/index/{index_id}/subject", query_params=query_params)
 
     #
@@ -680,7 +686,7 @@ class SearchClient(client.BaseClient):
         index_id: UUIDLike,
         subject: str,
         *,
-        entry_id: str | None = None,
+        entry_id: str | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
@@ -720,17 +726,21 @@ class SearchClient(client.BaseClient):
                 .. extdoclink:: Get Entry
                     :ref: search/reference/get_entry/
         """  # noqa: E501
-        if query_params is None:
-            query_params = {}
-        query_params["subject"] = subject
-        if entry_id is not None:
-            query_params["entry_id"] = entry_id
-
         log.debug(
             "SearchClient.get_entry({}, {}, {}, ...)".format(
                 index_id, subject, entry_id
             )
         )
+        add_kwargs = filter_missing(
+            {
+                "entry_id": entry_id,
+                "subject": subject,
+            }
+        )
+        query_params = {
+            **(query_params or {}),
+            **add_kwargs,
+        }
         return self.get(f"/v1/index/{index_id}/entry", query_params=query_params)
 
     def create_entry(
@@ -849,7 +859,7 @@ class SearchClient(client.BaseClient):
         index_id: UUIDLike,
         subject: str,
         *,
-        entry_id: str | None = None,
+        entry_id: str | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
@@ -889,16 +899,21 @@ class SearchClient(client.BaseClient):
                 .. extdoclink:: Delete Entry
                     :ref: search/reference/delete_entry/
         """  # noqa: E501
-        if query_params is None:
-            query_params = {}
-        query_params["subject"] = subject
-        if entry_id is not None:
-            query_params["entry_id"] = entry_id
         log.debug(
             "SearchClient.delete_entry({}, {}, {}, ...)".format(
                 index_id, subject, entry_id
             )
         )
+        add_kwargs = filter_missing(
+            {
+                "entry_id": entry_id,
+                "subject": subject,
+            }
+        )
+        query_params = {
+            **(query_params or {}),
+            **add_kwargs,
+        }
         return self.delete(f"/v1/index/{index_id}/entry", query_params=query_params)
 
     #

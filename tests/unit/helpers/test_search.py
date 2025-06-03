@@ -5,6 +5,7 @@ Unit tests for globus_sdk.SearchQuery
 import pytest
 
 from globus_sdk import RemovedInV4Warning, SearchQuery, SearchQueryV1, utils
+from globus_sdk.utils import filter_missing
 
 
 def test_init_legacy():
@@ -19,7 +20,7 @@ def test_init_legacy_no_args():
     with pytest.warns(RemovedInV4Warning, match="'SearchQuery' is deprecated"):
         query = SearchQuery()
 
-    assert len(query) == 0
+    assert len(filter_missing(query)) == 0
 
 
 def test_init_legacy_additional_fields():
@@ -67,7 +68,7 @@ def test_set_method(attrname):
         query = SearchQuery()
     method = getattr(query, "set_{}".format("query" if attrname == "q" else attrname))
     # start absent
-    assert attrname not in query
+    assert attrname not in filter_missing(query)
     # returns self
     assert method("foo") is query
     # sets value
@@ -84,7 +85,7 @@ def test_add_facet():
     assert query.add_facet("facetname", "fieldname") is query
     assert query["facets"]
     assert len(query["facets"]) == 1
-    assert query["facets"][0] == {
+    assert filter_missing(query["facets"][0]) == {
         "type": "terms",
         "name": "facetname",
         "field_name": "fieldname",
@@ -93,7 +94,7 @@ def test_add_facet():
     # terms with size
     query.add_facet("n", "f", size=5)
     assert len(query["facets"]) == 2
-    assert query["facets"][1] == {
+    assert filter_missing(query["facets"][1]) == {
         "type": "terms",
         "name": "n",
         "field_name": "f",
@@ -109,7 +110,7 @@ def test_add_facet():
         histogram_range=(1870, 1880),
     )
     assert len(query["facets"]) == 3
-    assert query["facets"][2] == {
+    assert filter_missing(query["facets"][2]) == {
         "type": "date_histogram",
         "name": "n",
         "field_name": "f",
@@ -122,7 +123,7 @@ def test_add_facet():
         "facetname", "fieldname", additional_fields={"nonexistentparam": "value1"}
     )
     assert len(query["facets"]) == 4
-    assert query["facets"][3] == {
+    assert filter_missing(query["facets"][3]) == {
         "type": "terms",
         "name": "facetname",
         "field_name": "fieldname",
@@ -203,7 +204,7 @@ def test_add_sort():
 
     assert query["sort"]
     assert len(query["sort"]) == 1
-    assert query["sort"][0] == {"field_name": "f"}
+    assert filter_missing(query["sort"][0]) == {"field_name": "f"}
 
     # with order
     query.add_sort("f", order="asc")

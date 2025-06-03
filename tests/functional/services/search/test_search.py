@@ -7,6 +7,7 @@ import responses
 
 import globus_sdk
 from globus_sdk._testing import get_last_request, load_response
+from globus_sdk.utils import filter_missing
 from tests.common import register_api_route_fixture_file
 
 
@@ -73,7 +74,7 @@ def test_search_post_query_with_legacy_helper(search_client):
     req = get_last_request()
     assert req.body is not None
     req_body = json.loads(req.body)
-    assert req_body == dict(query_doc)
+    assert req_body == filter_missing(query_doc)
 
 
 def test_search_post_query_simple_with_v1_helper(search_client):
@@ -181,4 +182,4 @@ def test_search_paginated_scroll_query(search_client, query_doc):
     assert data[1]["entries"][0]["content"]["foo"] == "baz"
 
     # confirm that pagination was not side-effecting
-    assert "marker" not in query_doc
+    assert "marker" not in filter_missing(query_doc)
