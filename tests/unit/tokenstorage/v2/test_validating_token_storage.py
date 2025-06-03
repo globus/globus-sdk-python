@@ -130,7 +130,7 @@ def test_validating_token_storage_evaluates_root_scope_requirements(
     make_token_response,
 ):
     adapter = _make_memstorage_with_scope_validator(
-        consent_client, {"rs1": [Scope.deserialize("scope1")]}
+        consent_client, {"rs1": [Scope.parse("scope1")]}
     )
     identity_id = str(uuid.uuid4())
     valid_token_response = make_token_response(
@@ -154,7 +154,7 @@ def test_storage_with_scope_validator_evaluates_dependent_scope_requirements(
     make_token_response, consent_client
 ):
     adapter = _make_memstorage_with_scope_validator(
-        consent_client, {"rs1": [Scope.deserialize("scope[subscope]")]}
+        consent_client, {"rs1": [Scope.parse("scope[subscope]")]}
     )
     token_response = make_token_response(scopes={"rs1": "scope"})
     adapter.store_token_response(token_response)

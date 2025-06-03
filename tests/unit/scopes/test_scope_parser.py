@@ -2,7 +2,7 @@ import time
 
 import pytest
 
-from globus_sdk import Scope, ScopeCycleError, ScopeParseError
+from globus_sdk.scopes import Scope, ScopeCycleError, ScopeParseError, ScopeParser
 
 
 def test_scope_str_and_repr_simple():
@@ -65,7 +65,7 @@ def test_add_dependency_parses_scope_with_optional_marker():
 
 
 def test_scope_parsing_allows_empty_string():
-    scopes = Scope.parse("")
+    scopes = ScopeParser.parse("")
     assert scopes == []
 
 
@@ -78,8 +78,8 @@ def test_scope_parsing_allows_empty_string():
     ],
 )
 def test_scope_parsing_ignores_non_semantic_whitespace(scope_string1, scope_string2):
-    list1 = Scope.parse(scope_string1)
-    list2 = Scope.parse(scope_string2)
+    list1 = ScopeParser.parse(scope_string1)
+    list2 = ScopeParser.parse(scope_string2)
     assert len(list1) == len(list2) == 1
     s1, s2 = list1[0], list2[0]
     # Scope.__eq__ is not defined, so equivalence checking is manual (and somewhat error
@@ -125,7 +125,7 @@ def test_scope_parsing_ignores_non_semantic_whitespace(scope_string1, scope_stri
 )
 def test_scope_parsing_rejects_bad_inputs(scopestring):
     with pytest.raises(ScopeParseError):
-        Scope.parse(scopestring)
+        ScopeParser.parse(scopestring)
 
 
 @pytest.mark.parametrize(
@@ -141,7 +141,7 @@ def test_scope_parsing_rejects_bad_inputs(scopestring):
 )
 def test_scope_parsing_catches_and_rejects_cycles(scopestring):
     with pytest.raises(ScopeCycleError):
-        Scope.parse(scopestring)
+        ScopeParser.parse(scopestring)
 
 
 @pytest.mark.flaky
@@ -166,7 +166,7 @@ def test_scope_parsing_catches_and_rejects_very_large_cycles_quickly():
 
     t0 = time.time()
     with pytest.raises(ScopeCycleError):
-        Scope.parse(scope_string)
+        ScopeParser.parse(scope_string)
     t1 = time.time()
     assert t1 - t0 < 0.1
 
@@ -177,31 +177,31 @@ def test_scope_parsing_catches_and_rejects_very_large_cycles_quickly():
 )
 def test_scope_parsing_accepts_valid_inputs(scopestring):
     # test *only* that parsing does not error and returns a non-empty list of scopes
-    scopes = Scope.parse(scopestring)
+    scopes = ScopeParser.parse(scopestring)
     assert isinstance(scopes, list)
     assert len(scopes) > 0
     assert isinstance(scopes[0], Scope)
 
 
 def test_scope_deserialize_simple():
-    scope = Scope.deserialize("foo")
+    scope = Scope.parse("foo")
     assert str(scope) == "foo"
 
 
 def test_scope_deserialize_with_dependencies():
     # oh, while we're here, let's also check that our whitespace insensitivity works
-    scope = Scope.deserialize("foo[ bar   *baz  ]")
+    scope = Scope.parse("foo[ bar   *baz  ]")
     assert str(scope) in ("foo[bar *baz]", "foo[*baz bar]")
 
 
 def test_scope_deserialize_fails_on_empty():
     with pytest.raises(ValueError):
-        Scope.deserialize("  ")
+        Scope.parse("  ")
 
 
 def test_scope_deserialize_fails_on_multiple_top_level_scopes():
     with pytest.raises(ValueError):
-        Scope.deserialize("foo bar")
+        Scope.parse("foo bar")
 
 
 @pytest.mark.parametrize("scope_str", ("*foo", "foo[bar]", "foo[", "foo]", "foo bar"))
@@ -220,4 +220,4 @@ def test_scope_init_forbids_special_chars(scope_str):
     ],
 )
 def test_scope_parsing_normalizes_optionals(original, reserialized):
-    assert {s.serialize() for s in Scope.parse(original)} == reserialized
+    assert {str(s) for s in ScopeParser.parse(original)} == reserialized

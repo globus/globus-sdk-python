@@ -32,6 +32,7 @@ from datetime import datetime
 
 from globus_sdk._types import UUIDLike
 
+from ..parser import ScopeParser
 from ..representation import Scope
 from ._errors import ConsentParseError, ConsentTreeConstructionError
 
@@ -313,7 +314,7 @@ def _normalize_scope_types(
     """
     Normalize the input scope types into a list of Scope objects.
 
-    Strings are parsed into 1 or more Scopes using `Scope.parse`.
+    Strings are parsed into 1 or more Scopes using `ScopeParser.parse`.
 
     :param scopes: Some collection of 0 or more scopes as Scope or scope strings.
     :returns: A list of Scope objects.
@@ -322,12 +323,12 @@ def _normalize_scope_types(
     if isinstance(scopes, Scope):
         return [scopes]
     elif isinstance(scopes, str):
-        return Scope.parse(scopes)
+        return ScopeParser.parse(scopes)
     else:
         scope_list = []
         for scope in scopes:
             if isinstance(scope, str):
-                scope_list.extend(Scope.parse(scope))
+                scope_list.extend(ScopeParser.parse(scope))
             else:
                 scope_list.append(scope)
         return scope_list

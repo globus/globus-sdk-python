@@ -14,11 +14,13 @@ from .data import (
     TransferScopes,
 )
 from .errors import ScopeCycleError, ScopeParseError
+from .parser import ScopeParser
 from .representation import Scope
 
 __all__ = (
     "ScopeBuilder",
     "Scope",
+    "ScopeParser",
     "ScopeParseError",
     "ScopeCycleError",
     "GCSCollectionScopeBuilder",

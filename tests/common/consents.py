@@ -5,8 +5,8 @@ from collections import defaultdict, namedtuple
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
-from globus_sdk import Scope
 from globus_sdk._types import UUIDLike
+from globus_sdk.scopes import Scope, ScopeParser
 from globus_sdk.scopes.consents import Consent, ConsentForest
 
 ScopeRepr = namedtuple("Scope", ["id", "name"])
@@ -79,7 +79,7 @@ def _normalize_scopes(scopes: list[str | Scope] | str | Scope) -> list[Scope]:
     if isinstance(scopes, Scope):
         return [scopes]
     elif isinstance(scopes, str):
-        return Scope.parse(scopes)
+        return ScopeParser.parse(scopes)
     else:
         to_return = []
         for scope in scopes:

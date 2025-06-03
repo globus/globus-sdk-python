@@ -31,3 +31,4 @@ which make learning about and manipulating these data easier.
 
     scopes
     consents
+    scope_parsing
