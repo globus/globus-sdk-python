@@ -282,10 +282,6 @@ ScopeBuilder Constants
 
     .. listknownscopes:: globus_sdk.scopes.TimersScopes
 
-    .. note::
-
-        ``TimersScopes`` is also available under the legacy name ``TimerScopes``.
-
 
 .. py:data:: globus_sdk.scopes.data.TransferScopes
 

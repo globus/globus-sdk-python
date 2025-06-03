@@ -26,9 +26,6 @@ PACKAGE_LOCS_TO_SCAN = (
 DEPRECATED_NAMES = {
     "ComputeFunctionDocument",
     "ComputeFunctionMetadata",
-    "TimerAPIError",
-    "TimerClient",
-    "TimerScopes",
 }
 
 

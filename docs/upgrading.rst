@@ -45,6 +45,15 @@ Then, code can dispatch with
 From 3.x to 4.0
 ---------------
 
+Deprecated Timers Aliases Removed
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+During the version 3 lifecycle, the ``TimersClient`` and ``TimersAPIError``
+classes were renamed. Their original names, ``TimerClient`` and
+``TimerAPIError`` were retained as compatibility aliases.
+
+These have been removed. Use ``TimersClient`` and ``TimersAPIError``.
+
 Deprecated Experimental Aliases Removed
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

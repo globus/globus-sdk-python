@@ -45,6 +45,6 @@ very simply:
     flows
     groups
     search
-    timer
+    timers
     transfer
     gcs

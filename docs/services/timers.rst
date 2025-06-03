@@ -3,10 +3,6 @@ Globus Timers
 
 .. currentmodule:: globus_sdk
 
-.. note::
-
-    ``TimersClient`` is also available under a legacy alias, ``TimerClient``.
-
 .. autoclass:: TimersClient
    :members:
    :member-order: bysource
@@ -49,10 +45,6 @@ Client Errors
 
 When an error occurs on calls to the Timers service, a :class:`TimersClient`
 will raise a ``TimersAPIError``.
-
-.. note::
-
-    ``TimersAPIError`` is also available under a legacy alias, ``TimerAPIError``.
 
 .. autoclass:: TimersAPIError
    :members:

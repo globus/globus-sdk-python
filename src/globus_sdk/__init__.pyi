@@ -109,7 +109,6 @@ from .services.search import (
     SearchQueryV1,
     SearchScrollQuery,
 )
-from .services.timer import TimerAPIError, TimerClient
 from .services.timers import (
     OnceTimerSchedule,
     RecurringTimerSchedule,
@@ -233,8 +232,6 @@ __all__ = (
     "SearchQuery",
     "SearchQueryV1",
     "SearchScrollQuery",
-    "TimerAPIError",
-    "TimerClient",
     "OnceTimerSchedule",
     "RecurringTimerSchedule",
     "TimerJob",
