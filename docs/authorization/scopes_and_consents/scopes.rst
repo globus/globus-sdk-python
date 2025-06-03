@@ -112,24 +112,21 @@ The SDK provides a ``Scope`` object which is the class model for a scope.
 ``Scope``\s can be parsed from strings and serialized to strings, and support
 programmatic manipulations to describe dependent scopes.
 
-``Scope`` can be constructed using its initializer, or one of its two main
-parsing methods: ``Scope.parse`` and ``Scope.deserialize``.
-``parse`` produces a list of scopes from a string, while ``deserialize``
-produces exactly one.
+``Scope`` can be constructed using its initializer, via ``Scope.parse``, or via
+:meth:`ScopeParser.parse`.
 
-For example, one can create a ``Scope`` from the Groups "all" scope
-as follows:
+For example, one can create a ``Scope`` object for the OIDC ``openid`` scope:
 
 .. code-block:: python
 
-    from globus_sdk.scopes import GroupsScopes, Scope
+    from globus_sdk.scopes import Scope
 
-    group_scope = Scope.deserialize(GroupsScopes.all)
+    openid_scope = Scope("openid")
 
 ``Scope`` objects primarily provide three main pieces of functionality:
 
-    * parsing (deserializing)
-    * stringifying (serializing)
+    * deserializing (parsing a single scope)
+    * serializing (stringifying)
     * scope tree construction
 
 Scope Construction
@@ -162,9 +159,8 @@ Serializing Scopes
 
 Whenever scopes are being sent to Globus services, they need to be encoded as
 strings. All scope objects support this by means of their defined
-``serialize`` method. Note that ``__str__`` for a ``Scope`` is just an
-alias for ``serialize``. For example, the following is an example of
-``str()``, ``repr()``, and ``serialize()`` usage:
+``__str__`` method. For example, the following is an example of
+``str()`` and ``repr()`` usage:
 
 .. code-block:: pycon
 
@@ -175,7 +171,7 @@ alias for ``serialize``. For example, the following is an example of
     >>> foo.add_dependency(bar)
     >>> print(str(foo))
     foo[bar[baz]]
-    >>> print(bar.serialize())
+    >>> print(str(bar))
     bar[baz]
     >>> alpha = Scope("alpha")
     >>> alpha.add_dependency("beta", optional=True)

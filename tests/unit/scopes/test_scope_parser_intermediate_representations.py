@@ -1,8 +1,8 @@
-from globus_sdk.scopes._parser import ScopeTreeNode, parse_scope_graph
+from globus_sdk.scopes._graph_parser import ScopeGraph, ScopeTreeNode
 
 
 def test_graph_str_single_node():
-    g = parse_scope_graph("foo")
+    g = ScopeGraph.parse("foo")
     clean_str = _blank_lines_removed(str(g))
     assert (
         clean_str
@@ -15,7 +15,7 @@ digraph scopes {
 
 
 def test_graph_str_single_optional_node():
-    g = parse_scope_graph("*foo")
+    g = ScopeGraph.parse("*foo")
     clean_str = _blank_lines_removed(str(g))
     assert (
         clean_str
@@ -28,7 +28,7 @@ digraph scopes {
 
 
 def test_graph_str_single_dependency():
-    g = parse_scope_graph("foo[bar]")
+    g = ScopeGraph.parse("foo[bar]")
     clean_str = _blank_lines_removed(str(g))
     assert (
         clean_str
@@ -42,7 +42,7 @@ digraph scopes {
 
 
 def test_graph_str_optional_dependency():
-    g = parse_scope_graph("foo[bar[*baz]]")
+    g = ScopeGraph.parse("foo[bar[*baz]]")
     clean_str = _blank_lines_removed(str(g))
     assert (
         clean_str
