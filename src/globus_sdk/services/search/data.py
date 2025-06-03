@@ -11,6 +11,15 @@ from globus_sdk.utils import MISSING, MissingType
 SearchQueryT = t.TypeVar("SearchQueryT", bound="SearchQueryBase")
 
 
+def _format_histogram_range(
+    value: tuple[t.Any, t.Any] | MissingType,
+) -> dict[str, t.Any] | MissingType:
+    if isinstance(value, MissingType):
+        return value
+    low, high = value
+    return {"low": low, "high": high}
+
+
 # an internal class for declaring multiple related types with shared methods
 class SearchQueryBase(utils.PayloadWrapper):
     """
@@ -163,11 +172,7 @@ class SearchQuery(SearchQueryBase):
             "type": type,
             "size": size,
             "date_interval": date_interval,
-            "histogram_range": (
-                dict(zip(["low", "high"], histogram_range))
-                if not isinstance(histogram_range, MissingType)
-                else histogram_range
-            ),
+            "histogram_range": _format_histogram_range(histogram_range),
             **(additional_fields or {}),
         }
         self["facets"].append(facet)
