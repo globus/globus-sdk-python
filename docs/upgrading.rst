@@ -45,6 +45,57 @@ Then, code can dispatch with
 From 3.x to 4.0
 ---------------
 
+Scopes are Immutable and Have New Methods
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+:class:`Scope <globus_sdk.scopes.Scope>` object in v3 of the SDK could be
+updated with in-place modifications.
+In v4, these objects are now frozen, and their methods have been altered to
+suit their immutability.
+
+In particular, ``add_dependency`` has been replaced with ``with_dependency``,
+which builds and returns a new scope rather than making changes to an existing
+value.
+
+Update ``add_dependency`` usage like so:
+
+.. code-block:: python
+
+    # globus-sdk v3
+    from globus_sdk.scopes import Scope
+
+    my_scope = Scope(ROOT_SCOPE_STRING)
+    my_scope.add_dependency(DEPENCENCY_STRING)
+
+    # globus-sdk v4
+    from globus_sdk.scopes import Scope
+
+    my_scope = Scope(ROOT_SCOPE_STRING)
+    my_scope = my_scope.with_dependency(DEPENCENCY_STRING)
+
+ScopeParser is now separate from Scope
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Scope parsing has been split from ``Scope`` to a new class, ``ScopeParser``.
+Additionally, ``Scope.serialize`` and ``Scope.deserialize`` have been removed,
+and ``Scope.parse`` is now a wrapper over ``ScopeParser.parse`` which always
+builds and returns one scope.
+
+Users who need to parse multiple scopes should rely on ``ScopeParser.parse``.
+For example, update like so:
+
+.. code-block:: python
+
+    # globus-sdk v3
+    from globus_sdk.scopes import Scope
+
+    my_scopes: list[Scope] = Scope.parse(scope_string)
+
+    # globus-sdk v4
+    from globus_sdk.scopes import Scope, Scopeparser
+
+    my_scopes: list[Scope] = ScopeParser.parse(scope_string)
+
 Deprecated Timers Aliases Removed
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
