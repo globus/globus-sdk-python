@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import sys
 import typing as t
 from collections import defaultdict, deque
 
@@ -136,7 +137,15 @@ class ScopeGraph:
         return graph
 
 
-@dataclasses.dataclass(slots=True)
+# pass slots=True on 3.10+
+# it's not strictly necessary, but it improves performance
+if sys.version_info >= (3, 10):
+    _add_dataclass_kwargs = {"slots": True}
+else:
+    _add_dataclass_kwargs = {}
+
+
+@dataclasses.dataclass(**_add_dataclass_kwargs)
 class ScopeTreeNode:
     #
     # This is an intermediate representation for scope parsing.

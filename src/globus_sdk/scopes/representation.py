@@ -1,26 +1,41 @@
 from __future__ import annotations
 
 import dataclasses
-import warnings
+import sys
+import typing as t
+
+# pass slots=True on 3.10+
+# it's not strictly necessary, but it improves performance
+if sys.version_info >= (3, 10):
+    _add_dataclass_kwargs = {"slots": True}
+else:
+    _add_dataclass_kwargs = {}
 
 
-@dataclasses.dataclass(slots=True)
+@dataclasses.dataclass(frozen=True, repr=False, **_add_dataclass_kwargs)
 class Scope:
     """
-    A scope object is a representation of a scope which allows modifications to be
-    made. In particular, it supports handling scope dependencies via
-    ``add_dependency``.
+    A scope object is a representation of a scope and its dynamic dependencies
+    (other scopes).
 
-    `str(Scope(...))` produces a valid scope string for use in various methods.
+    A scope also has optionality, also called its "atomically revovocable" setting.
+    An optional scope can be revoked without revoking consent for other scopes
+    which were granted at the same time.
+
+    Scopes are immutable, and provide several evolver methods which produce new
+    Scopes. In particular, ``with_dependency`` and ``with_dependencies`` create
+    new scopes with added dependencies.
+
+    ``str(Scope(...))`` produces a valid scope string for use in various methods.
 
     :param scope_string: The string which will be used as the basis for this Scope
     :param optional: The scope may be marked as optional. This means that the scope can
-        be declined by the user without declining consent for other scopes
+        be declined by the user without declining consent for other scopes.
     """
 
     scope_string: str
     optional: bool = dataclasses.field(default=False)
-    dependencies: list[Scope] = dataclasses.field(default_factory=list)
+    dependencies: tuple[Scope, ...] = dataclasses.field(default=())
 
     def __post_init__(
         self,
@@ -54,38 +69,37 @@ class Scope:
             )
         return data[0]
 
-    def add_dependency(
-        self, scope: str | Scope, *, optional: bool | None = None
-    ) -> Scope:
+    def with_dependency(self, other_scope: Scope) -> Scope:
         """
-        Add a scope dependency. The dependent scope relationship will be stored in the
-        Scope and will be evident in its string representation.
+        Create a new scope with a dependency.
+        The dependent scope relationship will be stored in the Scope and will
+        be evident in its string representation.
 
-        :param scope: The scope upon which the current scope depends
-        :param optional: Mark the dependency an optional one. By default it is not. An
-            optional scope dependency can be declined by the user without declining
-            consent for the primary scope
+        :param other_scope: The scope upon which the current scope depends.
         """
-        if optional is not None:
-            if isinstance(scope, Scope):
-                raise ValueError(
-                    "cannot use optional=... with a Scope object as the argument to "
-                    "add_dependency"
-                )
-            warnings.warn(
-                "Passing 'optional' to add_dependency is deprecated. "
-                "Construct an optional Scope object instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            scopeobj = Scope(scope, optional=optional)
-        else:
-            if isinstance(scope, str):
-                scopeobj = Scope.parse(scope)
-            else:
-                scopeobj = scope
-        self.dependencies.append(scopeobj)
-        return self
+        return dataclasses.replace(
+            self, dependencies=self.dependencies + (other_scope,)
+        )
+
+    def with_dependencies(self, other_scopes: t.Iterable[Scope]) -> Scope:
+        """
+        Create a new scope with added dependencies.
+        The dependent scope relationships will be stored in the Scope and will
+        be evident in its string representation.
+
+        :param other_scopes: The scopes upon which the current scope depends.
+        """
+        return dataclasses.replace(
+            self, dependencies=self.dependencies + tuple(other_scopes)
+        )
+
+    def with_optional(self, optional: bool) -> Scope:
+        """
+        Create a new scope with a different 'optional' value.
+
+        :param optional: Whether or not the scope is optional.
+        """
+        return dataclasses.replace(self, optional=optional)
 
     def __repr__(self) -> str:
         parts: list[str] = [f"'{self.scope_string}'"]
