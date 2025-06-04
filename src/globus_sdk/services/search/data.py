@@ -15,7 +15,7 @@ def _format_histogram_range(
     value: tuple[t.Any, t.Any] | MissingType,
 ) -> dict[str, t.Any] | MissingType:
     if isinstance(value, MissingType):
-        return value
+        return MISSING
     low, high = value
     return {"low": low, "high": high}
 

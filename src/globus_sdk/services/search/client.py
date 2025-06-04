@@ -7,7 +7,7 @@ from globus_sdk import client, paging, response, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.exc.warnings import warn_deprecated
 from globus_sdk.scopes import Scope, SearchScopes
-from globus_sdk.utils import MISSING, MissingType, filter_missing
+from globus_sdk.utils import MISSING, MissingType
 
 from .data import SearchQuery, SearchScrollQuery
 from .errors import SearchAPIError
@@ -235,9 +235,9 @@ class SearchClient(client.BaseClient):
         index_id: UUIDLike,
         q: str,
         *,
-        offset: int = 0,
-        limit: int = 10,
-        advanced: bool = False,
+        offset: int | MissingType = MISSING,
+        limit: int | MissingType = MISSING,
+        advanced: bool | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
@@ -280,11 +280,11 @@ class SearchClient(client.BaseClient):
                 .. expandtestfixture:: search.search
         """  # noqa: E501
         query_params = {
-            **(query_params or {}),
             "q": q,
             "offset": offset,
             "limit": limit,
             "advanced": advanced,
+            **(query_params or {}),
         }
         log.debug(f"SearchClient.search({index_id}, ...)")
         return self.get(f"/v1/index/{index_id}/search", query_params=query_params)
@@ -356,16 +356,12 @@ class SearchClient(client.BaseClient):
                     :ref: search/reference/post_query/
         """
         log.debug(f"SearchClient.post_search({index_id}, ...)")
-        add_kwargs = filter_missing(
-            {
-                "offset": offset,
-                "limit": limit,
-            }
-        )
-        data = {
-            **data,
-            **add_kwargs,
-        }
+        add_kwargs = {}
+        if not isinstance(offset, MissingType):
+            add_kwargs["offset"] = offset
+        if not isinstance(limit, MissingType):
+            add_kwargs["limit"] = limit
+        data = {**data, **add_kwargs}
         return self.post(f"v1/index/{index_id}/search", data=data)
 
     @paging.has_paginator(paging.MarkerPaginator, items_key="gmeta")
@@ -411,15 +407,10 @@ class SearchClient(client.BaseClient):
                     :ref: search/reference/scroll_query/
         """
         log.debug(f"SearchClient.scroll({index_id}, ...)")
-        add_kwargs = filter_missing(
-            {
-                "marker": marker,
-            }
-        )
-        data = {
-            **data,
-            **add_kwargs,
-        }
+        add_kwargs = {}
+        if not isinstance(marker, MissingType):
+            add_kwargs["marker"] = marker
+        data = {**data, **add_kwargs}
         return self.post(f"v1/index/{index_id}/scroll", data=data)
 
     #
@@ -628,8 +619,8 @@ class SearchClient(client.BaseClient):
         """
         log.debug(f"SearchClient.get_subject({index_id}, {subject}, ...)")
         query_params = {
-            **(query_params or {}),
             "subject": subject,
+            **(query_params or {}),
         }
         return self.get(f"/v1/index/{index_id}/subject", query_params=query_params)
 
@@ -672,8 +663,8 @@ class SearchClient(client.BaseClient):
         """
         log.debug(f"SearchClient.delete_subject({index_id}, {subject}, ...)")
         query_params = {
-            **(query_params or {}),
             "subject": subject,
+            **(query_params or {}),
         }
         return self.delete(f"/v1/index/{index_id}/subject", query_params=query_params)
 
@@ -731,15 +722,10 @@ class SearchClient(client.BaseClient):
                 index_id, subject, entry_id
             )
         )
-        add_kwargs = filter_missing(
-            {
-                "entry_id": entry_id,
-                "subject": subject,
-            }
-        )
         query_params = {
+            "entry_id": entry_id,
+            "subject": subject,
             **(query_params or {}),
-            **add_kwargs,
         }
         return self.get(f"/v1/index/{index_id}/entry", query_params=query_params)
 
@@ -904,15 +890,10 @@ class SearchClient(client.BaseClient):
                 index_id, subject, entry_id
             )
         )
-        add_kwargs = filter_missing(
-            {
-                "entry_id": entry_id,
-                "subject": subject,
-            }
-        )
         query_params = {
+            "entry_id": entry_id,
+            "subject": subject,
             **(query_params or {}),
-            **add_kwargs,
         }
         return self.delete(f"/v1/index/{index_id}/entry", query_params=query_params)
 

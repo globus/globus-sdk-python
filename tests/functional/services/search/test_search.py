@@ -32,12 +32,7 @@ def test_search_query_simple(search_client):
     req = get_last_request()
     assert req.body is None
     parsed_qs = urllib.parse.parse_qs(urllib.parse.urlparse(req.url).query)
-    assert parsed_qs == {
-        "q": ["foo"],
-        "advanced": ["False"],
-        "limit": ["10"],
-        "offset": ["0"],
-    }
+    assert parsed_qs == {"q": ["foo"]}
 
 
 @pytest.mark.parametrize("query_doc", [{"q": "foo"}, {"q": "foo", "limit": 10}])
