@@ -1,0 +1,5 @@
+Breaking Changes
+~~~~~~~~~~~~~~~~
+
+- All defaults of ``None`` converted to ``globus_sdk.MISSING`` for all payload types in the Compute client. (:pr:`1212`)
+- All defaults of ``None`` converted to ``globus_sdk.MISSING`` for all payload types in the Groups client. (:pr:`1212`)
