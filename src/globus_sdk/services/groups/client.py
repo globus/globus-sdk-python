@@ -5,6 +5,7 @@ import typing as t
 from globus_sdk import client, response, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.scopes import GroupsScopes, Scope
+from globus_sdk.utils import MISSING, MissingType
 
 from .data import BatchMembershipActions, GroupPolicies
 from .errors import GroupsAPIError
@@ -58,7 +59,7 @@ class GroupsClient(client.BaseClient):
         self,
         group_id: UUIDLike,
         *,
-        include: None | str | t.Iterable[str] = None,
+        include: str | t.Iterable[str] | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
@@ -80,10 +81,7 @@ class GroupsClient(client.BaseClient):
                     :service: groups
                     :ref: get_group_v2_groups__group_id__get
         """
-        if query_params is None:
-            query_params = {}
-        if include is not None:
-            query_params["include"] = ",".join(utils.safe_strseq_iter(include))
+        query_params = {"include": utils.commajoin(include), **(query_params or {})}
         return self.get(f"/v2/groups/{group_id}", query_params=query_params)
 
     def get_group_by_subscription_id(
