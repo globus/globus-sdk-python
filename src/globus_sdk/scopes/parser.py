@@ -44,12 +44,12 @@ class ScopeParser:
         built_scopes: dict[tuple[str, bool], Scope] = {}
 
         for name, optionality in list(scope_graph.breadth_first_walk())[::-1]:
-            dependencies: list[Scope] = [
+            dependencies: tuple[Scope, ...] = tuple(
                 # the lookup in built_scopes here is safe because of the
                 # reversed BFS ordering
                 built_scopes[(dep_name, dep_optional)]
                 for _, dep_name, dep_optional in scope_graph.adjacency_matrix[name]
-            ]
+            )
 
             built_scopes[(name, optionality)] = Scope(
                 name, optional=optionality, dependencies=dependencies

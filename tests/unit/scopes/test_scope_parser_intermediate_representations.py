@@ -1,4 +1,4 @@
-from globus_sdk.scopes._graph_parser import ScopeGraph, ScopeTreeNode
+from globus_sdk.scopes._graph_parser import ScopeGraph
 
 
 def test_graph_str_single_node():
@@ -54,18 +54,6 @@ digraph scopes {
   bar -> baz [ label = "optional" ];
 }"""
     )
-
-
-def test_treenode_repr():
-    t = ScopeTreeNode("foo", optional=False)
-    assert repr(t) == "ScopeTreeNode('foo')"
-
-    t = ScopeTreeNode("foo", optional=True)
-    assert repr(t) == "ScopeTreeNode('foo', optional=True)"
-
-    t = ScopeTreeNode("foo", optional=False)
-    t.dependencies = [ScopeTreeNode("bar", optional=False)]
-    assert repr(t) == "ScopeTreeNode('foo', dependencies=[ScopeTreeNode('bar')])"
 
 
 def _blank_lines_removed(s: str) -> str:

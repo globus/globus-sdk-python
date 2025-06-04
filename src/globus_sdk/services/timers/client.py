@@ -89,15 +89,16 @@ class TimersClient(client.BaseClient):
                 _guards.validators.uuidlike(f"collection_ids[{i}]", c)
 
         transfer_scope = Scope(TransferScopes.all)
+        dependencies: list[Scope] = []
         for coll_id in collection_ids_:
             data_access_scope = Scope(
                 GCSCollectionScopeBuilder(str(coll_id)).data_access,
                 optional=True,
             )
-            transfer_scope.add_dependency(data_access_scope)
+            dependencies.append(data_access_scope)
+        transfer_scope = transfer_scope.with_dependencies(dependencies)
 
-        timers_scope = Scope(TimersScopes.timer)
-        timers_scope.add_dependency(transfer_scope)
+        timers_scope = Scope(TimersScopes.timer, dependencies=(transfer_scope,))
         self.add_app_scope(timers_scope)
         return self
 

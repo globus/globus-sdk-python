@@ -19,49 +19,28 @@ def test_scope_str_and_repr_optional():
 
 def test_scope_str_and_repr_with_dependencies():
     s = Scope("top")
-    s.add_dependency("foo")
+    s = s.with_dependency(Scope("foo"))
     assert str(s) == "top[foo]"
-    s.add_dependency("bar")
+    s = s.with_dependency(Scope("bar"))
     assert str(s) == "top[foo bar]"
-    assert repr(s) == "Scope('top', dependencies=[Scope('foo'), Scope('bar')])"
-
-
-def test_add_dependency_warns_on_optional_but_still_has_good_str_and_repr():
-    s = Scope("top")
-    # this should warn, the use of `optional=...` rather than adding a Scope object
-    # when optional dependencies are wanted is deprecated
-    with pytest.warns(DeprecationWarning):
-        s.add_dependency("foo", optional=True)
-
-    # confirm the str representation and repr for good measure
-    assert str(s) == "top[*foo]"
-    assert repr(s) == "Scope('top', dependencies=[Scope('foo', optional=True)])"
-
-
-@pytest.mark.parametrize("optional_arg", (True, False))
-def test_add_dependency_fails_if_optional_is_combined_with_scope(optional_arg):
-    s = Scope("top")
-    s2 = Scope("bottom")
-    with pytest.raises(ValueError):
-        s.add_dependency(s2, optional=optional_arg)
+    assert repr(s) == "Scope('top', dependencies=(Scope('foo'), Scope('bar')))"
 
 
 def test_scope_str_nested():
-    top = Scope("top")
-    mid = Scope("mid")
     bottom = Scope("bottom")
-    mid.add_dependency(bottom)
-    top.add_dependency(mid)
+    mid = Scope("mid", dependencies=(bottom,))
+    top = Scope("top", dependencies=(mid,))
     assert str(bottom) == "bottom"
     assert str(mid) == "mid[bottom]"
     assert str(top) == "top[mid[bottom]]"
 
 
-def test_add_dependency_parses_scope_with_optional_marker():
+def test_scope_with_optional_dependency_stringifies():
     s = Scope("top")
-    s.add_dependency("*subscope")
+    s = s.with_dependency(Scope("subscope", optional=True))
     assert str(s) == "top[*subscope]"
-    assert repr(s) == "Scope('top', dependencies=[Scope('subscope', optional=True)])"
+    subscope_repr = "Scope('subscope', optional=True)"
+    assert repr(s) == f"Scope('top', dependencies=({subscope_repr},))"
 
 
 def test_scope_parsing_allows_empty_string():
