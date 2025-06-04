@@ -6,6 +6,7 @@ import typing as t
 from globus_sdk import GlobusHTTPResponse, client, utils
 from globus_sdk._types import UUIDLike
 from globus_sdk.scopes import ComputeScopes, Scope
+from globus_sdk.utils import MISSING, MissingType
 
 from .errors import ComputeAPIError
 
@@ -26,7 +27,7 @@ class ComputeClientV2(client.BaseClient):
     scopes = ComputeScopes
     default_scope_requirements = [Scope(ComputeScopes.all)]
 
-    def get_version(self, service: str | None = None) -> GlobusHTTPResponse:
+    def get_version(self, service: str | MissingType = MISSING) -> GlobusHTTPResponse:
         """Get the current version of the API and other services.
 
         :param service: Service for which to get version information.
@@ -39,7 +40,7 @@ class ComputeClientV2(client.BaseClient):
                     :service: compute
                     :ref: Root/operation/get_version_v2_version_get
         """
-        query_params = {"service": service} if service else None
+        query_params = {"service": service}
         return self.get("/v2/version", query_params=query_params)
 
     def get_result_amqp_url(self) -> GlobusHTTPResponse:
