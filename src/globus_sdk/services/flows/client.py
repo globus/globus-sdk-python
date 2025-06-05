@@ -1056,3 +1056,56 @@ class SpecificFlowClient(client.BaseClient):
                     :ref: Runs/paths/~1flows~1{flow_id}~1runs~1{run_id}~1resume/post
         """
         return self.post(f"/runs/{run_id}/resume")
+
+    def validate_run(
+        self,
+        body: dict[str, t.Any],
+        *,
+        label: str | None = None,
+        tags: list[str] | None = None,
+        run_monitors: list[str] | None = None,
+        run_managers: list[str] | None = None,
+        additional_fields: dict[str, t.Any] | None = None,
+    ):
+        """
+        :param body: The parameters to validate against the flow's input schema
+        :param label: A short human-readable title (1 - 64 chars)
+        :param tags: A collection of searchable tags associated with the run. Tags are
+            normalized by stripping leading and trailing whitespace, and replacing all
+            whitespace with a single space.
+        :param run_monitors: A list of authenticated entities (identified by URN)
+            authorized to view this run in addition to the run owner
+        :param run_managers: A list of authenticated entities (identified by URN)
+            authorized to view & cancel this run in addition to the run owner
+        :param additional_fields: Additional Key/Value pairs sent to the run API
+            (this parameter is used to bypass local sdk key validation helping)
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    from globus_sdk import SpecificFlowClient
+
+                    ...
+                    flow = SpecificFlowClient(flow_id, ...)
+                    flow.validate_run(body={"param": "value"})
+            .. tab-item:: Example Response Data
+
+                .. expandtestfixture:: flows.validate_run
+        """
+        data = {
+            k: v
+            for k, v in {
+                "body": body,
+                "tags": tags,
+                "label": label,
+                "run_monitors": run_monitors,
+                "run_managers": run_managers,
+            }.items()
+            if v is not None
+        }
+        data.update(additional_fields or {})
+
+        return self.post(f"/flows/{self._flow_id}/validate_run", data=data)
