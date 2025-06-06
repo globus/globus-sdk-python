@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import typing as t
 
+T = t.TypeVar("T")
+
 
 class MissingType:
     def __init__(self) -> None:
@@ -56,3 +58,16 @@ def filter_missing(data: dict[str, t.Any] | None) -> dict[str, t.Any] | None:
     if data is None:
         return None
     return {k: v for k, v in data.items() if v is not MISSING}
+
+
+def none2missing(obj: T | None) -> T | MissingType:
+    """
+    A converter for interfaces which take "nullable" to mean "omittable", to
+    adapt them to usage sites which require use of MISSING for omittable
+    elements.
+
+    :param obj: The nullable object to convert to an omittable object.
+    """
+    if obj is None:
+        return MISSING
+    return obj

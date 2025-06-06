@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import typing as t
 
+from globus_sdk._missing import MISSING, MissingType
 from globus_sdk._types import ScopeCollectionType, UUIDLike
 from globus_sdk.authorizers import NullAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
@@ -52,11 +53,11 @@ class NativeAppAuthClient(AuthLoginClient):
         self,
         requested_scopes: ScopeCollectionType,
         *,
-        redirect_uri: str | None = None,
+        redirect_uri: str | MissingType = MISSING,
         state: str = "_default",
-        verifier: str | None = None,
+        verifier: str | MissingType = MISSING,
         refresh_tokens: bool = False,
-        prefill_named_grant: str | None = None,
+        prefill_named_grant: str | MissingType = MISSING,
     ) -> GlobusNativeAppFlowManager:
         """
         Starts a Native App OAuth2 flow.

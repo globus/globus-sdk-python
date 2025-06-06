@@ -7,6 +7,7 @@ import typing as t
 import jwt
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 
+from globus_sdk._missing import MISSING, MissingType
 from globus_sdk._types import ScopeCollectionType
 from globus_sdk.exc import GlobusSDKUsageError
 from globus_sdk.response import GlobusHTTPResponse
@@ -77,7 +78,7 @@ class SupportsJWKMethods(t.Protocol):
     @t.overload
     def get_jwk(
         self,
-        openid_configuration: None | GlobusHTTPResponse | dict[str, t.Any],
+        openid_configuration: GlobusHTTPResponse | dict[str, t.Any] | MissingType,
         *,
         as_pem: t.Literal[True],
     ) -> RSAPublicKey: ...
@@ -85,14 +86,16 @@ class SupportsJWKMethods(t.Protocol):
     @t.overload
     def get_jwk(
         self,
-        openid_configuration: None | GlobusHTTPResponse | dict[str, t.Any],
+        openid_configuration: GlobusHTTPResponse | dict[str, t.Any] | MissingType,
         *,
         as_pem: t.Literal[False],
     ) -> dict[str, t.Any]: ...
 
     def get_jwk(
         self,
-        openid_configuration: None | GlobusHTTPResponse | dict[str, t.Any] = None,
+        openid_configuration: (
+            GlobusHTTPResponse | dict[str, t.Any] | MissingType
+        ) = MISSING,
         *,
         as_pem: bool = False,
     ) -> RSAPublicKey | dict[str, t.Any]: ...
