@@ -2,6 +2,7 @@ import json
 
 import globus_sdk
 from globus_sdk._testing import get_last_request, load_response
+from globus_sdk.utils import filter_missing
 
 
 def test_dummy_timer_creation(client):
@@ -44,5 +45,7 @@ def test_transfer_timer_creation(client):
         "end": {"condition": "iterations", "iterations": 3},
     }
     assert sent["timer"]["body"] == {
-        k: v for k, v in body.items() if k != "skip_activation_check"
+        k: [filter_missing(data_val) for data_val in v] if k == "DATA" else v
+        for k, v in filter_missing(body).items()
+        if k != "skip_activation_check"
     }

@@ -8,6 +8,7 @@ import uuid
 from globus_sdk import _guards, client, exc, paging, response, utils
 from globus_sdk._types import DateLike, IntLike, UUIDLike
 from globus_sdk.scopes import GCSCollectionScopeBuilder, Scope, TransferScopes
+from globus_sdk.utils import MISSING, MissingType
 
 from .data import DeleteData, TransferData
 from .errors import TransferAPIError
@@ -23,15 +24,38 @@ def _datelike_to_str(x: DateLike) -> str:
     return x if isinstance(x, str) else x.isoformat(timespec="seconds")
 
 
-def _format_filter_item(x: str | TransferFilterDict) -> str:
-    if isinstance(x, str):
+def _format_completion_time(
+    x: str | tuple[DateLike, DateLike] | MissingType,
+) -> str | MissingType:
+    if isinstance(x, MissingType):
+        return MISSING
+    elif isinstance(x, str):
+        return x
+    else:
+        start_t, end_t = x
+        start_t, end_t = _datelike_to_str(start_t), _datelike_to_str(end_t)
+        return f"{start_t},{end_t}"
+
+
+@t.overload
+def _format_filter_item(x: str | TransferFilterDict) -> str: ...
+
+
+@t.overload
+def _format_filter_item(x: MissingType) -> MissingType: ...
+
+
+def _format_filter_item(x: str | TransferFilterDict | MissingType) -> str | MissingType:
+    if isinstance(x, MissingType):
+        return MISSING
+    elif isinstance(x, str):
         return x
     return "/".join(f"{k}:{utils.commajoin(v)}" for k, v in x.items())
 
 
 def _format_filter(
-    x: str | TransferFilterDict | list[str | TransferFilterDict],
-) -> str | list[str]:
+    x: str | TransferFilterDict | list[str | TransferFilterDict] | MissingType,
+) -> str | list[str] | MissingType:
     if isinstance(x, list):
         return [_format_filter_item(y) for y in x]
     return _format_filter_item(x)
@@ -381,12 +405,12 @@ class TransferClient(client.BaseClient):
     )
     def endpoint_search(
         self,
-        filter_fulltext: str | None = None,
+        filter_fulltext: str | MissingType = MISSING,
         *,
-        filter_scope: str | None = None,
-        filter_owner_id: str | None = None,
-        filter_host_endpoint: UUIDLike | None = None,
-        filter_non_functional: bool | None = None,
+        filter_scope: str | MissingType = MISSING,
+        filter_owner_id: str | MissingType = MISSING,
+        filter_host_endpoint: UUIDLike | MissingType = MISSING,
+        filter_non_functional: bool | MissingType = MISSING,
         filter_entity_type: (
             t.Literal[
                 "GCP_mapped_collection",
@@ -395,10 +419,10 @@ class TransferClient(client.BaseClient):
                 "GCSv5_mapped_collection",
                 "GCSv5_guest_collection",
             ]
-            | None
-        ) = None,
-        limit: int | None = None,
-        offset: int | None = None,
+            | MissingType
+        ) = MISSING,
+        limit: int | MissingType = MISSING,
+        offset: int | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         r"""
@@ -461,24 +485,25 @@ class TransferClient(client.BaseClient):
                 .. extdoclink:: Endpoint and Collection Search
                     :ref: transfer/endpoint_and_collection_search
         """  # noqa: E501
-        if query_params is None:
-            query_params = {}
-        if filter_scope is not None:
-            query_params["filter_scope"] = filter_scope
-        if filter_fulltext is not None:
-            query_params["filter_fulltext"] = filter_fulltext
-        if filter_owner_id is not None:
-            query_params["filter_owner_id"] = filter_owner_id
-        if filter_host_endpoint is not None:
-            query_params["filter_host_endpoint"] = filter_host_endpoint
-        if filter_non_functional is not None:  # convert to int (expect bool input)
-            query_params["filter_non_functional"] = 1 if filter_non_functional else 0
-        if filter_entity_type is not None:
-            query_params["filter_entity_type"] = filter_entity_type
-        if limit is not None:
-            query_params["limit"] = limit
-        if offset is not None:
-            query_params["offset"] = offset
+        query_params = {
+            "filter_scope": filter_scope,
+            "filter_fulltext": filter_fulltext,
+            "filter_owner_id": filter_owner_id,
+            "filter_host_endpoint": filter_host_endpoint,
+            "filter_non_functional": (
+                1
+                if filter_non_functional
+                else (
+                    0
+                    if isinstance(filter_non_functional, bool)
+                    else filter_non_functional
+                )
+            ),
+            "filter_entity_type": filter_entity_type,
+            "limit": limit,
+            "offset": offset,
+            **(query_params or {}),
+        }
         log.debug(f"TransferClient.endpoint_search({query_params})")
         return IterableTransferResponse(
             self.get("/v0.10/endpoint_search", query_params=query_params)
@@ -488,7 +513,7 @@ class TransferClient(client.BaseClient):
         self,
         endpoint_id: UUIDLike,
         *,
-        if_expires_in: int | None = None,
+        if_expires_in: int | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         r"""
@@ -504,10 +529,10 @@ class TransferClient(client.BaseClient):
         :param query_params: Any additional parameters will be passed through
             as query params.
         """  # noqa: E501
-        if query_params is None:
-            query_params = {}
-        if if_expires_in is not None:
-            query_params["if_expires_in"] = if_expires_in
+        query_params = {
+            "if_expires_in": if_expires_in,
+            **(query_params or {}),
+        }
         log.debug(f"TransferClient.endpoint_autoactivate({endpoint_id})")
         return self.post(
             f"/v0.10/endpoint/{endpoint_id}/autoactivate", query_params=query_params
@@ -651,8 +676,8 @@ class TransferClient(client.BaseClient):
         self,
         endpoint_id: UUIDLike,
         *,
-        max_results: int | None = None,
-        next_token: str | None = None,
+        max_results: int | MissingType = MISSING,
+        next_token: str | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
@@ -678,12 +703,13 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/endpoints_and_collections/get_guest_collection_list
         """
         log.debug(f"TransferClient.get_shared_endpoint_list({endpoint_id}, ...)")
-        if query_params is None:
-            query_params = {}
-        if max_results is not None:
-            query_params["max_results"] = str(max_results)
-        if next_token is not None:
-            query_params["next_token"] = next_token
+        query_params = {
+            "max_results": (
+                str(max_results) if isinstance(max_results, int) else max_results
+            ),
+            "next_token": next_token,
+            **(query_params or {}),
+        }
         return IterableTransferResponse(
             self.get(
                 f"/v0.10/endpoint/{endpoint_id}/shared_endpoint_list",
@@ -1187,16 +1213,18 @@ class TransferClient(client.BaseClient):
     def operation_ls(
         self,
         endpoint_id: UUIDLike,
-        path: str | None = None,
+        path: str | MissingType = MISSING,
         *,
-        show_hidden: bool | None = None,
-        orderby: str | list[str] | None = None,
-        limit: int | None = None,
-        offset: int | None = None,
+        show_hidden: bool | MissingType = MISSING,
+        orderby: str | list[str] | MissingType = MISSING,
+        limit: int | MissingType = MISSING,
+        offset: int | MissingType = MISSING,
         # note: filter is a soft keyword in python, so using this name is okay
         # pylint: disable=redefined-builtin
-        filter: str | TransferFilterDict | list[str | TransferFilterDict] | None = None,
-        local_user: str | None = None,
+        filter: (
+            str | TransferFilterDict | list[str | TransferFilterDict] | MissingType
+        ) = MISSING,
+        local_user: str | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
@@ -1271,26 +1299,20 @@ class TransferClient(client.BaseClient):
                 .. extdoclink:: List Directory Contents
                     :ref: transfer/file_operations/#list_directory_contents
         """  # noqa: E501
-        if query_params is None:
-            query_params = {}
-        if path is not None:
-            query_params["path"] = path
-        if show_hidden is not None:
-            query_params["show_hidden"] = 1 if show_hidden else 0
-        if limit is not None:
-            query_params["limit"] = limit
-        if offset is not None:
-            query_params["offset"] = offset
-        if orderby is not None:
-            if isinstance(orderby, str):
-                query_params["orderby"] = orderby
-            else:
-                query_params["orderby"] = ",".join(orderby)
-        if filter is not None:
-            query_params["filter"] = _format_filter(filter)
-        if local_user is not None:
-            query_params["local_user"] = local_user
-
+        query_params = {
+            "path": path,
+            "limit": limit,
+            "offset": offset,
+            "show_hidden": (
+                1
+                if show_hidden
+                else 0 if isinstance(show_hidden, bool) else show_hidden
+            ),
+            "orderby": utils.commajoin(orderby),
+            "filter": _format_filter(filter),
+            "local_user": local_user,
+            **(query_params or {}),
+        }
         log.debug(f"TransferClient.operation_ls({endpoint_id}, {query_params})")
         return IterableTransferResponse(
             self.get(
@@ -1303,7 +1325,7 @@ class TransferClient(client.BaseClient):
         endpoint_id: UUIDLike,
         path: str,
         *,
-        local_user: str | None = None,
+        local_user: str | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
@@ -1335,9 +1357,11 @@ class TransferClient(client.BaseClient):
                 endpoint_id, path, query_params
             )
         )
-        json_body = {"DATA_TYPE": "mkdir", "path": path}
-        if local_user is not None:
-            json_body["local_user"] = local_user
+        json_body = {
+            "DATA_TYPE": "mkdir",
+            "path": path,
+            "local_user": local_user,
+        }
         return self.post(
             f"/v0.10/operation/endpoint/{endpoint_id}/mkdir",
             data=json_body,
@@ -1350,7 +1374,7 @@ class TransferClient(client.BaseClient):
         oldpath: str,
         newpath: str,
         *,
-        local_user: str | None = None,
+        local_user: str | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
@@ -1387,9 +1411,8 @@ class TransferClient(client.BaseClient):
             "DATA_TYPE": "rename",
             "old_path": oldpath,
             "new_path": newpath,
+            "local_user": local_user,
         }
-        if local_user is not None:
-            json_body["local_user"] = local_user
         return self.post(
             f"/v0.10/operation/endpoint/{endpoint_id}/rename",
             data=json_body,
@@ -1399,9 +1422,9 @@ class TransferClient(client.BaseClient):
     def operation_stat(
         self,
         endpoint_id: UUIDLike,
-        path: str | None = None,
+        path: str | MissingType = MISSING,
         *,
-        local_user: str | None = None,
+        local_user: str | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
@@ -1432,13 +1455,11 @@ class TransferClient(client.BaseClient):
                 .. extdoclink:: Get File or Directory Status
                     :ref: transfer/file_operations/#stat
         """
-        if query_params is None:
-            query_params = {}
-        if path is not None:
-            query_params["path"] = path
-        if local_user is not None:
-            query_params["local_user"] = local_user
-
+        query_params = {
+            "path": path,
+            "local_user": local_user,
+            **(query_params or {}),
+        }
         log.debug(f"TransferClient.operation_stat({endpoint_id}, {query_params})")
         return self.get(
             f"/v0.10/operation/endpoint/{endpoint_id}/stat", query_params=query_params
@@ -1622,11 +1643,11 @@ class TransferClient(client.BaseClient):
     def task_list(
         self,
         *,
-        limit: int | None = None,
-        offset: int | None = None,
-        orderby: str | list[str] | None = None,
+        limit: int | MissingType = MISSING,
+        offset: int | MissingType = MISSING,
+        orderby: str | list[str] | MissingType = MISSING,
         # pylint: disable=redefined-builtin
-        filter: str | TransferFilterDict | None = None,
+        filter: str | TransferFilterDict | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
@@ -1702,19 +1723,13 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/task/#get_task_list
         """  # noqa: E501
         log.debug("TransferClient.task_list(...)")
-        if query_params is None:
-            query_params = {}
-        if limit is not None:
-            query_params["limit"] = limit
-        if offset is not None:
-            query_params["offset"] = offset
-        if orderby is not None:
-            if isinstance(orderby, str):
-                query_params["orderby"] = orderby
-            else:
-                query_params["orderby"] = ",".join(orderby)
-        if filter is not None:
-            query_params["filter"] = _format_filter_item(filter)
+        query_params = {
+            "limit": limit,
+            "offset": offset,
+            "orderby": utils.commajoin(orderby),
+            "filter": _format_filter_item(filter),
+            **(query_params or {}),
+        }
         return IterableTransferResponse(
             self.get("/v0.10/task_list", query_params=query_params)
         )
@@ -1730,8 +1745,8 @@ class TransferClient(client.BaseClient):
         self,
         task_id: UUIDLike,
         *,
-        limit: int | None = None,
-        offset: int | None = None,
+        limit: int | MissingType = MISSING,
+        offset: int | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         r"""
@@ -1767,12 +1782,11 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/task/#get_event_list
         """  # noqa: E501
         log.debug(f"TransferClient.task_event_list({task_id}, ...)")
-        if query_params is None:
-            query_params = {}
-        if limit is not None:
-            query_params["limit"] = limit
-        if offset is not None:
-            query_params["offset"] = offset
+        query_params = {
+            "limit": limit,
+            "offset": offset,
+            **(query_params or {}),
+        }
         return IterableTransferResponse(
             self.get(f"/v0.10/task/{task_id}/event_list", query_params=query_params)
         )
@@ -1978,7 +1992,7 @@ class TransferClient(client.BaseClient):
         self,
         task_id: UUIDLike,
         *,
-        marker: str | None = None,
+        marker: str | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
@@ -2020,10 +2034,10 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/task/#get_task_successful_transfers
         """  # noqa: E501
         log.debug(f"TransferClient.task_successful_transfers({task_id}, ...)")
-        if query_params is None:
-            query_params = {}
-        if marker is not None:
-            query_params["marker"] = marker
+        query_params = {
+            "marker": marker,
+            **(query_params or {}),
+        }
         return IterableTransferResponse(
             self.get(
                 f"/v0.10/task/{task_id}/successful_transfers", query_params=query_params
@@ -2037,7 +2051,7 @@ class TransferClient(client.BaseClient):
         self,
         task_id: UUIDLike,
         *,
-        marker: str | None = None,
+        marker: str | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
@@ -2073,10 +2087,10 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/task/#get_task_skipped_errors
         """  # noqa: E501
         log.debug("TransferClient.task_skipped_errors(%s, ...)", task_id)
-        if query_params is None:
-            query_params = {}
-        if marker is not None:
-            query_params["marker"] = marker
+        query_params = {
+            "marker": marker,
+            **(query_params or {}),
+        }
         return IterableTransferResponse(
             self.get(f"/v0.10/task/{task_id}/skipped_errors", query_params=query_params)
         )
@@ -2207,16 +2221,16 @@ class TransferClient(client.BaseClient):
     def endpoint_manager_task_list(
         self,
         *,
-        filter_status: None | str | t.Iterable[str] = None,
-        filter_task_id: None | UUIDLike | t.Iterable[UUIDLike] = None,
-        filter_owner_id: UUIDLike | None = None,
-        filter_endpoint: UUIDLike | None = None,
-        filter_endpoint_use: t.Literal["source", "destination"] | None = None,
-        filter_is_paused: bool | None = None,
-        filter_completion_time: None | str | tuple[DateLike, DateLike] = None,
-        filter_min_faults: int | None = None,
-        filter_local_user: str | None = None,
-        last_key: str | None = None,
+        filter_status: str | t.Iterable[str] | MissingType = MISSING,
+        filter_task_id: UUIDLike | t.Iterable[UUIDLike] | MissingType = MISSING,
+        filter_owner_id: UUIDLike | MissingType = MISSING,
+        filter_endpoint: UUIDLike | MissingType = MISSING,
+        filter_endpoint_use: t.Literal["source", "destination"] | MissingType = MISSING,
+        filter_is_paused: bool | MissingType = MISSING,
+        filter_completion_time: str | tuple[DateLike, DateLike] | MissingType = MISSING,
+        filter_min_faults: int | MissingType = MISSING,
+        filter_local_user: str | MissingType = MISSING,
+        last_key: str | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         r"""
@@ -2324,39 +2338,26 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/advanced_collection_management/#get_tasks
         """  # noqa: E501
         log.debug("TransferClient.endpoint_manager_task_list(...)")
-        if filter_endpoint is None and filter_endpoint_use is not None:
+        if isinstance(filter_endpoint, MissingType) and not isinstance(
+            filter_endpoint_use, MissingType
+        ):
             raise exc.GlobusSDKUsageError(
                 "`filter_endpoint_use` is only valid when `filter_endpoint` is "
                 "also supplied."
             )
-
-        if query_params is None:
-            query_params = {}
-        if filter_status is not None:
-            query_params["filter_status"] = utils.commajoin(filter_status)
-        if filter_task_id is not None:
-            query_params["filter_task_id"] = utils.commajoin(filter_task_id)
-        if filter_owner_id is not None:
-            query_params["filter_owner_id"] = filter_owner_id
-        if filter_endpoint is not None:
-            query_params["filter_endpoint"] = filter_endpoint
-        if filter_endpoint_use is not None:
-            query_params["filter_endpoint_use"] = filter_endpoint_use
-        if filter_is_paused is not None:
-            query_params["filter_is_paused"] = filter_is_paused
-        if filter_completion_time is not None:
-            if isinstance(filter_completion_time, str):
-                query_params["filter_completion_time"] = filter_completion_time
-            else:
-                start_t, end_t = filter_completion_time
-                start_t, end_t = _datelike_to_str(start_t), _datelike_to_str(end_t)
-                query_params["filter_completion_time"] = f"{start_t},{end_t}"
-        if filter_min_faults is not None:
-            query_params["filter_min_faults"] = filter_min_faults
-        if filter_local_user is not None:
-            query_params["filter_local_user"] = filter_local_user
-        if last_key is not None:
-            query_params["last_key"] = last_key
+        query_params = {
+            "filter_status": utils.commajoin(filter_status),
+            "filter_task_id": utils.commajoin(filter_task_id),
+            "filter_owner_id": filter_owner_id,
+            "filter_endpoint": filter_endpoint,
+            "filter_endpoint_use": filter_endpoint_use,
+            "filter_is_paused": filter_is_paused,
+            "filter_completion_time": _format_completion_time(filter_completion_time),
+            "filter_min_faults": filter_min_faults,
+            "filter_local_user": filter_local_user,
+            "last_key": last_key,
+            **(query_params or {}),
+        }
         return IterableTransferResponse(
             self.get("/v0.10/endpoint_manager/task_list", query_params=query_params)
         )
@@ -2399,9 +2400,9 @@ class TransferClient(client.BaseClient):
         self,
         task_id: UUIDLike,
         *,
-        limit: int | None = None,
-        offset: int | None = None,
-        filter_is_error: bool | None = None,
+        limit: int | MissingType = MISSING,
+        offset: int | MissingType = MISSING,
+        filter_is_error: bool | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
@@ -2431,14 +2432,16 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/advanced_collection_management/#get_task_events
         """
         log.debug(f"TransferClient.endpoint_manager_task_event_list({task_id}, ...)")
-        if query_params is None:
-            query_params = {}
-        if limit is not None:
-            query_params["limit"] = limit
-        if offset is not None:
-            query_params["offset"] = offset
-        if filter_is_error is not None:
-            query_params["filter_is_error"] = 1 if filter_is_error else 0
+        query_params = {
+            "limit": limit,
+            "offset": offset,
+            "filter_is_error": (
+                1
+                if filter_is_error
+                else 0 if isinstance(filter_is_error, bool) else filter_is_error
+            ),
+            **(query_params or {}),
+        }
         return IterableTransferResponse(
             self.get(
                 f"/v0.10/endpoint_manager/task/{task_id}/event_list",
@@ -2481,7 +2484,7 @@ class TransferClient(client.BaseClient):
         self,
         task_id: UUIDLike,
         *,
-        marker: str | None = None,
+        marker: str | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         r"""
@@ -2509,10 +2512,10 @@ class TransferClient(client.BaseClient):
             "TransferClient.endpoint_manager_task_successful_transfers(%s, ...)",
             task_id,
         )
-        if query_params is None:
-            query_params = {}
-        if marker is not None:
-            query_params["marker"] = marker
+        query_params = {
+            "marker": marker,
+            **(query_params or {}),
+        }
         return IterableTransferResponse(
             self.get(
                 f"/v0.10/endpoint_manager/task/{task_id}/successful_transfers",
@@ -2527,7 +2530,7 @@ class TransferClient(client.BaseClient):
         self,
         task_id: UUIDLike,
         *,
-        marker: str | None = None,
+        marker: str | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         r"""
@@ -2554,10 +2557,10 @@ class TransferClient(client.BaseClient):
         log.debug(
             f"TransferClient.endpoint_manager_task_skipped_errors({task_id}, ...)"
         )
-        if query_params is None:
-            query_params = {}
-        if marker is not None:
-            query_params["marker"] = marker
+        query_params = {
+            "marker": marker,
+            **(query_params or {}),
+        }
         return IterableTransferResponse(
             self.get(
                 f"/v0.10/endpoint_manager/task/{task_id}/skipped_errors",
@@ -2695,7 +2698,7 @@ class TransferClient(client.BaseClient):
     def endpoint_manager_pause_rule_list(
         self,
         *,
-        filter_endpoint: UUIDLike | None = None,
+        filter_endpoint: UUIDLike | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableTransferResponse:
         """
@@ -2717,10 +2720,10 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/advanced_collection_management/#get_pause_rules
         """
         log.debug("TransferClient.endpoint_manager_pause_rule_list(...)")
-        if query_params is None:
-            query_params = {}
-        if filter_endpoint is not None:
-            query_params["filter_endpoint"] = filter_endpoint
+        query_params = {
+            "filter_endpoint": filter_endpoint,
+            **(query_params or {}),
+        }
         return IterableTransferResponse(
             self.get(
                 "/v0.10/endpoint_manager/pause_rule_list", query_params=query_params

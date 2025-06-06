@@ -6,6 +6,7 @@ import typing as t
 
 from globus_sdk import exc, utils
 from globus_sdk._types import UUIDLike
+from globus_sdk.utils import MISSING, MissingType
 
 if t.TYPE_CHECKING:
     import globus_sdk
@@ -87,25 +88,25 @@ class DeleteData(utils.PayloadWrapper):
     def __init__(
         self,
         transfer_client: globus_sdk.TransferClient | None = None,
-        endpoint: UUIDLike | None = None,
+        endpoint: UUIDLike | MissingType = MISSING,
         *,
-        label: str | None = None,
-        submission_id: UUIDLike | None = None,
-        recursive: bool = False,
-        ignore_missing: bool = False,
-        interpret_globs: bool = False,
-        deadline: str | datetime.datetime | None = None,
-        skip_activation_check: bool | None = None,
-        notify_on_succeeded: bool = True,
-        notify_on_failed: bool = True,
-        notify_on_inactive: bool = True,
-        local_user: str | None = None,
+        label: str | MissingType = MISSING,
+        submission_id: UUIDLike | MissingType = MISSING,
+        recursive: bool | MissingType = MISSING,
+        ignore_missing: bool | MissingType = MISSING,
+        interpret_globs: bool | MissingType = MISSING,
+        deadline: str | datetime.datetime | MissingType = MISSING,
+        skip_activation_check: bool | MissingType = MISSING,
+        notify_on_succeeded: bool | MissingType = MISSING,
+        notify_on_failed: bool | MissingType = MISSING,
+        notify_on_inactive: bool | MissingType = MISSING,
+        local_user: str | MissingType = MISSING,
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
         # this must be checked explicitly to handle the fact that `transfer_client` is
         # the first arg
-        if endpoint is None:
+        if isinstance(endpoint, MissingType):
             raise exc.GlobusSDKUsageError("endpoint is required")
 
         self["DATA_TYPE"] = "delete"
@@ -160,9 +161,11 @@ class DeleteData(utils.PayloadWrapper):
         :param path: Path to the directory or file to be deleted
         :param additional_fields: additional fields to be added to the delete item
         """
-        item_data = {"DATA_TYPE": "delete_item", "path": path}
-        if additional_fields is not None:
-            item_data.update(additional_fields)
+        item_data = {
+            "DATA_TYPE": "delete_item",
+            "path": path,
+            **(additional_fields or {}),
+        }
         log.debug('DeleteData[{}].add_item: "{}"'.format(self["endpoint"], path))
         self["DATA"].append(item_data)
 

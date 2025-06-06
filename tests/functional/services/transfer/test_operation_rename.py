@@ -4,11 +4,12 @@ import urllib.parse
 import pytest
 
 from globus_sdk._testing import get_last_request, load_response
+from globus_sdk.utils import MISSING
 
 _OMIT = object()
 
 
-@pytest.mark.parametrize("local_user", ("my-user", None, _OMIT))
+@pytest.mark.parametrize("local_user", ("my-user", MISSING, _OMIT))
 def test_operation_rename(client, local_user):
     meta = load_response(client.operation_rename).metadata
     endpoint_id = meta["endpoint_id"]
@@ -35,7 +36,7 @@ def test_operation_rename(client, local_user):
     body = json.loads(req.body)
     assert body["old_path"] == "~/old-name"
     assert body["new_path"] == "~/new-name"
-    if local_user not in (_OMIT, None):
+    if local_user not in (_OMIT, MISSING):
         assert body["local_user"] == local_user
     else:
         assert "local_user" not in body

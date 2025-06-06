@@ -12,7 +12,7 @@ from globus_sdk._testing import get_last_request, load_response
         ({"query_params": {"foo": "bar"}}, {"foo": "bar"}),
         ({"filter": "foo"}, {"filter": "foo"}),
         ({"limit": 10, "offset": 100}, {"limit": "10", "offset": "100"}),
-        ({"limit": 10, "query_params": {"limit": 100}}, {"limit": "10"}),
+        ({"limit": 10, "query_params": {"limit": 100}}, {"limit": "100"}),
         ({"filter": "foo:bar:baz"}, {"filter": "foo:bar:baz"}),
         ({"filter": {"foo": "bar", "bar": "baz"}}, {"filter": "foo:bar/bar:baz"}),
         ({"filter": {"foo": ["bar", "baz"]}}, {"filter": "foo:bar,baz"}),

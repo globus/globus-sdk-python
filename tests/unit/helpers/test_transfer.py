@@ -3,6 +3,7 @@ import pytest
 from globus_sdk import DeleteData, GlobusSDKUsageError, TransferClient, TransferData
 from globus_sdk._testing import load_response
 from globus_sdk.services.transfer.client import _format_filter
+from globus_sdk.utils import MISSING
 from tests.common import GO_EP1_ID, GO_EP2_ID
 
 
@@ -65,9 +66,9 @@ def test_transfer_init_no_client():
     [
         (),
         (GO_EP1_ID, GO_EP2_ID),
-        (None, None, None),
-        (None, GO_EP1_ID, None),
-        (None, None, GO_EP2_ID),
+        (MISSING, MISSING, MISSING),
+        (MISSING, GO_EP1_ID, MISSING),
+        (MISSING, MISSING, GO_EP2_ID),
     ],
 )
 def test_transfer_init_rejects_bad_usage(tdata_args):
@@ -90,9 +91,9 @@ def test_transfer_add_item():
     assert data["DATA_TYPE"] == "transfer_item"
     assert data["source_path"] == source_path
     assert data["destination_path"] == dest_path
-    assert "recursive" not in data
-    assert "external_checksum" not in data
-    assert "checksum_algorithm" not in data
+    assert data["recursive"] == MISSING
+    assert data["external_checksum"] == MISSING
+    assert data["checksum_algorithm"] == MISSING
 
     # add recursive item
     tdata.add_item(source_path, dest_path, recursive=True)
@@ -103,8 +104,8 @@ def test_transfer_add_item():
     assert r_data["source_path"] == source_path
     assert r_data["destination_path"] == dest_path
     assert r_data["recursive"]
-    assert "external_checksum" not in data
-    assert "checksum_algorithm" not in data
+    assert data["external_checksum"] == MISSING
+    assert data["checksum_algorithm"] == MISSING
 
     # item with checksum
     checksum = "d577273ff885c3f84dadb8578bb41399"
@@ -117,7 +118,7 @@ def test_transfer_add_item():
     assert c_data["DATA_TYPE"] == "transfer_item"
     assert c_data["source_path"] == source_path
     assert c_data["destination_path"] == dest_path
-    assert "recursive" not in c_data
+    assert c_data["recursive"] == MISSING
     assert c_data["external_checksum"] == checksum
     assert c_data["checksum_algorithm"] == algorithm
 
@@ -129,7 +130,7 @@ def test_transfer_add_item():
     assert fields_data["DATA_TYPE"] == "transfer_item"
     assert fields_data["source_path"] == source_path
     assert fields_data["destination_path"] == dest_path
-    assert "recursive" not in fields_data
+    assert fields_data["recursive"] == MISSING
     assert all(fields_data[k] == v for k, v in addfields.items())
 
 
@@ -204,7 +205,7 @@ def test_delete_init_no_client(args, kwargs):
 
 
 @pytest.mark.parametrize(
-    "ddata_args", [(), (GO_EP1_ID,), (None, None), (GO_EP1_ID, None)]
+    "ddata_args", [(), (GO_EP1_ID,), (MISSING, MISSING), (GO_EP1_ID, MISSING)]
 )
 def test_delete_init_rejects_bad_usage(ddata_args):
     with pytest.raises(GlobusSDKUsageError):
@@ -302,8 +303,12 @@ def test_notification_options(n_succeeded, n_failed, n_inactive):
         "notify_on_inactive": _default(n_inactive),
     }
     for k, v in expect.items():
-        assert tdata[k] is v
-        assert ddata[k] is v
+        if k in notify_kwargs:
+            assert tdata[k] is v
+            assert ddata[k] is v
+        else:
+            assert k not in tdata
+            assert k not in ddata
 
 
 @pytest.mark.parametrize(
@@ -381,7 +386,7 @@ def test_add_filter_rule():
     assert tdata["filter_rules"][1]["DATA_TYPE"] == "filter_rule"
     assert tdata["filter_rules"][1]["method"] == "exclude"
     assert tdata["filter_rules"][1]["name"] == "tmp"
-    assert "type" not in tdata["filter_rules"][1]
+    assert tdata["filter_rules"][1]["type"] == MISSING
 
 
 @pytest.mark.parametrize(

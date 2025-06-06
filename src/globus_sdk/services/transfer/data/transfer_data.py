@@ -6,6 +6,7 @@ import typing as t
 
 from globus_sdk import exc, utils
 from globus_sdk._types import UUIDLike
+from globus_sdk.utils import MISSING, MissingType
 
 if t.TYPE_CHECKING:
     import globus_sdk
@@ -164,36 +165,36 @@ class TransferData(utils.PayloadWrapper):
     def __init__(
         self,
         transfer_client: globus_sdk.TransferClient | None = None,
-        source_endpoint: UUIDLike | None = None,
-        destination_endpoint: UUIDLike | None = None,
+        source_endpoint: UUIDLike | MissingType = MISSING,
+        destination_endpoint: UUIDLike | MissingType = MISSING,
         *,
-        label: str | None = None,
-        submission_id: UUIDLike | None = None,
+        label: str | MissingType = MISSING,
+        submission_id: UUIDLike | MissingType = MISSING,
         sync_level: (
-            int | None | t.Literal["exists", "size", "mtime", "checksum"]
-        ) = None,
-        verify_checksum: bool = False,
-        preserve_timestamp: bool = False,
-        encrypt_data: bool = False,
-        deadline: datetime.datetime | str | None = None,
-        skip_activation_check: bool | None = None,
-        skip_source_errors: bool = False,
-        fail_on_quota_errors: bool = False,
-        recursive_symlinks: str | None = None,
-        delete_destination_extra: bool = False,
-        notify_on_succeeded: bool = True,
-        notify_on_failed: bool = True,
-        notify_on_inactive: bool = True,
-        source_local_user: str | None = None,
-        destination_local_user: str | None = None,
+            int | t.Literal["exists", "size", "mtime", "checksum"] | MissingType
+        ) = MISSING,
+        verify_checksum: bool | MissingType = MISSING,
+        preserve_timestamp: bool | MissingType = MISSING,
+        encrypt_data: bool | MissingType = MISSING,
+        deadline: datetime.datetime | str | MissingType = MISSING,
+        skip_activation_check: bool | MissingType = MISSING,
+        skip_source_errors: bool | MissingType = MISSING,
+        fail_on_quota_errors: bool | MissingType = MISSING,
+        recursive_symlinks: str | MissingType = MISSING,
+        delete_destination_extra: bool | MissingType = MISSING,
+        notify_on_succeeded: bool | MissingType = MISSING,
+        notify_on_failed: bool | MissingType = MISSING,
+        notify_on_inactive: bool | MissingType = MISSING,
+        source_local_user: str | MissingType = MISSING,
+        destination_local_user: str | MissingType = MISSING,
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
         # these must be checked explicitly to handle the fact that `transfer_client` is
         # the first arg
-        if source_endpoint is None:
+        if isinstance(source_endpoint, MissingType):
             raise exc.GlobusSDKUsageError("source_endpoint is required")
-        if destination_endpoint is None:
+        if isinstance(destination_endpoint, MissingType):
             raise exc.GlobusSDKUsageError("destination_endpoint is required")
 
         log.debug("Creating a new TransferData object")
@@ -244,9 +245,9 @@ class TransferData(utils.PayloadWrapper):
         source_path: str,
         destination_path: str,
         *,
-        recursive: bool | None = None,
-        external_checksum: str | None = None,
-        checksum_algorithm: str | None = None,
+        recursive: bool | MissingType = MISSING,
+        external_checksum: str | MissingType = MISSING,
+        checksum_algorithm: str | MissingType = MISSING,
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         """
@@ -282,16 +283,11 @@ class TransferData(utils.PayloadWrapper):
             "DATA_TYPE": "transfer_item",
             "source_path": source_path,
             "destination_path": destination_path,
+            "recursive": recursive,
+            "external_checksum": external_checksum,
+            "checksum_algorithm": checksum_algorithm,
+            **(additional_fields or {}),
         }
-        if recursive is not None:
-            item_data["recursive"] = recursive
-        if external_checksum is not None:
-            item_data["external_checksum"] = external_checksum
-        if checksum_algorithm is not None:
-            item_data["checksum_algorithm"] = checksum_algorithm
-        if additional_fields is not None:
-            item_data.update(additional_fields)
-
         log.debug(
             'TransferData[{}, {}].add_item: "{}"->"{}"'.format(
                 self["source_endpoint"],
@@ -334,8 +330,8 @@ class TransferData(utils.PayloadWrapper):
         *,
         method: t.Literal["include", "exclude"] = "exclude",
         type: (  # pylint: disable=redefined-builtin
-            None | t.Literal["file", "dir"]
-        ) = None,
+            t.Literal["file", "dir"] | MissingType
+        ) = MISSING,
     ) -> None:
         """
         Add a filter rule to the transfer document.
@@ -383,9 +379,8 @@ class TransferData(utils.PayloadWrapper):
             "DATA_TYPE": "filter_rule",
             "method": method,
             "name": name,
+            "type": type,
         }
-        if type is not None:
-            rule["type"] = type
         self["filter_rules"].append(rule)
 
     def iter_items(self) -> t.Iterator[dict[str, t.Any]]:
