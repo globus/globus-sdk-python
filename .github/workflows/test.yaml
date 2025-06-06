@@ -59,6 +59,7 @@ jobs:
           - name: "Windows"
             runner: "windows-latest"
             cpythons:
+              - "3.8"
               - "3.11"
             tox-post-environments:
               - "py3.8-mindeps"
