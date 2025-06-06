@@ -139,10 +139,24 @@ def safe_strseq_iter(
             yield str(x)
 
 
-def commajoin(val: UUIDLike | t.Iterable[UUIDLike] | MissingType) -> str | MissingType:
+@t.overload
+def commajoin(val: UUIDLike | t.Iterable[UUIDLike]) -> str: ...
+
+
+@t.overload
+def commajoin(val: MissingType) -> MissingType: ...
+
+
+@t.overload
+def commajoin(val: None) -> None: ...
+
+
+def commajoin(
+    val: UUIDLike | t.Iterable[UUIDLike] | MissingType | None,
+) -> str | MissingType | None:
     # note that this explicit handling of Iterable allows for string-like objects to be
     # passed to this function and be stringified by the `str()` call
-    if isinstance(val, MissingType):
+    if isinstance(val, (MissingType, type(None))):
         return val
     if isinstance(val, collections.abc.Iterable):
         return ",".join(safe_strseq_iter(val))

@@ -6,6 +6,7 @@ import urllib.parse
 
 from globus_sdk import utils
 from globus_sdk._types import ScopeCollectionType
+from globus_sdk.utils import filter_missing
 
 from .._common import stringify_requested_scopes
 from ..response import OAuthAuthorizationCodeResponse
@@ -99,10 +100,9 @@ class GlobusAuthorizationCodeFlowManager(GlobusOAuthFlowManager):
             "state": self.state,
             "response_type": "code",
             "access_type": (self.refresh_tokens and "offline") or "online",
+            **(query_params or {}),
         }
-        if query_params:
-            params.update(query_params)
-
+        params = filter_missing(params)
         encoded_params = urllib.parse.urlencode(params)
         return f"{authorize_base_url}?{encoded_params}"
 

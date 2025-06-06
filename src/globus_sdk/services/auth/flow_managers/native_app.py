@@ -184,8 +184,7 @@ class GlobusNativeAppFlowManager(GlobusOAuthFlowManager):
         }
         if self.prefill_named_grant is not None:
             params["prefill_named_grant"] = self.prefill_named_grant
-        if query_params:
-            params.update(query_params)
+        params.update(query_params or {})
 
         encoded_params = urllib.parse.urlencode(params)
         return f"{authorize_base_url}?{encoded_params}"

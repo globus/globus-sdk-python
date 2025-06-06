@@ -10,6 +10,7 @@ from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer, NullAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
 from globus_sdk.scopes import AuthScopes, Scope
+from globus_sdk.utils import MISSING, MissingType
 
 from .._common import get_jwk_data, pem_decode_jwk_data
 from ..errors import AuthAPIError
@@ -95,7 +96,7 @@ class AuthLoginClient(client.BaseClient):
     @t.overload
     def get_jwk(
         self,
-        openid_configuration: None | GlobusHTTPResponse | dict[str, t.Any],
+        openid_configuration: GlobusHTTPResponse | dict[str, t.Any] | MissingType,
         *,
         as_pem: t.Literal[True],
     ) -> RSAPublicKey: ...
@@ -103,7 +104,7 @@ class AuthLoginClient(client.BaseClient):
     @t.overload
     def get_jwk(
         self,
-        openid_configuration: None | GlobusHTTPResponse | dict[str, t.Any],
+        openid_configuration: GlobusHTTPResponse | dict[str, t.Any] | MissingType,
         *,
         as_pem: t.Literal[False],
     ) -> dict[str, t.Any]: ...
@@ -117,7 +118,9 @@ class AuthLoginClient(client.BaseClient):
     # an AuthClient which it uses
     def get_jwk(
         self,
-        openid_configuration: None | GlobusHTTPResponse | dict[str, t.Any] = None,
+        openid_configuration: (
+            GlobusHTTPResponse | dict[str, t.Any] | MissingType
+        ) = MISSING,
         *,
         as_pem: bool = False,
     ) -> RSAPublicKey | dict[str, t.Any]:
@@ -130,7 +133,7 @@ class AuthLoginClient(client.BaseClient):
             When not provided, it will be fetched automatically.
         :param as_pem: Decode the JWK to an RSA PEM key, typically for JWT decoding
         """
-        if openid_configuration is None:
+        if isinstance(openid_configuration, MissingType):
             log.debug("No OIDC Config provided, autofetching...")
             openid_configuration = self.get_openid_configuration()
         jwk_data = get_jwk_data(
@@ -141,12 +144,16 @@ class AuthLoginClient(client.BaseClient):
     def oauth2_get_authorize_url(
         self,
         *,
-        session_required_identities: UUIDLike | t.Iterable[UUIDLike] | None = None,
-        session_required_single_domain: str | t.Iterable[str] | None = None,
-        session_required_policies: UUIDLike | t.Iterable[UUIDLike] | None = None,
-        session_required_mfa: bool | None = None,
-        session_message: str | None = None,
-        prompt: t.Literal["login"] | None = None,
+        session_required_identities: (
+            UUIDLike | t.Iterable[UUIDLike] | MissingType
+        ) = MISSING,
+        session_required_single_domain: str | t.Iterable[str] | MissingType = MISSING,
+        session_required_policies: (
+            UUIDLike | t.Iterable[UUIDLike] | MissingType
+        ) = MISSING,
+        session_required_mfa: bool | MissingType = MISSING,
+        session_message: str | MissingType = MISSING,
+        prompt: t.Literal["login"] | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> str:
         """
@@ -179,26 +186,17 @@ class AuthLoginClient(client.BaseClient):
                 "Call the oauth2_start_flow() method on this "
                 "AuthClient to resolve"
             )
-        if query_params is None:
-            query_params = {}
-        if session_required_identities is not None:
-            query_params["session_required_identities"] = utils.commajoin(
-                session_required_identities
-            )
-        if session_required_single_domain is not None:
-            query_params["session_required_single_domain"] = utils.commajoin(
+        query_params = {
+            "session_required_identities": utils.commajoin(session_required_identities),
+            "session_required_single_domain": utils.commajoin(
                 session_required_single_domain
-            )
-        if session_required_policies is not None:
-            query_params["session_required_policies"] = utils.commajoin(
-                session_required_policies
-            )
-        if session_required_mfa is not None:
-            query_params["session_required_mfa"] = session_required_mfa
-        if session_message is not None:
-            query_params["session_message"] = session_message
-        if prompt is not None:
-            query_params["prompt"] = prompt
+            ),
+            "session_required_policies": utils.commajoin(session_required_policies),
+            "session_required_mfa": session_required_mfa,
+            "session_message": session_message,
+            "prompt": prompt,
+            **(query_params or {}),
+        }
         auth_url = self.current_oauth2_flow_manager.get_authorize_url(
             query_params=query_params
         )
@@ -291,9 +289,7 @@ class AuthLoginClient(client.BaseClient):
         if no_authentication and self.client_id:
             log.debug("Validating token with unauthenticated client")
             body.update({"client_id": self.client_id})
-
-        if body_params:
-            body.update(body_params)
+        body.update(body_params or {})
         return self.post("/v2/oauth2/token/validate", data=body, encoding="form")
 
     def oauth2_revoke_token(
@@ -336,9 +332,7 @@ class AuthLoginClient(client.BaseClient):
         if no_authentication and self.client_id:
             log.debug("Revoking token with unauthenticated client")
             body.update({"client_id": self.client_id})
-
-        if body_params:
-            body.update(body_params)
+        body.update(body_params or {})
         return self.post("/v2/oauth2/token/revoke", data=body, encoding="form")
 
     @t.overload
@@ -402,9 +396,7 @@ class AuthLoginClient(client.BaseClient):
         log.debug("Fetching new token from Globus Auth")
         # use the fact that requests implicitly encodes the `data` parameter as
         # a form POST
-        data = dict(form_data)
-        if body_params:
-            data.update(body_params)
+        data = {**dict(form_data), **(body_params or {})}
         return response_class(
             self.post(
                 "/v2/oauth2/token",

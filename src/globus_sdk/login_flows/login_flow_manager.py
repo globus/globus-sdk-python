@@ -4,6 +4,7 @@ import abc
 
 import globus_sdk
 from globus_sdk.gare import GlobusAuthorizationParameters
+from globus_sdk.utils import MISSING
 
 
 class LoginFlowManager(metaclass=abc.ABCMeta):
@@ -50,15 +51,8 @@ class LoginFlowManager(metaclass=abc.ABCMeta):
         authorization flow and get an authorization URL.
         """
         self._oauth2_start_flow(auth_parameters, redirect_uri)
-
-        session_required_single_domain = auth_parameters.session_required_single_domain
         return self.login_client.oauth2_get_authorize_url(
-            session_required_identities=auth_parameters.session_required_identities,
-            session_required_single_domain=session_required_single_domain,
-            session_required_policies=auth_parameters.session_required_policies,
-            session_required_mfa=auth_parameters.session_required_mfa,
-            session_message=auth_parameters.session_message,
-            prompt=auth_parameters.prompt,  # type: ignore
+            **{k: v if v else MISSING for k, v in auth_parameters.to_dict().items()}
         )
 
     def _oauth2_start_flow(

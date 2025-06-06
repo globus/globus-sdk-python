@@ -7,6 +7,7 @@ from globus_sdk import exc, utils
 from globus_sdk._types import ScopeCollectionType, UUIDLike
 from globus_sdk.authorizers import BasicAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
+from globus_sdk.utils import MISSING, MissingType
 
 from .._common import stringify_requested_scopes
 from ..flow_managers import GlobusAuthorizationCodeFlowManager
@@ -63,9 +64,9 @@ class ConfidentialAppAuthClient(AuthLoginClient):
     def get_identities(
         self,
         *,
-        usernames: t.Iterable[str] | str | None = None,
-        ids: t.Iterable[UUIDLike] | UUIDLike | None = None,
-        provision: bool = False,
+        usernames: t.Iterable[str] | str | MissingType = MISSING,
+        ids: t.Iterable[UUIDLike] | UUIDLike | MissingType = MISSING,
+        provision: bool | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> GetIdentitiesResponse:
         """
@@ -90,18 +91,16 @@ class ConfidentialAppAuthClient(AuthLoginClient):
             "Get a token via `oauth2_client_credentials_tokens` "
             "and use that to call the API instead."
         )
-
-        if query_params is None:
-            query_params = {}
-
-        if usernames is not None:
-            query_params["usernames"] = utils.commajoin(usernames)
-            query_params["provision"] = (
-                "false" if str(provision).lower() == "false" else "true"
-            )
-        if ids is not None:
-            query_params["ids"] = utils.commajoin(ids)
-
+        query_params = {
+            "usernames": utils.commajoin(usernames),
+            "provision": (
+                provision
+                if isinstance(provision, MissingType)
+                else ("false" if str(provision).lower() == "false" else "true")
+            ),
+            "ids": utils.commajoin(ids),
+            **(query_params or {}),
+        }
         return GetIdentitiesResponse(
             self.get("/v2/api/identities", query_params=query_params)
         )
@@ -194,7 +193,7 @@ class ConfidentialAppAuthClient(AuthLoginClient):
         token: str,
         *,
         refresh_tokens: bool = False,
-        scope: str | t.Iterable[str] | utils.MissingType = utils.MISSING,
+        scope: str | t.Iterable[str] | MissingType = MISSING,
         additional_params: dict[str, t.Any] | None = None,
     ) -> OAuthDependentTokenResponse:
         """
@@ -262,24 +261,24 @@ class ConfidentialAppAuthClient(AuthLoginClient):
         form_data = {
             "grant_type": "urn:globus:auth:grant_type:dependent_token",
             "token": token,
+            # the internal parameter is 'access_type', but using the name
+            # 'refresh_tokens' is consistent with the rest of the SDK and better
+            # communicates expectations back to the user than the OAuth2 spec wording
+            "access_type": "offline" if refresh_tokens else MISSING,
+            "scope": (
+                " ".join(utils.safe_strseq_iter(scope))
+                if not isinstance(scope, MissingType)
+                else scope
+            ),
+            **(additional_params or {}),
         }
-        # the internal parameter is 'access_type', but using the name 'refresh_tokens'
-        # is consistent with the rest of the SDK and better communicates expectations
-        # back to the user than the OAuth2 spec wording
-        if refresh_tokens:
-            form_data["access_type"] = "offline"
-        if not isinstance(scope, utils.MissingType):
-            form_data["scope"] = " ".join(utils.safe_strseq_iter(scope))
-        if additional_params:
-            form_data.update(additional_params)
-
         return self.oauth2_token(form_data, response_class=OAuthDependentTokenResponse)
 
     def oauth2_token_introspect(
         self,
         token: str,
         *,
-        include: str | None = None,
+        include: str | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
         """
@@ -318,9 +317,10 @@ class ConfidentialAppAuthClient(AuthLoginClient):
                     :ref: auth/reference/#token_introspection_post_v2_oauth2_token_introspect
         """  # noqa: E501
         log.debug("Checking token validity (introspect)")
-        body = {"token": token}
-        if include is not None:
-            body["include"] = include
+        body = {
+            "token": token,
+            "include": include,
+        }
         return self.post(
             "/v2/oauth2/token/introspect",
             data=body,
@@ -332,7 +332,7 @@ class ConfidentialAppAuthClient(AuthLoginClient):
         self,
         name: str,
         *,
-        public_client: bool | utils.MissingType = utils.MISSING,
+        public_client: bool | MissingType = MISSING,
         client_type: (
             t.Literal[
                 "client_identity",
@@ -342,15 +342,15 @@ class ConfidentialAppAuthClient(AuthLoginClient):
                 "hybrid_confidential_client_resource_server",
                 "resource_server",
             ]
-            | utils.MissingType
-        ) = utils.MISSING,
-        visibility: t.Literal["public", "private"] | utils.MissingType = utils.MISSING,
-        redirect_uris: t.Iterable[str] | utils.MissingType = utils.MISSING,
-        terms_and_conditions: str | utils.MissingType = utils.MISSING,
-        privacy_policy: str | utils.MissingType = utils.MISSING,
-        required_idp: UUIDLike | utils.MissingType = utils.MISSING,
-        preselect_idp: UUIDLike | utils.MissingType = utils.MISSING,
-        additional_fields: dict[str, t.Any] | utils.MissingType = utils.MISSING,
+            | MissingType
+        ) = MISSING,
+        visibility: t.Literal["public", "private"] | MissingType = MISSING,
+        redirect_uris: t.Iterable[str] | MissingType = MISSING,
+        terms_and_conditions: str | MissingType = MISSING,
+        privacy_policy: str | MissingType = MISSING,
+        required_idp: UUIDLike | MissingType = MISSING,
+        preselect_idp: UUIDLike | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
         """
         Create a new client. Requires the ``manage_projects`` scope.
@@ -435,17 +435,26 @@ class ConfidentialAppAuthClient(AuthLoginClient):
                     :ref: auth/reference/#create_client
         """
         # Must specify exactly one of public_client or client_type
-        if public_client is not utils.MISSING and client_type is not utils.MISSING:
+        if public_client is not MISSING and client_type is not MISSING:
             raise exc.GlobusSDKUsageError(
                 "AuthClient.create_client does not take both "
                 "'public_client' and 'client_type'. These are mutually exclusive."
             )
-        if public_client is utils.MISSING and client_type is utils.MISSING:
+        if public_client is MISSING and client_type is MISSING:
             raise exc.GlobusSDKUsageError(
                 "AuthClient.create_client requires either 'public_client' or "
                 "'client_type'."
             )
+        # terms_and_conditions and privacy_policy must both be set or unset
+        if bool(terms_and_conditions) ^ bool(privacy_policy):
+            raise exc.GlobusSDKUsageError(
+                "terms_and_conditions and privacy_policy must both be set or unset"
+            )
 
+        links: dict[str, str | MissingType] = {
+            "terms_and_conditions": terms_and_conditions,
+            "privacy_policy": privacy_policy,
+        }
         body: dict[str, t.Any] = {
             "name": name,
             "visibility": visibility,
@@ -453,23 +462,12 @@ class ConfidentialAppAuthClient(AuthLoginClient):
             "preselect_idp": preselect_idp,
             "public_client": public_client,
             "client_type": client_type,
+            "redirect_uris": (
+                list(utils.safe_strseq_iter(redirect_uris))
+                if not isinstance(redirect_uris, MissingType)
+                else redirect_uris
+            ),
+            "links": (links if terms_and_conditions or privacy_policy else MISSING),
+            **(additional_fields or {}),
         }
-        if not isinstance(redirect_uris, utils.MissingType):
-            body["redirect_uris"] = list(utils.safe_strseq_iter(redirect_uris))
-
-        # terms_and_conditions and privacy_policy must both be set or unset
-        if bool(terms_and_conditions) ^ bool(privacy_policy):
-            raise exc.GlobusSDKUsageError(
-                "terms_and_conditions and privacy_policy must both be set or unset"
-            )
-        links: dict[str, str | utils.MissingType] = {
-            "terms_and_conditions": terms_and_conditions,
-            "privacy_policy": privacy_policy,
-        }
-        if terms_and_conditions or privacy_policy:
-            body["links"] = links
-
-        if not isinstance(additional_fields, utils.MissingType):
-            body.update(additional_fields)
-
         return self.post("/v2/api/clients", data={"client": body})
