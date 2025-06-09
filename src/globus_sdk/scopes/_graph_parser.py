@@ -140,9 +140,9 @@ class ScopeGraph:
 # pass slots=True on 3.10+
 # it's not strictly necessary, but it improves performance
 if sys.version_info >= (3, 10):
-    _add_dataclass_kwargs = {"slots": True}
+    _add_dataclass_kwargs: dict[str, bool] = {"slots": True}
 else:
-    _add_dataclass_kwargs = {}
+    _add_dataclass_kwargs: dict[str, bool] = {}
 
 
 @dataclasses.dataclass(**_add_dataclass_kwargs)
