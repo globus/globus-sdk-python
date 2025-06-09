@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import typing as t
 
+from .parser import ScopeParser
 from .representation import Scope
 
 if t.TYPE_CHECKING:
@@ -47,7 +48,7 @@ def scopes_to_scope_list(scopes: ScopeCollectionType) -> list[Scope]:
     scope_list: list[Scope] = []
     for scope in _iter_scope_collection(scopes):
         if isinstance(scope, str):
-            scope_list.extend(Scope.parse(scope))
+            scope_list.extend(ScopeParser.parse(scope))
         else:
             scope_list.append(scope)
     return scope_list
@@ -99,5 +100,5 @@ def _iter_scope_string(scope_str: str, split_root_scopes: bool) -> t.Iterator[st
     elif "[" not in scope_str:
         yield from scope_str.split(" ")
     else:
-        for scope_obj in Scope.parse(scope_str):
+        for scope_obj in ScopeParser.parse(scope_str):
             yield str(scope_obj)
