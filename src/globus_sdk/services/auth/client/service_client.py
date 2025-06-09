@@ -1322,16 +1322,11 @@ class AuthClient(client.BaseClient):
 
             .. tab-item:: Example Usage
 
-                When creating a project, your account is not necessarily included as an
-                admin. The following snippet uses the ``manage_projects`` scope as well
-                as the ``openid`` and ``email`` scopes to get the current user ID and
-                email address and use those data to setup the project.
-
                 .. code-block:: pycon
 
                     >>> ac = globus_sdk.AuthClient(...)
                     >>> client_id = ...
-                    >>> r = ac.create_update(client_id, name="Foo Utility")
+                    >>> r = ac.update_client(client_id, name="Foo Utility")
 
             .. tab-item:: Example Response Data
 
