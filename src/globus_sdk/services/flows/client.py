@@ -1010,10 +1010,9 @@ class SpecificFlowClient(client.BaseClient):
                 GCSCollectionScopeBuilder(str(coll_id)).data_access,
                 optional=True,
             )
-            transfer_scope.add_dependency(data_access_scope)
+            transfer_scope = transfer_scope.with_dependency(data_access_scope)
 
-        specific_flow_scope = Scope(self.scopes.user)
-        specific_flow_scope.add_dependency(transfer_scope)
+        specific_flow_scope = Scope(self.scopes.user, dependencies=(transfer_scope,))
         self.add_app_scope(specific_flow_scope)
         return self
 

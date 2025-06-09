@@ -42,10 +42,10 @@ def attach_data_access_scope(gcs_client, collection_id):
     endpoint_scopes = gcs_client.get_gcs_endpoint_scopes(gcs_client.endpoint_client_id)
     collection_scopes = gcs_client.get_gcs_collection_scopes(collection_id)
 
-    manage_collections = globus_sdk.Scope(endpoint_scopes.manage_collections)
     data_access = globus_sdk.Scope(collection_scopes.data_access, optional=True)
-
-    manage_collections.add_dependency(data_access)
+    manage_collections = globus_sdk.Scope(
+        endpoint_scopes.manage_collections, dependencies=(data_access,)
+    )
 
     gcs_client.add_app_scope(manage_collections)
 

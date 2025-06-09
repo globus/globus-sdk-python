@@ -148,7 +148,7 @@ constructed by means of ``Scope`` methods thusly:
     transfer_scope = Scope(TransferScopes.all)
     data_access_scope = GCSCollectionScopeBuilder(MAPPED_COLLECTION_ID).data_access
     # add data_access as an optional dependency
-    transfer_scope.add_dependency(data_access_scope, optional=True)
+    transfer_scope = transfer_scope.with_dependency(data_access_scope, optional=True)
 
 ``Scope``\s can be used in most of the same locations where scope
 strings can be used, but you can also call ``scope.serialize()`` to get a
@@ -167,14 +167,14 @@ strings. All scope objects support this by means of their defined
     >>> from globus_sdk.scopes import Scope
     >>> foo = Scope("foo")
     >>> bar = Scope("bar")
-    >>> bar.add_dependency("baz")
-    >>> foo.add_dependency(bar)
+    >>> bar = bar.with_dependency(Scope("baz"))
+    >>> foo = foo.with_dependency(bar)
     >>> print(str(foo))
     foo[bar[baz]]
     >>> print(str(bar))
     bar[baz]
     >>> alpha = Scope("alpha")
-    >>> alpha.add_dependency("beta", optional=True)
+    >>> alpha = alpha.with_dependency("beta", optional=True)
     >>> print(str(alpha))
     alpha[*beta]
     >>> print(repr(alpha))
