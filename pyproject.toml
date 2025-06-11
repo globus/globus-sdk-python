@@ -7,12 +7,12 @@ name = "globus-sdk"
 authors = [
     { name = "Globus Team", email = "support@globus.org" },
 ]
+license = "Apache-2.0"
 description = "Globus SDK for Python"
 keywords = ["globus"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -41,9 +41,6 @@ dynamic = ["version"]
 [project.readme]
 file = "README.rst"
 content-type = "text/x-rst"
-
-[project.license]
-text = "Apache-2.0"
 
 [project.urls]
 Homepage = "https://github.com/globus/globus-sdk-python"
