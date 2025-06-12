@@ -101,6 +101,19 @@ class Scope:
         """
         return dataclasses.replace(self, optional=optional)
 
+    def __getitem__(self, key: str | Scope | t.Iterable[Scope]) -> Scope:
+        # deferred import because ScopeParser depends on Scope
+        from .parser import ScopeParser
+
+        if isinstance(key, str):
+            new_deps: t.Iterable[Scope] = ScopeParser.parse(key)
+        elif isinstance(key, Scope):
+            new_deps = [key]
+        else:
+            new_deps = key
+
+        return self.with_dependencies(new_deps)
+
     def __repr__(self) -> str:
         parts: list[str] = [f"'{self.scope_string}'"]
         if self.optional:
