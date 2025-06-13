@@ -5,7 +5,8 @@ import logging
 import time
 import typing as t
 
-from globus_sdk import exc, utils
+from globus_sdk import exc
+from globus_sdk._utils import sha256_string
 
 from .base import GlobusAuthorizer
 
@@ -97,7 +98,7 @@ class RenewingAuthorizer(GlobusAuthorizer, t.Generic[ResponseT], metaclass=abc.A
     def access_token(self, value: str | None) -> None:
         self._access_token = value
         if value:
-            self._access_token_hash = utils.sha256_string(value)
+            self._access_token_hash = sha256_string(value)
 
     @abc.abstractmethod
     def _get_token_response(self) -> ResponseT:

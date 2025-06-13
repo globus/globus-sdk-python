@@ -3,7 +3,9 @@ from __future__ import annotations
 import enum
 import typing as t
 
-from globus_sdk import utils
+from globus_sdk._missing import MISSING, MissingType
+from globus_sdk._payload import Payload
+from globus_sdk._remarshal import safe_strseq_iter
 from globus_sdk._types import UUIDLike
 
 T = t.TypeVar("T")
@@ -97,7 +99,7 @@ def _docstring_fixer(cls: type[T]) -> type[T]:
     return cls
 
 
-class BatchMembershipActions(utils.PayloadWrapper):
+class BatchMembershipActions(Payload):
     """
     An object used to represent a batch action on memberships of a group.
     `Perform actions on group members
@@ -115,7 +117,7 @@ class BatchMembershipActions(utils.PayloadWrapper):
         """
         self.setdefault("accept", []).extend(
             {"identity_id": identity_id}
-            for identity_id in utils.safe_strseq_iter(identity_ids)
+            for identity_id in safe_strseq_iter(identity_ids)
         )
         return self
 
@@ -133,7 +135,7 @@ class BatchMembershipActions(utils.PayloadWrapper):
         """
         self.setdefault("add", []).extend(
             {"identity_id": identity_id, "role": role}
-            for identity_id in utils.safe_strseq_iter(identity_ids)
+            for identity_id in safe_strseq_iter(identity_ids)
         )
         return self
 
@@ -147,7 +149,7 @@ class BatchMembershipActions(utils.PayloadWrapper):
         """
         self.setdefault("approve", []).extend(
             {"identity_id": identity_id}
-            for identity_id in utils.safe_strseq_iter(identity_ids)
+            for identity_id in safe_strseq_iter(identity_ids)
         )
         return self
 
@@ -161,7 +163,7 @@ class BatchMembershipActions(utils.PayloadWrapper):
         """
         self.setdefault("decline", []).extend(
             {"identity_id": identity_id}
-            for identity_id in utils.safe_strseq_iter(identity_ids)
+            for identity_id in safe_strseq_iter(identity_ids)
         )
         return self
 
@@ -179,7 +181,7 @@ class BatchMembershipActions(utils.PayloadWrapper):
         """
         self.setdefault("invite", []).extend(
             {"identity_id": identity_id, "role": role}
-            for identity_id in utils.safe_strseq_iter(identity_ids)
+            for identity_id in safe_strseq_iter(identity_ids)
         )
         return self
 
@@ -192,7 +194,7 @@ class BatchMembershipActions(utils.PayloadWrapper):
         """
         self.setdefault("join", []).extend(
             {"identity_id": identity_id}
-            for identity_id in utils.safe_strseq_iter(identity_ids)
+            for identity_id in safe_strseq_iter(identity_ids)
         )
         return self
 
@@ -205,7 +207,7 @@ class BatchMembershipActions(utils.PayloadWrapper):
         """
         self.setdefault("leave", []).extend(
             {"identity_id": identity_id}
-            for identity_id in utils.safe_strseq_iter(identity_ids)
+            for identity_id in safe_strseq_iter(identity_ids)
         )
         return self
 
@@ -219,7 +221,7 @@ class BatchMembershipActions(utils.PayloadWrapper):
         """
         self.setdefault("reject", []).extend(
             {"identity_id": identity_id}
-            for identity_id in utils.safe_strseq_iter(identity_ids)
+            for identity_id in safe_strseq_iter(identity_ids)
         )
         return self
 
@@ -234,7 +236,7 @@ class BatchMembershipActions(utils.PayloadWrapper):
         """
         self.setdefault("remove", []).extend(
             {"identity_id": identity_id}
-            for identity_id in utils.safe_strseq_iter(identity_ids)
+            for identity_id in safe_strseq_iter(identity_ids)
         )
         return self
 
@@ -248,13 +250,13 @@ class BatchMembershipActions(utils.PayloadWrapper):
         """
         self.setdefault("request_join", []).extend(
             {"identity_id": identity_id}
-            for identity_id in utils.safe_strseq_iter(identity_ids)
+            for identity_id in safe_strseq_iter(identity_ids)
         )
         return self
 
 
 @_docstring_fixer
-class GroupPolicies(utils.PayloadWrapper):
+class GroupPolicies(Payload):
     """
     An object used to represent the policy settings of a group.
     This may be used to set or modify group settings.
@@ -283,9 +285,7 @@ class GroupPolicies(utils.PayloadWrapper):
         group_members_visibility: _GROUP_MEMBER_VISIBILITY_T,
         join_requests: bool,
         signup_fields: t.Iterable[_GROUP_REQUIRED_SIGNUP_FIELDS_T],
-        authentication_assurance_timeout: (
-            int | None | utils.MissingType
-        ) = utils.MISSING,
+        authentication_assurance_timeout: int | None | MissingType = MISSING,
     ) -> None:
         super().__init__()
         self["is_high_assurance"] = is_high_assurance

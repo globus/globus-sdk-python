@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import typing as t
 
-from globus_sdk import client, response, utils
+from globus_sdk import client, response
+from globus_sdk._missing import MISSING, MissingType
+from globus_sdk._remarshal import commajoin
 from globus_sdk._types import UUIDLike
 from globus_sdk.scopes import GroupsScopes, Scope
-from globus_sdk.utils import MISSING, MissingType
 
 from .data import BatchMembershipActions, GroupPolicies
 from .errors import GroupsAPIError
@@ -81,7 +82,7 @@ class GroupsClient(client.BaseClient):
                     :service: groups
                     :ref: get_group_v2_groups__group_id__get
         """
-        query_params = {"include": utils.commajoin(include), **(query_params or {})}
+        query_params = {"include": commajoin(include), **(query_params or {})}
         return self.get(f"/v2/groups/{group_id}", query_params=query_params)
 
     def get_group_by_subscription_id(

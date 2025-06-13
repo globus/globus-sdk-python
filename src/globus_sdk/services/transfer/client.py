@@ -5,10 +5,11 @@ import time
 import typing as t
 import uuid
 
-from globus_sdk import _guards, client, exc, paging, response, utils
+from globus_sdk import _guards, client, exc, paging, response
+from globus_sdk._missing import MISSING, MissingType
+from globus_sdk._remarshal import commajoin
 from globus_sdk._types import DateLike, IntLike, UUIDLike
 from globus_sdk.scopes import GCSCollectionScopeBuilder, Scope, TransferScopes
-from globus_sdk.utils import MISSING, MissingType
 
 from .data import DeleteData, TransferData
 from .errors import TransferAPIError
@@ -50,7 +51,7 @@ def _format_filter_item(x: str | TransferFilterDict | MissingType) -> str | Miss
         return MISSING
     elif isinstance(x, str):
         return x
-    return "/".join(f"{k}:{utils.commajoin(v)}" for k, v in x.items())
+    return "/".join(f"{k}:{commajoin(v)}" for k, v in x.items())
 
 
 def _format_filter(
@@ -1308,7 +1309,7 @@ class TransferClient(client.BaseClient):
                 if show_hidden
                 else 0 if isinstance(show_hidden, bool) else show_hidden
             ),
-            "orderby": utils.commajoin(orderby),
+            "orderby": commajoin(orderby),
             "filter": _format_filter(filter),
             "local_user": local_user,
             **(query_params or {}),
@@ -1726,7 +1727,7 @@ class TransferClient(client.BaseClient):
         query_params = {
             "limit": limit,
             "offset": offset,
-            "orderby": utils.commajoin(orderby),
+            "orderby": commajoin(orderby),
             "filter": _format_filter_item(filter),
             **(query_params or {}),
         }
@@ -2346,8 +2347,8 @@ class TransferClient(client.BaseClient):
                 "also supplied."
             )
         query_params = {
-            "filter_status": utils.commajoin(filter_status),
-            "filter_task_id": utils.commajoin(filter_task_id),
+            "filter_status": commajoin(filter_status),
+            "filter_task_id": commajoin(filter_task_id),
             "filter_owner_id": filter_owner_id,
             "filter_endpoint": filter_endpoint,
             "filter_endpoint_use": filter_endpoint_use,

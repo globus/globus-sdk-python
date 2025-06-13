@@ -1,8 +1,8 @@
 import json
 
 import globus_sdk
+from globus_sdk._missing import filter_missing
 from globus_sdk._testing import get_last_request, load_response
-from globus_sdk.utils import filter_missing
 
 
 def test_dummy_timer_creation(client):

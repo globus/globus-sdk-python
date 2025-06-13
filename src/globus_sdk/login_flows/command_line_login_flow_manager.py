@@ -5,9 +5,9 @@ import typing as t
 from contextlib import contextmanager
 
 import globus_sdk
+from globus_sdk._utils import get_nice_hostname
 from globus_sdk.exc.base import GlobusError
 from globus_sdk.gare import GlobusAuthorizationParameters
-from globus_sdk.utils import get_nice_hostname
 
 from .login_flow_manager import LoginFlowManager
 

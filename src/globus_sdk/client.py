@@ -1,23 +1,31 @@
 from __future__ import annotations
 
 import logging
+import sys
 import typing as t
 import urllib.parse
 
-from globus_sdk import GlobusSDKUsageError, config, exc, utils
+from globus_sdk import GlobusSDKUsageError, config, exc
+from globus_sdk._classproperty import classproperty
 from globus_sdk._types import ScopeCollectionType
+from globus_sdk._utils import slash_join
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.paging import PaginatorTable
 from globus_sdk.response import GlobusHTTPResponse
 from globus_sdk.scopes import Scope, ScopeBuilder
 from globus_sdk.transport import RequestsTransport
 
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
+
 if t.TYPE_CHECKING:
     from globus_sdk.globus_app import GlobusApp
 
 log = logging.getLogger(__name__)
 
-_DataParamType = t.Union[None, str, bytes, t.Dict[str, t.Any], utils.PayloadWrapper]
+_DataParamType: TypeAlias = t.Union[None, str, bytes, t.Dict[str, t.Any]]
 
 
 class BaseClient:
@@ -293,7 +301,7 @@ class BaseClient:
     def app_name(self, value: str) -> None:
         self._app_name = self.transport.user_agent = value
 
-    @utils.classproperty
+    @classproperty
     def resource_server(  # pylint: disable=missing-param-doc
         self_or_cls: BaseClient | type[BaseClient],
     ) -> str | None:
@@ -476,7 +484,7 @@ class BaseClient:
         if path.startswith("https://") or path.startswith("http://"):
             url = path
         else:
-            url = utils.slash_join(self.base_url, urllib.parse.quote(path))
+            url = slash_join(self.base_url, urllib.parse.quote(path))
 
         # either use given authorizer or get one from app
         if automatic_authorization:

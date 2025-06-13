@@ -5,7 +5,7 @@ import typing as t
 
 import responses
 
-from ..utils import slash_join
+from globus_sdk._utils import slash_join
 
 
 class RegisteredResponse:

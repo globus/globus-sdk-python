@@ -4,9 +4,10 @@ import datetime
 import logging
 import typing as t
 
-from globus_sdk import exc, utils
+from globus_sdk import exc
+from globus_sdk._missing import MISSING, MissingType
+from globus_sdk._payload import Payload
 from globus_sdk._types import UUIDLike
-from globus_sdk.utils import MISSING, MissingType
 
 if t.TYPE_CHECKING:
     import globus_sdk
@@ -21,8 +22,8 @@ _sync_level_dict: dict[t.Literal["exists", "size", "mtime", "checksum"], int] = 
 
 
 def _parse_sync_level(
-    sync_level: t.Literal["exists", "size", "mtime", "checksum"] | int,
-) -> int:
+    sync_level: t.Literal["exists", "size", "mtime", "checksum"] | int | MissingType,
+) -> int | MissingType:
     """
     Map sync_level strings to known int values
 
@@ -36,7 +37,7 @@ def _parse_sync_level(
     return sync_level
 
 
-class TransferData(utils.PayloadWrapper):
+class TransferData(Payload):
     r"""
     Convenience class for constructing a transfer document, to use as the
     ``data`` parameter to
@@ -200,34 +201,27 @@ class TransferData(utils.PayloadWrapper):
         log.debug("Creating a new TransferData object")
         self["DATA_TYPE"] = "transfer"
         self["DATA"] = []
-        self._set_optstrs(
-            source_endpoint=source_endpoint,
-            destination_endpoint=destination_endpoint,
-            label=label,
-            submission_id=submission_id
-            or (
-                transfer_client.get_submission_id()["value"]
-                if transfer_client
-                else None
-            ),
-            recursive_symlinks=recursive_symlinks,
-            deadline=deadline,
-            source_local_user=source_local_user,
-            destination_local_user=destination_local_user,
+        self["source_endpoint"] = source_endpoint
+        self["destination_endpoint"] = destination_endpoint
+        self["label"] = label
+        self["submission_id"] = submission_id or (
+            transfer_client.get_submission_id()["value"] if transfer_client else MISSING
         )
-        self._set_optbools(
-            verify_checksum=verify_checksum,
-            preserve_timestamp=preserve_timestamp,
-            encrypt_data=encrypt_data,
-            skip_activation_check=skip_activation_check,
-            skip_source_errors=skip_source_errors,
-            fail_on_quota_errors=fail_on_quota_errors,
-            delete_destination_extra=delete_destination_extra,
-            notify_on_succeeded=notify_on_succeeded,
-            notify_on_failed=notify_on_failed,
-            notify_on_inactive=notify_on_inactive,
-        )
-        self._set_value("sync_level", sync_level, callback=_parse_sync_level)
+        self["recursive_symlinks"] = recursive_symlinks
+        self["deadline"] = deadline
+        self["source_local_user"] = source_local_user
+        self["destination_local_user"] = destination_local_user
+        self["verify_checksum"] = verify_checksum
+        self["preserve_timestamp"] = preserve_timestamp
+        self["encrypt_data"] = encrypt_data
+        self["skip_activation_check"] = skip_activation_check
+        self["skip_source_errors"] = skip_source_errors
+        self["fail_on_quota_errors"] = fail_on_quota_errors
+        self["delete_destination_extra"] = delete_destination_extra
+        self["notify_on_succeeded"] = notify_on_succeeded
+        self["notify_on_failed"] = notify_on_failed
+        self["notify_on_inactive"] = notify_on_inactive
+        self["sync_level"] = _parse_sync_level(sync_level)
 
         for k, v in self.items():
             log.debug("TransferData.%s = %s", k, v)
@@ -373,7 +367,7 @@ class TransferData(utils.PayloadWrapper):
         ``tdata`` now describes a transfer which will only transfer files
         with the ``.txt`` extension.
         """
-        if "filter_rules" not in self:
+        if self.get("filter_rules", MISSING) is MISSING:
             self["filter_rules"] = []
         rule = {
             "DATA_TYPE": "filter_rule",

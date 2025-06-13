@@ -3,7 +3,7 @@ import os
 
 import responses
 
-from globus_sdk import utils
+from globus_sdk._utils import slash_join
 
 
 def register_api_route_fixture_file(service, path, filename, **kwargs):
@@ -54,7 +54,7 @@ def register_api_route(
     }
     assert service in base_url_map
     base_url = base_url_map.get(service)
-    full_url = utils.slash_join(base_url, path)
+    full_url = slash_join(base_url, path)
 
     # can set it to `{}` explicitly to clear the default
     if adding_headers is None:

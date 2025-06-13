@@ -1,3 +1,4 @@
+from ._missing import MISSING, MissingType
 from .authorizers import (
     AccessTokenAuthorizer,
     BasicAuthorizer,
@@ -125,7 +126,6 @@ from .services.transfer import (
     TransferClient,
     TransferData,
 )
-from .utils import MISSING, MissingType
 
 __version__ = "x.y.z"
 

@@ -3,12 +3,13 @@ from __future__ import annotations
 import logging
 import typing as t
 
-from globus_sdk.utils import MISSING, MissingType, PayloadWrapper
+from globus_sdk._missing import MISSING, MissingType
+from globus_sdk._payload import Payload
 
 log = logging.getLogger(__name__)
 
 
-class RunActivityNotificationPolicy(PayloadWrapper):
+class RunActivityNotificationPolicy(Payload):
     """
     A notification policy for a run, determining when emails will be sent.
 

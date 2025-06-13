@@ -4,8 +4,8 @@ Unit tests for globus_sdk.SearchQuery
 
 import pytest
 
-from globus_sdk import RemovedInV4Warning, SearchQuery, SearchQueryV1, utils
-from globus_sdk.utils import filter_missing
+from globus_sdk import MISSING, RemovedInV4Warning, SearchQuery, SearchQueryV1
+from globus_sdk._missing import filter_missing
 
 
 def test_init_legacy():
@@ -47,7 +47,7 @@ def test_init_v1():
 
     # ensure key attributes initialize to empty lists
     for attribute in ["facets", "filters", "post_facet_filters", "sort", "boosts"]:
-        assert query[attribute] == utils.MISSING
+        assert query[attribute] == MISSING
 
     # init with supported fields
     params = {"q": "foo", "limit": 10, "offset": 0, "advanced": False}

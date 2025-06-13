@@ -3,12 +3,15 @@ from __future__ import annotations
 import typing as t
 import uuid
 
-from globus_sdk import client, exc, paging, response, scopes, utils
+from globus_sdk import client, exc, paging, response, scopes
+from globus_sdk._classproperty import classproperty
+from globus_sdk._missing import MISSING, MissingType
+from globus_sdk._remarshal import commajoin
 from globus_sdk._types import UUIDLike
+from globus_sdk._utils import slash_join
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.globus_app import GlobusApp
 from globus_sdk.scopes import Scope
-from globus_sdk.utils import MISSING, MissingType
 
 from .connector_table import ConnectorTable
 from .data import (
@@ -64,7 +67,7 @@ class GCSClient(client.BaseClient):
         # if it was an HTTPS URL, check that it ends with /api/
         elif not gcs_address.endswith(("/api/", "/api")):
             # if it doesn't, add it
-            gcs_address = utils.slash_join(gcs_address, "/api/")
+            gcs_address = slash_join(gcs_address, "/api/")
 
         self._endpoint_client_id: str | None = None
 
@@ -144,7 +147,7 @@ class GCSClient(client.BaseClient):
             )
         ]
 
-    @utils.classproperty
+    @classproperty
     def resource_server(  # pylint: disable=missing-param-doc
         self_or_cls: client.BaseClient | type[client.BaseClient],
     ) -> str | None:
@@ -257,7 +260,7 @@ class GCSClient(client.BaseClient):
                     :ref: openapi_Endpoint/#patchEndpoint
                     :service: gcs
         """
-        query_params = {"include": utils.commajoin(include), **(query_params or {})}
+        query_params = {"include": commajoin(include), **(query_params or {})}
         return UnpackingGCSResponse(
             self.patch(
                 "/endpoint",
@@ -312,11 +315,11 @@ class GCSClient(client.BaseClient):
                     :service: gcs
         """
         query_params = {
-            "include": utils.commajoin(include),
+            "include": commajoin(include),
             "page_size": page_size,
             "marker": marker,
             "mapped_collection_id": mapped_collection_id,
-            "filter": utils.commajoin(filter),
+            "filter": commajoin(filter),
             **(query_params or {}),
         }
         return IterableGCSResponse(self.get("collections", query_params=query_params))
@@ -479,7 +482,7 @@ class GCSClient(client.BaseClient):
                     :service: gcs
         """
         query_params = {
-            "include": utils.commajoin(include),
+            "include": commajoin(include),
             "page_size": page_size,
             "marker": marker,
             **(query_params or {}),
@@ -543,7 +546,7 @@ class GCSClient(client.BaseClient):
                     :ref: openapi_Storage_Gateways/#getStorageGateway
                     :service: gcs
         """
-        query_params = {"include": utils.commajoin(include), **(query_params or {})}
+        query_params = {"include": commajoin(include), **(query_params or {})}
         return UnpackingGCSResponse(
             self.get(
                 f"/storage_gateways/{storage_gateway_id}",

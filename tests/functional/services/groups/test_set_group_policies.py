@@ -3,11 +3,11 @@ import json
 import pytest
 
 from globus_sdk import (
+    MISSING,
     GroupMemberVisibility,
     GroupPolicies,
     GroupRequiredSignupFields,
     GroupVisibility,
-    utils,
 )
 from globus_sdk._testing import get_last_request, load_response
 
@@ -87,7 +87,7 @@ def test_set_group_policies(
             GroupMemberVisibility.managers,
             ["address1"],
             ["address1"],
-            utils.MISSING,
+            MISSING,
         ),
         (
             "private",
@@ -147,7 +147,7 @@ def test_set_group_policies_explicit_payload(
 
     # check the authentication_assurance_timeout
     # it should be omitted if it's MISSING
-    if auth_timeout is utils.MISSING:
+    if auth_timeout is MISSING:
         assert "authentication_assurance_timeout" not in req_body
     else:
         assert req_body["authentication_assurance_timeout"] == auth_timeout

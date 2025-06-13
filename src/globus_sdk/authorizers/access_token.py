@@ -1,6 +1,6 @@
 import logging
 
-from globus_sdk import utils
+from globus_sdk._utils import sha256_string
 
 from .base import StaticGlobusAuthorizer
 
@@ -24,5 +24,5 @@ class AccessTokenAuthorizer(StaticGlobusAuthorizer):
         self.access_token = access_token
         self.header_val = "Bearer %s" % access_token
 
-        self.access_token_hash = utils.sha256_string(self.access_token)
+        self.access_token_hash = sha256_string(self.access_token)
         log.debug(f'Bearer token has hash "{self.access_token_hash}"')

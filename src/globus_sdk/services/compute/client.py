@@ -3,10 +3,11 @@ from __future__ import annotations
 import logging
 import typing as t
 
-from globus_sdk import GlobusHTTPResponse, client, utils
+from globus_sdk import GlobusHTTPResponse, client
+from globus_sdk._missing import MISSING, MissingType
+from globus_sdk._remarshal import safe_strseq_listify
 from globus_sdk._types import UUIDLike
 from globus_sdk.scopes import ComputeScopes, Scope
-from globus_sdk.utils import MISSING, MissingType
 
 from .errors import ComputeAPIError
 
@@ -223,8 +224,9 @@ class ComputeClientV2(client.BaseClient):
                     :service: compute
                     :ref: Root/operation/get_batch_status_v2_batch_status_post
         """
-        task_ids = list(utils.safe_strseq_iter(task_ids))
-        return self.post("/v2/batch_status", data={"task_ids": task_ids})
+        return self.post(
+            "/v2/batch_status", data={"task_ids": safe_strseq_listify(task_ids)}
+        )
 
     def get_task_group(self, task_group_id: UUIDLike) -> GlobusHTTPResponse:
         """Get a list of task IDs associated with a task group.

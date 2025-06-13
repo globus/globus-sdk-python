@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import typing as t
 
-from globus_sdk import utils
+from globus_sdk._missing import MISSING, MissingType
+from globus_sdk._payload import Payload
 from globus_sdk._types import UUIDLike
-from globus_sdk.utils import MISSING, MissingType
 
 
-class UserCredentialDocument(utils.PayloadWrapper):
+class UserCredentialDocument(Payload):
     """
     Convenience class for constructing a UserCredential document
     to use as the `data` parameter to `create_user_credential` and
@@ -37,13 +37,11 @@ class UserCredentialDocument(utils.PayloadWrapper):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        self._set_optstrs(
-            DATA_TYPE=DATA_TYPE,
-            identity_id=identity_id,
-            connector_id=connector_id,
-            username=username,
-            display_name=display_name,
-            storage_gateway_id=storage_gateway_id,
-        )
-        self._set_value("policies", policies)
+        self["DATA_TYPE"] = DATA_TYPE
+        self["identity_id"] = identity_id
+        self["connector_id"] = connector_id
+        self["username"] = username
+        self["display_name"] = display_name
+        self["storage_gateway_id"] = storage_gateway_id
+        self["policies"] = policies
         self.update(additional_fields or {})

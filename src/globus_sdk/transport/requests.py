@@ -9,7 +9,7 @@ import typing as t
 
 import requests
 
-from globus_sdk import __version__, config, exc, utils
+from globus_sdk import __version__, config, exc
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.transport.encoders import (
     FormRequestEncoder,
@@ -253,9 +253,7 @@ class RequestsTransport:
         method: str,
         url: str,
         query_params: dict[str, t.Any] | None = None,
-        data: (
-            dict[str, t.Any] | list[t.Any] | utils.PayloadWrapper | str | bytes | None
-        ) = None,
+        data: dict[str, t.Any] | list[t.Any] | str | bytes | None = None,
         headers: dict[str, str] | None = None,
         encoding: str | None = None,
     ) -> requests.Request:
@@ -305,9 +303,7 @@ class RequestsTransport:
         method: str,
         url: str,
         query_params: dict[str, t.Any] | None = None,
-        data: (
-            dict[str, t.Any] | list[t.Any] | utils.PayloadWrapper | str | bytes | None
-        ) = None,
+        data: dict[str, t.Any] | list[t.Any] | str | bytes | None = None,
         headers: dict[str, str] | None = None,
         encoding: str | None = None,
         authorizer: GlobusAuthorizer | None = None,

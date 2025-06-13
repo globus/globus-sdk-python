@@ -2,9 +2,8 @@ import urllib.parse
 
 import pytest
 
-from globus_sdk import GlobusSDKUsageError, RemovedInV4Warning
+from globus_sdk import MISSING, GlobusSDKUsageError, RemovedInV4Warning
 from globus_sdk._testing import get_last_request, load_response
-from globus_sdk.utils import MISSING
 
 
 @pytest.mark.parametrize("filter_fulltext", [MISSING, "foo"])

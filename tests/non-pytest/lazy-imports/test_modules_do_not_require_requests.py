@@ -35,10 +35,13 @@ PYTHON_BINARY = os.environ.get("GLOBUS_TEST_PY", sys.executable)
         # internal components and utilities are a special case:
         # failing to ensure that these avoid 'requests' can make it more difficult
         # to ensure that the main parts (above) do not transitively pick it up
+        "_classproperty",
         "_guards",
+        "_missing",
+        "_remarshal",
         "_serializable",
         "_types",
-        "utils",
+        "_utils",
     ),
 )
 def test_module_does_not_require_requests(module_name):

@@ -12,8 +12,9 @@ from globus_sdk import (
     client,
     exc,
     paging,
-    utils,
 )
+from globus_sdk._missing import MISSING, MissingType
+from globus_sdk._remarshal import commajoin
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.globus_app import GlobusApp
@@ -25,7 +26,6 @@ from globus_sdk.scopes import (
     SpecificFlowScopeBuilder,
     TransferScopes,
 )
-from globus_sdk.utils import MISSING, MissingType
 
 from .data import RunActivityNotificationPolicy
 from .errors import FlowsAPIError
@@ -361,7 +361,7 @@ class FlowsClient(client.BaseClient):
             raise GlobusSDKUsageError(msg)
         query_params = {
             "filter_role": filter_role,
-            "filter_roles": utils.commajoin(filter_roles),
+            "filter_roles": commajoin(filter_roles),
             "filter_fulltext": filter_fulltext,
             # if `orderby` is an iterable (e.g., generator expression), it gets
             # converted to a list in this step
@@ -654,8 +654,8 @@ class FlowsClient(client.BaseClient):
                     :ref: Runs/paths/~1runs/get
         """
         query_params = {
-            "filter_flow_id": utils.commajoin(filter_flow_id),
-            "filter_roles": utils.commajoin(filter_roles),
+            "filter_flow_id": commajoin(filter_flow_id),
+            "filter_roles": commajoin(filter_roles),
             "marker": marker,
             **(query_params or {}),
         }

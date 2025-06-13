@@ -6,15 +6,17 @@ import datetime as dt
 import logging
 import typing as t
 
+from globus_sdk._missing import MISSING, MissingType
+from globus_sdk._payload import Payload
+from globus_sdk._utils import slash_join
 from globus_sdk.config import get_service_url
 from globus_sdk.exc import warn_deprecated
 from globus_sdk.services.transfer import TransferData
-from globus_sdk.utils import MISSING, MissingType, PayloadWrapper, slash_join
 
 log = logging.getLogger(__name__)
 
 
-class TransferTimer(PayloadWrapper):
+class TransferTimer(Payload):
     """
     A helper for defining a payload for Transfer Timer creation.
     Use this along with :meth:`create_timer <globus_sdk.TimersClient.create_timer>` to
@@ -123,7 +125,7 @@ class TransferTimer(PayloadWrapper):
         return new_body
 
 
-class RecurringTimerSchedule(PayloadWrapper):
+class RecurringTimerSchedule(Payload):
     """
     A helper used as part of a *timer* to define when the *timer* will run.
 
@@ -181,7 +183,7 @@ class RecurringTimerSchedule(PayloadWrapper):
             }
 
 
-class OnceTimerSchedule(PayloadWrapper):
+class OnceTimerSchedule(Payload):
     """
     A helper used as part of a *timer* to define when the *timer* will run.
 
@@ -201,7 +203,7 @@ class OnceTimerSchedule(PayloadWrapper):
         self["datetime"] = _format_date(datetime)
 
 
-class TimerJob(PayloadWrapper):
+class TimerJob(Payload):
     r"""
     .. warning::
 
@@ -310,7 +312,7 @@ class TimerJob(PayloadWrapper):
             "Creating TimerJob from TransferData, action_url=%s", transfer_action_url
         )
         for key in ("submission_id", "skip_activation_check"):
-            if key in transfer_data:
+            if transfer_data.get(key, MISSING) is not MISSING:
                 raise ValueError(
                     f"cannot create TimerJob from TransferData which has {key} set"
                 )

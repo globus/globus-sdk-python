@@ -1,16 +1,18 @@
 from __future__ import annotations
 
 import abc
+import copy
 import typing as t
 
-from globus_sdk import utils
+from globus_sdk._missing import MISSING, MissingType
+from globus_sdk._payload import Payload
+from globus_sdk._remarshal import listify, safe_list_map, safe_strseq_listify
 from globus_sdk._types import UUIDLike
-from globus_sdk.utils import MISSING, MissingType
 
 from ._common import DatatypeCallback, ensure_datatype
 
 
-class StorageGatewayDocument(utils.PayloadWrapper):
+class StorageGatewayDocument(Payload):
     """
     Convenience class for constructing a Storage Gateway document
     to use as the `data` parameter to ``create_storage_gateway`` or
@@ -72,26 +74,23 @@ class StorageGatewayDocument(utils.PayloadWrapper):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        self._set_optstrs(
-            DATA_TYPE=DATA_TYPE,
-            display_name=display_name,
-            connector_id=connector_id,
-            root=root,
-        )
-        self._set_optstrlists(
-            allowed_domains=allowed_domains,
-            users_allow=users_allow,
-            users_deny=users_deny,
-        )
-        self._set_optbools(high_assurance=high_assurance, require_mfa=require_mfa)
-        self._set_optints(authentication_timeout_mins=authentication_timeout_mins)
-        self._set_value("identity_mappings", identity_mappings, callback=list)
-        self._set_value("policies", policies)
+        self["DATA_TYPE"] = DATA_TYPE
+        self["display_name"] = display_name
+        self["connector_id"] = connector_id
+        self["root"] = root
+        self["allowed_domains"] = safe_strseq_listify(allowed_domains)
+        self["users_allow"] = safe_strseq_listify(users_allow)
+        self["users_deny"] = safe_strseq_listify(users_deny)
+        self["high_assurance"] = high_assurance
+        self["require_mfa"] = require_mfa
+        self["authentication_timeout_mins"] = authentication_timeout_mins
+        self["identity_mappings"] = listify(identity_mappings)
+        self["policies"] = policies
         self.update(additional_fields or {})
         ensure_datatype(self)
 
 
-class StorageGatewayPolicies(utils.PayloadWrapper, abc.ABC):
+class StorageGatewayPolicies(Payload, abc.ABC):
     """
     This is the abstract base type for Storage Policies documents to use as the
     ``policies`` parameter when creating a StorageGatewayDocument.
@@ -123,8 +122,9 @@ class POSIXStoragePolicies(StorageGatewayPolicies):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        self._set_optstrs(DATA_TYPE=DATA_TYPE)
-        self._set_optstrlists(groups_allow=groups_allow, groups_deny=groups_deny)
+        self["DATA_TYPE"] = DATA_TYPE
+        self["groups_allow"] = safe_strseq_listify(groups_allow)
+        self["groups_deny"] = safe_strseq_listify(groups_deny)
         self.update(additional_fields or {})
 
 
@@ -155,13 +155,12 @@ class POSIXStagingStoragePolicies(StorageGatewayPolicies):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        self._set_optstrs(DATA_TYPE=DATA_TYPE, stage_app=stage_app)
-        self._set_optstrlists(groups_allow=groups_allow, groups_deny=groups_deny)
-        self._set_value(
-            "environment",
-            environment,
-            callback=lambda env_iter: [{**e} for e in env_iter],
-        )
+        self["DATA_TYPE"] = DATA_TYPE
+        self["stage_app"] = stage_app
+        self["groups_allow"] = safe_strseq_listify(groups_allow)
+        self["groups_deny"] = safe_strseq_listify(groups_deny)
+        # make shallow copies of all the dicts passed
+        self["environment"] = safe_list_map(environment, copy.copy)
         self.update(additional_fields or {})
 
 
@@ -188,11 +187,9 @@ class BlackPearlStoragePolicies(StorageGatewayPolicies):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        self._set_optstrs(
-            DATA_TYPE=DATA_TYPE,
-            s3_endpoint=s3_endpoint,
-            bp_access_id_file=bp_access_id_file,
-        )
+        self["DATA_TYPE"] = DATA_TYPE
+        self["s3_endpoint"] = s3_endpoint
+        self["bp_access_id_file"] = bp_access_id_file
         self.update(additional_fields or {})
 
 
@@ -218,8 +215,9 @@ class BoxStoragePolicies(StorageGatewayPolicies):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        self._set_optstrs(DATA_TYPE=DATA_TYPE, enterpriseID=enterpriseID)
-        self._set_value("boxAppSettings", boxAppSettings)
+        self["DATA_TYPE"] = DATA_TYPE
+        self["enterpriseID"] = enterpriseID
+        self["boxAppSettings"] = boxAppSettings
         self.update(additional_fields or {})
 
 
@@ -250,13 +248,11 @@ class CephStoragePolicies(StorageGatewayPolicies):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        self._set_optstrs(
-            DATA_TYPE=DATA_TYPE,
-            s3_endpoint=s3_endpoint,
-            ceph_admin_key_id=ceph_admin_key_id,
-            ceph_admin_secret_key=ceph_admin_secret_key,
-        )
-        self._set_optstrlists(s3_buckets=s3_buckets)
+        self["DATA_TYPE"] = DATA_TYPE
+        self["s3_endpoint"] = s3_endpoint
+        self["ceph_admin_key_id"] = ceph_admin_key_id
+        self["ceph_admin_secret_key"] = ceph_admin_secret_key
+        self["s3_buckets"] = safe_strseq_listify(s3_buckets)
         self.update(additional_fields or {})
 
 
@@ -284,8 +280,10 @@ class GoogleDriveStoragePolicies(StorageGatewayPolicies):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        self._set_optstrs(DATA_TYPE=DATA_TYPE, client_id=client_id, secret=secret)
-        self._set_optints(user_api_rate_quota=user_api_rate_quota)
+        self["DATA_TYPE"] = DATA_TYPE
+        self["client_id"] = client_id
+        self["secret"] = secret
+        self["user_api_rate_quota"] = user_api_rate_quota
         self.update(additional_fields or {})
 
 
@@ -325,9 +323,12 @@ class GoogleCloudStoragePolicies(StorageGatewayPolicies):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        self._set_optstrs(DATA_TYPE=DATA_TYPE, client_id=client_id, secret=secret)
-        self._set_optstrlists(buckets=buckets, projects=projects)
-        self._set_value("service_account_key", service_account_key)
+        self["DATA_TYPE"] = DATA_TYPE
+        self["client_id"] = client_id
+        self["secret"] = secret
+        self["buckets"] = safe_strseq_listify(buckets)
+        self["projects"] = safe_strseq_listify(projects)
+        self["service_account_key"] = service_account_key
         self.update(additional_fields or {})
 
 
@@ -357,10 +358,11 @@ class OneDriveStoragePolicies(StorageGatewayPolicies):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        self._set_optstrs(
-            DATA_TYPE=DATA_TYPE, client_id=client_id, secret=secret, tenant=tenant
-        )
-        self._set_optints(user_api_rate_limit=user_api_rate_limit)
+        self["DATA_TYPE"] = DATA_TYPE
+        self["client_id"] = client_id
+        self["secret"] = secret
+        self["tenant"] = tenant
+        self["user_api_rate_limit"] = user_api_rate_limit
         self.update(additional_fields or {})
 
 
@@ -394,15 +396,13 @@ class AzureBlobStoragePolicies(StorageGatewayPolicies):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        self._set_optstrs(
-            DATA_TYPE=DATA_TYPE,
-            client_id=client_id,
-            secret=secret,
-            tenant=tenant,
-            account=account,
-            auth_type=auth_type,
-        )
-        self._set_optbools(adls=adls)
+        self["DATA_TYPE"] = DATA_TYPE
+        self["client_id"] = client_id
+        self["secret"] = secret
+        self["tenant"] = tenant
+        self["account"] = account
+        self["auth_type"] = auth_type
+        self["adls"] = adls
         self.update(additional_fields or {})
 
 
@@ -432,9 +432,10 @@ class S3StoragePolicies(StorageGatewayPolicies):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        self._set_optstrs(DATA_TYPE=DATA_TYPE, s3_endpoint=s3_endpoint)
-        self._set_optbools(s3_user_credential_required=s3_user_credential_required)
-        self._set_optstrlists(s3_buckets=s3_buckets)
+        self["DATA_TYPE"] = DATA_TYPE
+        self["s3_endpoint"] = s3_endpoint
+        self["s3_user_credential_required"] = s3_user_credential_required
+        self["s3_buckets"] = safe_strseq_listify(s3_buckets)
         self.update(additional_fields or {})
 
 
@@ -465,11 +466,9 @@ class IrodsStoragePolicies(StorageGatewayPolicies):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        self._set_optstrs(
-            DATA_TYPE=DATA_TYPE,
-            irods_environment_file=irods_environment_file,
-            irods_authentication_file=irods_authentication_file,
-        )
+        self["DATA_TYPE"] = DATA_TYPE
+        self["irods_environment_file"] = irods_environment_file
+        self["irods_authentication_file"] = irods_authentication_file
         self.update(additional_fields or {})
 
 
@@ -496,10 +495,8 @@ class HPSSStoragePolicies(StorageGatewayPolicies):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        self._set_optstrs(
-            DATA_TYPE=DATA_TYPE,
-            authentication_mech=authentication_mech,
-            authenticator=authenticator,
-        )
-        self._set_optbools(uda_checksum_support=uda_checksum_support)
+        self["DATA_TYPE"] = DATA_TYPE
+        self["authentication_mech"] = authentication_mech
+        self["authenticator"] = authenticator
+        self["uda_checksum_support"] = uda_checksum_support
         self.update(additional_fields or {})

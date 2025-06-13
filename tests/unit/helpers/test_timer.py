@@ -9,8 +9,8 @@ from globus_sdk import (
     TransferData,
     TransferTimer,
     exc,
-    utils,
 )
+from globus_sdk._missing import filter_missing
 from tests.common import GO_EP1_ID, GO_EP2_ID
 
 
@@ -76,12 +76,12 @@ def test_transfer_timer_removes_disallowed_fields():
 )
 def test_once_timer_schedule_formats_datetime(input_time, expected):
     schedule = OnceTimerSchedule(datetime=input_time)
-    assert schedule.data == {"type": "once", "datetime": expected}
+    assert dict(schedule) == {"type": "once", "datetime": expected}
 
 
 def test_recurring_timer_schedule_interval_only():
     schedule = RecurringTimerSchedule(interval_seconds=600)
-    assert utils.filter_missing(schedule) == {
+    assert filter_missing(schedule) == {
         "type": "recurring",
         "interval_seconds": 600,
     }
@@ -99,7 +99,7 @@ def test_recurring_timer_schedule_interval_only():
 )
 def test_recurring_timer_schedule_formats_start(input_time, expected):
     schedule = RecurringTimerSchedule(interval_seconds=600, start=input_time)
-    assert utils.filter_missing(schedule) == {
+    assert filter_missing(schedule) == {
         "type": "recurring",
         "interval_seconds": 600,
         "start": expected,
@@ -112,7 +112,7 @@ def test_recurring_timer_schedule_formats_datetime_for_end():
     schedule = RecurringTimerSchedule(
         interval_seconds=600, end={"condition": "time", "datetime": end_time}
     )
-    assert utils.filter_missing(schedule) == {
+    assert filter_missing(schedule) == {
         "type": "recurring",
         "interval_seconds": 600,
         "end": {"condition": "time", "datetime": "2023-10-27T05:38:49+00:00"},

@@ -2,8 +2,9 @@ import uuid
 
 import pytest
 
+from globus_sdk import MISSING
+from globus_sdk._payload import Payload
 from globus_sdk.transport import FormRequestEncoder, JSONRequestEncoder, RequestEncoder
-from globus_sdk.utils import MISSING, PayloadWrapper
 
 
 @pytest.mark.parametrize("data", ("foo", b"bar"))
@@ -70,7 +71,7 @@ def test_all_request_encoders_remove_missing_in_params_and_headers(encoder_class
 
 
 @pytest.mark.parametrize(
-    "using_payload_wrapper, payload_contents, expected_data",
+    "using_payload_type, payload_contents, expected_data",
     [
         # basic dicts
         (False, {"foo": 1}, {"foo": 1}),
@@ -84,7 +85,7 @@ def test_all_request_encoders_remove_missing_in_params_and_headers(encoder_class
         # nested payload wrappers (get dictified / "unwrapped")
         (
             True,
-            {"bar": PayloadWrapper(foo=1), "baz": [2, PayloadWrapper(foo=1)]},
+            {"bar": Payload(foo=1), "baz": [2, Payload(foo=1)]},
             {"bar": {"foo": 1}, "baz": [2, {"foo": 1}]},
         ),
         # document with UUIDs and tuples buried inside nested structures
@@ -96,10 +97,10 @@ def test_all_request_encoders_remove_missing_in_params_and_headers(encoder_class
     ],
 )
 def test_json_encoder_payload_preparation(
-    using_payload_wrapper, payload_contents, expected_data
+    using_payload_type, payload_contents, expected_data
 ):
     encoder = JSONRequestEncoder()
-    x = PayloadWrapper() if using_payload_wrapper else {}
+    x = Payload() if using_payload_type else {}
     for k, v in payload_contents.items():
         x[k] = v
     request = encoder.encode(
@@ -130,7 +131,7 @@ def test_json_encoder_is_well_defined_on_array_containing_missing():
 
 
 @pytest.mark.parametrize(
-    "using_payload_wrapper, payload_contents, expected_data",
+    "using_payload_type, payload_contents, expected_data",
     [
         # basic dicts
         (True, {"foo": 1}, {"foo": 1}),
@@ -144,10 +145,10 @@ def test_json_encoder_is_well_defined_on_array_containing_missing():
     ],
 )
 def test_form_encoder_payload_preparation(
-    using_payload_wrapper, payload_contents, expected_data
+    using_payload_type, payload_contents, expected_data
 ):
     encoder = FormRequestEncoder()
-    x = PayloadWrapper() if using_payload_wrapper else {}
+    x = Payload() if using_payload_type else {}
     for k, v in payload_contents.items():
         x[k] = v
     request = encoder.encode(

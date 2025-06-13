@@ -8,9 +8,9 @@ from contextlib import contextmanager
 from string import Template
 
 import globus_sdk
+from globus_sdk._utils import get_nice_hostname
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.login_flows.login_flow_manager import LoginFlowManager
-from globus_sdk.utils import get_nice_hostname
 
 from .errors import LocalServerEnvironmentalLoginError, LocalServerLoginError
 from .local_server import DEFAULT_HTML_TEMPLATE, RedirectHandler, RedirectHTTPServer

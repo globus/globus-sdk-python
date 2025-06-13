@@ -3,11 +3,12 @@ from __future__ import annotations
 import logging
 import typing as t
 
-from globus_sdk import client, paging, response, utils
+from globus_sdk import client, paging, response
+from globus_sdk._missing import MISSING, MissingType
+from globus_sdk._remarshal import safe_strseq_listify
 from globus_sdk._types import UUIDLike
 from globus_sdk.exc.warnings import warn_deprecated
 from globus_sdk.scopes import Scope, SearchScopes
-from globus_sdk.utils import MISSING, MissingType
 
 from .data import SearchQuery, SearchScrollQuery
 from .errors import SearchAPIError
@@ -575,7 +576,7 @@ class SearchClient(client.BaseClient):
         # ensure that a single string is *not* treated as an iterable of strings,
         # which is usually not intentional
         body = {
-            "subjects": list(utils.safe_strseq_iter(subjects)),
+            "subjects": safe_strseq_listify(subjects),
             **(additional_params or {}),
         }
         return self.post(f"/v1/index/{index_id}/batch_delete_by_subject", data=body)

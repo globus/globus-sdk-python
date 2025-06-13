@@ -5,7 +5,8 @@ import typing as t
 
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 
-from globus_sdk import _guards, client, exc, utils
+from globus_sdk import _guards, client, exc
+from globus_sdk._remarshal import commajoin
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer, NullAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
@@ -182,15 +183,15 @@ class AuthLoginClient(client.BaseClient):
         if query_params is None:
             query_params = {}
         if session_required_identities is not None:
-            query_params["session_required_identities"] = utils.commajoin(
+            query_params["session_required_identities"] = commajoin(
                 session_required_identities
             )
         if session_required_single_domain is not None:
-            query_params["session_required_single_domain"] = utils.commajoin(
+            query_params["session_required_single_domain"] = commajoin(
                 session_required_single_domain
             )
         if session_required_policies is not None:
-            query_params["session_required_policies"] = utils.commajoin(
+            query_params["session_required_policies"] = commajoin(
                 session_required_policies
             )
         if session_required_mfa is not None:
@@ -344,13 +345,13 @@ class AuthLoginClient(client.BaseClient):
     @t.overload
     def oauth2_token(
         self,
-        form_data: dict[str, t.Any] | utils.PayloadWrapper,
+        form_data: dict[str, t.Any],
     ) -> OAuthTokenResponse: ...
 
     @t.overload
     def oauth2_token(
         self,
-        form_data: dict[str, t.Any] | utils.PayloadWrapper,
+        form_data: dict[str, t.Any],
         *,
         body_params: dict[str, t.Any] | None,
     ) -> OAuthTokenResponse: ...
@@ -358,7 +359,7 @@ class AuthLoginClient(client.BaseClient):
     @t.overload
     def oauth2_token(
         self,
-        form_data: dict[str, t.Any] | utils.PayloadWrapper,
+        form_data: dict[str, t.Any],
         *,
         response_class: type[RT],
     ) -> RT: ...
@@ -366,7 +367,7 @@ class AuthLoginClient(client.BaseClient):
     @t.overload
     def oauth2_token(
         self,
-        form_data: dict[str, t.Any] | utils.PayloadWrapper,
+        form_data: dict[str, t.Any],
         *,
         body_params: dict[str, t.Any] | None,
         response_class: type[RT],
@@ -374,7 +375,7 @@ class AuthLoginClient(client.BaseClient):
 
     def oauth2_token(
         self,
-        form_data: dict[str, t.Any] | utils.PayloadWrapper,
+        form_data: dict[str, t.Any],
         *,
         body_params: dict[str, t.Any] | None = None,
         response_class: type[OAuthTokenResponse] | type[RT] = OAuthTokenResponse,

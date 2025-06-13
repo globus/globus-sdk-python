@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typing as t
 
-from globus_sdk.utils import MISSING
+from globus_sdk._missing import MISSING
 
 VersionTuple = t.Tuple[int, int, int]
 

@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import typing as t
 
-from globus_sdk import utils
+from globus_sdk._missing import MISSING, MissingType
+from globus_sdk._payload import Payload
 from globus_sdk._types import UUIDLike
-from globus_sdk.utils import MISSING, MissingType
 
 
-class GCSRoleDocument(utils.PayloadWrapper):
+class GCSRoleDocument(Payload):
     """
     Convenience class for constructing a Role document
     to use as the `data` parameter to `create_role`
@@ -31,10 +31,8 @@ class GCSRoleDocument(utils.PayloadWrapper):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        self._set_optstrs(
-            DATA_TYPE=DATA_TYPE,
-            collection=collection,
-            principal=principal,
-            role=role,
-        )
+        self["DATA_TYPE"] = DATA_TYPE
+        self["collection"] = collection
+        self["principal"] = principal
+        self["role"] = role
         self.update(additional_fields or {})
