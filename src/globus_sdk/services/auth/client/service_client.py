@@ -378,8 +378,8 @@ class AuthClient(client.BaseClient):
     def get_identity_providers(
         self,
         *,
-        domains: t.Iterable[str] | str | None = None,
-        ids: t.Iterable[UUIDLike] | UUIDLike | None = None,
+        domains: t.Iterable[str] | str | MissingType = MISSING,
+        ids: t.Iterable[UUIDLike] | UUIDLike | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> GetIdentityProvidersResponse:
         r"""
@@ -444,27 +444,22 @@ class AuthClient(client.BaseClient):
 
         log.debug("Looking up Globus Auth Identity Providers")
 
-        if query_params is None:
-            query_params = {}
-
-        if domains is not None and ids is not None:
+        if domains is not MISSING and ids is not MISSING:
             raise exc.GlobusSDKUsageError(
                 "AuthClient.get_identity_providers does not take both "
                 "'domains' and 'ids'. These are mutually exclusive."
             )
-        # if either of these params has a truthy value, stringify it
-        # this handles lists of values as well as individual values gracefully
-        # letting us consume args whose `__str__` methods produce "the right
-        # thing"
-        elif domains is not None:
-            query_params["domains"] = commajoin(domains)
-        elif ids is not None:
-            query_params["ids"] = commajoin(ids)
-        else:
+        elif domains is MISSING and ids is MISSING:
             log.warning(
                 "neither 'domains' nor 'ids' provided to get_identity_providers(). "
                 "This can only succeed if 'query_params' were given."
             )
+
+        query_params = {
+            "domains": commajoin(domains),
+            "ids": commajoin(ids),
+            **(query_params or {}),
+        }
 
         log.debug(f"query_params={query_params}")
         return GetIdentityProvidersResponse(
@@ -576,8 +571,8 @@ class AuthClient(client.BaseClient):
         display_name: str,
         contact_email: str,
         *,
-        admin_ids: UUIDLike | t.Iterable[UUIDLike] | None = None,
-        admin_group_ids: UUIDLike | t.Iterable[UUIDLike] | None = None,
+        admin_ids: UUIDLike | t.Iterable[UUIDLike] | MissingType = MISSING,
+        admin_group_ids: UUIDLike | t.Iterable[UUIDLike] | MissingType = MISSING,
     ) -> GlobusHTTPResponse:
         """
         Create a new project. Requires the ``manage_projects`` scope.
@@ -622,24 +617,22 @@ class AuthClient(client.BaseClient):
                 .. extdoclink:: Create Project
                     :ref: auth/reference/#create_project
         """
-        body: dict[str, t.Any] = {
+        body = {
             "display_name": display_name,
             "contact_email": contact_email,
+            "admin_ids": strseq_listify(admin_ids),
+            "admin_group_ids": strseq_listify(admin_group_ids),
         }
-        if admin_ids is not None:
-            body["admin_ids"] = strseq_listify(admin_ids)
-        if admin_group_ids is not None:
-            body["admin_group_ids"] = strseq_listify(admin_group_ids)
         return self.post("/v2/api/projects", data={"project": body})
 
     def update_project(
         self,
         project_id: UUIDLike,
         *,
-        display_name: str | None = None,
-        contact_email: str | None = None,
-        admin_ids: UUIDLike | t.Iterable[UUIDLike] | None = None,
-        admin_group_ids: UUIDLike | t.Iterable[UUIDLike] | None = None,
+        display_name: str | MissingType = MISSING,
+        contact_email: str | MissingType = MISSING,
+        admin_ids: UUIDLike | t.Iterable[UUIDLike] | MissingType = MISSING,
+        admin_group_ids: UUIDLike | t.Iterable[UUIDLike] | MissingType = MISSING,
     ) -> GlobusHTTPResponse:
         """
         Update a project. Requires the ``manage_projects`` scope.
@@ -677,15 +670,12 @@ class AuthClient(client.BaseClient):
                 .. extdoclink:: Update Project
                     :ref: auth/reference/#update_project
         """
-        body: dict[str, t.Any] = {}
-        if display_name is not None:
-            body["display_name"] = display_name
-        if contact_email is not None:
-            body["contact_email"] = contact_email
-        if admin_ids is not None:
-            body["admin_ids"] = strseq_listify(admin_ids)
-        if admin_group_ids is not None:
-            body["admin_group_ids"] = strseq_listify(admin_group_ids)
+        body = {
+            "display_name": display_name,
+            "contact_email": contact_email,
+            "admin_ids": strseq_listify(admin_ids),
+            "admin_group_ids": strseq_listify(admin_group_ids),
+        }
         return self.put(f"/v2/api/projects/{project_id}", data={"project": body})
 
     def delete_project(self, project_id: UUIDLike) -> GlobusHTTPResponse:
@@ -888,8 +878,8 @@ class AuthClient(client.BaseClient):
             "required_mfa": required_mfa,
             "display_name": display_name,
             "description": description,
-            "domain_constraints_include": domain_constraints_include,
-            "domain_constraints_exclude": domain_constraints_exclude,
+            "domain_constraints_include": strseq_listify(domain_constraints_include),
+            "domain_constraints_exclude": strseq_listify(domain_constraints_exclude),
         }
 
         return self.post("/v2/api/policies", data={"policy": body})
@@ -949,8 +939,8 @@ class AuthClient(client.BaseClient):
             "required_mfa": required_mfa,
             "display_name": display_name,
             "description": description,
-            "domain_constraints_include": domain_constraints_include,
-            "domain_constraints_exclude": domain_constraints_exclude,
+            "domain_constraints_include": strseq_listify(domain_constraints_include),
+            "domain_constraints_exclude": strseq_listify(domain_constraints_exclude),
             "project_id": project_id,
         }
         return self.put(f"/v2/api/policies/{policy_id}", data={"policy": body})
