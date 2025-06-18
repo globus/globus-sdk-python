@@ -10,7 +10,7 @@ from globus_sdk.scopes import TransferScopes
 from globus_sdk.services.auth.flow_managers.authorization_code import (
     GlobusAuthorizationCodeFlowManager,
 )
-from globus_sdk.services.auth.flow_managers.native_app import make_native_app_challenge
+from globus_sdk.services.auth.flow_managers.native_app import _make_native_app_challenge
 
 
 @pytest.mark.parametrize(
@@ -23,7 +23,7 @@ from globus_sdk.services.auth.flow_managers.native_app import make_native_app_ch
 )
 def test_invalid_native_app_challenge(verifier):
     with pytest.raises(globus_sdk.GlobusSDKUsageError):
-        make_native_app_challenge(verifier)
+        _make_native_app_challenge(verifier)
 
 
 def test_simple_input_native_app_challenge():
@@ -33,7 +33,7 @@ def test_simple_input_native_app_challenge():
         .rstrip(b"=")
         .decode("utf-8")
     )
-    res_verifier, res_challenge = make_native_app_challenge(verifier)
+    res_verifier, res_challenge = _make_native_app_challenge(verifier)
     assert res_verifier == verifier
     assert res_challenge == challenge
 
@@ -51,7 +51,7 @@ def test_random_native_app_challenge(monkeypatch):
     monkeypatch.setattr(os, "urandom", mock_urandom)
     monkeypatch.setattr(base64, "urlsafe_b64encode", mock_b64encode)
 
-    verifier, challenge = make_native_app_challenge()
+    verifier, challenge = _make_native_app_challenge()
     assert verifier == "abc123"
     assert challenge == "abc123"
 

@@ -55,15 +55,15 @@ def test_get_identities_success(usernames, service_client):
     [
         (True, "true"),
         (False, "false"),
-        (1, "true"),
-        (0, "true"),
-        ("fALSe", "false"),
-        ("true", "true"),
+        (None, "false"),
     ],
 )
 def test_get_identities_provision(inval, outval, service_client):
     load_response(service_client.get_identities)
-    service_client.get_identities(usernames="globus@globus.org", provision=inval)
+    if inval is not None:
+        service_client.get_identities(usernames="globus@globus.org", provision=inval)
+    else:
+        service_client.get_identities(usernames="globus@globus.org")
     lastreq = get_last_request()
     assert "provision" in lastreq.params
     assert lastreq.params["provision"] == outval

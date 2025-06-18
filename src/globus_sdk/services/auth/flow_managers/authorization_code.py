@@ -4,6 +4,7 @@ import logging
 import typing as t
 import urllib.parse
 
+from globus_sdk._missing import filter_missing
 from globus_sdk._types import ScopeCollectionType
 from globus_sdk._utils import slash_join
 
@@ -99,10 +100,9 @@ class GlobusAuthorizationCodeFlowManager(GlobusOAuthFlowManager):
             "state": self.state,
             "response_type": "code",
             "access_type": (self.refresh_tokens and "offline") or "online",
+            **(query_params or {}),
         }
-        if query_params:
-            params.update(query_params)
-
+        params = filter_missing(params)
         encoded_params = urllib.parse.urlencode(params)
         return f"{authorize_base_url}?{encoded_params}"
 

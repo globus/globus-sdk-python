@@ -3,17 +3,18 @@ import uuid
 
 import pytest
 
+from globus_sdk._missing import MISSING, filter_missing
 from globus_sdk._testing import get_last_request, load_response
 
 
 @pytest.mark.parametrize(
-    "admin_id_style", ("none", "string", "list", "set", "uuid", "uuid_list")
+    "admin_id_style", ("missing", "string", "list", "set", "uuid", "uuid_list")
 )
 def test_update_project_admin_id_styles(service_client, admin_id_style):
     meta = load_response(service_client.update_project).metadata
 
-    if admin_id_style == "none":
-        admin_ids = None
+    if admin_id_style == "missing":
+        admin_ids = MISSING
     elif admin_id_style == "string":
         admin_ids = meta["admin_id"]
     elif admin_id_style == "list":
@@ -37,8 +38,8 @@ def test_update_project_admin_id_styles(service_client, admin_id_style):
     last_req = get_last_request()
     data = json.loads(last_req.body)
     assert list(data) == ["project"], data  # 'project' is the only key
-    if admin_id_style == "none":
-        assert data["project"] == {"display_name": "My Project"}
+    if admin_id_style == "missing":
+        assert filter_missing(data["project"]) == {"display_name": "My Project"}
     else:
         assert data["project"] == {
             "display_name": "My Project",
