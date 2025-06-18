@@ -10,12 +10,11 @@ from globus_sdk import (
     AuthLoginClient,
     GlobusSDKUsageError,
     IDTokenDecoder,
-    Scope,
 )
 from globus_sdk._types import ScopeCollectionType, UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.gare import GlobusAuthorizationParameters
-from globus_sdk.scopes import AuthScopes, scopes_to_scope_list
+from globus_sdk.scopes import AuthScopes, Scope, ScopeParser, scopes_to_scope_list
 from globus_sdk.tokenstorage import (
     ScopeRequirementsValidator,
     TokenStorage,
@@ -383,7 +382,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         # merge scopes for deduplication to minimize url request length
         # this is useful even if there weren't any auth_param scope requirements
         # as the app's scope_requirements can have duplicates
-        combined_scopes = Scope.merge_scopes(
+        combined_scopes = ScopeParser.merge_scopes(
             required_scopes, [Scope(s) for s in auth_params.required_scopes or []]
         )
         auth_params.required_scopes = [str(s) for s in combined_scopes]

@@ -198,14 +198,16 @@ class TransferClient(client.BaseClient):
             for i, c in enumerate(collection_ids_):
                 _guards.validators.uuidlike(f"collection_ids[{i}]", c)
 
-        base_scope = Scope(TransferScopes.all)
+        scope = Scope(TransferScopes.all)
+        dependencies: list[Scope] = []
         for coll_id in collection_ids_:
             data_access_scope = Scope(
                 GCSCollectionScopeBuilder(str(coll_id)).data_access,
                 optional=True,
             )
-            base_scope.add_dependency(data_access_scope)
-        self.add_app_scope(base_scope)
+            dependencies.append(data_access_scope)
+        scope = scope.with_dependencies(dependencies)
+        self.add_app_scope(scope)
         return self
 
     # Convenience methods, providing more pythonic access to common REST

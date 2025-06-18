@@ -2,7 +2,7 @@ import time
 
 import pytest
 
-from globus_sdk import Scope, ScopeCycleError, ScopeParseError
+from globus_sdk.scopes import Scope, ScopeCycleError, ScopeParseError, ScopeParser
 
 
 def test_scope_str_and_repr_simple():
@@ -19,53 +19,32 @@ def test_scope_str_and_repr_optional():
 
 def test_scope_str_and_repr_with_dependencies():
     s = Scope("top")
-    s.add_dependency("foo")
+    s = s.with_dependency(Scope("foo"))
     assert str(s) == "top[foo]"
-    s.add_dependency("bar")
+    s = s.with_dependency(Scope("bar"))
     assert str(s) == "top[foo bar]"
-    assert repr(s) == "Scope('top', dependencies=[Scope('foo'), Scope('bar')])"
-
-
-def test_add_dependency_warns_on_optional_but_still_has_good_str_and_repr():
-    s = Scope("top")
-    # this should warn, the use of `optional=...` rather than adding a Scope object
-    # when optional dependencies are wanted is deprecated
-    with pytest.warns(DeprecationWarning):
-        s.add_dependency("foo", optional=True)
-
-    # confirm the str representation and repr for good measure
-    assert str(s) == "top[*foo]"
-    assert repr(s) == "Scope('top', dependencies=[Scope('foo', optional=True)])"
-
-
-@pytest.mark.parametrize("optional_arg", (True, False))
-def test_add_dependency_fails_if_optional_is_combined_with_scope(optional_arg):
-    s = Scope("top")
-    s2 = Scope("bottom")
-    with pytest.raises(ValueError):
-        s.add_dependency(s2, optional=optional_arg)
+    assert repr(s) == "Scope('top', dependencies=(Scope('foo'), Scope('bar')))"
 
 
 def test_scope_str_nested():
-    top = Scope("top")
-    mid = Scope("mid")
     bottom = Scope("bottom")
-    mid.add_dependency(bottom)
-    top.add_dependency(mid)
+    mid = Scope("mid", dependencies=(bottom,))
+    top = Scope("top", dependencies=(mid,))
     assert str(bottom) == "bottom"
     assert str(mid) == "mid[bottom]"
     assert str(top) == "top[mid[bottom]]"
 
 
-def test_add_dependency_parses_scope_with_optional_marker():
+def test_scope_with_optional_dependency_stringifies():
     s = Scope("top")
-    s.add_dependency("*subscope")
+    s = s.with_dependency(Scope("subscope", optional=True))
     assert str(s) == "top[*subscope]"
-    assert repr(s) == "Scope('top', dependencies=[Scope('subscope', optional=True)])"
+    subscope_repr = "Scope('subscope', optional=True)"
+    assert repr(s) == f"Scope('top', dependencies=({subscope_repr},))"
 
 
 def test_scope_parsing_allows_empty_string():
-    scopes = Scope.parse("")
+    scopes = ScopeParser.parse("")
     assert scopes == []
 
 
@@ -78,8 +57,8 @@ def test_scope_parsing_allows_empty_string():
     ],
 )
 def test_scope_parsing_ignores_non_semantic_whitespace(scope_string1, scope_string2):
-    list1 = Scope.parse(scope_string1)
-    list2 = Scope.parse(scope_string2)
+    list1 = ScopeParser.parse(scope_string1)
+    list2 = ScopeParser.parse(scope_string2)
     assert len(list1) == len(list2) == 1
     s1, s2 = list1[0], list2[0]
     # Scope.__eq__ is not defined, so equivalence checking is manual (and somewhat error
@@ -125,7 +104,7 @@ def test_scope_parsing_ignores_non_semantic_whitespace(scope_string1, scope_stri
 )
 def test_scope_parsing_rejects_bad_inputs(scopestring):
     with pytest.raises(ScopeParseError):
-        Scope.parse(scopestring)
+        ScopeParser.parse(scopestring)
 
 
 @pytest.mark.parametrize(
@@ -141,7 +120,7 @@ def test_scope_parsing_rejects_bad_inputs(scopestring):
 )
 def test_scope_parsing_catches_and_rejects_cycles(scopestring):
     with pytest.raises(ScopeCycleError):
-        Scope.parse(scopestring)
+        ScopeParser.parse(scopestring)
 
 
 @pytest.mark.flaky
@@ -166,7 +145,7 @@ def test_scope_parsing_catches_and_rejects_very_large_cycles_quickly():
 
     t0 = time.time()
     with pytest.raises(ScopeCycleError):
-        Scope.parse(scope_string)
+        ScopeParser.parse(scope_string)
     t1 = time.time()
     assert t1 - t0 < 0.1
 
@@ -177,31 +156,31 @@ def test_scope_parsing_catches_and_rejects_very_large_cycles_quickly():
 )
 def test_scope_parsing_accepts_valid_inputs(scopestring):
     # test *only* that parsing does not error and returns a non-empty list of scopes
-    scopes = Scope.parse(scopestring)
+    scopes = ScopeParser.parse(scopestring)
     assert isinstance(scopes, list)
     assert len(scopes) > 0
     assert isinstance(scopes[0], Scope)
 
 
 def test_scope_deserialize_simple():
-    scope = Scope.deserialize("foo")
+    scope = Scope.parse("foo")
     assert str(scope) == "foo"
 
 
 def test_scope_deserialize_with_dependencies():
     # oh, while we're here, let's also check that our whitespace insensitivity works
-    scope = Scope.deserialize("foo[ bar   *baz  ]")
+    scope = Scope.parse("foo[ bar   *baz  ]")
     assert str(scope) in ("foo[bar *baz]", "foo[*baz bar]")
 
 
 def test_scope_deserialize_fails_on_empty():
     with pytest.raises(ValueError):
-        Scope.deserialize("  ")
+        Scope.parse("  ")
 
 
 def test_scope_deserialize_fails_on_multiple_top_level_scopes():
     with pytest.raises(ValueError):
-        Scope.deserialize("foo bar")
+        Scope.parse("foo bar")
 
 
 @pytest.mark.parametrize("scope_str", ("*foo", "foo[bar]", "foo[", "foo]", "foo bar"))
@@ -220,4 +199,4 @@ def test_scope_init_forbids_special_chars(scope_str):
     ],
 )
 def test_scope_parsing_normalizes_optionals(original, reserialized):
-    assert {s.serialize() for s in Scope.parse(original)} == reserialized
+    assert {str(s) for s in ScopeParser.parse(original)} == reserialized
