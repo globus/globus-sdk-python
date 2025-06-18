@@ -52,15 +52,14 @@ class LoginFlowManager(metaclass=abc.ABCMeta):
         """
         self._oauth2_start_flow(auth_parameters, redirect_uri)
 
-        session_required_single_domain = none2missing(
-            auth_parameters.session_required_single_domain
-        )
         prompt = none2missing(auth_parameters.prompt)
         return self.login_client.oauth2_get_authorize_url(
             session_required_identities=none2missing(
                 auth_parameters.session_required_identities
             ),
-            session_required_single_domain=none2missing(session_required_single_domain),
+            session_required_single_domain=none2missing(
+                auth_parameters.session_required_single_domain
+            ),
             session_required_policies=none2missing(
                 auth_parameters.session_required_policies
             ),
