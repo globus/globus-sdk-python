@@ -94,7 +94,10 @@ class ConfidentialAppAuthClient(AuthLoginClient):
         )
         query_params = {
             "usernames": commajoin(usernames),
-            "provision": str(provision).lower(),
+            # only specify `provision` if `usernames` is given
+            "provision": (
+                str(provision).lower() if usernames is not MISSING else MISSING
+            ),
             "ids": commajoin(ids),
             **(query_params or {}),
         }

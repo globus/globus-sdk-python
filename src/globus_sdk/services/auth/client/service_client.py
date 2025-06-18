@@ -175,7 +175,7 @@ class AuthClient(client.BaseClient):
     @t.overload
     def get_jwk(
         self,
-        openid_configuration: None | GlobusHTTPResponse | dict[str, t.Any],
+        openid_configuration: GlobusHTTPResponse | dict[str, t.Any] | MissingType,
         *,
         as_pem: t.Literal[True],
     ) -> RSAPublicKey: ...
@@ -183,7 +183,7 @@ class AuthClient(client.BaseClient):
     @t.overload
     def get_jwk(
         self,
-        openid_configuration: None | GlobusHTTPResponse | dict[str, t.Any],
+        openid_configuration: GlobusHTTPResponse | dict[str, t.Any] | MissingType,
         *,
         as_pem: t.Literal[False],
     ) -> dict[str, t.Any]: ...
@@ -193,7 +193,9 @@ class AuthClient(client.BaseClient):
     # this will ideally be resolved in a future SDK version by making this the only copy
     def get_jwk(
         self,
-        openid_configuration: None | GlobusHTTPResponse | dict[str, t.Any] = None,
+        openid_configuration: (
+            GlobusHTTPResponse | dict[str, t.Any] | MissingType
+        ) = MISSING,
         *,
         as_pem: bool = False,
     ) -> RSAPublicKey | dict[str, t.Any]:
@@ -262,8 +264,8 @@ class AuthClient(client.BaseClient):
     def get_identities(
         self,
         *,
-        usernames: t.Iterable[str] | str | None = None,
-        ids: t.Iterable[UUIDLike] | UUIDLike | None = None,
+        usernames: t.Iterable[str] | str | MissingType = MISSING,
+        ids: t.Iterable[UUIDLike] | UUIDLike | MissingType = MISSING,
         provision: bool = False,
         query_params: dict[str, t.Any] | None = None,
     ) -> GetIdentitiesResponse:
@@ -348,25 +350,26 @@ class AuthClient(client.BaseClient):
 
         log.debug("Looking up Globus Auth Identities")
 
-        if query_params is None:
-            query_params = {}
+        query_params = {
+            "usernames": commajoin(usernames),
+            "ids": commajoin(ids),
+            # only specify `provision` if `usernames` is given
+            "provision": (
+                str(provision).lower() if usernames is not MISSING else MISSING
+            ),
+            **(query_params or {}),
+        }
 
-        # if either of these params has a truthy value, stringify it
-        if usernames:
-            query_params["usernames"] = commajoin(usernames)
-            query_params["provision"] = (
-                "false" if str(provision).lower() == "false" else "true"
-            )
-        if ids:
-            query_params["ids"] = commajoin(ids)
-
-        log.debug(f"query_params={query_params}")
-
-        if "usernames" in query_params and "ids" in query_params:
+        if (
+            query_params["usernames"] is not MISSING
+            and query_params["ids"] is not MISSING
+        ):
             log.warning(
                 "get_identities call with both usernames and "
                 "identities set! Expected to result in errors"
             )
+
+        log.debug(f"query_params={query_params}")
 
         return GetIdentitiesResponse(
             self.get("/v2/api/identities", query_params=query_params)
