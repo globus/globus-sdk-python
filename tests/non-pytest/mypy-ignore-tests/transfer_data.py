@@ -1,21 +1,20 @@
 import uuid
 
-from globus_sdk import TransferClient, TransferData
+from globus_sdk import TransferData
 
 # simple usage, ok
-tc = TransferClient()
-TransferData(tc, "srcep", "destep")
+TransferData("srcep", "destep")
 
 # can set sync level
-TransferData(tc, "srcep", "destep", sync_level=1)
-TransferData(tc, "srcep", "destep", sync_level="exists")
+TransferData("srcep", "destep", sync_level=1)
+TransferData("srcep", "destep", sync_level="exists")
 # unknown int values are allowed
-TransferData(tc, "srcep", "destep", sync_level=100)
+TransferData("srcep", "destep", sync_level=100)
 # unknown str values are rejected (Literal)
-TransferData(tc, "srcep", "destep", sync_level="sizes")  # type: ignore[arg-type]
+TransferData("srcep", "destep", sync_level="sizes")  # type: ignore[arg-type]
 
 # TransferData.add_filter_rule
-tdata = TransferData(tc, uuid.UUID(), uuid.UUID())
+tdata = TransferData(uuid.UUID(), uuid.UUID())
 tdata.add_filter_rule("*.tgz")
 tdata.add_filter_rule("*.tgz", method="exclude")
 tdata.add_filter_rule("*.tgz", type="file")

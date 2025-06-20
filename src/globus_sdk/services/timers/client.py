@@ -67,9 +67,7 @@ class TimersClient(client.BaseClient):
                     app = UserApp("myapp", client_id=NATIVE_APP_CLIENT_ID)
                     client = TimersClient(app=app).add_app_transfer_data_access_scope(COLLECTION_ID)
 
-                    transfer_data = TransferData(
-                        source_endpoint=COLLECTION_ID, destination_endpoint=COLLECTION_ID
-                    )
+                    transfer_data = TransferData(COLLECTION_ID, COLLECTION_ID)
                     transfer_data.add_item("/staging/", "/active/")
 
                     daily_timer = TransferTimer(
@@ -155,15 +153,14 @@ class TimersClient(client.BaseClient):
 
                 .. code-block:: pycon
 
-                    >>> transfer_client = TransferClient(...)
-                    >>> transfer_data = TransferData(transfer_client, ...)
-                    >>> timer_client = globus_sdk.TimersClient(...)
+                    >>> transfer_data = TransferData(...)
+                    >>> timers_client = globus_sdk.TimersClient(...)
                     >>> create_doc = globus_sdk.TransferTimer(
                     ...     name="my-timer",
                     ...     schedule={"type": "recurring", "interval": 1800},
                     ...     body=transfer_data,
                     ... )
-                    >>> response = timer_client.create_timer(timer=create_doc)
+                    >>> response = timers_client.create_timer(timer=create_doc)
 
             .. tab-item:: Example Response Data
 
@@ -192,16 +189,15 @@ class TimersClient(client.BaseClient):
         **Examples**
 
         >>> from datetime import datetime, timedelta
-        >>> transfer_client = TransferClient(...)
-        >>> transfer_data = TransferData(transfer_client, ...)
-        >>> timer_client = globus_sdk.TimersClient(...)
+        >>> transfer_data = TransferData(...)
+        >>> timers_client = globus_sdk.TimersClient(...)
         >>> job = TimerJob.from_transfer_data(
         ...     transfer_data,
         ...     datetime.utcnow(),
         ...     timedelta(days=14),
         ...     name="my-timer-job"
         ... )
-        >>> timer_result = timer_client.create_job(job)
+        >>> timer_result = timers_client.create_job(job)
         """
         if isinstance(data, TransferTimer):
             raise exc.GlobusSDKUsageError(

@@ -4,14 +4,10 @@ import datetime
 import logging
 import typing as t
 
-from globus_sdk import exc
 from globus_sdk._missing import MISSING, MissingType
 from globus_sdk._payload import GlobusPayload
 from globus_sdk._remarshal import stringify
 from globus_sdk._types import UUIDLike
-
-if t.TYPE_CHECKING:
-    import globus_sdk
 
 log = logging.getLogger(__name__)
 
@@ -25,20 +21,12 @@ class DeleteData(GlobusPayload):
     At least one item must be added using
     :meth:`add_item <globus_sdk.DeleteData.add_item>`.
 
-    If ``submission_id`` isn't passed, one will be fetched automatically. The
-    submission ID can be pulled out of here to inspect, but the document
-    can be used as-is multiple times over to retry a potential submission
-    failure (so there shouldn't be any need to inspect it).
-
-    :param transfer_client: A ``TransferClient`` instance which will be used to get a
-        submission ID if one is not supplied. Should be the same instance that is used
-        to submit the deletion.
     :param endpoint: The endpoint ID which is targeted by this deletion Task
     :param label: A string label for the Task
-    :param submission_id: A submission ID value fetched via
-        :meth:`get_submission_id <globus_sdk.TransferClient.get_submission_id>`.
-        Defaults to using ``transfer_client.get_submission_id`` if a ``transfer_client``
-        is provided
+    :param submission_id: A submission ID value fetched via :meth:`get_submission_id \
+        <globus_sdk.TransferClient.get_submission_id>`. By default, the SDK
+        will fetch and populate this field when :meth:`submit_delete \
+        <globus_sdk.TransferClient.submit_delete>` is called.
     :param recursive: Recursively delete subdirectories on the target endpoint
       [default: ``False``]
     :param ignore_missing: Ignore nonexistent files and directories instead of treating
@@ -89,8 +77,7 @@ class DeleteData(GlobusPayload):
 
     def __init__(
         self,
-        transfer_client: globus_sdk.TransferClient | None = None,
-        endpoint: UUIDLike | MissingType = MISSING,
+        endpoint: UUIDLike,
         *,
         label: str | MissingType = MISSING,
         submission_id: UUIDLike | MissingType = MISSING,
@@ -106,18 +93,11 @@ class DeleteData(GlobusPayload):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        # this must be checked explicitly to handle the fact that `transfer_client` is
-        # the first arg
-        if isinstance(endpoint, MissingType):
-            raise exc.GlobusSDKUsageError("endpoint is required")
-
         self["DATA_TYPE"] = "delete"
         self["DATA"] = []
         self["endpoint"] = endpoint
         self["label"] = label
-        self["submission_id"] = submission_id or (
-            transfer_client.get_submission_id()["value"] if transfer_client else MISSING
-        )
+        self["submission_id"] = submission_id
         self["deadline"] = stringify(deadline)
         self["local_user"] = local_user
         self["recursive"] = recursive

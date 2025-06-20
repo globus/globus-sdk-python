@@ -79,8 +79,8 @@ a sample task document with a deadline set for "an hour from now":
 
     # create a Transfer Task request document, including a relative deadline
     transfer_request = globus_sdk.TransferData(
-        source_endpoint=SRC_COLLECTION,
-        destination_endpoint=DST_COLLECTION,
+        SRC_COLLECTION,
+        DST_COLLECTION,
         deadline=make_relative_deadline(datetime.timedelta(hours=1)),
     )
     transfer_request.add_item(SRC_PATH, DST_PATH)

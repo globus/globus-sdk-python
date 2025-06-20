@@ -4,13 +4,9 @@ import datetime
 import logging
 import typing as t
 
-from globus_sdk import exc
 from globus_sdk._missing import MISSING, MissingType
 from globus_sdk._payload import GlobusPayload
 from globus_sdk._types import UUIDLike
-
-if t.TYPE_CHECKING:
-    import globus_sdk
 
 log = logging.getLogger(__name__)
 _sync_level_dict: dict[t.Literal["exists", "size", "mtime", "checksum"], int] = {
@@ -46,20 +42,13 @@ class TransferData(GlobusPayload):
     At least one item must be added using
     :meth:`add_item <globus_sdk.TransferData.add_item>`.
 
-    If ``submission_id`` isn't passed, one will be fetched automatically. The
-    submission ID can be pulled out of here to inspect, but the document
-    can be used as-is multiple times over to retry a potential submission
-    failure (so there shouldn't be any need to inspect it).
-
-    :param transfer_client: A ``TransferClient`` instance which will be used to get a
-        submission ID if one is not supplied. Should be the same instance that is used
-        to submit the transfer.
     :param source_endpoint: The endpoint ID of the source endpoint
     :param destination_endpoint: The endpoint ID of the destination endpoint
     :param label: A string label for the Task
     :param submission_id: A submission ID value fetched via :meth:`get_submission_id \
-        <globus_sdk.TransferClient.get_submission_id>`. Defaults to using
-        ``transfer_client.get_submission_id``
+        <globus_sdk.TransferClient.get_submission_id>`. By default, the SDK
+        will fetch and populate this field when :meth:`submit_transfer \
+        <globus_sdk.TransferClient.submit_transfer>` is called.
     :param sync_level: The method used to compare items between the source and
         destination. One of  ``"exists"``, ``"size"``, ``"mtime"``, or ``"checksum"``
         See the section below on sync-level for an explanation of values.
@@ -165,9 +154,8 @@ class TransferData(GlobusPayload):
 
     def __init__(
         self,
-        transfer_client: globus_sdk.TransferClient | None = None,
-        source_endpoint: UUIDLike | MissingType = MISSING,
-        destination_endpoint: UUIDLike | MissingType = MISSING,
+        source_endpoint: UUIDLike,
+        destination_endpoint: UUIDLike,
         *,
         label: str | MissingType = MISSING,
         submission_id: UUIDLike | MissingType = MISSING,
@@ -191,22 +179,13 @@ class TransferData(GlobusPayload):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        # these must be checked explicitly to handle the fact that `transfer_client` is
-        # the first arg
-        if isinstance(source_endpoint, MissingType):
-            raise exc.GlobusSDKUsageError("source_endpoint is required")
-        if isinstance(destination_endpoint, MissingType):
-            raise exc.GlobusSDKUsageError("destination_endpoint is required")
-
         log.debug("Creating a new TransferData object")
         self["DATA_TYPE"] = "transfer"
         self["DATA"] = []
         self["source_endpoint"] = source_endpoint
         self["destination_endpoint"] = destination_endpoint
         self["label"] = label
-        self["submission_id"] = submission_id or (
-            transfer_client.get_submission_id()["value"] if transfer_client else MISSING
-        )
+        self["submission_id"] = submission_id
         self["recursive_symlinks"] = recursive_symlinks
         self["deadline"] = deadline
         self["source_local_user"] = source_local_user

@@ -45,6 +45,73 @@ Then, code can dispatch with
 From 3.x to 4.0
 ---------------
 
+``TransferData`` and ``DeleteData`` Do Not Take a ``TransferClient``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The signatures for these two data constructors has changed to remove support
+for ``transfer_client`` as their first parameter.
+
+Generally, update usage which passed a client to omit it:
+
+.. code-block:: python
+
+    from globus_sdk import TransferClient, TransferData, DeleteData
+
+    # globus-sdk v3
+
+    tc = TransferClient(...)
+    tdata = TransferData(tc, SRC_COLLECTION, DST_COLLECTION)
+    tc.submit_transfer(tdata)
+
+    tc = TransferClient(...)
+    ddata = DeleteData(tc, COLLECTION)
+    tc.submit_delete(tdata)
+
+    # globus-sdk v4
+
+    tdata = TransferData(SRC_COLLECTION, DST_COLLECTION)
+    tc = TransferClient(...)
+    tc.submit_transfer(tdata)
+
+    ddata = DeleteData(COLLECTION)
+    tc = TransferClient(...)
+    tc.submit_delete(tdata)
+
+Users who are using keyword arguments to pass collection IDs without a
+``transfer_client`` do not need to make any change. For example:
+
+.. code-block:: python
+
+    from globus_sdk import TransferData, DeleteData
+
+    # globus-sdk v3 or v4
+
+    tdata = TransferData(
+        source_endpoint=SRC_COLLECTION, destination_endpoint=DST_COLLECTION
+    )
+    ddata = DeleteData(endpoint=COLLECTION)
+
+The client object was used to fetch a ``submission_id`` on initialization.
+Users typically will rely on ``TransferClient.submit_transfer()`` and
+``TransferClient.submit_delete()`` filling in this value.
+To control when a submission ID is fetched, use
+``TransferClient.get_submsission_id()``, as in:
+
+.. code-block:: python
+
+    from globus_sdk import TransferClient, TransferData
+
+    # globus-sdk v3 or v4
+
+    tc = TransferClient(...)
+    submission_id = tc.get_submission_id()["value"]
+
+    tdata = TransferData(
+        source_endpoint=SRC_COLLECTION,
+        destination_endpoint=DST_COLLECTION,
+        submission_id=submission_id,
+    )
+
 Deprecated Timers Aliases Removed
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

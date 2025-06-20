@@ -24,10 +24,7 @@ def main():
     transfer_client.add_app_data_access_scope(SRC_COLLECTION)
     transfer_client.add_app_data_access_scope(DST_COLLECTION)
 
-    transfer_request = globus_sdk.TransferData(
-        source_endpoint=SRC_COLLECTION,
-        destination_endpoint=DST_COLLECTION,
-    )
+    transfer_request = globus_sdk.TransferData(SRC_COLLECTION, DST_COLLECTION)
     transfer_request.add_item(SRC_PATH, DST_PATH)
 
     task = transfer_client.submit_transfer(transfer_request)

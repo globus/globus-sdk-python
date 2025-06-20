@@ -19,10 +19,7 @@ DST_PATH = "/~/example-timer-destination.txt"
 
 # as with an immediate data transfer, we take our input data and wrap them in
 # a TransferData object, representing the transfer task
-transfer_request = globus_sdk.TransferData(
-    source_endpoint=SRC_COLLECTION,
-    destination_endpoint=DST_COLLECTION,
-)
+transfer_request = globus_sdk.TransferData(SRC_COLLECTION, DST_COLLECTION)
 transfer_request.add_item(SRC_PATH, DST_PATH)
 
 # we'll define the timer as one which runs every hour for 3 days
