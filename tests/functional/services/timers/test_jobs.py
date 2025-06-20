@@ -39,9 +39,7 @@ def test_get_job_errors(client):
 )
 def test_create_job(client, start, interval):
     meta = load_response(client.create_job).metadata
-    transfer_data = TransferData(
-        source_endpoint=GO_EP1_ID, destination_endpoint=GO_EP2_ID
-    )
+    transfer_data = TransferData(GO_EP1_ID, GO_EP2_ID)
     with pytest.warns(exc.RemovedInV4Warning, match="Prefer TransferTimer"):
         timer_job = TimerJob.from_transfer_data(transfer_data, start, interval)
     response = client.create_job(timer_job)
@@ -68,9 +66,7 @@ def test_create_job(client, start, interval):
 
 def test_create_job_validation_error(client):
     meta = load_response(client.create_job, case="validation_error").metadata
-    transfer_data = TransferData(
-        source_endpoint=GO_EP1_ID, destination_endpoint=GO_EP2_ID
-    )
+    transfer_data = TransferData(GO_EP1_ID, GO_EP2_ID)
     with pytest.warns(exc.RemovedInV4Warning, match="Prefer TransferTimer"):
         timer_job = TimerJob.from_transfer_data(
             transfer_data, "2022-04-05T06:00:00", 1800

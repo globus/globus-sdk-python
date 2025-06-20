@@ -15,7 +15,7 @@ from tests.common import GO_EP1_ID, GO_EP2_ID
 
 
 def test_timer_from_transfer_data_ok():
-    tdata = TransferData(None, GO_EP1_ID, GO_EP2_ID)
+    tdata = TransferData(GO_EP1_ID, GO_EP2_ID)
     with pytest.warns(exc.RemovedInV4Warning, match="Prefer TransferTimer"):
         job = TimerJob.from_transfer_data(tdata, "2022-01-01T00:00:00Z", 600)
     assert "callback_body" in job
@@ -30,14 +30,14 @@ def test_timer_from_transfer_data_ok():
     "badkey, value", (("submission_id", "foo"), ("skip_activation_check", True))
 )
 def test_timer_from_transfer_data_rejects_forbidden_keys(badkey, value):
-    tdata = TransferData(None, GO_EP1_ID, GO_EP2_ID, **{badkey: value})
+    tdata = TransferData(GO_EP1_ID, GO_EP2_ID, **{badkey: value})
     with pytest.raises(ValueError):
         with pytest.warns(exc.RemovedInV4Warning, match="Prefer TransferTimer"):
             TimerJob.from_transfer_data(tdata, "2022-01-01T00:00:00Z", 600)
 
 
 def test_transfer_timer_ok():
-    tdata = TransferData(source_endpoint=GO_EP1_ID, destination_endpoint=GO_EP2_ID)
+    tdata = TransferData(GO_EP1_ID, GO_EP2_ID)
     timer = TransferTimer(body=tdata, name="foo timer", schedule={"type": "once"})
     assert timer["name"] == "foo timer"
     assert timer["schedule"]["type"] == "once"

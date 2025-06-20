@@ -19,10 +19,7 @@ DST_PATH = "/~/example-transfer-script-destination.txt"
 def main():
     transfer_client = globus_sdk.TransferClient(app=USER_APP)
 
-    transfer_request = globus_sdk.TransferData(
-        source_endpoint=SRC_COLLECTION,
-        destination_endpoint=DST_COLLECTION,
-    )
+    transfer_request = globus_sdk.TransferData(SRC_COLLECTION, DST_COLLECTION)
     transfer_request.add_item(SRC_PATH, DST_PATH)
 
     try:

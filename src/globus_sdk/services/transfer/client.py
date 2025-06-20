@@ -1558,16 +1558,16 @@ class TransferClient(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.TransferClient(...)
                     tdata = globus_sdk.TransferData(
-                        tc,
                         source_endpoint_id,
                         destination_endpoint_id,
                         label="SDK example",
                         sync_level="checksum",
                     )
-                    tdata.add_item("/source/path/dir/", "/dest/path/dir/", recursive=True)
+                    tdata.add_item("/source/path/dir/", "/dest/path/dir/")
                     tdata.add_item("/source/path/file.txt", "/dest/path/file.txt")
+
+                    tc = globus_sdk.TransferClient(...)
                     transfer_result = tc.submit_transfer(tdata)
                     print("task_id =", transfer_result["task_id"])
 
@@ -1582,7 +1582,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/task_submit/#submit_transfer_task
         """  # noqa: E501
         log.debug("TransferClient.submit_transfer(...)")
-        if "submission_id" not in data:
+        if "submission_id" not in data or data["submission_id"] is MISSING:
             log.debug("submit_transfer autofetching submission_id")
             data["submission_id"] = self.get_submission_id()["value"]
         return self.post("/v0.10/transfer", data=data)
@@ -1607,10 +1607,11 @@ class TransferClient(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.TransferClient(...)
-                    ddata = globus_sdk.DeleteData(tc, endpoint_id, recursive=True)
+                    ddata = globus_sdk.DeleteData(endpoint_id, recursive=True)
                     ddata.add_item("/dir/to/delete/")
                     ddata.add_item("/file/to/delete/file.txt")
+
+                    tc = globus_sdk.TransferClient(...)
                     delete_result = tc.submit_delete(ddata)
                     print("task_id =", delete_result["task_id"])
 
@@ -1625,7 +1626,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/task_submit/#submit_delete_task
         """
         log.debug("TransferClient.submit_delete(...)")
-        if "submission_id" not in data:
+        if "submission_id" not in data or data["submission_id"] is MISSING:
             log.debug("submit_delete autofetching submission_id")
             data["submission_id"] = self.get_submission_id()["value"]
         return self.post("/v0.10/delete", data=data)

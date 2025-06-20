@@ -16,9 +16,7 @@ def test_transfer_submit_failure(client):
     meta = load_response(client.submit_transfer, case="failure").metadata
 
     with pytest.raises(TransferAPIError) as excinfo:
-        client.submit_transfer(
-            TransferData(source_endpoint=GO_EP1_ID, destination_endpoint=GO_EP2_ID)
-        )
+        client.submit_transfer(TransferData(GO_EP1_ID, GO_EP2_ID))
 
     assert excinfo.value.http_status == 400
     assert excinfo.value.request_id == meta["request_id"]
@@ -30,8 +28,8 @@ def test_transfer_submit_success(client):
     meta = load_response(client.submit_transfer).metadata
 
     tdata = TransferData(
-        source_endpoint=GO_EP1_ID,
-        destination_endpoint=GO_EP2_ID,
+        GO_EP1_ID,
+        GO_EP2_ID,
         label="mytask",
         sync_level="exists",
         deadline="2018-06-01",

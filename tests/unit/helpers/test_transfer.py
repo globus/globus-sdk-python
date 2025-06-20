@@ -1,42 +1,30 @@
 import pytest
 
-from globus_sdk import (
-    MISSING,
-    DeleteData,
-    GlobusSDKUsageError,
-    TransferClient,
-    TransferData,
-)
-from globus_sdk._testing import load_response
+from globus_sdk import MISSING, DeleteData, TransferData
 from globus_sdk.services.transfer.client import _format_filter
 from tests.common import GO_EP1_ID, GO_EP2_ID
 
 
-def test_transfer_init_simple():
+def test_transfer_init_no_params():
     """
-    Creates TransferData objects with and without parameters,
-    Verifies TransferData field initialization
+    Creates a TransferData object without optional parameters and
+    verifies field initialization.
     """
-    tc = TransferClient()
-    meta = load_response(tc.get_submission_id).metadata
     # default init
-    tdata = TransferData(tc, GO_EP1_ID, GO_EP2_ID)
+    tdata = TransferData(GO_EP1_ID, GO_EP2_ID)
     assert tdata["DATA_TYPE"] == "transfer"
     assert tdata["source_endpoint"] == GO_EP1_ID
     assert tdata["destination_endpoint"] == GO_EP2_ID
-    assert tdata["submission_id"] == meta["submission_id"]
+    assert tdata["submission_id"] is MISSING
     assert "DATA" in tdata
     assert len(tdata["DATA"]) == 0
 
 
 def test_transfer_init_w_params():
-    tc = TransferClient()
-    meta = load_response(tc.get_submission_id).metadata
     # init with params
     label = "label"
     params = {"param1": "value1", "param2": "value2"}
     tdata = TransferData(
-        tc,
         GO_EP1_ID,
         GO_EP2_ID,
         label=label,
@@ -44,48 +32,18 @@ def test_transfer_init_w_params():
         additional_fields=params,
     )
     assert tdata["label"] == label
-    assert tdata["submission_id"] == meta["submission_id"]
+    assert tdata["submission_id"] is MISSING
     # sync_level of "exists" should be converted to 0
     assert tdata["sync_level"] == 0
     for par in params:
         assert tdata[par] == params[par]
 
 
-def test_transfer_init_no_client():
-    tdata1 = TransferData(None, GO_EP1_ID, GO_EP2_ID)
-    tdata2 = TransferData(source_endpoint=GO_EP1_ID, destination_endpoint=GO_EP2_ID)
-    tdata3 = TransferData(
-        source_endpoint=GO_EP1_ID, destination_endpoint=GO_EP2_ID, transfer_client=None
-    )
-    for tdata in (tdata1, tdata2, tdata3):
-        assert tdata["DATA_TYPE"] == "transfer"
-        assert tdata["source_endpoint"] == GO_EP1_ID
-        assert tdata["destination_endpoint"] == GO_EP2_ID
-        assert tdata["submission_id"] is MISSING
-        assert "DATA" in tdata
-        assert len(tdata["DATA"]) == 0
-
-
-@pytest.mark.parametrize(
-    "tdata_args",
-    [
-        (),
-        (GO_EP1_ID, GO_EP2_ID),
-        (MISSING, MISSING, MISSING),
-        (MISSING, GO_EP1_ID, MISSING),
-        (MISSING, MISSING, GO_EP2_ID),
-    ],
-)
-def test_transfer_init_rejects_bad_usage(tdata_args):
-    with pytest.raises(GlobusSDKUsageError):
-        TransferData(*tdata_args)
-
-
 def test_transfer_add_item():
     """
     Adds items to TransferData, verifies results
     """
-    tdata = TransferData(source_endpoint=GO_EP1_ID, destination_endpoint=GO_EP2_ID)
+    tdata = TransferData(GO_EP1_ID, GO_EP2_ID)
     # add item
     source_path = "source/path/"
     dest_path = "dest/path/"
@@ -143,7 +101,7 @@ def test_transfer_add_symlink_item():
     """
     Adds a transfer_symlink_item to TransferData, verifies results
     """
-    tdata = TransferData(source_endpoint=GO_EP1_ID, destination_endpoint=GO_EP2_ID)
+    tdata = TransferData(GO_EP1_ID, GO_EP2_ID)
     # add item
     source_path = "source/path/"
     dest_path = "dest/path/"
@@ -156,16 +114,20 @@ def test_transfer_add_symlink_item():
     assert data["destination_path"] == dest_path
 
 
-def test_delete_init_with_client():
-    """
-    Verifies DeleteData field initialization
-    """
-    tc = TransferClient()
-    load_response(tc.get_submission_id)
-    ddata = DeleteData(tc, GO_EP1_ID)
+@pytest.mark.parametrize(
+    "args, kwargs",
+    (
+        ((GO_EP1_ID,), {}),
+        ((), {"endpoint": GO_EP1_ID}),
+    ),
+)
+def test_delete_data_noparams_init(args, kwargs):
+    # the minimal, required argument is the endpoint ID -- less than that results
+    # in a TypeError because the signature is not obeyed
+    ddata = DeleteData(*args, **kwargs)
     assert ddata["DATA_TYPE"] == "delete"
     assert ddata["endpoint"] == GO_EP1_ID
-    assert "submission_id" in ddata
+    assert ddata["submission_id"] is MISSING
     assert "DATA" in ddata
     assert len(ddata["DATA"]) == 0
 
@@ -180,48 +142,23 @@ def test_delete_init_with_client():
     ),
 )
 def test_delete_init_with_supported_parameters(add_kwargs):
-    ddata = DeleteData(endpoint=GO_EP1_ID, **add_kwargs)
+    ddata = DeleteData(GO_EP1_ID, **add_kwargs)
     for k, v in add_kwargs.items():
         assert ddata[k] == v
 
 
 def test_delete_init_with_additional_fields():
     params = {"param1": "value1", "param2": "value2"}
-    ddata = DeleteData(endpoint=GO_EP1_ID, additional_fields=params)
+    ddata = DeleteData(GO_EP1_ID, additional_fields=params)
     assert ddata["param1"] == "value1"
     assert ddata["param2"] == "value2"
-
-
-@pytest.mark.parametrize(
-    "args, kwargs",
-    (
-        ((None, GO_EP1_ID), {}),
-        ((), {"endpoint": GO_EP1_ID}),
-        ((), {"endpoint": GO_EP1_ID, "transfer_client": None}),
-    ),
-)
-def test_delete_init_no_client(args, kwargs):
-    ddata = DeleteData(*args, **kwargs)
-    assert ddata["DATA_TYPE"] == "delete"
-    assert ddata["endpoint"] == GO_EP1_ID
-    assert ddata["submission_id"] is MISSING
-    assert "DATA" in ddata
-    assert len(ddata["DATA"]) == 0
-
-
-@pytest.mark.parametrize(
-    "ddata_args", [(), (GO_EP1_ID,), (MISSING, MISSING), (GO_EP1_ID, MISSING)]
-)
-def test_delete_init_rejects_bad_usage(ddata_args):
-    with pytest.raises(GlobusSDKUsageError):
-        DeleteData(*ddata_args)
 
 
 def test_delete_add_item():
     """
     Adds items to DeleteData, verifies results
     """
-    ddata = DeleteData(endpoint=GO_EP1_ID)
+    ddata = DeleteData(GO_EP1_ID)
 
     # add normal item
     path = "source/path/"
@@ -242,7 +179,7 @@ def test_delete_add_item():
 
 
 def test_delete_iter_items():
-    ddata = DeleteData(endpoint=GO_EP1_ID)
+    ddata = DeleteData(GO_EP1_ID)
     # add item
     ddata.add_item("abc/")
     ddata.add_item("def/")
@@ -261,7 +198,7 @@ def test_delete_iter_items():
 
 
 def test_transfer_iter_items():
-    tdata = TransferData(source_endpoint=GO_EP1_ID, destination_endpoint=GO_EP2_ID)
+    tdata = TransferData(GO_EP1_ID, GO_EP2_ID)
     tdata.add_item("source/abc.txt", "dest/abc.txt")
     tdata.add_item("source/def/", "dest/def/", recursive=True)
 
@@ -294,10 +231,8 @@ def test_notification_options(n_succeeded, n_failed, n_inactive):
     if n_inactive is not None:
         notify_kwargs["notify_on_inactive"] = n_inactive
 
-    ddata = DeleteData(endpoint=GO_EP1_ID, **notify_kwargs)
-    tdata = TransferData(
-        source_endpoint=GO_EP1_ID, destination_endpoint=GO_EP2_ID, **notify_kwargs
-    )
+    ddata = DeleteData(GO_EP1_ID, **notify_kwargs)
+    tdata = TransferData(GO_EP1_ID, GO_EP2_ID, **notify_kwargs)
 
     def _default(x):
         return x if x is not None else True
@@ -335,17 +270,9 @@ def test_notification_options(n_succeeded, n_failed, n_inactive):
 def test_transfer_sync_levels_result(sync_level, result):
     if isinstance(result, type) and issubclass(result, Exception):
         with pytest.raises(result):
-            TransferData(
-                source_endpoint=GO_EP1_ID,
-                destination_endpoint=GO_EP2_ID,
-                sync_level=sync_level,
-            )
+            TransferData(GO_EP1_ID, GO_EP2_ID, sync_level=sync_level)
     else:
-        tdata = TransferData(
-            source_endpoint=GO_EP1_ID,
-            destination_endpoint=GO_EP2_ID,
-            sync_level=sync_level,
-        )
+        tdata = TransferData(GO_EP1_ID, GO_EP2_ID, sync_level=sync_level)
         assert tdata["sync_level"] == result
 
 
@@ -354,11 +281,9 @@ def test_transfer_sync_levels_result(sync_level, result):
 def test_skip_activation_check_supported(datatype, value):
     def create(**kwargs):
         if datatype == "transfer":
-            return TransferData(
-                source_endpoint=GO_EP1_ID, destination_endpoint=GO_EP2_ID, **kwargs
-            )
+            return TransferData(GO_EP1_ID, GO_EP2_ID, **kwargs)
         else:
-            return DeleteData(endpoint=GO_EP1_ID, **kwargs)
+            return DeleteData(GO_EP1_ID, **kwargs)
 
     if value is None:
         # not present if not provided as a param or provided as explicit None
@@ -374,7 +299,7 @@ def test_skip_activation_check_supported(datatype, value):
 
 
 def test_add_filter_rule():
-    tdata = TransferData(source_endpoint=GO_EP1_ID, destination_endpoint=GO_EP2_ID)
+    tdata = TransferData(GO_EP1_ID, GO_EP2_ID)
     assert "filter_rules" not in tdata
 
     tdata.add_filter_rule("*.tgz", type="file")
