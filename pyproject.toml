@@ -88,6 +88,10 @@ typing-mindeps = [
     {include-group = "typing"},
     "typing-extensions==4.0",
 ]
+check-project-metadata = [
+    "ruamel.yaml<0.19",
+    "mddj==0.1.0",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
