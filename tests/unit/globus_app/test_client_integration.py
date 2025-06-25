@@ -103,7 +103,7 @@ def test_transfer_client_add_app_data_access_scope_in_iterable(app):
 
     transfer_dependencies = []
     for scope in app.scope_requirements["transfer.api.globus.org"]:
-        if scope.scope_string != globus_sdk.TransferClient.scopes.all:
+        if scope.scope_string != str(globus_sdk.TransferClient.scopes.all):
             continue
         for dep in scope.dependencies:
             transfer_dependencies.append((dep.scope_string, dep.optional))
@@ -124,10 +124,10 @@ def test_timers_client_add_app_data_access_scope_in_iterable(app):
 
     transfer_dependencies = []
     for scope in app.scope_requirements[globus_sdk.TimersClient.resource_server]:
-        if scope.scope_string != globus_sdk.TimersClient.scopes.timer:
+        if scope.scope_string != str(globus_sdk.TimersClient.scopes.timer):
             continue
         for dep in scope.dependencies:
-            if dep.scope_string != globus_sdk.TransferClient.scopes.all:
+            if dep.scope_string != str(globus_sdk.TransferClient.scopes.all):
                 continue
             for subdep in dep.dependencies:
                 transfer_dependencies.append((subdep.scope_string, subdep.optional))

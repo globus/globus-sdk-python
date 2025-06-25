@@ -24,7 +24,7 @@ def base_client_class(no_retry_transport):
         service_name = "transfer"
         transport_class = no_retry_transport
         scopes = TransferScopes
-        default_scope_requirements = [Scope(TransferScopes.all)]
+        default_scope_requirements = [TransferScopes.all]
 
     return CustomClient
 
@@ -223,7 +223,7 @@ def test_app_integration(base_client_class):
 
     # confirm default_required_scopes were automatically added
     assert [str(s) for s in app.scope_requirements[c.resource_server]] == [
-        TransferScopes.all
+        str(TransferScopes.all)
     ]
 
     # confirm attempt at getting an authorizer from app
@@ -250,7 +250,7 @@ def test_add_app_scope(base_client_class):
     c.add_app_scope("foo")
     str_list = [str(s) for s in app.scope_requirements[c.resource_server]]
     assert len(str_list) == 2
-    assert TransferScopes.all in str_list
+    assert str(TransferScopes.all) in str_list
     assert "foo" in str_list
 
 
@@ -259,7 +259,7 @@ def test_add_app_scope_chaining(base_client_class):
     c = base_client_class(app=app).add_app_scope("foo").add_app_scope("bar")
     str_list = [str(s) for s in app.scope_requirements[c.resource_server]]
     assert len(str_list) == 3
-    assert TransferScopes.all in str_list
+    assert str(TransferScopes.all) in str_list
     assert "foo" in str_list
     assert "bar" in str_list
 
@@ -328,7 +328,7 @@ def test_cannot_attach_app_when_authorizer_was_provided(base_client_class):
 def test_cannot_attach_app_when_resource_server_is_not_resolvable():
     class CustomClient(globus_sdk.BaseClient):
         service_name = "transfer"
-        default_scope_requirements = [Scope(TransferScopes.all)]
+        default_scope_requirements = [TransferScopes.all]
 
     c = CustomClient()
     app = UserApp("SDK Test", client_id="client_id")

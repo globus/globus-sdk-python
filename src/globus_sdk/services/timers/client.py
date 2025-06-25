@@ -7,7 +7,7 @@ import uuid
 from globus_sdk import _guards, client, exc, response
 from globus_sdk._types import UUIDLike
 from globus_sdk.scopes import (
-    GCSCollectionScopeBuilder,
+    GCSCollectionScopes,
     Scope,
     TimersScopes,
     TransferScopes,
@@ -31,7 +31,7 @@ class TimersClient(client.BaseClient):
     error_class = TimersAPIError
     service_name = "timer"
     scopes = TimersScopes
-    default_scope_requirements = [Scope(TimersScopes.timer)]
+    default_scope_requirements = [TimersScopes.timer]
 
     def add_app_transfer_data_access_scope(
         self, collection_ids: UUIDLike | t.Iterable[UUIDLike]
@@ -86,17 +86,15 @@ class TimersClient(client.BaseClient):
             for i, c in enumerate(collection_ids_):
                 _guards.validators.uuidlike(f"collection_ids[{i}]", c)
 
-        transfer_scope = Scope(TransferScopes.all)
         dependencies: list[Scope] = []
         for coll_id in collection_ids_:
-            data_access_scope = Scope(
-                GCSCollectionScopeBuilder(str(coll_id)).data_access,
-                optional=True,
-            )
+            data_access_scope = GCSCollectionScopes(
+                str(coll_id)
+            ).data_access.with_optional(True)
             dependencies.append(data_access_scope)
-        transfer_scope = transfer_scope.with_dependencies(dependencies)
+        transfer_scope = TransferScopes.all.with_dependencies(dependencies)
 
-        timers_scope = Scope(TimersScopes.timer, dependencies=(transfer_scope,))
+        timers_scope = TimersScopes.timer.with_dependency(transfer_scope)
         self.add_app_scope(timers_scope)
         return self
 

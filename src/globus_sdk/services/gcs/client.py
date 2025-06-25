@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing as t
 import uuid
 
-from globus_sdk import client, exc, paging, response, scopes
+from globus_sdk import client, exc, paging, response
 from globus_sdk._classproperty import classproperty
 from globus_sdk._missing import MISSING, MissingType
 from globus_sdk._remarshal import commajoin
@@ -11,7 +11,7 @@ from globus_sdk._types import UUIDLike
 from globus_sdk._utils import slash_join
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.globus_app import GlobusApp
-from globus_sdk.scopes import Scope
+from globus_sdk.scopes import GCSCollectionScopes, GCSEndpointScopes, Scope
 
 from .connector_table import ConnectorTable
 from .data import (
@@ -84,30 +84,30 @@ class GCSClient(client.BaseClient):
     @staticmethod
     def get_gcs_endpoint_scopes(
         endpoint_id: uuid.UUID | str,
-    ) -> scopes.GCSEndpointScopeBuilder:
+    ) -> GCSEndpointScopes:
         """Given a GCS Endpoint ID, this helper constructs an object containing the
         scopes for that Endpoint.
 
         :param endpoint_id: The ID of the Endpoint
 
-        See documentation for :class:`globus_sdk.scopes.GCSEndpointScopeBuilder` for
+        See documentation for :class:`globus_sdk.scopes.GCSEndpointScopes` for
         more information.
         """
-        return scopes.GCSEndpointScopeBuilder(str(endpoint_id))
+        return GCSEndpointScopes(str(endpoint_id))
 
     @staticmethod
     def get_gcs_collection_scopes(
         collection_id: uuid.UUID | str,
-    ) -> scopes.GCSCollectionScopeBuilder:
+    ) -> GCSCollectionScopes:
         """Given a GCS Collection ID, this helper constructs an object containing the
         scopes for that Collection.
 
         :param collection_id: The ID of the Collection
 
-        See documentation for :class:`globus_sdk.scopes.GCSCollectionScopeBuilder` for
+        See documentation for :class:`globus_sdk.scopes.GCSCollectionScopes` for
         more information.
         """
-        return scopes.GCSCollectionScopeBuilder(str(collection_id))
+        return GCSCollectionScopes(str(collection_id))
 
     @staticmethod
     def connector_id_to_name(connector_id: UUIDLike) -> str | None:
@@ -140,11 +140,9 @@ class GCSClient(client.BaseClient):
     @property
     def default_scope_requirements(self) -> list[Scope]:
         return [
-            Scope(
-                GCSClient.get_gcs_endpoint_scopes(
-                    self.endpoint_client_id
-                ).manage_collections
-            )
+            GCSClient.get_gcs_endpoint_scopes(
+                self.endpoint_client_id
+            ).manage_collections
         ]
 
     @classproperty

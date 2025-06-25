@@ -30,5 +30,6 @@ which make learning about and manipulating these data easier.
     :maxdepth: 1
 
     scopes
+    scope_collections
     consents
     scope_parsing

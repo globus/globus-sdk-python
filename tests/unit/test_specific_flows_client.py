@@ -1,6 +1,7 @@
 import pytest
 
 import globus_sdk
+from globus_sdk.scopes import Scope
 
 
 def test_specific_flow_client_class_errors_on_scope_access():
@@ -22,7 +23,7 @@ def test_specific_flow_client_class_errors_on_scope_access():
         scopes.demuddle
 
     err = excinfo.value
-    assert str(err) == "Unrecognized Attribute 'demuddle'"
+    assert str(err).endswith("has no attribute 'demuddle'")
 
 
 def test_specific_flow_client_class_errors_on_resource_server_access():
@@ -57,15 +58,15 @@ def test_specific_flow_client_instance_supports_scope_access():
 
     # for the 'user' scope, we get a string
     user_scope = scopes.user
-    assert isinstance(user_scope, str)
-    assert user_scope.endswith("flow_foo_user")
+    assert isinstance(user_scope, Scope)
+    assert str(user_scope).endswith("flow_foo_user")
 
     # but for any other scope we still get the generic attribute error
     with pytest.raises(AttributeError) as excinfo:
         scopes.demuddle
 
     err = excinfo.value
-    assert str(err) == "Unrecognized Attribute 'demuddle'"
+    assert str(err).endswith("has no attribute 'demuddle'")
 
 
 def test_specific_flow_client_instance_supports_resource_server_access():

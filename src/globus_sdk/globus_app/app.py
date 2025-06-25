@@ -116,7 +116,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         #
         # additionally, this will ensure that openid scope requirement is always
         # registered (it's required for token identity validation).
-        consent_client.attach_globus_app(self, app_scopes=[Scope(AuthScopes.openid)])
+        consent_client.attach_globus_app(self, app_scopes=[AuthScopes.openid])
 
     def _resolve_scope_requirements(
         self, scope_requirements: t.Mapping[str, ScopeCollectionType] | None

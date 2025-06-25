@@ -7,7 +7,7 @@ from globus_sdk import GlobusHTTPResponse, client
 from globus_sdk._missing import MISSING, MissingType
 from globus_sdk._remarshal import strseq_listify
 from globus_sdk._types import UUIDLike
-from globus_sdk.scopes import ComputeScopes, Scope
+from globus_sdk.scopes import ComputeScopes
 
 from .errors import ComputeAPIError
 
@@ -26,7 +26,7 @@ class ComputeClientV2(client.BaseClient):
     error_class = ComputeAPIError
     service_name = "compute"
     scopes = ComputeScopes
-    default_scope_requirements = [Scope(ComputeScopes.all)]
+    default_scope_requirements = [ComputeScopes.all]
 
     def get_version(self, service: str | MissingType = MISSING) -> GlobusHTTPResponse:
         """Get the current version of the API and other services.
@@ -269,7 +269,7 @@ class ComputeClientV3(client.BaseClient):
     error_class = ComputeAPIError
     service_name = "compute"
     scopes = ComputeScopes
-    default_scope_requirements = [Scope(ComputeScopes.all)]
+    default_scope_requirements = [ComputeScopes.all]
 
     def register_endpoint(self, data: dict[str, t.Any]) -> GlobusHTTPResponse:
         """Register a new endpoint.

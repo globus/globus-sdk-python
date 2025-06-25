@@ -104,9 +104,9 @@ class AuthClient(client.BaseClient):
     error_class = AuthAPIError
     scopes = AuthScopes
     default_scope_requirements = [
-        Scope(AuthScopes.openid),
-        Scope(AuthScopes.profile),
-        Scope(AuthScopes.email),
+        AuthScopes.openid,
+        AuthScopes.profile,
+        AuthScopes.email,
     ]
 
     def __init__(

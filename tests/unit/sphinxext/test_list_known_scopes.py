@@ -13,18 +13,18 @@ def test_listknownscopes_rejects_wrong_object_type(sphinx_runner, capsys):
 
     test_line = None
     for line in err_lines:
-        if "ScopeBuilder" in line:
+        if "scope collection" in line:
             test_line = line
             break
     else:
-        pytest.fail("Didn't find 'ScopeBuilder' in stderr")
+        pytest.fail("Didn't find 'scope collection' in stderr")
 
     assert re.search(
-        r"Expected <class '(\w+\.)+BaseClient'> to be a ScopeBuilder", test_line
+        r"Expected <class '(\w+\.)+BaseClient'> to be a scope collection", test_line
     )
 
 
-# choose an arbitrary scope builder from the SDK and confirm that listknownscopes
+# choose an arbitrary scope collection from the SDK and confirm that listknownscopes
 # will render its list of members
 # for this case, we're using `TimersScopes`
 def test_listknownscopes_of_timers(sphinx_runner):

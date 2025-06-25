@@ -1,7 +1,7 @@
 from .auth import AuthScopes
 from .compute import ComputeScopes
-from .flows import FlowsScopes, SpecificFlowScopeBuilder
-from .gcs import GCSCollectionScopeBuilder, GCSEndpointScopeBuilder
+from .flows import FlowsScopes, SpecificFlowScopes
+from .gcs import GCSCollectionScopes, GCSEndpointScopes
 from .groups import GroupsScopes, NexusScopes
 from .search import SearchScopes
 from .timers import TimersScopes
@@ -11,9 +11,9 @@ __all__ = (
     "AuthScopes",
     "ComputeScopes",
     "FlowsScopes",
-    "SpecificFlowScopeBuilder",
-    "GCSEndpointScopeBuilder",
-    "GCSCollectionScopeBuilder",
+    "SpecificFlowScopes",
+    "GCSEndpointScopes",
+    "GCSCollectionScopes",
     "GroupsScopes",
     "NexusScopes",
     "SearchScopes",

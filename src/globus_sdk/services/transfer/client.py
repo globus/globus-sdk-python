@@ -9,7 +9,7 @@ from globus_sdk import _guards, client, exc, paging, response
 from globus_sdk._missing import MISSING, MissingType
 from globus_sdk._remarshal import commajoin
 from globus_sdk._types import DateLike, IntLike, UUIDLike
-from globus_sdk.scopes import GCSCollectionScopeBuilder, Scope, TransferScopes
+from globus_sdk.scopes import GCSCollectionScopes, Scope, TransferScopes
 
 from .data import DeleteData, TransferData
 from .errors import TransferAPIError
@@ -131,7 +131,7 @@ class TransferClient(client.BaseClient):
     transport_class: type[TransferRequestsTransport] = TransferRequestsTransport
     error_class = TransferAPIError
     scopes = TransferScopes
-    default_scope_requirements = [Scope(TransferScopes.all)]
+    default_scope_requirements = [TransferScopes.all]
 
     def add_app_data_access_scope(
         self, collection_ids: UUIDLike | t.Iterable[UUIDLike]
@@ -198,13 +198,12 @@ class TransferClient(client.BaseClient):
             for i, c in enumerate(collection_ids_):
                 _guards.validators.uuidlike(f"collection_ids[{i}]", c)
 
-        scope = Scope(TransferScopes.all)
+        scope = TransferScopes.all
         dependencies: list[Scope] = []
         for coll_id in collection_ids_:
-            data_access_scope = Scope(
-                GCSCollectionScopeBuilder(str(coll_id)).data_access,
-                optional=True,
-            )
+            data_access_scope = GCSCollectionScopes(
+                str(coll_id)
+            ).data_access.with_optional(True)
             dependencies.append(data_access_scope)
         scope = scope.with_dependencies(dependencies)
         self.add_app_scope(scope)

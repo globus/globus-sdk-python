@@ -109,7 +109,7 @@ class ConsentForest:
     It exists to expose a simple interface for evaluating whether resource server grant
         requirements, as defined by a scope object are satisfied.
 
-    Consents should be retrieved from the AuthClient's `get_consents` method.
+    Consents should be retrieved from the AuthClient's ``get_consents`` method.
 
     Example usage:
 
@@ -117,10 +117,10 @@ class ConsentForest:
     >>> identity_id = ...
     >>> forest = auth_client.get_consents(identity_id).to_forest()
     >>>
-    >>> # Check whether the forest contains a scope relationship
-    >>> dependent_scope = GCSCollectionScopeBuilder(collection_id).data_access
-    >>> scope = f"{TransferScopes.all}[{dependent_scope}]"
-    >>> forest.contains_scopes(scope)
+    >>> # Check whether the forest meets a scope requirement
+    >>> data_access_scope = GCSCollectionScopes(collection_id).data_access
+    >>> scope = TransferScopes.all.with_dependency(data_access_scope)
+    >>> forest.meets_scope_requirements(scope)
 
 
     The following diagram demonstrates a Consent Forest in which a user has consented

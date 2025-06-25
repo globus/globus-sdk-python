@@ -8,7 +8,7 @@ from globus_sdk._missing import MISSING, MissingType
 from globus_sdk._remarshal import strseq_listify
 from globus_sdk._types import UUIDLike
 from globus_sdk.exc.warnings import warn_deprecated
-from globus_sdk.scopes import Scope, SearchScopes
+from globus_sdk.scopes import SearchScopes
 
 from .data import SearchQuery, SearchScrollQuery
 from .errors import SearchAPIError
@@ -33,14 +33,11 @@ class SearchClient(client.BaseClient):
     error_class = SearchAPIError
     service_name = "search"
     scopes = SearchScopes
+    default_scope_requirements = [SearchScopes.search]
 
     #
     # Index Management
     #
-
-    @property
-    def default_scope_requirements(self) -> list[Scope]:
-        return [Scope(SearchScopes.search)]
 
     def create_index(
         self, display_name: str, description: str

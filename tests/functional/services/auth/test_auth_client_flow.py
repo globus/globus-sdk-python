@@ -196,7 +196,7 @@ def test_oauth2_get_authorize_url_native_defaults(native_client):
     assert parsed_params == {
         "client_id": [native_client.client_id],
         "redirect_uri": [native_client.base_url + "v2/web/auth-code"],
-        "scope": [TransferScopes.all],
+        "scope": [str(TransferScopes.all)],
         "state": ["_default"],
         "response_type": ["code"],
         "code_challenge": [flow_manager.challenge],
@@ -251,7 +251,7 @@ def test_oauth2_get_authorize_url_confidential_defaults(confidential_client):
     assert parsed_params == {
         "client_id": [confidential_client.client_id],
         "redirect_uri": ["uri"],
-        "scope": [TransferScopes.all],
+        "scope": [str(TransferScopes.all)],
         "state": ["_default"],
         "response_type": ["code"],
         "access_type": ["online"],

@@ -12,7 +12,7 @@ from globus_sdk._utils import slash_join
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.paging import PaginatorTable
 from globus_sdk.response import GlobusHTTPResponse
-from globus_sdk.scopes import Scope, ScopeBuilder
+from globus_sdk.scopes import Scope, ScopeCollection
 from globus_sdk.transport import RequestsTransport
 
 if sys.version_info >= (3, 10):
@@ -69,8 +69,8 @@ class BaseClient:
     #: the type of Transport which will be used, defaults to ``RequestsTransport``
     transport_class: type[RequestsTransport] = RequestsTransport
 
-    #: the scopes for this client may be present as a ``ScopeBuilder``
-    scopes: ScopeBuilder | None = None
+    #: the scopes for this client may be present as a ``ScopeCollection``
+    scopes: ScopeCollection | None = None
 
     def __init__(
         self,

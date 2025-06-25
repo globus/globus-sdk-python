@@ -1,9 +1,11 @@
-from ..builder import ScopeBuilder
+from ..collection import StaticScopeCollection, _urn_scope
 
-TransferScopes = ScopeBuilder(
-    "transfer.api.globus.org",
-    known_scopes=[
-        "all",
-        "gcp_install",
-    ],
-)
+
+class _TransferScopes(StaticScopeCollection):
+    resource_server = "transfer.api.globus.org"
+
+    all = _urn_scope(resource_server, "all")
+    gcp_install = _urn_scope(resource_server, "gcp_install")
+
+
+TransferScopes = _TransferScopes()

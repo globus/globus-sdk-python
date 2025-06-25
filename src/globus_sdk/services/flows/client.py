@@ -20,10 +20,9 @@ from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.globus_app import GlobusApp
 from globus_sdk.scopes import (
     FlowsScopes,
-    GCSCollectionScopeBuilder,
+    GCSCollectionScopes,
     Scope,
-    ScopeBuilder,
-    SpecificFlowScopeBuilder,
+    SpecificFlowScopes,
     TransferScopes,
 )
 
@@ -55,7 +54,7 @@ class FlowsClient(client.BaseClient):
     error_class = FlowsAPIError
     service_name = "flows"
     scopes = FlowsScopes
-    default_scope_requirements = [Scope(FlowsScopes.all)]
+    default_scope_requirements = [FlowsScopes.all]
 
     def create_flow(
         self,
@@ -927,7 +926,7 @@ class SpecificFlowClient(client.BaseClient):
 
     error_class = FlowsAPIError
     service_name = "flows"
-    scopes: ScopeBuilder = SpecificFlowScopeBuilder._CLASS_STUB
+    scopes: SpecificFlowScopes = SpecificFlowScopes._build_class_stub()
 
     def __init__(
         self,
@@ -941,7 +940,7 @@ class SpecificFlowClient(client.BaseClient):
         transport_params: dict[str, t.Any] | None = None,
     ) -> None:
         self._flow_id = flow_id
-        self.scopes = SpecificFlowScopeBuilder(flow_id)
+        self.scopes = SpecificFlowScopes(flow_id)
         super().__init__(
             app=app,
             app_scopes=app_scopes,
@@ -953,7 +952,7 @@ class SpecificFlowClient(client.BaseClient):
 
     @property
     def default_scope_requirements(self) -> list[Scope]:
-        return [Scope(self.scopes.user)]
+        return [self.scopes.user]
 
     def add_app_transfer_data_access_scope(
         self, collection_ids: UUIDLike | t.Iterable[UUIDLike]
@@ -1004,15 +1003,14 @@ class SpecificFlowClient(client.BaseClient):
             for i, c in enumerate(collection_ids_):
                 _guards.validators.uuidlike(f"collection_ids[{i}]", c)
 
-        transfer_scope = Scope(TransferScopes.all, optional=True)
+        transfer_scope = TransferScopes.all.with_optional(True)
         for coll_id in collection_ids_:
-            data_access_scope = Scope(
-                GCSCollectionScopeBuilder(str(coll_id)).data_access,
-                optional=True,
-            )
+            data_access_scope = GCSCollectionScopes(
+                str(coll_id)
+            ).data_access.with_optional(True)
             transfer_scope = transfer_scope.with_dependency(data_access_scope)
 
-        specific_flow_scope = Scope(self.scopes.user, dependencies=(transfer_scope,))
+        specific_flow_scope = self.scopes.user.with_dependency(transfer_scope)
         self.add_app_scope(specific_flow_scope)
         return self
 

@@ -32,7 +32,7 @@ class GroupsClient(client.BaseClient):
 
     @property
     def default_scope_requirements(self) -> list[Scope]:
-        return [Scope(GroupsScopes.view_my_groups_and_memberships)]
+        return [GroupsScopes.view_my_groups_and_memberships]
 
     def get_my_groups(
         self, *, query_params: dict[str, t.Any] | None = None

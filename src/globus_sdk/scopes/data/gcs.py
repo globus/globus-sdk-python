@@ -1,44 +1,47 @@
-from ..builder import ScopeBuilder
+from functools import cached_property
+
+from ..collection import DynamicScopeCollection, _url_scope, _urn_scope
+from ..representation import Scope
 
 
-class GCSEndpointScopeBuilder(ScopeBuilder):
+class GCSEndpointScopes(DynamicScopeCollection):
     """
-    A ScopeBuilder with a named property for the GCS manage_collections scope.
-    "manage_collections" is a scope on GCS Endpoints. The resource_server string should
-    be the GCS Endpoint ID.
+    A dynamic ScopeCollection with a named property for the GCS
+    manage_collections scope. "manage_collections" is a scope on GCS Endpoints.
+    The resource_server string should be the GCS Endpoint ID.
 
     **Examples**
 
-    >>> sb = GCSEndpointScopeBuilder("xyz")
+    >>> sc = GCSEndpointScopes("xyz")
     >>> mc_scope = sb.manage_collections
     """
 
-    _classattr_scope_names = ["manage_collections"]
+    _scope_names = ("manage_collections",)
 
-    @property
-    def manage_collections(self) -> str:
-        return self.urn_scope_string("manage_collections")
+    @cached_property
+    def manage_collections(self) -> Scope:
+        return _urn_scope(self.resource_server, "manage_collections")
 
 
-class GCSCollectionScopeBuilder(ScopeBuilder):
+class GCSCollectionScopes(DynamicScopeCollection):
     """
-    A ScopeBuilder with a named property for the GCS data_access scope.
+    A dynamic ScopeCollection with a named property for the GCS data_access scope.
     "data_access" is a scope on GCS Collections. The resource_server string should
     be the GCS Collection ID.
 
     **Examples**
 
-    >>> sb = GCSCollectionScopeBuilder("xyz")
-    >>> da_scope = sb.data_access
-    >>> https_scope = sb.https
+    >>> sc = GCSCollectionScopes("xyz")
+    >>> da_scope = sc.data_access
+    >>> https_scope = sc.https
     """
 
-    _classattr_scope_names = ["data_access", "https"]
+    _scope_names = ("data_access", "https")
 
-    @property
-    def data_access(self) -> str:
-        return self.url_scope_string("data_access")
+    @cached_property
+    def data_access(self) -> Scope:
+        return _url_scope(self.resource_server, "data_access")
 
-    @property
-    def https(self) -> str:
-        return self.url_scope_string("https")
+    @cached_property
+    def https(self) -> Scope:
+        return _url_scope(self.resource_server, "https")

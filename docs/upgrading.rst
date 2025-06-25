@@ -112,6 +112,45 @@ To control when a submission ID is fetched, use
         submission_id=submission_id,
     )
 
+Scope Constants Are Now Objects
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Under version 3, many scopes were provided as string constants.
+For example, ``globus_sdk.TransferClient.scopes.all`` was a string.
+
+In version 4, these constants are now :class:`Scope <globus_sdk.scopes.Scope>`
+objects. They can be rendered to strings using ``str()`` and no longer need to
+be converted to :class:`Scope <globus_sdk.scopes.Scope>`\s in order to use
+methods.
+
+Convert usage which stringifies scopes like so:
+
+.. code-block:: python
+
+    # globus-sdk v3
+    from globus_sdk.scopes import AuthScopes
+
+    my_scope_str: str = AuthScopes.openid
+
+    # globus-sdk v4
+    from globus_sdk.scopes import AuthScopes
+
+    my_scope_str: str = str(AuthScopes.openid)
+
+And convert usage which builds scope objects like so:
+
+.. code-block:: python
+
+    # globus-sdk v3
+    from globus_sdk.scopes import AuthScopes, Scope
+
+    my_scope: Scope = Scope(AuthScopes.openid)
+
+    # globus-sdk v4
+    from globus_sdk.scopes import AuthScopes, Scope
+
+    my_scope: Scope = AuthScopes.openid
+
 Scopes Are Immutable and Have New Methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -162,6 +201,18 @@ For example, update like so:
     from globus_sdk.scopes import Scope, Scopeparser
 
     my_scopes: list[Scope] = ScopeParser.parse(scope_string)
+
+Scope Collections Provide ``__iter__``, not ``__str__``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In version 3, the SDK scope collection objects provided a pretty printer in the
+form of ``str()``. Users could call ``str(TransferClient.scopes)`` to see the
+available scopes.
+
+In version 4, this has been removed, but the collection types provide
+``__iter__`` over their member scopes instead. Therefore, you can fetch all
+scopes for the Globus Transfer service via ``list(TransferClient.scopes)`` or
+similar usage.
 
 Deprecated Timers Aliases Removed
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
