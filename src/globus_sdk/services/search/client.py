@@ -358,9 +358,9 @@ class SearchClient(client.BaseClient):
         """
         log.debug(f"SearchClient.post_search({index_id}, ...)")
         add_kwargs = {}
-        if not isinstance(offset, MissingType):
+        if offset is not MISSING:
             add_kwargs["offset"] = offset
-        if not isinstance(limit, MissingType):
+        if limit is not MISSING:
             add_kwargs["limit"] = limit
         data = {**data, **add_kwargs}
         return self.post(f"v1/index/{index_id}/search", data=data)
@@ -409,7 +409,7 @@ class SearchClient(client.BaseClient):
         """
         log.debug(f"SearchClient.scroll({index_id}, ...)")
         add_kwargs = {}
-        if not isinstance(marker, MissingType):
+        if marker is not MISSING:
             add_kwargs["marker"] = marker
         data = {**data, **add_kwargs}
         return self.post(f"v1/index/{index_id}/scroll", data=data)

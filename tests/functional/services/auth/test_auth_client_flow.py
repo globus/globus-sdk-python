@@ -4,7 +4,7 @@ import uuid
 import pytest
 
 import globus_sdk
-from globus_sdk._missing import MISSING, MissingType
+from globus_sdk._missing import MISSING
 from globus_sdk._testing import load_response
 from globus_sdk.scopes import TransferScopes
 from globus_sdk.services.auth.flow_managers.native_app import _make_native_app_challenge
@@ -131,7 +131,7 @@ def test_oauth2_get_authorize_url_supports_session_params(
         "session_required_single_domain" if domain_option else None,
         "session_required_identities" if identity_option else None,
         "session_required_policies" if policy_option else None,
-        "session_required_mfa" if not isinstance(mfa_option, MissingType) else None,
+        "session_required_mfa" if mfa_option is not MISSING else None,
         "prompt" if prompt_option else None,
     }
     expected_params_keys.discard(None)

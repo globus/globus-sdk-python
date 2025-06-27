@@ -350,13 +350,11 @@ class FlowsClient(client.BaseClient):
                     :service: flows
                     :ref: Flows/paths/~1flows/get
         """
-        if not isinstance(filter_role, MissingType):
+        if filter_role is not MISSING:
             exc.warn_deprecated(
                 "The `filter_role` parameter is deprecated. Use `filter_roles` instead."
             )
-        if not isinstance(filter_role, MissingType) and not isinstance(
-            filter_roles, MissingType
-        ):
+        if filter_role is not MISSING and filter_roles is not MISSING:
             msg = "Mutually exclusive parameters: filter_role and filter_roles."
             raise GlobusSDKUsageError(msg)
         query_params = {

@@ -28,7 +28,7 @@ def _datelike_to_str(x: DateLike) -> str:
 def _format_completion_time(
     x: str | tuple[DateLike, DateLike] | MissingType,
 ) -> str | MissingType:
-    if isinstance(x, MissingType):
+    if x is MISSING:
         return MISSING
     elif isinstance(x, str):
         return x
@@ -47,7 +47,7 @@ def _format_filter_item(x: MissingType) -> MissingType: ...
 
 
 def _format_filter_item(x: str | TransferFilterDict | MissingType) -> str | MissingType:
-    if isinstance(x, MissingType):
+    if x is MISSING:
         return MISSING
     elif isinstance(x, str):
         return x
@@ -2396,9 +2396,7 @@ class TransferClient(client.BaseClient):
                     :ref: transfer/advanced_collection_management/#get_tasks
         """  # noqa: E501
         log.debug("TransferClient.endpoint_manager_task_list(...)")
-        if isinstance(filter_endpoint, MissingType) and not isinstance(
-            filter_endpoint_use, MissingType
-        ):
+        if filter_endpoint is MISSING and filter_endpoint_use is not MISSING:
             raise exc.GlobusSDKUsageError(
                 "`filter_endpoint_use` is only valid when `filter_endpoint` is "
                 "also supplied."

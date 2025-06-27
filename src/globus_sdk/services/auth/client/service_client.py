@@ -210,7 +210,7 @@ class AuthClient(client.BaseClient):
         :param as_pem: Decode the JWK to an RSA PEM key, typically for JWT decoding
         :type as_pem: bool
         """
-        if isinstance(openid_configuration, MissingType):
+        if openid_configuration is MISSING:
             log.debug("No OIDC Config provided, autofetching...")
             openid_configuration = self.get_openid_configuration()
         jwk_data = get_jwk_data(
@@ -1267,7 +1267,7 @@ class AuthClient(client.BaseClient):
         if terms_and_conditions or privacy_policy:
             body["links"] = links
 
-        if not isinstance(additional_fields, MissingType):
+        if additional_fields is not MISSING:
             body.update(additional_fields)
 
         return self.post("/v2/api/clients", data={"client": body})
@@ -1350,7 +1350,7 @@ class AuthClient(client.BaseClient):
         if terms_and_conditions is not MISSING or privacy_policy is not MISSING:
             body["links"] = links
 
-        if not isinstance(additional_fields, MissingType):
+        if additional_fields is not MISSING:
             body.update(additional_fields)
 
         return self.put(f"/v2/api/clients/{client_id}", data={"client": body})
@@ -1632,12 +1632,12 @@ class AuthClient(client.BaseClient):
                 "'scopes_strings' and 'ids'. These are mutually exclusive."
             )
 
-        if isinstance(query_params, MissingType):
+        if query_params is MISSING:
             query_params = {}
 
-        if not isinstance(scope_strings, MissingType):
+        if scope_strings is not MISSING:
             query_params["scope_strings"] = commajoin(scope_strings)
-        if not isinstance(ids, MissingType):
+        if ids is not MISSING:
             query_params["ids"] = commajoin(ids)
 
         return GetScopesResponse(self.get("/v2/api/scopes", query_params=query_params))

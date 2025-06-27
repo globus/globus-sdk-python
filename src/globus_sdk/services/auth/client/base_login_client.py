@@ -134,7 +134,7 @@ class AuthLoginClient(client.BaseClient):
             When not provided, it will be fetched automatically.
         :param as_pem: Decode the JWK to an RSA PEM key, typically for JWT decoding
         """
-        if isinstance(openid_configuration, MissingType):
+        if openid_configuration is MISSING:
             log.debug("No OIDC Config provided, autofetching...")
             openid_configuration = self.get_openid_configuration()
         jwk_data = get_jwk_data(

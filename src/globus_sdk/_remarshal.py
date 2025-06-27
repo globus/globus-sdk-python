@@ -40,7 +40,7 @@ def stringify(value: NullableOmittable[object]) -> NullableOmittable[str]:
     """
     if value is None:
         return None
-    if isinstance(value, MissingType):
+    if value is MISSING:
         return MISSING
     return str(value)
 
@@ -61,7 +61,7 @@ def listify(value: NullableOmittable[t.Iterable[T]]) -> NullableOmittable[list[T
     """
     if value is None:
         return None
-    if isinstance(value, MissingType):
+    if value is MISSING:
         return MISSING
     if isinstance(value, list):
         return value
@@ -131,7 +131,7 @@ def strseq_listify(
     """
     if value is None:
         return None
-    if isinstance(value, MissingType):
+    if value is MISSING:
         return MISSING
     return list(strseq_iter(value))
 
@@ -161,7 +161,7 @@ def list_map(
     """
     if value is None:
         return None
-    if isinstance(value, MissingType):
+    if value is MISSING:
         return MISSING
     return [mapped_function(element) for element in value]
 
@@ -179,7 +179,7 @@ def commajoin(
 ) -> NullableOmittable[str]:
     if value is None:
         return None
-    if isinstance(value, MissingType):
+    if value is MISSING:
         return MISSING
     # note that this explicit handling of Iterable allows for objects to be
     # passed to this function and be stringified by the `str()` call

@@ -207,7 +207,7 @@ class CollectionDocument(AbstractGlobusPayload):
         self["acl_expiration_mins"] = acl_expiration_mins
         self["associated_flow_policy"] = associated_flow_policy
 
-        if not isinstance(additional_fields, MissingType):
+        if additional_fields is not MISSING:
             self.update(additional_fields)
 
     @property
@@ -522,7 +522,7 @@ class POSIXCollectionPolicies(CollectionPolicies):
         self["sharing_groups_allow"] = strseq_listify(sharing_groups_allow)
         self["sharing_groups_deny"] = strseq_listify(sharing_groups_deny)
 
-        if not isinstance(additional_fields, MissingType):
+        if additional_fields is not MISSING:
             self.update(additional_fields)
 
 
@@ -553,7 +553,7 @@ class POSIXStagingCollectionPolicies(CollectionPolicies):
         self["sharing_groups_allow"] = strseq_listify(sharing_groups_allow)
         self["sharing_groups_deny"] = strseq_listify(sharing_groups_deny)
 
-        if not isinstance(additional_fields, MissingType):
+        if additional_fields is not MISSING:
             self.update(additional_fields)
 
 
@@ -577,5 +577,5 @@ class GoogleCloudStorageCollectionPolicies(CollectionPolicies):
         super().__init__()
         self["DATA_TYPE"] = DATA_TYPE
         self["project"] = project
-        if not isinstance(additional_fields, MissingType):
+        if additional_fields is not MISSING:
             self.update(additional_fields)

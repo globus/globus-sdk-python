@@ -265,11 +265,7 @@ class ConfidentialAppAuthClient(AuthLoginClient):
             # 'refresh_tokens' is consistent with the rest of the SDK and better
             # communicates expectations back to the user than the OAuth2 spec wording
             "access_type": "offline" if refresh_tokens else MISSING,
-            "scope": (
-                " ".join(strseq_iter(scope))
-                if not isinstance(scope, MissingType)
-                else scope
-            ),
+            "scope": (" ".join(strseq_iter(scope)) if scope is not MISSING else scope),
             **(additional_params or {}),
         }
         return self.oauth2_token(form_data, response_class=OAuthDependentTokenResponse)

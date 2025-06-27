@@ -15,7 +15,7 @@ SearchQueryT = t.TypeVar("SearchQueryT", bound="SearchQueryBase")
 def _format_histogram_range(
     value: tuple[t.Any, t.Any] | MissingType,
 ) -> dict[str, t.Any] | MissingType:
-    if isinstance(value, MissingType):
+    if value is MISSING:
         return MISSING
     low, high = value
     return {"low": low, "high": high}

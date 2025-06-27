@@ -137,6 +137,6 @@ class EndpointDocument(GlobusPayload):
         self["subscription_id"] = subscription_id
         self["gridftp_control_channel_port"] = gridftp_control_channel_port
 
-        if not isinstance(additional_fields, MissingType):
+        if additional_fields is not MISSING:
             self.update(additional_fields)
         ensure_datatype(self)

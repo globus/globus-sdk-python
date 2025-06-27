@@ -153,7 +153,7 @@ class GlobusNativeAppFlowManager(GlobusOAuthFlowManager):
             f"verifier=<REDACTED>,challenge={self.challenge}"
         )
 
-        if not isinstance(prefill_named_grant, MissingType):
+        if prefill_named_grant is not MISSING:
             log.debug(f"prefill_named_grant={self.prefill_named_grant}")
 
     def get_authorize_url(self, query_params: dict[str, t.Any] | None = None) -> str:

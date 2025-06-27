@@ -9,6 +9,8 @@ CODEMAP: dict[str, str] = {
     # lexical scopes!
     "SDK001": "SDK001 loggers should be named 'log'",
     "SDK002": "SDK002 never use 'log.info'",
+    # don't do `isinstance(x, MissingType)` -- use `x is MISSING` instead
+    "SDK003": "SDK003 use `is MISSING`, not `isinstance(..., MissingType)`",
 }
 
 
@@ -41,99 +43,111 @@ class SDKVisitor(ast.NodeVisitor):
     def _record(self, node: ast.expr | ast.stmt, code: str) -> None:
         self.collect.append((node.lineno, node.col_offset, code))
 
-    # see the structure of an assignment:
-    #
-    # >>> print(ast.dump(ast.parse("""\
-    # ... log = logging.getLogger(__name__)
-    # ... """), indent=4))
-    #
-    # Module(
-    #     body=[
-    #         Assign(
-    #             targets=[
-    #                 Name(id='log', ctx=Store())],
-    #             value=Call(
-    #                 func=Attribute(
-    #                     value=Name(id='logging', ctx=Load()),
-    #                     attr='getLogger',
-    #                     ctx=Load()),
-    #                 args=[
-    #                     Name(id='__name__', ctx=Load())],
-    #                 keywords=[]))],
-    #     type_ignores=[])
-    #
-    # we will try to find an optimal path to bail out quickly on most assignments
     def visit_Assign(self, node: ast.Assign) -> None:
-        # the value must be a call and must be using attr access in the function call
-        # this eliminates bare funcs like `x = foo()` but allows `x = foo.bar()`
-        if not (
-            isinstance(node.value, ast.Call)
-            and isinstance(node.value.func, ast.Attribute)
-        ):
-            self.generic_visit(node)
-            return
-        call_node: ast.Call = node.value
-        func_node: ast.Attribute = node.value.func
-
-        # not getLogger? irrelevant!
-        # not a name access (e.g., `foo().bar`)? irrelevant!
-        # not `getLogger` of `logging` (e.g., `x.getLogger`)? irrelevant! (and weird!)
-        if not (
-            func_node.attr == "getLogger"
-            and isinstance(func_node.value, ast.Name)
-            and func_node.value.id == "logging"
-        ):
-            self.generic_visit(node)
-            return
-
-        # the assignee must be a single variable and it must be a name node
-        if not (len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)):
-            self.generic_visit(node)
-            return
-        name_node: ast.Name = node.targets[0]
-
-        # confirm that the `logging.getLogger` args look right, if not... ignore
-        if len(call_node.args) != 1 or not isinstance(call_node.args[0], ast.Name):
-            self.generic_visit(node)
-            return
-        logger_arg: ast.Name = call_node.args[0]
-
-        # now, all data prepared, do the check:
-        # - if the argument to `getLogger` is `"__name__"`
-        # - and the assignee is not "log"
-        # that fails
-        #
-        # other usages are allowed, e.g. `liblog = logging.getLogger(otherlib_name)
-        if name_node.id != "log" and logger_arg.id == "__name__":
+        if matches_sdk001(node):
             self._record(node, "SDK001")
 
-    # see the structure of a call:
-    #
-    # >>> print(ast.dump(ast.parse("log.info('foo')"), indent=4))
-    # Module(
-    #     body=[
-    #         Expr(
-    #             value=Call(
-    #                 func=Attribute(
-    #                     value=Name(id='log', ctx=Load()),
-    #                     attr='info',
-    #                     ctx=Load()),
-    #                 args=[
-    #                     Constant(value='foo')],
-    #                 keywords=[]))],
-    #     type_ignores=[])
-    #
+        self.generic_visit(node)
+
     def visit_Call(self, node: ast.Call) -> None:
-        # if it's not a call to 'x.info(...)', ignore
-        if not (isinstance(node.func, ast.Attribute) and node.func.attr == "info"):
-            self.generic_visit(node)
-            return
-        func_node: ast.Attribute = node.func
+        if matches_sdk003(node):
+            self._record(node, "SDK003")
+        elif matches_sdk002(node):
+            self._record(node, "SDK002")
 
-        # if the function was not a method of something named "log", ignore
-        if not (isinstance(func_node.value, ast.Name) and func_node.value.id == "log"):
-            self.generic_visit(node)
-            return
+        self.generic_visit(node)
 
-        # nothing left, it failed SDK002!
-        self._record(node, "SDK002")
+
+def matches_sdk001(node: ast.Assign) -> bool:
+    """
+    A matcher for the SDK001 lint rule.
+
+    Checks for `x = logging.getLogger(__name__)` where `x` is not `log`.
+
+    :param node: the assignment statement AST node to check
+    """
+    # the value must be a call and must be using attr access in the function call
+    # this eliminates bare funcs like `x = foo()` but allows `x = foo.bar()`
+    if not (
+        isinstance(node.value, ast.Call) and isinstance(node.value.func, ast.Attribute)
+    ):
+        return False
+
+    call_node: ast.Call = node.value
+    func_node: ast.Attribute = node.value.func
+
+    # make sure it's 'logging.getLogger' and no other function
+    if not (
+        func_node.attr == "getLogger"
+        and isinstance(func_node.value, ast.Name)
+        and func_node.value.id == "logging"
+    ):
+        return False
+
+    # the assignee must be a single variable and it must be a name node
+    if not (len(node.targets) == 1 and isinstance(node.targets[0], ast.Name)):
+        return False
+
+    # if the assigned name is `log`, then it cannot be a match
+    name_node: ast.Name = node.targets[0]
+    if name_node.id == "log":
+        return False
+
+    # confirm that the `logging.getLogger` args are a single name -- that's the
+    # form it will be when `__name__` is passed
+    if len(call_node.args) != 1 or not isinstance(call_node.args[0], ast.Name):
+        return False
+
+    # if the argument is some other name, e.g. `logging.getLogger(my_variable)`,
+    # then that cannot be a match
+    logger_arg: ast.Name = call_node.args[0]
+    if logger_arg.id != "__name__":
+        return False
+
+    return True  # all conditions met!
+
+
+def matches_sdk002(node: ast.Call) -> bool:
+    """
+    A matcher for the SDK002 lint rule.
+
+    Checks for `log.info(...)`
+
+    :param node: the function call AST node to check
+    """
+    func_node = node.func
+    # the function call must be of the form 'OBJ.info(...)'
+    if not (isinstance(func_node, ast.Attribute) and func_node.attr == "info"):
+        return False
+
+    # and, more specifically, the object must be named 'log', so
+    # it's `log.info(...)
+    if not (isinstance(func_node.value, ast.Name) and func_node.value.id == "log"):
+        return False
+
+    return True  # all conditions met!
+
+
+def matches_sdk003(node: ast.Call) -> bool:
+    """
+    A matcher for the SDK003 lint rule.
+
+    Checks for `isinstance(x, MissingType)`
+
+    :param node: the function call AST node to check
+    """
+    # it must be a call to a function named "isinstance"
+    if not (isinstance(node.func, ast.Name) and node.func.id == "isinstance"):
+        return False
+    # if the number of arguments is improper, it can't be a violation (not a
+    # valid 'isinstance' call)
+    if len(node.args) != 2:
+        return False
+    right_hand_side = node.args[1]
+    # the second argument must be the name 'MissingType'
+    if not (
+        isinstance(right_hand_side, ast.Name) and right_hand_side.id == "MissingType"
+    ):
+        return False
+
+    return True  # all conditions met!
