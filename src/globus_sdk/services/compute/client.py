@@ -114,7 +114,7 @@ class ComputeClientV2(client.BaseClient):
                     :service: compute
                     :ref: Endpoints/operation/get_endpoints_v2_endpoints_get
         """  # noqa: E501
-        query_params = {"role": role} if role else None
+        query_params = {"role": role}
         return self.get("/v2/endpoints", query_params=query_params)
 
     def delete_endpoint(self, endpoint_id: UUIDLike) -> GlobusHTTPResponse:
