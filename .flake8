@@ -8,5 +8,5 @@ per-file-ignores = *.pyi:E302,E305
 
 [flake8:local-plugins]
 extension =
-    SDK = _globus_sdk_flake8:Plugin
-paths = ./src/globus_sdk/
+    SDK = globus_sdk_flake8:Plugin
+paths = ./src/globus_sdk/_internal/extensions/
