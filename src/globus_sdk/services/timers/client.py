@@ -4,7 +4,8 @@ import logging
 import typing as t
 import uuid
 
-from globus_sdk import _guards, client, exc, response
+from globus_sdk import client, exc, response
+from globus_sdk._internal import guards
 from globus_sdk._types import UUIDLike
 from globus_sdk.scopes import (
     GCSCollectionScopes,
@@ -77,14 +78,14 @@ class TimersClient(client.BaseClient):
                     client.create_timer(daily_timer)
         """  # noqa: E501
         if isinstance(collection_ids, (str, uuid.UUID)):
-            _guards.validators.uuidlike("collection_ids", collection_ids)
+            guards.validators.uuidlike("collection_ids", collection_ids)
             # wrap the collection_ids input in a list for consistent iteration below
             collection_ids_ = [collection_ids]
         else:
             # copy to a list so that ephemeral iterables can be iterated multiple times
             collection_ids_ = list(collection_ids)
             for i, c in enumerate(collection_ids_):
-                _guards.validators.uuidlike(f"collection_ids[{i}]", c)
+                guards.validators.uuidlike(f"collection_ids[{i}]", c)
 
         dependencies: list[Scope] = []
         for coll_id in collection_ids_:

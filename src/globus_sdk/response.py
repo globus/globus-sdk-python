@@ -5,7 +5,7 @@ import json
 import logging
 import typing as t
 
-from globus_sdk import _guards
+from globus_sdk._internal import guards
 
 log = logging.getLogger(__name__)
 
@@ -145,7 +145,7 @@ class GlobusHTTPResponse:
         :param key: The string key to lookup in the response if it is a dict
         :param default: The default value to be used if the data is null or a list
         """
-        if _guards.is_optional(self.data, list):
+        if guards.is_optional(self.data, list):
             return default
         # NB: `default` is provided as a positional because the native dict type
         # doesn't recognize a keyword argument `default`

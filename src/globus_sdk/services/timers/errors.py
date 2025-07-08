@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typing as t
 
-from globus_sdk import _guards
+from globus_sdk._internal import guards
 from globus_sdk.exc import ErrorSubdocument, GlobusAPIError
 
 
@@ -53,7 +53,7 @@ class TimersAPIError(GlobusAPIError):
             self.code = self._extract_code_from_error_array(self.errors)
             self.messages = self._extract_messages_from_error_array(self.errors)
             return True
-        elif _guards.is_list_of(self._dict_data.get("detail"), dict):
+        elif guards.is_list_of(self._dict_data.get("detail"), dict):
             # collect the errors array from details
             self.errors = [
                 ErrorSubdocument(d, message_fields=("msg",))
@@ -79,6 +79,6 @@ def _parse_detail_docs(
         if d.message is None:
             continue
         loc_list = d.get("loc")
-        if not _guards.is_list_of(loc_list, str):
+        if not guards.is_list_of(loc_list, str):
             continue
         yield (d.message, ".".join(loc_list))

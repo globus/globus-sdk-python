@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typing as t
 
-from globus_sdk._guards import validators
+from globus_sdk._internal.guards import validators
 from globus_sdk._serializable import Serializable
 
 
