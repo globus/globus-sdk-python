@@ -8,7 +8,7 @@ from contextlib import contextmanager
 from string import Template
 
 import globus_sdk
-from globus_sdk._utils import get_nice_hostname
+from globus_sdk._internal.utils import get_nice_hostname
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.login_flows.login_flow_manager import LoginFlowManager
 

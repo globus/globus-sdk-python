@@ -39,9 +39,9 @@ PYTHON_BINARY = os.environ.get("GLOBUS_TEST_PY", sys.executable)
         "_internal.guards",
         "_internal.remarshal",
         "_internal.serializable",
+        "_internal.utils",
         "_missing",
         "_types",
-        "_utils",
     ),
 )
 def test_module_does_not_require_requests(module_name):

@@ -5,7 +5,7 @@ import typing as t
 from contextlib import contextmanager
 
 import globus_sdk
-from globus_sdk._utils import get_nice_hostname
+from globus_sdk._internal.utils import get_nice_hostname
 from globus_sdk.exc.base import GlobusError
 from globus_sdk.gare import GlobusAuthorizationParameters
 

@@ -1,6 +1,6 @@
 import logging
 
-from globus_sdk._utils import sha256_string
+from globus_sdk._internal.utils import sha256_string
 
 from .base import StaticGlobusAuthorizer
 

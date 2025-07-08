@@ -3,7 +3,7 @@ import os
 
 import responses
 
-from globus_sdk._utils import slash_join
+from globus_sdk._internal.utils import slash_join
 
 
 def register_api_route_fixture_file(service, path, filename, **kwargs):

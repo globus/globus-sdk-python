@@ -6,9 +6,9 @@ import datetime as dt
 import logging
 import typing as t
 
+from globus_sdk._internal.utils import slash_join
 from globus_sdk._missing import MISSING, MissingType
 from globus_sdk._payload import GlobusPayload
-from globus_sdk._utils import slash_join
 from globus_sdk.config import get_service_url
 from globus_sdk.exc import warn_deprecated
 from globus_sdk.services.transfer import TransferData
