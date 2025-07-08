@@ -6,7 +6,7 @@ from .base import TokenStorage
 from .token_data import TokenStorageData
 
 if t.TYPE_CHECKING:
-    from globus_sdk._types import UUIDLike
+    from globus_sdk._internal.type_definitions import UUIDLike
     from globus_sdk.globus_app import GlobusAppConfig
 
 

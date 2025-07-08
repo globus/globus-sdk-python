@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing as t
 
 from globus_sdk import response
-from globus_sdk._types import UUIDLike
+from globus_sdk._internal.type_definitions import UUIDLike
 
 from .client import GroupsClient
 from .data import (

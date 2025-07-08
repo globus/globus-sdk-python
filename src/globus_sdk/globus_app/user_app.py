@@ -10,7 +10,7 @@ from globus_sdk import (
     NativeAppAuthClient,
     Scope,
 )
-from globus_sdk._types import ScopeCollectionType, UUIDLike
+from globus_sdk._internal.type_definitions import ScopeCollectionType, UUIDLike
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.login_flows import CommandLineLoginFlowManager, LoginFlowManager
 from globus_sdk.token_storage import (

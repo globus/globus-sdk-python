@@ -7,8 +7,8 @@ import typing as t
 import jwt
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 
+from globus_sdk._internal.type_definitions import ScopeCollectionType
 from globus_sdk._missing import MISSING, MissingType
-from globus_sdk._types import ScopeCollectionType
 from globus_sdk.exc import GlobusSDKUsageError
 from globus_sdk.response import GlobusHTTPResponse
 from globus_sdk.scopes import scopes_to_str

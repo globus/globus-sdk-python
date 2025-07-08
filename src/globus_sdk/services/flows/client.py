@@ -14,8 +14,8 @@ from globus_sdk import (
 )
 from globus_sdk._internal import guards
 from globus_sdk._internal.remarshal import commajoin
+from globus_sdk._internal.type_definitions import UUIDLike
 from globus_sdk._missing import MISSING, MissingType
-from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.globus_app import GlobusApp
 from globus_sdk.scopes import (

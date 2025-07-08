@@ -12,8 +12,8 @@ from globus_sdk import (
     POSIXCollectionPolicies,
     POSIXStagingCollectionPolicies,
 )
+from globus_sdk._internal.type_definitions import UUIDLike
 from globus_sdk._missing import MISSING, MissingType, filter_missing
-from globus_sdk._types import UUIDLike
 from globus_sdk.transport import JSONRequestEncoder
 
 STUB_SG_ID = uuid.uuid1()  # storage gateway

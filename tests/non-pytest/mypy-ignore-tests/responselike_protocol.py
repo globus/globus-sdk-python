@@ -7,7 +7,7 @@ import typing as t
 import requests
 
 from globus_sdk import GlobusAPIError, GlobusHTTPResponse
-from globus_sdk._types import ResponseLike
+from globus_sdk._internal.type_definitions import ResponseLike
 
 if sys.version_info < (3, 11):
     from typing_extensions import assert_type

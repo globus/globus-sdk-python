@@ -6,7 +6,7 @@ import uuid
 
 from globus_sdk import client, exc, response
 from globus_sdk._internal import guards
-from globus_sdk._types import UUIDLike
+from globus_sdk._internal.type_definitions import UUIDLike
 from globus_sdk.scopes import (
     GCSCollectionScopes,
     Scope,

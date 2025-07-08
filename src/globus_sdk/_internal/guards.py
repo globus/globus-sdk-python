@@ -4,7 +4,7 @@ import sys
 import typing as t
 import uuid
 
-from globus_sdk._types import UUIDLike
+from globus_sdk._internal.type_definitions import UUIDLike
 
 # some error types use guards, so import from the specific module to avoid circularity
 from globus_sdk.exc.base import ValidationError

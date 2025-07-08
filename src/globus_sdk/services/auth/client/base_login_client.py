@@ -8,8 +8,8 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from globus_sdk import client, exc
 from globus_sdk._internal import guards
 from globus_sdk._internal.remarshal import commajoin
+from globus_sdk._internal.type_definitions import UUIDLike
 from globus_sdk._missing import MISSING, MissingType
-from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer, NullAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
 from globus_sdk.scopes import AuthScopes, Scope

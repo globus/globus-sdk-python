@@ -9,7 +9,7 @@ import sys
 import typing as t
 
 import globus_sdk
-from globus_sdk._types import UUIDLike
+from globus_sdk._internal.type_definitions import UUIDLike
 
 from .token_data import TokenStorageData
 

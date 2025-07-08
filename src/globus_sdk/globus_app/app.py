@@ -11,7 +11,7 @@ from globus_sdk import (
     GlobusSDKUsageError,
     IDTokenDecoder,
 )
-from globus_sdk._types import ScopeCollectionType, UUIDLike
+from globus_sdk._internal.type_definitions import ScopeCollectionType, UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.scopes import AuthScopes, Scope, ScopeParser, scopes_to_scope_list

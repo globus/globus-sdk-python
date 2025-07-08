@@ -4,9 +4,9 @@ import copy
 import typing as t
 
 from globus_sdk._internal.remarshal import list_map, listify, strseq_listify
+from globus_sdk._internal.type_definitions import UUIDLike
 from globus_sdk._missing import MISSING, MissingType
 from globus_sdk._payload import AbstractGlobusPayload, GlobusPayload
-from globus_sdk._types import UUIDLike
 
 from ._common import DatatypeCallback, ensure_datatype
 

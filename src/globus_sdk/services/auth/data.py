@@ -1,5 +1,5 @@
+from globus_sdk._internal.type_definitions import UUIDLike
 from globus_sdk._payload import GlobusPayload
-from globus_sdk._types import UUIDLike
 
 
 class DependentScopeSpec(GlobusPayload):

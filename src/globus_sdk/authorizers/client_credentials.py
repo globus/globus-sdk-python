@@ -4,7 +4,7 @@ import logging
 import typing as t
 
 import globus_sdk
-from globus_sdk._types import ScopeCollectionType
+from globus_sdk._internal.type_definitions import ScopeCollectionType
 from globus_sdk.scopes import scopes_to_str
 
 from .renewing import RenewingAuthorizer

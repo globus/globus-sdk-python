@@ -4,9 +4,9 @@ import datetime
 import logging
 import typing as t
 
+from globus_sdk._internal.type_definitions import UUIDLike
 from globus_sdk._missing import MISSING, MissingType
 from globus_sdk._payload import GlobusPayload
-from globus_sdk._types import UUIDLike
 
 log = logging.getLogger(__name__)
 _sync_level_dict: dict[t.Literal["exists", "size", "mtime", "checksum"], int] = {
