@@ -5,7 +5,7 @@ holds for this module **in particular**.
 
 Usage:
 
-    from globus_sdk._classproperty import classproperty
+    from globus_sdk._internal.classprop import classproperty
 
     class A:
         @classproperty

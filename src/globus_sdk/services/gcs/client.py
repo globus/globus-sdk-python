@@ -4,7 +4,7 @@ import typing as t
 import uuid
 
 from globus_sdk import client, exc, paging, response
-from globus_sdk._classproperty import classproperty
+from globus_sdk._internal.classprop import classproperty
 from globus_sdk._missing import MISSING, MissingType
 from globus_sdk._remarshal import commajoin
 from globus_sdk._types import UUIDLike

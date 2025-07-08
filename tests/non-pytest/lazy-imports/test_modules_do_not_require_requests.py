@@ -35,7 +35,7 @@ PYTHON_BINARY = os.environ.get("GLOBUS_TEST_PY", sys.executable)
         # internal components and utilities are a special case:
         # failing to ensure that these avoid 'requests' can make it more difficult
         # to ensure that the main parts (above) do not transitively pick it up
-        "_classproperty",
+        "_internal.classprop",
         "_guards",
         "_missing",
         "_remarshal",
