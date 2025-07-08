@@ -4,7 +4,7 @@ import typing as t
 
 from globus_sdk import exc
 from globus_sdk._internal.guards import validators
-from globus_sdk._serializable import Serializable
+from globus_sdk._internal.serializable import Serializable
 
 from ._auth_requirements_error import GARE, GlobusAuthorizationParameters
 

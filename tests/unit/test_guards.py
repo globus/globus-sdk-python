@@ -2,8 +2,9 @@ import uuid
 
 import pytest
 
-from globus_sdk import _serializable, exc
+from globus_sdk import exc
 from globus_sdk._internal import guards
+from globus_sdk._internal.serializable import Serializable
 
 
 @pytest.mark.parametrize(
@@ -181,7 +182,7 @@ def test_simple_validator_failing(validator, value, match_message):
 
 
 def test_instance_or_dict_validator_failing():
-    class MyObj(_serializable.Serializable):
+    class MyObj(Serializable):
         def __init__(self, *, extra=None) -> None:
             pass
 
@@ -192,7 +193,7 @@ def test_instance_or_dict_validator_failing():
 
 
 def test_instance_or_dict_validator_pass_on_simple_instance():
-    class MyObj(_serializable.Serializable):
+    class MyObj(Serializable):
         def __init__(self, *, extra=None) -> None:
             pass
 
@@ -202,7 +203,7 @@ def test_instance_or_dict_validator_pass_on_simple_instance():
 
 
 def test_instance_or_dict_validator_pass_on_simple_dict():
-    class MyObj(_serializable.Serializable):
+    class MyObj(Serializable):
         def __init__(self, *, extra=None) -> None:
             pass
 
