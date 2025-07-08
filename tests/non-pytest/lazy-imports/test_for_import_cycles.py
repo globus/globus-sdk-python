@@ -16,7 +16,7 @@ import sys
 import pytest
 
 import globus_sdk
-from globus_sdk._lazy_import import find_source_module
+from globus_sdk._internal.lazy_import import find_source_module
 
 PYTHON_BINARY = os.environ.get("GLOBUS_TEST_PY", sys.executable)
 
