@@ -37,8 +37,8 @@ PYTHON_BINARY = os.environ.get("GLOBUS_TEST_PY", sys.executable)
         # to ensure that the main parts (above) do not transitively pick it up
         "_internal.classprop",
         "_internal.guards",
+        "_internal.remarshal",
         "_missing",
-        "_remarshal",
         "_serializable",
         "_types",
         "_utils",

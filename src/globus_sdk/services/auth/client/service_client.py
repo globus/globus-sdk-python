@@ -7,8 +7,8 @@ import typing as t
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 
 from globus_sdk import client, exc
+from globus_sdk._internal.remarshal import commajoin, strseq_listify
 from globus_sdk._missing import MISSING, MissingType
-from globus_sdk._remarshal import commajoin, strseq_listify
 from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.response import GlobusHTTPResponse, IterableResponse

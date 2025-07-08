@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import typing as t
 
+from globus_sdk._internal.remarshal import strseq_listify
 from globus_sdk._missing import MISSING, MissingType
 from globus_sdk._payload import GlobusPayload
-from globus_sdk._remarshal import strseq_listify
 from globus_sdk.services.gcs.data._common import DatatypeCallback, ensure_datatype
 
 

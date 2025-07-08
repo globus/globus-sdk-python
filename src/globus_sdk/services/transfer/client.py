@@ -7,8 +7,8 @@ import uuid
 
 from globus_sdk import client, exc, paging, response
 from globus_sdk._internal import guards
+from globus_sdk._internal.remarshal import commajoin
 from globus_sdk._missing import MISSING, MissingType
-from globus_sdk._remarshal import commajoin
 from globus_sdk._types import DateLike, IntLike, UUIDLike
 from globus_sdk.scopes import GCSCollectionScopes, Scope, TransferScopes
 

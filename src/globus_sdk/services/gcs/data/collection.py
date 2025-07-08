@@ -3,9 +3,9 @@ from __future__ import annotations
 import abc
 import typing as t
 
+from globus_sdk._internal.remarshal import strseq_listify
 from globus_sdk._missing import MISSING, MissingType
 from globus_sdk._payload import AbstractGlobusPayload
-from globus_sdk._remarshal import strseq_listify
 from globus_sdk._types import UUIDLike
 
 from ._common import (

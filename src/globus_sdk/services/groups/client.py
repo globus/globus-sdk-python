@@ -3,8 +3,8 @@ from __future__ import annotations
 import typing as t
 
 from globus_sdk import client, response
+from globus_sdk._internal.remarshal import commajoin
 from globus_sdk._missing import MISSING, MissingType
-from globus_sdk._remarshal import commajoin
 from globus_sdk._types import UUIDLike
 from globus_sdk.scopes import GroupsScopes, Scope
 

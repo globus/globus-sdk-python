@@ -4,7 +4,7 @@ import uuid
 import pytest
 
 from globus_sdk import MISSING
-from globus_sdk._remarshal import (
+from globus_sdk._internal.remarshal import (
     commajoin,
     list_map,
     listify,
