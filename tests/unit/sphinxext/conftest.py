@@ -183,9 +183,9 @@ def sphinxext():
     """
     pytest.importorskip("docutils", reason="testing sphinx extension needs docutils")
 
-    import globus_sdk._sphinxext
+    import globus_sdk._internal.extensions.sphinxext
 
-    return globus_sdk._sphinxext
+    return globus_sdk._internal.extensions.sphinxext
 
 
 @pytest.fixture
