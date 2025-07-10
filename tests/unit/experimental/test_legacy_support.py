@@ -23,15 +23,6 @@ def test_login_flow_manager_importable_from_experimental():
         )
 
 
-def test_tokenstorage_importable_from_experimental():
-    with pytest.warns(RemovedInV4Warning):
-        from globus_sdk.experimental.tokenstorage import (  # noqa: F401
-            JSONTokenStorage,
-            MemoryTokenStorage,
-            SQLiteTokenStorage,
-        )
-
-
 def test_globus_app_importable_from_experimental():
     # This construct should be imported from `globus_sdk.globus_app`.
     with pytest.warns(RemovedInV4Warning, match=r"globus_sdk\.globus_app\."):
