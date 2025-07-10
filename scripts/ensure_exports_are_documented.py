@@ -20,7 +20,7 @@ PACKAGE_LOCS_TO_SCAN = (
     "globus_sdk/globus_app/",
     "globus_sdk/scopes/",
     "globus_sdk/response.py",
-    "globus_sdk/_testing/",
+    "globus_sdk/testing/",
 )
 
 DEPRECATED_NAMES = {
