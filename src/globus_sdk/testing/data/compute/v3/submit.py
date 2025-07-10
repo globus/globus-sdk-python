@@ -1,4 +1,4 @@
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 from .._common import ENDPOINT_ID, FUNCTION_ID, TASK_GROUP_ID, TASK_ID, TASK_ID_2
 

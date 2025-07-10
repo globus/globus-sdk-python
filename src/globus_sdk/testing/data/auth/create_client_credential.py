@@ -1,6 +1,6 @@
 import uuid
 
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 NEW_CREDENTIAL_NAME = str(uuid.uuid4()).replace("-", "")
 

@@ -1,6 +1,6 @@
 from responses.matchers import query_param_matcher
 
-from globus_sdk._testing import RegisteredResponse, ResponseList, ResponseSet
+from globus_sdk.testing import RegisteredResponse, ResponseList, ResponseSet
 
 RUN_ID = "cfdaf0a4-0931-40af-b974-b619ce69f401"
 OWNER_URN = "urn:globus:auth:identity:944cfbe8-60f8-474d-a634-a0c1ad543a54"

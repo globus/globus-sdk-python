@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import typing as t
 
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 raw_data: list[dict[str, t.Any]] = [
     {

@@ -3,7 +3,7 @@ import typing as t
 
 from docutils.parsers.rst import directives
 
-from globus_sdk._testing import ResponseList
+from globus_sdk.testing import ResponseList
 
 from .add_content_directive import AddContentDirective
 
@@ -17,7 +17,7 @@ class ExpandTestingFixture(AddContentDirective):
     }
 
     def gen_rst(self) -> t.Iterator[str]:
-        from globus_sdk._testing import get_response_set
+        from globus_sdk.testing import get_response_set
 
         response_set_name = self.arguments[0]
         casename = "default"

@@ -17,7 +17,7 @@ class EnumerateTestingFixtures(AddContentDirective):
     }
 
     def gen_rst(self) -> t.Iterator[str]:
-        from globus_sdk._testing import get_response_set
+        from globus_sdk.testing import get_response_set
 
         underline_char = self.options.get("header_underline_char", "-")
 
@@ -46,7 +46,7 @@ class EnumerateTestingFixtures(AddContentDirective):
             for casename in rset.cases():
                 # use "attr" rather than "meth" so that sphinx does not add parens
                 # the use of the method as an attribute of the class or instance better
-                # matches how `_testing` handles things
+                # matches how `testing` handles things
                 yield (
                     ".. dropdown:: "
                     f':py:attr:`~{classname}.{methodname}` (``case="{casename}"``)'

@@ -1,4 +1,4 @@
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 from ._common import TWO_HOP_TRANSFER_FLOW_DOC
 

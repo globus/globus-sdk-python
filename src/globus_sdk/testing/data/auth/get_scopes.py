@@ -2,7 +2,7 @@ import uuid
 
 from responses.matchers import query_param_matcher
 
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 SCOPE1 = {
     "scope_string": "https://auth.globus.org/scopes/3f33d83f-ec0a-4190-887d-0622e7c4ee9a/manage",  # noqa: E501

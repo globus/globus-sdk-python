@@ -1,6 +1,6 @@
 import uuid
 
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 endpoint_client_id = str(uuid.uuid4())
 domain_name = "abc.xyz.data.globus.org"

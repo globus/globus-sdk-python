@@ -1,4 +1,4 @@
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 CREDENTIAL_ID = "af43d884-64a1-4414-897a-680c32374439"
 

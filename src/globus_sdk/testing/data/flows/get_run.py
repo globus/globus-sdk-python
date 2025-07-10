@@ -2,7 +2,7 @@ from copy import deepcopy
 
 from responses.matchers import query_param_matcher
 
-from globus_sdk._testing import RegisteredResponse, ResponseList, ResponseSet
+from globus_sdk.testing import RegisteredResponse, ResponseList, ResponseSet
 
 from ._common import FLOW_DESCRIPTION, RUN, RUN_ID
 

@@ -1,4 +1,4 @@
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 _DATA_ACCESS = (
     "https://auth.globus.org/scopes/542a86fc-1766-450d-841f-065488a2ec01/data_access"

@@ -1,6 +1,6 @@
 import uuid
 
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 identity_id = str(uuid.uuid4())
 collection_ids = [str(uuid.uuid4()), str(uuid.uuid4())]

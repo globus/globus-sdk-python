@@ -1,6 +1,6 @@
 import uuid
 
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 endpoint_id = str(uuid.uuid4())
 gcs_manager_url = RegisteredResponse._url_map["gcs"]

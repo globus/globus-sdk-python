@@ -1,6 +1,6 @@
 from responses.matchers import query_param_matcher
 
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 API_VERSION = "1.23.0"
 ALL_RESPONSE_DOC = {

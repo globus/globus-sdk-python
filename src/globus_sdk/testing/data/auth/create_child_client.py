@@ -3,7 +3,7 @@ import uuid
 
 from responses.matchers import json_params_matcher
 
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 _COMMON_RESPONSE_RECORD = {
     "fqdns": [],

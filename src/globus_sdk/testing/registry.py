@@ -85,17 +85,17 @@ def get_response_set(set_id: t.Any) -> ResponseSet:
 
     # if ID is a string, it's the (optionally dotted) name of a module
     if isinstance(set_id, str):
-        module_name = f"globus_sdk._testing.data.{set_id}"
+        module_name = f"globus_sdk.testing.data.{set_id}"
     else:
         assert hasattr(
             set_id, "__qualname__"
         ), f"cannot load response set from {type(set_id)}"
         # support modules like
-        #   globus_sdk/_testing/data/auth/get_identities.py
+        #   globus_sdk/testing/data/auth/get_identities.py
         # for lookups like
         #   get_response_set(AuthClient.get_identities)
         module_name = (
-            f"globus_sdk._testing.data.{_resolve_qualname(set_id.__qualname__)}"
+            f"globus_sdk.testing.data.{_resolve_qualname(set_id.__qualname__)}"
         )
 
     # after that, check the built-in "registry" built from modules

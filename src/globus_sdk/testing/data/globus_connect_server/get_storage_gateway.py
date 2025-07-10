@@ -1,4 +1,4 @@
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 metadata = {
     "id": "daa09846-eb92-11e9-b89c-9cb6d0d9fd63",

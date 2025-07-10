@@ -1,6 +1,6 @@
 import uuid
 
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 INDEX_ID = str(uuid.uuid4())
 

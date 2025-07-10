@@ -1,6 +1,6 @@
 import uuid
 
-from globus_sdk._testing import RegisteredResponse, ResponseList, ResponseSet
+from globus_sdk.testing import RegisteredResponse, ResponseList, ResponseSet
 
 from ._common import RUN_ID
 

@@ -6,7 +6,7 @@ import uuid
 
 from responses import matchers
 
-from globus_sdk._testing.models import RegisteredResponse, ResponseList, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseList, ResponseSet
 
 from ._common import TWO_HOP_TRANSFER_FLOW_DOC, TWO_HOP_TRANSFER_FLOW_ID
 

@@ -1,4 +1,4 @@
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 INDEX_ID = "60d1160b-f016-40b0-8545-99619865873d"
 IDENTITY_IDS = [

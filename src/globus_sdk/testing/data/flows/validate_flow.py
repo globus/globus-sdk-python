@@ -1,6 +1,6 @@
 from responses import matchers
 
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 VALIDATE_SIMPLE_FLOW_DEFINITION = {
     "Comment": "Simple flow",

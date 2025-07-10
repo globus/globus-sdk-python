@@ -1,6 +1,6 @@
 from responses.matchers import query_param_matcher
 
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 from .._common import ENDPOINT_ID, ENDPOINT_ID_2, ENDPOINT_ID_3, NON_USER_ID, USER_ID
 

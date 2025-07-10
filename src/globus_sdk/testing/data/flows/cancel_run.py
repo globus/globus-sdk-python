@@ -1,6 +1,6 @@
 import copy
 
-from globus_sdk._testing import RegisteredResponse, ResponseSet
+from globus_sdk.testing import RegisteredResponse, ResponseSet
 
 from ._common import TWO_HOP_TRANSFER_RUN
 

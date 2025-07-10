@@ -1,6 +1,6 @@
 import uuid
 
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 SCOPE = {
     "scope_string": "https://auth.globus.org/scopes/3f33d83f-ec0a-4190-887d-0622e7c4ee9a/manager",  # noqa: E501

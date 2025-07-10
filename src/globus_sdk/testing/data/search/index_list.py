@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing as t
 import uuid
 
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 INDEX_IDS = [str(uuid.uuid1()), str(uuid.uuid1())]
 INDEX_ATTRIBUTES: dict[str, dict[str, t.Any]] = {

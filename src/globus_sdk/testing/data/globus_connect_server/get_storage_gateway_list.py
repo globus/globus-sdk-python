@@ -1,4 +1,4 @@
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 GATEWAY_IDS = [
     "a0cbde58-0183-11ea-92bd-9cb6d0d9fd63",

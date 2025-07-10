@@ -1,4 +1,4 @@
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 from ._common import DEST_EP_ID, SOURCE_EP_ID, TIMER_ID, V2_TRANSFER_TIMER
 

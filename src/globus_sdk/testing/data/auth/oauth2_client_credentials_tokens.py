@@ -1,4 +1,4 @@
-from globus_sdk._testing.models import RegisteredResponse, ResponseSet
+from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
 _token = "DUMMY_TRANSFER_TOKEN_FROM_THE_INTERTUBES"
 _scope = "urn:globus:auth:scope:transfer.api.globus.org:all"
