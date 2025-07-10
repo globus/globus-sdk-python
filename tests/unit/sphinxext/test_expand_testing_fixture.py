@@ -20,7 +20,7 @@ def test_expand_testing_fixture_fails_on_bad_reference(sphinx_runner, capsys):
         pytest.fail("Didn't find 'ValueError: no fixtures defined' in stderr")
 
     assert (
-        "no fixtures defined for globus_sdk._testing.data.NO_SUCH_FIXTURE" in test_line
+        "no fixtures defined for globus_sdk.testing.data.NO_SUCH_FIXTURE" in test_line
     )
 
 

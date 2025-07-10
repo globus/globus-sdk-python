@@ -1,7 +1,7 @@
 import urllib.parse
 
 import globus_sdk
-from globus_sdk._testing import get_last_request, load_response
+from globus_sdk.testing import get_last_request, load_response
 
 
 def test_get_endpoints(compute_client_v2: globus_sdk.ComputeClientV2):

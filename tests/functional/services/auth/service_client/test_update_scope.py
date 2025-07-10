@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from globus_sdk._testing import load_response
+from globus_sdk.testing import load_response
 
 
 @pytest.mark.parametrize(

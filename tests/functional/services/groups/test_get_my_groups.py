@@ -1,5 +1,5 @@
-from globus_sdk._testing import load_response
 from globus_sdk.response import ArrayResponse
+from globus_sdk.testing import load_response
 
 
 def test_get_my_groups(groups_client):

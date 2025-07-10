@@ -4,8 +4,8 @@ import json
 import pytest
 
 from globus_sdk import TimerJob, TimersAPIError, TransferData, config, exc
-from globus_sdk._testing import get_last_request, load_response
 from globus_sdk._utils import slash_join
+from globus_sdk.testing import get_last_request, load_response
 from tests.common import GO_EP1_ID, GO_EP2_ID
 
 

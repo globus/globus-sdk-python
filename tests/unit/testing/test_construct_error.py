@@ -1,7 +1,7 @@
 import pytest
 
 import globus_sdk
-from globus_sdk._testing import construct_error
+from globus_sdk.testing import construct_error
 
 
 def test_construct_error_defaults_to_base_error_class():

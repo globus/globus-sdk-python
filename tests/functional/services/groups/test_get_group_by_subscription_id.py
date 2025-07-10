@@ -1,4 +1,4 @@
-from globus_sdk._testing import load_response
+from globus_sdk.testing import load_response
 
 
 def test_get_group_by_subscription_id(groups_client):

@@ -3,7 +3,6 @@ from unittest.mock import Mock, patch
 import pytest
 
 from globus_sdk import ConfidentialAppAuthClient, NativeAppAuthClient
-from globus_sdk._testing import load_response
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.login_flows import (
     CommandLineLoginFlowManager,
@@ -12,6 +11,7 @@ from globus_sdk.login_flows import (
 from globus_sdk.login_flows.command_line_login_flow_manager import (
     CommandLineLoginFlowEOFError,
 )
+from globus_sdk.testing import load_response
 
 
 def _mock_input(s):

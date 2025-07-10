@@ -6,7 +6,7 @@ import pytest
 
 import globus_sdk
 from globus_sdk import FlowsAPIError, SpecificFlowClient
-from globus_sdk._testing import get_last_request, load_response
+from globus_sdk.testing import get_last_request, load_response
 
 
 def test_run_flow(specific_flow_client_class: type[SpecificFlowClient]):

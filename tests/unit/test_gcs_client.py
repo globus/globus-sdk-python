@@ -1,5 +1,5 @@
 from globus_sdk import GCSClient
-from globus_sdk._testing import load_response
+from globus_sdk.testing import load_response
 
 
 def test_client_address_handling():

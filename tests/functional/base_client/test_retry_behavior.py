@@ -2,7 +2,7 @@ import pytest
 import requests
 
 import globus_sdk
-from globus_sdk._testing import RegisteredResponse, load_response
+from globus_sdk.testing import RegisteredResponse, load_response
 
 
 @pytest.mark.parametrize("error_status", [500, 429, 502, 503, 504])

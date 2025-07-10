@@ -1,7 +1,7 @@
 import uuid
 
 import globus_sdk
-from globus_sdk._testing import load_response
+from globus_sdk.testing import load_response
 
 ENDPOINT_CONFIG = """
 display_name: My Endpoint

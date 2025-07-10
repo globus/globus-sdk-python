@@ -1,5 +1,5 @@
 from globus_sdk import TimersAPIError
-from globus_sdk._testing import construct_error
+from globus_sdk.testing import construct_error
 
 
 def test_timer_error_load_simple():

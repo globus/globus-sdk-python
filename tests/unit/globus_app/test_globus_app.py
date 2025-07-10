@@ -19,7 +19,6 @@ from globus_sdk import (
     TransferClient,
     UserApp,
 )
-from globus_sdk._testing import load_response
 from globus_sdk.exc import GlobusSDKUsageError
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.globus_app.authorizer_factory import (
@@ -33,6 +32,7 @@ from globus_sdk.login_flows import (
     LoginFlowManager,
 )
 from globus_sdk.scopes import AuthScopes, Scope
+from globus_sdk.testing import load_response
 from globus_sdk.token_storage import (
     HasRefreshTokensValidator,
     JSONTokenStorage,

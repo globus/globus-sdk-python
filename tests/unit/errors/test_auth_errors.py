@@ -1,7 +1,7 @@
 import pytest
 
 from globus_sdk import AuthAPIError
-from globus_sdk._testing import construct_error
+from globus_sdk.testing import construct_error
 
 
 def test_auth_error_get_args_simple():

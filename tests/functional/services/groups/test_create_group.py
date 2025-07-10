@@ -1,6 +1,6 @@
 import json
 
-from globus_sdk._testing import get_last_request, load_response
+from globus_sdk.testing import get_last_request, load_response
 
 
 def test_create_group(groups_client):

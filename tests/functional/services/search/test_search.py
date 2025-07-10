@@ -7,7 +7,7 @@ import responses
 
 import globus_sdk
 from globus_sdk._missing import filter_missing
-from globus_sdk._testing import get_last_request, load_response
+from globus_sdk.testing import get_last_request, load_response
 from tests.common import register_api_route_fixture_file
 
 

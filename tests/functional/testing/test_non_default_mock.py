@@ -1,5 +1,5 @@
 """
-Test that globus_sdk._testing can accept a non-default requests mock
+Test that globus_sdk.testing can accept a non-default requests mock
 """
 
 import sys
@@ -9,7 +9,7 @@ import requests
 import responses
 
 from globus_sdk import GlobusHTTPResponse, GroupsClient
-from globus_sdk._testing import get_last_request, load_response
+from globus_sdk.testing import get_last_request, load_response
 
 
 @pytest.fixture

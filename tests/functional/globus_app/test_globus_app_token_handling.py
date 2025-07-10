@@ -5,7 +5,7 @@ import responses
 
 import globus_sdk
 import globus_sdk.token_storage
-from globus_sdk._testing import RegisteredResponse, load_response
+from globus_sdk.testing import RegisteredResponse, load_response
 
 # the JWT will have a client ID in its audience claim
 # make sure to use that value when trying to decode it

@@ -1,7 +1,7 @@
 import typing as t
 
 from globus_sdk import SpecificFlowClient
-from globus_sdk._testing import load_response
+from globus_sdk.testing import load_response
 
 
 def test_resume_run(specific_flow_client_class: t.Type[SpecificFlowClient]):

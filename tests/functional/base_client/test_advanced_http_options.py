@@ -1,4 +1,4 @@
-from globus_sdk._testing import RegisteredResponse, load_response
+from globus_sdk.testing import RegisteredResponse, load_response
 
 
 def test_allow_redirects_false(client):

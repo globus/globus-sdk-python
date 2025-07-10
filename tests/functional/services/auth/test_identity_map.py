@@ -2,7 +2,7 @@ import pytest
 import responses
 
 import globus_sdk
-from globus_sdk._testing import get_last_request, load_response
+from globus_sdk.testing import get_last_request, load_response
 
 IDENTITIES_MULTIPLE_RESPONSE = {
     "identities": [

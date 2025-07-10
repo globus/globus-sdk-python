@@ -1,7 +1,7 @@
 import pytest
 
 import globus_sdk
-from globus_sdk._testing import RegisteredResponse, load_response
+from globus_sdk.testing import RegisteredResponse, load_response
 
 
 def test_oauth2_validate_token_emits_deprecation_warning():

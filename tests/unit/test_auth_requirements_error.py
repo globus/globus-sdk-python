@@ -2,7 +2,6 @@ import uuid
 
 import pytest
 
-from globus_sdk._testing import construct_error
 from globus_sdk.exc import ErrorSubdocument
 from globus_sdk.gare import (
     GARE,
@@ -13,6 +12,7 @@ from globus_sdk.gare import (
     to_gare,
     to_gares,
 )
+from globus_sdk.testing import construct_error
 
 
 @pytest.mark.parametrize(

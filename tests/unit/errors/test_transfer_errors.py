@@ -1,5 +1,5 @@
 from globus_sdk import TransferAPIError
-from globus_sdk._testing import construct_error
+from globus_sdk.testing import construct_error
 
 
 def test_transfer_response_get_args():

@@ -4,7 +4,7 @@ import pytest
 import requests
 
 from globus_sdk import ErrorSubdocument, GlobusAPIError, RemovedInV4Warning, exc
-from globus_sdk._testing import construct_error
+from globus_sdk.testing import construct_error
 
 
 def _strmatch_any_order(inputstr, prefix, midfixes, suffix, sep=", "):

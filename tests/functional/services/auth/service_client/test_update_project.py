@@ -4,7 +4,7 @@ import uuid
 import pytest
 
 from globus_sdk._missing import MISSING, filter_missing
-from globus_sdk._testing import get_last_request, load_response
+from globus_sdk.testing import get_last_request, load_response
 
 
 @pytest.mark.parametrize(

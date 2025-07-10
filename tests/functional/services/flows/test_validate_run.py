@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from globus_sdk import FlowsAPIError, SpecificFlowClient
-from globus_sdk._testing import load_response
+from globus_sdk.testing import load_response
 
 
 def test_validate_run(specific_flow_client_class: type[SpecificFlowClient]):

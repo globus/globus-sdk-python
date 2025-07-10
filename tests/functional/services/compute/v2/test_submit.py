@@ -1,7 +1,7 @@
 import uuid
 
 import globus_sdk
-from globus_sdk._testing import load_response
+from globus_sdk.testing import load_response
 
 
 def test_submit(compute_client_v2: globus_sdk.ComputeClientV2):

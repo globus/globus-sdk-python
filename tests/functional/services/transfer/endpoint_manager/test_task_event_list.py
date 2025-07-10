@@ -2,7 +2,7 @@ import uuid
 
 import pytest
 
-from globus_sdk._testing import get_last_request
+from globus_sdk.testing import get_last_request
 from tests.common import register_api_route
 
 ZERO_ID = uuid.UUID(int=0)

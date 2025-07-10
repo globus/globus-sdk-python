@@ -1,5 +1,5 @@
-from globus_sdk._testing import get_last_request, load_response
 from globus_sdk.authorizers import AccessTokenAuthorizer
+from globus_sdk.testing import get_last_request, load_response
 
 
 def test_get_gcs_info(client):

@@ -1,7 +1,7 @@
 import json
 
 from globus_sdk import GCSRoleDocument
-from globus_sdk._testing import get_last_request
+from globus_sdk.testing import get_last_request
 from tests.common import register_api_route_fixture_file
 
 

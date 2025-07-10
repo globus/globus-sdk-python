@@ -1,5 +1,5 @@
 from globus_sdk import __version__
-from globus_sdk._testing import RegisteredResponse, get_last_request
+from globus_sdk.testing import RegisteredResponse, get_last_request
 
 
 def test_clientinfo_header_default(client):

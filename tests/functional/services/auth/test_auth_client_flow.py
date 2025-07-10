@@ -5,9 +5,9 @@ import pytest
 
 import globus_sdk
 from globus_sdk._missing import MISSING
-from globus_sdk._testing import load_response
 from globus_sdk.scopes import TransferScopes
 from globus_sdk.services.auth.flow_managers.native_app import _make_native_app_challenge
+from globus_sdk.testing import load_response
 
 CLIENT_ID = "d0f1d9b0-bd81-4108-be74-ea981664453a"
 

@@ -4,8 +4,8 @@ import pytest
 from responses import matchers
 
 from globus_sdk import MISSING, FlowsAPIError
-from globus_sdk._testing import get_last_request, load_response
-from globus_sdk._testing.models import RegisteredResponse
+from globus_sdk.testing import get_last_request, load_response
+from globus_sdk.testing.models import RegisteredResponse
 
 
 @pytest.mark.parametrize("subscription_id", [MISSING, None, "dummy_subscription_id"])
