@@ -4,7 +4,7 @@
     normal semver policy.
 
 Getting Started with testing
-=============================
+============================
 
 Dependencies
 ------------

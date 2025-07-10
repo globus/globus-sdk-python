@@ -4,7 +4,7 @@
     normal semver policy.
 
 testing Reference
-==================
+=================
 
 .. module:: globus_sdk.testing
 

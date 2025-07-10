@@ -6,7 +6,7 @@
 .. testing_root:
 
 Globus SDK testing
-===================
+==================
 
 .. warning::
 
