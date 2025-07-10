@@ -6,7 +6,7 @@ import pytest
 
 import globus_sdk
 from globus_sdk._testing import RegisteredResponse
-from globus_sdk.tokenstorage import TokenStorageData
+from globus_sdk.token_storage import TokenStorageData
 
 
 @pytest.fixture

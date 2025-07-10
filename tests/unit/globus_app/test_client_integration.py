@@ -5,7 +5,7 @@ import pytest
 import globus_sdk
 from globus_sdk import GlobusApp, GlobusAppConfig, UserApp
 from globus_sdk._testing import load_response
-from globus_sdk.tokenstorage import MemoryTokenStorage
+from globus_sdk.token_storage import MemoryTokenStorage
 
 
 @pytest.fixture

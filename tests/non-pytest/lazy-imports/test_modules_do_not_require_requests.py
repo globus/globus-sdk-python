@@ -28,7 +28,7 @@ PYTHON_BINARY = os.environ.get("GLOBUS_TEST_PY", sys.executable)
         "paging",
         "response",
         "scopes",
-        "tokenstorage",
+        "token_storage",
         # the top-level of the 'exc' subpackage (but not necessarily its contents)
         # should similarly be standalone, for exception handlers
         "exc",

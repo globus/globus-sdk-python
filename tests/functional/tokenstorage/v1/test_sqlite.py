@@ -1,6 +1,6 @@
 import pytest
 
-from globus_sdk.tokenstorage import SQLiteAdapter
+from globus_sdk.token_storage import SQLiteAdapter
 
 
 @pytest.fixture

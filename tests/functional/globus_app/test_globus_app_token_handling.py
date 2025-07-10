@@ -4,7 +4,7 @@ import pytest
 import responses
 
 import globus_sdk
-import globus_sdk.tokenstorage
+import globus_sdk.token_storage
 from globus_sdk._testing import RegisteredResponse, load_response
 
 # the JWT will have a client ID in its audience claim
@@ -124,7 +124,7 @@ def test_globus_app_only_gets_oidc_data_once(
         calls = [c for c in calls if c.url == "https://auth.globus.org/jwk.json"]
         return len(calls)
 
-    memory_storage = globus_sdk.tokenstorage.MemoryTokenStorage()
+    memory_storage = globus_sdk.token_storage.MemoryTokenStorage()
     config = globus_sdk.GlobusAppConfig(
         token_storage=memory_storage,
         id_token_decoder=InfiniteLeewayDecoder,
@@ -164,7 +164,7 @@ def test_globus_app_can_set_custom_id_token_decoder_via_config_provider(
             nonlocal init_counter
             init_counter += 1
 
-    memory_storage = globus_sdk.tokenstorage.MemoryTokenStorage()
+    memory_storage = globus_sdk.token_storage.MemoryTokenStorage()
     config = globus_sdk.GlobusAppConfig(
         token_storage=memory_storage,
         id_token_decoder=CustomDecoder,
@@ -195,7 +195,7 @@ def test_globus_app_can_set_custom_id_token_decoder_via_config_instance(
             return super().decode(*args, **kwargs)
 
     login_client = globus_sdk.NativeAppAuthClient(client_id=CLIENT_ID_FROM_JWT)
-    memory_storage = globus_sdk.tokenstorage.MemoryTokenStorage()
+    memory_storage = globus_sdk.token_storage.MemoryTokenStorage()
     config = globus_sdk.GlobusAppConfig(
         token_storage=memory_storage, id_token_decoder=CustomDecoder(login_client)
     )
@@ -222,7 +222,7 @@ def test_globus_app_custom_id_token_decoder_instance_can_overload_jwt_leeway(
     load_response(globus_sdk.NativeAppAuthClient.oauth2_revoke_token)
 
     login_client = globus_sdk.NativeAppAuthClient(client_id=CLIENT_ID_FROM_JWT)
-    memory_storage = globus_sdk.tokenstorage.MemoryTokenStorage()
+    memory_storage = globus_sdk.token_storage.MemoryTokenStorage()
     config = globus_sdk.GlobusAppConfig(
         token_storage=memory_storage,
         id_token_decoder=globus_sdk.IDTokenDecoder(

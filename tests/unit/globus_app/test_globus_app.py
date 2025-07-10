@@ -33,7 +33,7 @@ from globus_sdk.login_flows import (
     LoginFlowManager,
 )
 from globus_sdk.scopes import AuthScopes, Scope
-from globus_sdk.tokenstorage import (
+from globus_sdk.token_storage import (
     HasRefreshTokensValidator,
     JSONTokenStorage,
     MemoryTokenStorage,

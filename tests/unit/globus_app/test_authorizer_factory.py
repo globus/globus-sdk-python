@@ -8,12 +8,12 @@ from globus_sdk.globus_app.authorizer_factory import (
     ClientCredentialsAuthorizerFactory,
     RefreshTokenAuthorizerFactory,
 )
-from globus_sdk.tokenstorage import (
+from globus_sdk.token_storage import (
     HasRefreshTokensValidator,
     MemoryTokenStorage,
     NotExpiredValidator,
 )
-from globus_sdk.tokenstorage.v2.validating_token_storage import (
+from globus_sdk.token_storage.v2.validating_token_storage import (
     ExpiredTokenError,
     MissingTokenError,
     ValidatingTokenStorage,

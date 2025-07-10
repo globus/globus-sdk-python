@@ -16,13 +16,13 @@ from globus_sdk import (
     Scope,
 )
 from globus_sdk.scopes.consents import ConsentForest
-from globus_sdk.tokenstorage import (
+from globus_sdk.token_storage import (
     MemoryTokenStorage,
     ScopeRequirementsValidator,
     UnchangingIdentityIDValidator,
     ValidatingTokenStorage,
 )
-from globus_sdk.tokenstorage.v2.validating_token_storage import (
+from globus_sdk.token_storage.v2.validating_token_storage import (
     IdentityMismatchError,
     MissingIdentityError,
     MissingTokenError,

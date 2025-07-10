@@ -1,7 +1,7 @@
 import pytest
 
 from globus_sdk import exc
-from globus_sdk.tokenstorage import SQLiteAdapter, SQLiteTokenStorage
+from globus_sdk.token_storage import SQLiteAdapter, SQLiteTokenStorage
 
 
 @pytest.fixture
