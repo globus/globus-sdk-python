@@ -1,4 +1,4 @@
-Globus Search _testing Method List
+Globus Search testing Method List
 ==================================
 
 .. enumeratetestingfixtures:: globus_sdk.SearchClient

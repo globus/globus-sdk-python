@@ -1,4 +1,4 @@
-Globus Connect Server _testing Method List
+Globus Connect Server testing Method List
 ==========================================
 
 .. enumeratetestingfixtures:: globus_sdk.GCSClient

@@ -3,10 +3,10 @@
     This component is an *alpha*. Interfaces may change outside of the
     normal semver policy.
 
-_testing Reference
+testing Reference
 ==================
 
-.. module:: globus_sdk._testing
+.. module:: globus_sdk.testing
 
 Functions
 ---------

@@ -1,4 +1,4 @@
-Globus Transfer _testing Method List
+Globus Transfer testing Method List
 ====================================
 
 .. enumeratetestingfixtures:: globus_sdk.TransferClient

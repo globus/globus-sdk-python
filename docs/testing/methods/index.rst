@@ -3,10 +3,10 @@
     This component is an *alpha*. Interfaces may change outside of the
     normal semver policy.
 
-_testing Method List
+testing Method List
 ====================
 
-These pages list all methods which have ``globus_sdk._testing`` response data,
+These pages list all methods which have ``globus_sdk.testing`` response data,
 and the casenames for those data.
 
 .. toctree::

@@ -3,7 +3,7 @@
     This component is an *alpha*. Interfaces may change outside of the
     normal semver policy.
 
-Getting Started with _testing
+Getting Started with testing
 =============================
 
 Dependencies
@@ -11,7 +11,7 @@ Dependencies
 
 This toolchain requires the ``responses`` library.
 
-``globus_sdk._testing`` is tested to operate with the latest version of
+``globus_sdk.testing`` is tested to operate with the latest version of
 ``responses``.
 
 Recommended Fixtures
@@ -41,7 +41,7 @@ activated by name:
 
 .. code-block:: python
 
-    from globus_sdk._testing import load_response
+    from globus_sdk.testing import load_response
 
     # load_response will add the response to `responses` and return it
     load_response("auth.get_identities")
@@ -54,7 +54,7 @@ unbound, as in:
 .. code-block:: python
 
     import globus_sdk
-    from globus_sdk._testing import load_response
+    from globus_sdk.testing import load_response
 
     load_response(globus_sdk.AuthClient.get_identities)
     load_response(globus_sdk.AuthClient.get_identities, case="unauthorized")
@@ -71,7 +71,7 @@ load all of them at once:
 
 .. code-block:: python
 
-    from globus_sdk._testing import load_response_set
+    from globus_sdk.testing import load_response_set
 
     fixtures = load_response_set("scenario.foo")
 
@@ -86,7 +86,7 @@ response is ``"default"``.
 .. code-block:: python
 
     from globus_sdk import AuthClient
-    from globus_sdk._testing import get_response_set
+    from globus_sdk.testing import get_response_set
 
     # rset will not be activated
     rset = get_response_set(AuthClient.get_identities)
@@ -110,7 +110,7 @@ override the builtin response sets, if names match.
 
 .. code-block:: python
 
-    from globus_sdk._testing import load_response_set, register_response_set
+    from globus_sdk.testing import load_response_set, register_response_set
     import uuid
 
     # register a scenario under which Globus Auth get_identities and Globus
@@ -152,7 +152,7 @@ Loading Responses without Registering
 
 Because ``RegisteredResponse`` takes care of resolving ``"auth"`` to the Auth
 URL, ``"transfer"`` to the Transfer URL, and so forth, you might want to use
-``globus_sdk._testing`` in lieu of ``responses`` even when registering single
+``globus_sdk.testing`` in lieu of ``responses`` even when registering single
 responses for individual tests.
 
 To support this mode of usage, ``load_response`` can take a
@@ -165,7 +165,7 @@ Consider the following example of a parametrized test which uses
 
 .. code-block:: python
 
-    from globus_sdk._testing import load_response, RegisteredResponse
+    from globus_sdk.testing import load_response, RegisteredResponse
     import pytest
 
 
@@ -191,7 +191,7 @@ outside of the specific test.
 Using non-default responses.RequestsMock objects
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-By default, all methods in ``globus_sdk._testing`` which converse with
+By default, all methods in ``globus_sdk.testing`` which converse with
 ``responses`` use the default mock. This is the behavior offered by
 ``responses.add(...)`` and similar methods.
 
@@ -208,7 +208,7 @@ e.g.
 
 .. code-block:: python
 
-    from globus_sdk._testing import get_last_request
+    from globus_sdk.testing import get_last_request
     import responses
 
     custom_mock = responses.RequestsMock(...)

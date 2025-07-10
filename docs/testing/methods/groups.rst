@@ -1,4 +1,4 @@
-Globus Groups _testing Method List
+Globus Groups testing Method List
 ==================================
 
 .. enumeratetestingfixtures:: globus_sdk.GroupsClient

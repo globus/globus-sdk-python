@@ -3,14 +3,14 @@
     This component is an *alpha*. Interfaces may change outside of the
     normal semver policy.
 
-.. _testing_root:
+.. testing_root:
 
-Globus SDK _testing
+Globus SDK testing
 ===================
 
 .. warning::
 
-    The exact data and payloads provided via ``_testing`` are a best
+    The exact data and payloads provided via ``testing`` are a best
     approximation of API responses. They may change in any SDK release to be
     more accurate.
 
