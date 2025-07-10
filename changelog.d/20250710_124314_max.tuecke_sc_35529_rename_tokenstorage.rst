@@ -1,0 +1,4 @@
+Changed
+-------
+
+- Renamed the ``globus_sdk.tokenstorage`` subpackage to ``globus_sdk.token_storage``. (:pr:`1252`)
