@@ -55,7 +55,7 @@ class SimpleJSONFileAdapter(FileAdapter):
         return val
 
     def _handle_formats(self, read_data: dict[str, t.Any]) -> _JSONFileData:
-        """Handle older data formats supported by globus_sdk.tokenstorage
+        """Handle older data formats supported by globus_sdk.token_storage
 
         if the data is not in a known/recognized format, this will error
         otherwise, reshape the data to the current supported format and return it
@@ -110,7 +110,7 @@ class SimpleJSONFileAdapter(FileAdapter):
 
         Given a token response, extract all the token data and write it to
         ``self.filename`` as JSON data.
-        Additionally will write the version of ``globus_sdk.tokenstorage``
+        Additionally will write the version of ``globus_sdk.token_storage``
         which was in use.
 
         Under the assumption that this may be running on a system with multiple

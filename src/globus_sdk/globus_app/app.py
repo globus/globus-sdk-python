@@ -15,7 +15,7 @@ from globus_sdk._types import ScopeCollectionType, UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.scopes import AuthScopes, Scope, ScopeParser, scopes_to_scope_list
-from globus_sdk.tokenstorage import (
+from globus_sdk.token_storage import (
     ScopeRequirementsValidator,
     TokenStorage,
     TokenValidationError,

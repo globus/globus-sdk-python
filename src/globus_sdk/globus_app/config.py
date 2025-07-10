@@ -10,14 +10,14 @@ from globus_sdk.login_flows import (
     LocalServerLoginFlowManager,
     LoginFlowManager,
 )
-from globus_sdk.tokenstorage import (
+from globus_sdk.token_storage import (
     JSONTokenStorage,
     MemoryTokenStorage,
     SQLiteTokenStorage,
     TokenStorage,
     TokenValidationError,
 )
-from globus_sdk.tokenstorage.v2.validating_token_storage import IdentityMismatchError
+from globus_sdk.token_storage.v2.validating_token_storage import IdentityMismatchError
 
 from .protocols import (
     IDTokenDecoderProvider,
@@ -71,9 +71,9 @@ class GlobusAppConfig:
     :ivar str | ``TokenStorage`` | ``TokenStorageProvider`` token_storage:
         A class responsible for storing and retrieving tokens.
         This may be either a well-known provider (one of
-        :class:`"json" <globus_sdk.tokenstorage.JSONTokenStorage>`,
-        :class:`"sqlite" <globus_sdk.tokenstorage.SQLiteTokenStorage>`, or
-        :class:`"memory" <globus_sdk.tokenstorage.MemoryTokenStorage>`) or a custom
+        :class:`"json" <globus_sdk.token_storage.JSONTokenStorage>`,
+        :class:`"sqlite" <globus_sdk.token_storage.SQLiteTokenStorage>`, or
+        :class:`"memory" <globus_sdk.token_storage.MemoryTokenStorage>`) or a custom
         storage/provider. Default: ``"json"``.
 
     :ivar str | ``LoginFlowManager`` | ``LoginFlowManagerProvider`` login_flow_manager:

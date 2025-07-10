@@ -6,7 +6,7 @@ if t.TYPE_CHECKING:
     from globus_sdk import AuthLoginClient, IDTokenDecoder
     from globus_sdk._types import UUIDLike
     from globus_sdk.login_flows import LoginFlowManager
-    from globus_sdk.tokenstorage import TokenStorage, TokenValidationError
+    from globus_sdk.token_storage import TokenStorage, TokenValidationError
 
     from .app import GlobusApp
     from .config import GlobusAppConfig

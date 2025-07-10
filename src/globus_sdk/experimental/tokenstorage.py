@@ -15,7 +15,7 @@ __all__ = (
 # legacy aliases
 # (when accessed, these will emit deprecation warnings)
 if t.TYPE_CHECKING:
-    from globus_sdk.tokenstorage import (
+    from globus_sdk.token_storage import (
         FileTokenStorage,
         JSONTokenStorage,
         MemoryTokenStorage,
@@ -26,14 +26,14 @@ if t.TYPE_CHECKING:
 else:
 
     def __getattr__(name: str) -> t.Any:
-        import globus_sdk.tokenstorage as tokenstorage_module
+        import globus_sdk.token_storage as tokenstorage_module
         from globus_sdk.exc import warn_deprecated
 
         warn_deprecated(
             "'globus_sdk.experimental.tokenstorage' has been renamed to "
-            "'globus_sdk.tokenstorage'. "
+            "'globus_sdk.token_storage'. "
             f"Importing '{name}' from `globus_sdk.experimental` is deprecated. "
-            f"Use `globus_sdk.tokenstorage.{name}` instead."
+            f"Use `globus_sdk.token_storage.{name}` instead."
         )
 
         value = getattr(tokenstorage_module, name, None)

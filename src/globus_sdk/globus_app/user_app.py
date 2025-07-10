@@ -13,7 +13,7 @@ from globus_sdk import (
 from globus_sdk._types import ScopeCollectionType, UUIDLike
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.login_flows import CommandLineLoginFlowManager, LoginFlowManager
-from globus_sdk.tokenstorage import (
+from globus_sdk.token_storage import (
     HasRefreshTokensValidator,
     NotExpiredValidator,
     TokenStorage,
