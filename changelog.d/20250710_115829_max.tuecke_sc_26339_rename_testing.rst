@@ -1,4 +1,4 @@
-.. Changed
-.. -------
-..
-.. - Renamed the globus_sdk._testing subpackage to globus_sdk.testing. (:pr:`1251`)
+Changed
+-------
+
+- Renamed the ``globus_sdk._testing`` subpackage to ``globus_sdk.testing``. (:pr:`1251`)
