@@ -9,7 +9,7 @@ recommend using the former. ``TokenStorage`` is a newer iteration of the token s
 interface and includes a superset of the functionality previously supported in
 ``StorageAdapter``.
 
-All constructs from both hierarchies are importable from the ``globus_sdk.tokenstorage``
+All constructs from both hierarchies are importable from the ``globus_sdk.token_storage``
 namespace.
 
 .. toctree::

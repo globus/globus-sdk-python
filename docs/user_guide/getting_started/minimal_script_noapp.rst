@@ -182,7 +182,7 @@ Defining a token storage object is simple:
 .. code-block:: python
 
     import os
-    from globus_sdk.tokenstorage import JSONTokenStorage
+    from globus_sdk.token_storage import JSONTokenStorage
 
     token_storage = JSONTokenStorage(
         os.path.expanduser("~/.list-my-globus-groups-tokens.json")

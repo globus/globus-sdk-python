@@ -1,7 +1,7 @@
 import os
 
 import globus_sdk
-from globus_sdk.tokenstorage import JSONTokenStorage
+from globus_sdk.token_storage import JSONTokenStorage
 
 # this is the tutorial client ID
 # replace this string with your ID for production use

@@ -7,7 +7,7 @@ import typing as t
 import boto3
 
 import globus_sdk
-from globus_sdk.tokenstorage import StorageAdapter
+from globus_sdk.token_storage import StorageAdapter
 
 CLIENT_ID = "61338d24-54d5-408f-a10d-66c06b59f6d2"
 tablename = "example-globus-tokenstorage"

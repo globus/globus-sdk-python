@@ -1,6 +1,6 @@
 .. _token_storages:
 
-.. currentmodule:: globus_sdk.tokenstorage
+.. currentmodule:: globus_sdk.token_storage
 
 Token Storages
 ==============

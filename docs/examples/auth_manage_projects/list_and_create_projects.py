@@ -4,7 +4,7 @@ import argparse
 import os
 
 import globus_sdk
-from globus_sdk.tokenstorage import SimpleJSONFileAdapter
+from globus_sdk.token_storage import SimpleJSONFileAdapter
 
 MY_FILE_ADAPTER = SimpleJSONFileAdapter(
     os.path.expanduser("~/.sdk-manage-projects.json")
