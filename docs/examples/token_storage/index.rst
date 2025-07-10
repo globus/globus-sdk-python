@@ -1,4 +1,4 @@
-.. _example_tokenstorage:
+.. _example_token_storage:
 
 Token Storage Adapters
 ======================
@@ -16,6 +16,6 @@ sequential scans for enumeration. The example therefore demonstrates that
 key-value stores with limited or no capabilities for table scans can be used to
 implement the token storage interface.
 
-.. literalinclude:: dynamodb_tokenstorage.py
-    :caption: ``dynamodb_tokenstorage.py`` [:download:`download <dynamodb_tokenstorage.py>`]
+.. literalinclude:: dynamodb_token_storage.py
+    :caption: ``dynamodb_token_storage.py`` [:download:`download <dynamodb_token_storage.py>`]
     :language: python

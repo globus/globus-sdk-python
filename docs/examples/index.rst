@@ -9,7 +9,7 @@ Each of these pages contains an example of a piece of SDK functionality.
    minimal_transfer_script/index
    auth_manage_projects/index
    create_and_run_flow/index
-   tokenstorage/index
+   token_storage/index
    group_listing
    authorization
    native_app
