@@ -4,7 +4,7 @@ import dataclasses
 import re
 import typing as t
 
-from globus_sdk._types import UUIDLike
+from globus_sdk._internal.type_definitions import UUIDLike
 
 _NORMALIZATION_PATTERN = re.compile(r"[_\- ]+")
 

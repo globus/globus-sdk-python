@@ -1,4 +1,4 @@
-from globus_sdk._classproperty import classproperty
+from globus_sdk._internal.classprop import classproperty
 
 
 def test_classproperty_simple():

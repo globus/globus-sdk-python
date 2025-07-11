@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from globus_sdk import GlobusError, Scope
-from globus_sdk._types import UUIDLike
+from globus_sdk._internal.type_definitions import UUIDLike
 
 
 class TokenValidationError(GlobusError):

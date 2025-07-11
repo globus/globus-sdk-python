@@ -4,9 +4,9 @@ import logging
 import typing as t
 
 from globus_sdk import exc
+from globus_sdk._internal.remarshal import commajoin, strseq_iter, strseq_listify
+from globus_sdk._internal.type_definitions import ScopeCollectionType, UUIDLike
 from globus_sdk._missing import MISSING, MissingType
-from globus_sdk._remarshal import commajoin, strseq_iter, strseq_listify
-from globus_sdk._types import ScopeCollectionType, UUIDLike
 from globus_sdk.authorizers import BasicAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
 

@@ -4,9 +4,9 @@ import logging
 import typing as t
 
 from globus_sdk import client, paging, response
+from globus_sdk._internal.remarshal import strseq_listify
+from globus_sdk._internal.type_definitions import UUIDLike
 from globus_sdk._missing import MISSING, MissingType
-from globus_sdk._remarshal import strseq_listify
-from globus_sdk._types import UUIDLike
 from globus_sdk.exc.warnings import warn_deprecated
 from globus_sdk.scopes import SearchScopes
 

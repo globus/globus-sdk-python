@@ -1,6 +1,6 @@
 import pytest
 
-from globus_sdk._utils import get_nice_hostname, sha256_string, slash_join
+from globus_sdk._internal.utils import get_nice_hostname, sha256_string, slash_join
 
 
 def test_sha256string():

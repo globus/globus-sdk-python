@@ -6,7 +6,7 @@ import time
 import typing as t
 
 from globus_sdk import exc
-from globus_sdk._utils import sha256_string
+from globus_sdk._internal.utils import sha256_string
 
 from .base import GlobusAuthorizer
 

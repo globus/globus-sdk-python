@@ -28,7 +28,7 @@ extensions = [
     "sphinx_design",
     "sphinx_issues",
     # our custom one
-    "globus_sdk._sphinxext",
+    "globus_sdk._internal.extensions.sphinxext",
 ]
 
 project = "globus-sdk"

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from globus_sdk import _guards
+from globus_sdk._internal import guards
 from globus_sdk.exc import ErrorSubdocument, GlobusAPIError
 
 
@@ -28,7 +28,7 @@ class FlowsAPIError(GlobusAPIError):
         self.code = self._extract_code_from_error_array(self.errors)
 
         details = self._dict_data["error"].get("detail")
-        if _guards.is_list_of(details, dict):
+        if guards.is_list_of(details, dict):
             self.messages = [
                 error_detail["msg"]
                 for error_detail in details

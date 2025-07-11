@@ -18,7 +18,7 @@ class Serializable:
     Serializable classes:
     - know what fields they have, based on their initializer signatures
     - support `to_dict()` and `from_dict()` conversions
-    - typically use `globus_sdk._guards.validators` to check attribute types
+    - typically use `globus_sdk._internal.guards.validators` to check attribute types
     """
 
     _EXCLUDE_VARS: t.ClassVar[tuple[str, ...]] = ("self", "extra")

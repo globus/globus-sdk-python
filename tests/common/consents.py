@@ -5,7 +5,7 @@ from collections import defaultdict, namedtuple
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
-from globus_sdk._types import UUIDLike
+from globus_sdk._internal.type_definitions import UUIDLike
 from globus_sdk.scopes import Scope, ScopeParser
 from globus_sdk.scopes.consents import Consent, ConsentForest
 

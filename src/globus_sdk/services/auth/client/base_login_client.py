@@ -5,10 +5,11 @@ import typing as t
 
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 
-from globus_sdk import _guards, client, exc
+from globus_sdk import client, exc
+from globus_sdk._internal import guards
+from globus_sdk._internal.remarshal import commajoin
+from globus_sdk._internal.type_definitions import UUIDLike
 from globus_sdk._missing import MISSING, MissingType
-from globus_sdk._remarshal import commajoin
-from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer, NullAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
 from globus_sdk.scopes import AuthScopes, Scope
@@ -284,7 +285,7 @@ class AuthLoginClient(client.BaseClient):
 
         # if this client has no way of authenticating itself but
         # it does have a client_id, we'll send that in the request
-        no_authentication = _guards.is_optional(self.authorizer, NullAuthorizer)
+        no_authentication = guards.is_optional(self.authorizer, NullAuthorizer)
         if no_authentication and self.client_id:
             log.debug("Validating token with unauthenticated client")
             body.update({"client_id": self.client_id})

@@ -8,9 +8,9 @@ import re
 import typing as t
 import urllib.parse
 
+from globus_sdk._internal.type_definitions import ScopeCollectionType
+from globus_sdk._internal.utils import slash_join
 from globus_sdk._missing import MISSING, MissingType, filter_missing
-from globus_sdk._types import ScopeCollectionType
-from globus_sdk._utils import slash_join
 from globus_sdk.exc import GlobusSDKUsageError
 
 from .._common import stringify_requested_scopes

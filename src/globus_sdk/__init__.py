@@ -2,7 +2,7 @@ import importlib.metadata
 import logging
 import sys
 
-from ._lazy_import import (
+from ._internal.lazy_import import (
     default_dir_implementation,
     default_getattr_implementation,
     load_all_tuple,

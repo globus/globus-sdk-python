@@ -6,7 +6,7 @@ from .parser import ScopeParser
 from .representation import Scope
 
 if t.TYPE_CHECKING:
-    from globus_sdk._types import ScopeCollectionType
+    from globus_sdk._internal.type_definitions import ScopeCollectionType
 
 
 def scopes_to_str(scopes: ScopeCollectionType) -> str:
