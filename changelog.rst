@@ -85,7 +85,7 @@ Changed
   (:pr:`1222`)
 
 - The SDK's ``ScopeBuilder`` types have been replaced with
-  ``StaticScopeCollection`` and ``DynamicScopeCollection`` types. (:pr:`NUMBER`)
+  ``StaticScopeCollection`` and ``DynamicScopeCollection`` types. (:pr:`1237`)
 
   - Scopes provided as constants by the SDK are now ``Scope`` objects, not
     strings. They can be converted to strings trivially with ``str(scope)``.
@@ -96,7 +96,7 @@ Changed
     ``GCSCollectionScopeBuilder``.
 
 - The ``ScopeBuilder`` types have been simplified and improved as the new
-  ``ScopeCollection`` types. (:pr:`NUMBER`)
+  ``ScopeCollection`` types. (:pr:`1237`)
 
   - ``ScopeBuilder`` is replaced with ``StaticScopeCollection`` and
     ``DynamicScopeCollection``. The ``scopes`` attribute of client classes is
