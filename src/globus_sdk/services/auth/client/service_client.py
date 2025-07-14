@@ -764,7 +764,7 @@ class AuthClient(client.BaseClient):
         """
         return GetPoliciesResponse(self.get("/v2/api/policies"))
 
-    def create_policy(  # pylint: disable=missing-param-doc
+    def create_policy(
         self,
         *,
         project_id: UUIDLike,
@@ -780,15 +780,15 @@ class AuthClient(client.BaseClient):
         Create a new Auth policy. Requires the ``manage_projects`` scope.
 
         :param project_id: ID of the project for the new policy
+        :param display_name: A user-friendly name for the policy
+        :param description: A user-friendly description to explain the purpose of the
+            policy
         :param high_assurance: Whether or not this policy is applied to sessions.
         :param authentication_assurance_timeout: Number of seconds within which someone
             must have authenticated to satisfy the policy
         :param required_mfa: If True, then multi-factor authentication is required.
             This can only be set to True for high-assurance policies. The default
             is False.
-        :param display_name: A user-friendly name for the policy
-        :param description: A user-friendly description to explain the purpose of the
-            policy
         :param domain_constraints_include: A list of domains that can satisfy the policy
         :param domain_constraints_exclude: A list of domains that cannot satisfy the
             policy
