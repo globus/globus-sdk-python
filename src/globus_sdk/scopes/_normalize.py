@@ -5,15 +5,13 @@ import typing as t
 from .parser import ScopeParser
 from .representation import Scope
 
-if t.TYPE_CHECKING:
-    from globus_sdk._types import ScopeCollectionType
 
-
-def scopes_to_str(scopes: ScopeCollectionType) -> str:
+def scopes_to_str(scopes: str | Scope | t.Iterable[str | Scope]) -> str:
     """
-    Normalize a scope collection to a space-separated scope string.
+    Normalize scopes to a space-separated scope string.
 
-    :param scopes: A scope string or object, or an iterable of scope strings or objects.
+    :param scopes: A scope string, scope object, or an iterable of scope strings
+        and scope objects.
     :returns: A space-separated scope string.
 
     Example usage:
@@ -29,11 +27,12 @@ def scopes_to_str(scopes: ScopeCollectionType) -> str:
     return " ".join(str(scope) for scope in scope_iter)
 
 
-def scopes_to_scope_list(scopes: ScopeCollectionType) -> list[Scope]:
+def scopes_to_scope_list(scopes: str | Scope | t.Iterable[str | Scope]) -> list[Scope]:
     """
-    Normalize a scope collection to a list of Scope objects.
+    Normalize scopes to a list of Scope objects.
 
-    :param scopes: A scope string or object, or an iterable of scope strings or objects.
+    :param scopes: A scope string, scope object, or an iterable of scope strings
+        and scope objects.
     :returns: A list of Scope objects.
 
     Example usage:
@@ -55,19 +54,19 @@ def scopes_to_scope_list(scopes: ScopeCollectionType) -> list[Scope]:
 
 
 def _iter_scope_collection(
-    obj: ScopeCollectionType,
+    obj: str | Scope | t.Iterable[str | Scope],
     *,
     split_root_scopes: bool = True,
 ) -> t.Iterator[str | Scope]:
     """
-    Provide an iterator over a scope collection type, flattening nested scope
-    collections as encountered.
+    Provide an iterator over a collection of scopes.
 
     Collections of scope representations are yielded one at a time.
     Individual scope representations are yielded as-is.
 
-    :param obj: A scope collection or scope representation.
-    :param iter_scope_strings: If True, scope strings with multiple root scopes are
+    :param obj: A scope string, scope object, or an iterable of scope strings
+        and scope objects.
+    :param split_root_scopes: If True, scope strings with multiple root scopes are
         split. This flag allows a caller to optimize, skipping a bfs operation if
         merging will be done later purely with strings.
 
@@ -77,20 +76,19 @@ def _iter_scope_collection(
 
         >>> list(_iter_scope_collection("foo"))
         ['foo']
-        >>> list(_iter_scope_collection(Scope.parse("foo bar"), "baz qux"))
+        >>> list(_iter_scope_collection(Scope.parse("foo bar") + ["baz qux"]))
         [Scope('foo'), Scope('bar'), 'baz', 'qux']
         >>> list(_iter_scope_collection("foo bar[baz qux]"))
         ['foo', 'bar[baz qux]']
         >>> list(_iter_scope_collection("foo bar[baz qux]", split_root_scopes=False))
-        'foo bar[baz qux]'
+        ['foo bar[baz qux]']
     """
     if isinstance(obj, str):
         yield from _iter_scope_string(obj, split_root_scopes)
     elif isinstance(obj, Scope):
         yield obj
     else:
-        for item in obj:
-            yield from _iter_scope_collection(item, split_root_scopes=split_root_scopes)
+        yield from _iter_scope_iterable(obj, split_root_scopes)
 
 
 def _iter_scope_string(scope_str: str, split_root_scopes: bool) -> t.Iterator[str]:
@@ -102,3 +100,15 @@ def _iter_scope_string(scope_str: str, split_root_scopes: bool) -> t.Iterator[st
     else:
         for scope_obj in ScopeParser.parse(scope_str):
             yield str(scope_obj)
+
+
+def _iter_scope_iterable(
+    scope_iterable: t.Iterable[str | Scope], split_root_scopes: bool
+) -> t.Iterator[str | Scope]:
+    for scope in scope_iterable:
+        if isinstance(scope, str):
+            yield from _iter_scope_string(scope, split_root_scopes)
+        elif isinstance(scope, Scope):
+            yield scope
+        else:
+            raise TypeError(f"Expected str or Scope in iterable, got {type(scope)}")
