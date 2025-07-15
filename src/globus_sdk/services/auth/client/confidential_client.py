@@ -6,9 +6,10 @@ import typing as t
 from globus_sdk import exc
 from globus_sdk._missing import MISSING, MissingType
 from globus_sdk._remarshal import commajoin, strseq_iter, strseq_listify
-from globus_sdk._types import ScopeCollectionType, UUIDLike
+from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import BasicAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
+from globus_sdk.scopes import Scope
 
 from .._common import stringify_requested_scopes
 from ..flow_managers import GlobusAuthorizationCodeFlowManager
@@ -106,7 +107,7 @@ class ConfidentialAppAuthClient(AuthLoginClient):
         )
 
     def oauth2_client_credentials_tokens(
-        self, requested_scopes: ScopeCollectionType
+        self, requested_scopes: str | Scope | t.Iterable[str | Scope]
     ) -> OAuthClientCredentialsResponse:
         r"""
         Perform an OAuth2 Client Credentials Grant to get access tokens which
@@ -142,7 +143,7 @@ class ConfidentialAppAuthClient(AuthLoginClient):
     def oauth2_start_flow(
         self,
         redirect_uri: str,
-        requested_scopes: ScopeCollectionType,
+        requested_scopes: str | Scope | t.Iterable[str | Scope],
         *,
         state: str = "_default",
         refresh_tokens: bool = False,

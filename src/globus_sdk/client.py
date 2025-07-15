@@ -7,7 +7,6 @@ import urllib.parse
 
 from globus_sdk import GlobusSDKUsageError, config, exc
 from globus_sdk._classproperty import classproperty
-from globus_sdk._types import ScopeCollectionType
 from globus_sdk._utils import slash_join
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.paging import PaginatorTable
@@ -252,7 +251,9 @@ class BaseClient:
         # finally, register the scope requirements on the app side
         self._app.add_scope_requirements({self.resource_server: self.app_scopes})
 
-    def add_app_scope(self, scope_collection: ScopeCollectionType) -> BaseClient:
+    def add_app_scope(
+        self, scope_collection: str | Scope | t.Iterable[str | Scope]
+    ) -> BaseClient:
         """
         Add a given scope collection to this client's ``GlobusApp`` scope requirements
         for this client's ``resource_server``. This allows defining additional scope
@@ -263,8 +264,9 @@ class BaseClient:
         Raises ``GlobusSDKUsageError`` if this client was not initialized with a
             ``GlobusApp``.
 
-        :param scope_collection: A scope or scopes of ``ScopeCollectionType`` to be
-            added to the app's required scopes.
+        :param scope_collection: A scope or scopes of
+            ``str | Scope | t.Iterable[str | Scope]`` to be added to
+            the app's required scopes.
 
         .. tab-set::
 

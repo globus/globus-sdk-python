@@ -9,9 +9,9 @@ import typing as t
 import urllib.parse
 
 from globus_sdk._missing import MISSING, MissingType, filter_missing
-from globus_sdk._types import ScopeCollectionType
 from globus_sdk._utils import slash_join
 from globus_sdk.exc import GlobusSDKUsageError
+from globus_sdk.scopes import Scope
 
 from .._common import stringify_requested_scopes
 from ..response import OAuthAuthorizationCodeResponse
@@ -103,7 +103,7 @@ class GlobusNativeAppFlowManager(GlobusOAuthFlowManager):
     def __init__(
         self,
         auth_client: globus_sdk.NativeAppAuthClient,
-        requested_scopes: ScopeCollectionType,
+        requested_scopes: str | Scope | t.Iterable[str | Scope],
         redirect_uri: str | MissingType = MISSING,
         state: str = "_default",
         verifier: str | MissingType = MISSING,

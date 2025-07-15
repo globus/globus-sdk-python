@@ -11,7 +11,7 @@ from globus_sdk import (
     GlobusSDKUsageError,
     IDTokenDecoder,
 )
-from globus_sdk._types import ScopeCollectionType, UUIDLike
+from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.scopes import AuthScopes, Scope, ScopeParser, scopes_to_scope_list
@@ -66,7 +66,9 @@ class GlobusApp(metaclass=abc.ABCMeta):
         login_client: AuthLoginClient | None = None,
         client_id: UUIDLike | None = None,
         client_secret: str | None = None,
-        scope_requirements: t.Mapping[str, ScopeCollectionType] | None = None,
+        scope_requirements: (
+            t.Mapping[str, str | Scope | t.Iterable[str | Scope]] | None
+        ) = None,
         config: GlobusAppConfig = DEFAULT_CONFIG,
     ) -> None:
         self.app_name = app_name
@@ -119,7 +121,10 @@ class GlobusApp(metaclass=abc.ABCMeta):
         consent_client.attach_globus_app(self, app_scopes=[AuthScopes.openid])
 
     def _resolve_scope_requirements(
-        self, scope_requirements: t.Mapping[str, ScopeCollectionType] | None
+        self,
+        scope_requirements: (
+            t.Mapping[str, str | Scope | t.Iterable[str | Scope]] | None
+        ),
     ) -> dict[str, list[Scope]]:
         if scope_requirements is None:
             return {}
@@ -408,7 +413,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
             self._token_validation_error_handling_enabled = initial_val
 
     def add_scope_requirements(
-        self, scope_requirements: t.Mapping[str, ScopeCollectionType]
+        self, scope_requirements: t.Mapping[str, str | Scope | t.Iterable[str | Scope]]
     ) -> None:
         """
         Add given scope requirements to the app's scope requirements. Any duplicate

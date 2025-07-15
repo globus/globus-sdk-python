@@ -4,9 +4,10 @@ import logging
 import typing as t
 
 from globus_sdk._missing import MISSING, MissingType
-from globus_sdk._types import ScopeCollectionType, UUIDLike
+from globus_sdk._types import UUIDLike
 from globus_sdk.authorizers import NullAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
+from globus_sdk.scopes import Scope
 
 from ..flow_managers import GlobusNativeAppFlowManager
 from ..response import OAuthRefreshTokenResponse
@@ -51,7 +52,7 @@ class NativeAppAuthClient(AuthLoginClient):
 
     def oauth2_start_flow(
         self,
-        requested_scopes: ScopeCollectionType,
+        requested_scopes: str | Scope | t.Iterable[str | Scope],
         *,
         redirect_uri: str | MissingType = MISSING,
         state: str = "_default",

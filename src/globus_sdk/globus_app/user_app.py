@@ -10,7 +10,7 @@ from globus_sdk import (
     NativeAppAuthClient,
     Scope,
 )
-from globus_sdk._types import ScopeCollectionType, UUIDLike
+from globus_sdk._types import UUIDLike
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.login_flows import CommandLineLoginFlowManager, LoginFlowManager
 from globus_sdk.token_storage import (
@@ -80,7 +80,9 @@ class UserApp(GlobusApp):
         login_client: AuthLoginClient | None = None,
         client_id: UUIDLike | None = None,
         client_secret: str | None = None,
-        scope_requirements: t.Mapping[str, ScopeCollectionType] | None = None,
+        scope_requirements: (
+            t.Mapping[str, str | Scope | t.Iterable[str | Scope]] | None
+        ) = None,
         config: GlobusAppConfig = DEFAULT_CONFIG,
     ) -> None:
         super().__init__(

@@ -31,14 +31,26 @@ def test_scopes_to_str_roundtrip_simple_str_in_collection(scope_collection):
         ((Scope("scope1"), Scope("scope2")), "scope1 scope2"),
         ((Scope("scope1"), Scope("scope2"), "scope3"), "scope1 scope2 scope3"),
         (
-            ((Scope("scope1"), Scope("scope2")), "scope3 scope4"),
+            (Scope("scope1"), Scope("scope2"), "scope3 scope4"),
             "scope1 scope2 scope3 scope4",
         ),
-        (([[["bar"]]],), "bar"),
+        ([Scope("scope1"), "scope2", "scope3 scope4"], "scope1 scope2 scope3 scope4"),
     ),
 )
 def test_scopes_to_str_handles_mixed_data(scope_collection, expect_str):
     assert scopes_to_str(scope_collection) == expect_str
+
+
+@pytest.mark.parametrize(
+    "scope_collection",
+    (
+        ((Scope("scope1"), Scope("scope2")), "scope3 scope4"),
+        [["bar"]],
+    ),
+)
+def test_scopes_to_str_rejects_nested_iterables(scope_collection):
+    with pytest.raises(TypeError):
+        scopes_to_str(scope_collection)
 
 
 @pytest.mark.parametrize(
@@ -61,10 +73,10 @@ def test_scopes_to_scope_list_simple(scope_collection):
         ((Scope("scope1"), Scope("scope2")), "scope1 scope2"),
         ((Scope("scope1"), Scope("scope2"), "scope3"), "scope1 scope2 scope3"),
         (
-            ((Scope("scope1"), Scope("scope2")), "scope3 scope4"),
+            (Scope("scope1"), Scope("scope2"), "scope3 scope4"),
             "scope1 scope2 scope3 scope4",
         ),
-        (([[["bar"]]],), "bar"),
+        ([Scope("scope1"), "scope2", "scope3 scope4"], "scope1 scope2 scope3 scope4"),
     ),
 )
 def test_scopes_to_scope_list_handles_mixed_data(scope_collection, expect_str):
@@ -72,6 +84,18 @@ def test_scopes_to_scope_list_handles_mixed_data(scope_collection, expect_str):
 
     assert all(isinstance(scope, Scope) for scope in actual_list)
     assert _as_sorted_string(actual_list) == expect_str
+
+
+@pytest.mark.parametrize(
+    "scope_collection",
+    (
+        ((Scope("scope1"), Scope("scope2")), "scope3 scope4"),
+        [["bar"]],
+    ),
+)
+def test_scopes_to_list_rejects_nested_iterables(scope_collection):
+    with pytest.raises(TypeError):
+        scopes_to_scope_list(scope_collection)
 
 
 def test_scopes_to_scope_list_handles_dependent_scopes():

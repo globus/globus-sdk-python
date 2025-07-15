@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import typing as t
+
 from globus_sdk import AuthLoginClient, ConfidentialAppAuthClient, GlobusSDKUsageError
-from globus_sdk._types import ScopeCollectionType, UUIDLike
+from globus_sdk._types import UUIDLike
 from globus_sdk.gare import GlobusAuthorizationParameters
+from globus_sdk.scopes import Scope
 
 from .app import GlobusApp
 from .authorizer_factory import ClientCredentialsAuthorizerFactory
@@ -57,7 +60,9 @@ class ClientApp(GlobusApp):
         login_client: ConfidentialAppAuthClient | None = None,
         client_id: UUIDLike | None = None,
         client_secret: str | None = None,
-        scope_requirements: dict[str, ScopeCollectionType] | None = None,
+        scope_requirements: (
+            dict[str, str | Scope | t.Iterable[str | Scope]] | None
+        ) = None,
         config: GlobusAppConfig = DEFAULT_CONFIG,
     ) -> None:
         if config.login_flow_manager is not None:

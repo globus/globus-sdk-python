@@ -5,8 +5,8 @@ import typing as t
 import urllib.parse
 
 from globus_sdk._missing import filter_missing
-from globus_sdk._types import ScopeCollectionType
 from globus_sdk._utils import slash_join
+from globus_sdk.scopes import Scope
 
 from .._common import stringify_requested_scopes
 from ..response import OAuthAuthorizationCodeResponse
@@ -50,7 +50,7 @@ class GlobusAuthorizationCodeFlowManager(GlobusOAuthFlowManager):
         self,
         auth_client: globus_sdk.ConfidentialAppAuthClient,
         redirect_uri: str,
-        requested_scopes: ScopeCollectionType,
+        requested_scopes: str | Scope | t.Iterable[str | Scope],
         state: str = "_default",
         refresh_tokens: bool = False,
     ) -> None:
