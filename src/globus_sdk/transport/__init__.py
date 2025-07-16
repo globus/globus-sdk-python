@@ -1,4 +1,4 @@
-from ._clientinfo import GlobusClientInfo
+from ._clientinfo import GlobusClientInfo, RequestCallerInfo
 from .encoders import FormRequestEncoder, JSONRequestEncoder, RequestEncoder
 from .requests import RequestsTransport
 from .retry import (
@@ -12,6 +12,7 @@ from .retry import (
 
 __all__ = (
     "RequestsTransport",
+    "RequestCallerInfo",
     "RetryCheck",
     "RetryCheckFlags",
     "RetryCheckResult",

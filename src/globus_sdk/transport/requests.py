@@ -17,7 +17,7 @@ from globus_sdk.transport.encoders import (
     RequestEncoder,
 )
 
-from ._clientinfo import GlobusClientInfo
+from ._clientinfo import GlobusClientInfo, RequestCallerInfo
 from .retry import (
     RetryCheck,
     RetryCheckFlags,
@@ -307,6 +307,7 @@ class RequestsTransport:
         headers: dict[str, str] | None = None,
         encoding: str | None = None,
         authorizer: GlobusAuthorizer | None = None,
+        caller_info: RequestCallerInfo | None = None,
         allow_redirects: bool = True,
         stream: bool = False,
     ) -> requests.Response:
@@ -324,6 +325,10 @@ class RequestsTransport:
             all other objects get "json".
         :param authorizer: The authorizer which is used to get or update authorization
             information for the request
+        :param caller_info: Contextual information about the caller of the request,
+            including the authorizer. If provided, takes precedence over the standalone
+            authorizer parameter. If not provided and an authorizer is given,
+            a RequestCallerInfo will be created automatically.
         :param allow_redirects: Follow Location headers on redirect response
             automatically. Defaults to ``True``
         :param stream: Do not immediately download the response content. Defaults to
@@ -335,15 +340,27 @@ class RequestsTransport:
         resp: requests.Response | None = None
         req = self._encode(method, url, query_params, data, headers, encoding)
         checker = RetryCheckRunner(self.retry_checks)
+
+        # Always ensure we have caller_info
+        if caller_info is None:
+            caller_info = RequestCallerInfo(authorizer=authorizer)
+        elif authorizer is not None and caller_info.authorizer is not authorizer:
+            # Warn if both parameters are provided but differ
+            log.warning(
+                "Both 'caller_info' and 'authorizer' parameters provided to "
+                "request(). Using authorizer from caller_info and ignoring "
+                "standalone authorizer parameter."
+            )
+
         log.debug("transport request state initialized")
         for attempt in range(self.max_retries + 1):
             log.debug("transport request retry cycle. attempt=%d", attempt)
             # add Authorization header, or (if it's a NullAuthorizer) possibly
             # explicitly remove the Authorization header
             # done fresh for each request, to handle potential for refreshed credentials
-            self._set_authz_header(authorizer, req)
+            self._set_authz_header(caller_info.authorizer, req)
 
-            ctx = RetryContext(attempt, authorizer=authorizer)
+            ctx = RetryContext(attempt, caller_info=caller_info)
             try:
                 log.debug("request about to send")
                 resp = ctx.response = self.session.send(
@@ -468,13 +485,14 @@ class RequestsTransport:
         """
         if (  # is the current check applicable?
             ctx.response is None
-            or ctx.authorizer is None
+            or ctx.caller_info is None
+            or ctx.caller_info.authorizer is None
             or ctx.response.status_code not in self.EXPIRED_AUTHORIZATION_STATUS_CODES
         ):
             return RetryCheckResult.no_decision
 
         # run the authorizer's handler, and 'do_retry' if the handler indicated
         # that it was able to make a change which should make the request retryable
-        if ctx.authorizer.handle_missing_authorization():
+        if ctx.caller_info.authorizer.handle_missing_authorization():
             return RetryCheckResult.do_retry
         return RetryCheckResult.no_decision

@@ -3,6 +3,7 @@ from unittest import mock
 import pytest
 
 from globus_sdk.transport import (
+    RequestCallerInfo,
     RequestsTransport,
     RetryCheckResult,
     RetryCheckRunner,
@@ -71,3 +72,19 @@ def test_default_retry_check_noop_on_exception(checkname, mocksleep):
     method = getattr(transport, checkname)
     ctx = RetryContext(1, exception=Exception("foo"))
     assert method(ctx) is RetryCheckResult.no_decision
+
+
+def test_retry_context_accepts_caller_info():
+    mock_authorizer = mock.Mock()
+    caller_info = RequestCallerInfo(authorizer=mock_authorizer)
+
+    ctx = RetryContext(1, caller_info=caller_info)
+
+    assert ctx.caller_info is caller_info
+    assert ctx.caller_info.authorizer is mock_authorizer
+
+
+def test_retry_context_caller_info_none():
+    ctx = RetryContext(1, caller_info=None)
+
+    assert ctx.caller_info is None

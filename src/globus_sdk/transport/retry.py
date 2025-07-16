@@ -6,7 +6,8 @@ import typing as t
 
 import requests
 
-from globus_sdk.authorizers import GlobusAuthorizer
+if t.TYPE_CHECKING:
+    from globus_sdk.transport._clientinfo import RequestCallerInfo
 
 log = logging.getLogger(__name__)
 
@@ -24,23 +25,23 @@ class RetryContext:
     or ``exception`` will be present.
 
     :param attempt: The request attempt number, starting at 0.
+    :param caller_info: Contextual information about the caller, including authorizer
     :param response: The response on a successful request
     :param exception: The error raised when trying to send the request
-    :param authorizer: The authorizer object from the client making the request
     """
 
     def __init__(
         self,
         attempt: int,
         *,
-        authorizer: GlobusAuthorizer | None = None,
+        caller_info: RequestCallerInfo | None = None,
         response: requests.Response | None = None,
         exception: Exception | None = None,
     ) -> None:
         # retry attempt number
         self.attempt = attempt
-        # if there is an authorizer for the request, it will be available in the context
-        self.authorizer = authorizer
+        # caller info provides contextual information about the request
+        self.caller_info = caller_info
         # the response or exception from a request
         # we expect exactly one of these to be non-null
         self.response = response

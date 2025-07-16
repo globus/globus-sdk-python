@@ -3,6 +3,7 @@ import requests
 
 import globus_sdk
 from globus_sdk.testing import RegisteredResponse, load_response
+from globus_sdk.transport import RequestCallerInfo
 
 
 @pytest.mark.parametrize("error_status", [500, 429, 502, 503, 504])
@@ -267,4 +268,38 @@ def test_retry_with_authorizer_persistent_401(client):
     # ensure that setting authz was called twice (once for each request)
     # and that between the two calls, handle_missing_authorization was called once
     # but the handler should not be called a second time because the 401 repeated
+    assert dummy_authz_calls == ["set_authz", "handle_missing", "set_authz"]
+
+
+def test_transport_caller_info_with_retry(client):
+    load_response(
+        RegisteredResponse(
+            path="https://foo.api.globus.org/bar", status=401, body="Unauthorized"
+        )
+    )
+    load_response(
+        RegisteredResponse(path="https://foo.api.globus.org/bar", json={"baz": 1})
+    )
+
+    dummy_authz_calls = []
+
+    class DummyAuthorizer(globus_sdk.authorizers.GlobusAuthorizer):
+        def get_authorization_header(self):
+            dummy_authz_calls.append("set_authz")
+            return "foo"
+
+        def handle_missing_authorization(self):
+            dummy_authz_calls.append("handle_missing")
+            return True
+
+    authorizer = DummyAuthorizer()
+    caller_info = RequestCallerInfo(authorizer=authorizer)
+
+    # Test direct transport usage with caller_info
+    response = client.transport.request(
+        "GET", "https://foo.api.globus.org/bar", caller_info=caller_info
+    )
+
+    assert response.status_code == 200
+    # Verify that the authorizer was used for both authorization and retry handling
     assert dummy_authz_calls == ["set_authz", "handle_missing", "set_authz"]

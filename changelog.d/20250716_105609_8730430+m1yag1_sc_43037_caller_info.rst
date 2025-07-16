@@ -1,0 +1,4 @@
+Added
+-----
+
+- Add ``RequestCallerInfo`` data object to ``RequestsTransport.request`` for passing caller context information. (:pr:`NUMBER`)
