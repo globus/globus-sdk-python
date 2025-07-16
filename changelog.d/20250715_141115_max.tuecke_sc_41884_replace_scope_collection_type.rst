@@ -1,5 +1,4 @@
 Changed
 -------
 
-- Replaced the ``globus_sdk._types.ScopeCollectionType`` alias with explicit ``str | Scope | t.Iterable[str | Scope]`` type annotations. (:pr:`1259`)
-    - Removed support for nested scope collections in the scope normalization functions (e.g., nested iterables like ``[["scope1"], "scope2"]``).
+- Remove support for normalizing nested iterables of scopes, e.g. ``[["scope1"], "scope2"]`` (:pr:`1259`)
