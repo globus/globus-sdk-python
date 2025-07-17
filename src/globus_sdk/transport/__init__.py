@@ -1,6 +1,6 @@
-from ._clientinfo import GlobusClientInfo, RequestCallerInfo
+from ._clientinfo import GlobusClientInfo
 from .encoders import FormRequestEncoder, JSONRequestEncoder, RequestEncoder
-from .requests import RequestsTransport
+from .requests import RequestCallerInfo, RequestsTransport
 from .retry import (
     RetryCheck,
     RetryCheckFlags,

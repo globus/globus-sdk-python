@@ -7,7 +7,7 @@ import typing as t
 import requests
 
 if t.TYPE_CHECKING:
-    from globus_sdk.transport._clientinfo import RequestCallerInfo
+    from globus_sdk.transport.requests import RequestCallerInfo
 
 log = logging.getLogger(__name__)
 

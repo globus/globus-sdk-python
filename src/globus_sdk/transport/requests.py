@@ -17,7 +17,7 @@ from globus_sdk.transport.encoders import (
     RequestEncoder,
 )
 
-from ._clientinfo import GlobusClientInfo, RequestCallerInfo
+from ._clientinfo import GlobusClientInfo
 from .retry import (
     RetryCheck,
     RetryCheckFlags,
@@ -28,6 +28,17 @@ from .retry import (
 )
 
 log = logging.getLogger(__name__)
+
+
+class RequestCallerInfo:
+    """
+    Data object that holds contextual information about the caller of a request.
+
+    :param authorizer: The authorizer object from the client making the request
+    """
+
+    def __init__(self, *, authorizer: GlobusAuthorizer | None = None) -> None:
+        self.authorizer = authorizer
 
 
 def _parse_retry_after(response: requests.Response) -> int | None:
@@ -302,12 +313,12 @@ class RequestsTransport:
         self,
         method: str,
         url: str,
+        *,
+        caller_info: RequestCallerInfo,
         query_params: dict[str, t.Any] | None = None,
         data: dict[str, t.Any] | list[t.Any] | str | bytes | None = None,
         headers: dict[str, str] | None = None,
         encoding: str | None = None,
-        authorizer: GlobusAuthorizer | None = None,
-        caller_info: RequestCallerInfo | None = None,
         allow_redirects: bool = True,
         stream: bool = False,
     ) -> requests.Response:
@@ -316,6 +327,8 @@ class RequestsTransport:
 
         :param url: URL for the request
         :param method: HTTP request method, as an all caps string
+        :param caller_info: Contextual information about the caller of the request,
+            including the authorizer. This parameter is required.
         :param query_params: Parameters to be encoded as a query string
         :param headers: HTTP headers to add to the request
         :param data: Data to send as the request body. May pass through encoding.
@@ -323,12 +336,6 @@ class RequestsTransport:
             are all valid values. Custom encodings can be used only if they are
             registered with the transport. By default, strings get "text" behavior and
             all other objects get "json".
-        :param authorizer: The authorizer which is used to get or update authorization
-            information for the request
-        :param caller_info: Contextual information about the caller of the request,
-            including the authorizer. If provided, takes precedence over the standalone
-            authorizer parameter. If not provided and an authorizer is given,
-            a RequestCallerInfo will be created automatically.
         :param allow_redirects: Follow Location headers on redirect response
             automatically. Defaults to ``True``
         :param stream: Do not immediately download the response content. Defaults to
@@ -340,17 +347,6 @@ class RequestsTransport:
         resp: requests.Response | None = None
         req = self._encode(method, url, query_params, data, headers, encoding)
         checker = RetryCheckRunner(self.retry_checks)
-
-        # Always ensure we have caller_info
-        if caller_info is None:
-            caller_info = RequestCallerInfo(authorizer=authorizer)
-        elif authorizer is not None and caller_info.authorizer is not authorizer:
-            # Warn if both parameters are provided but differ
-            log.warning(
-                "Both 'caller_info' and 'authorizer' parameters provided to "
-                "request(). Using authorizer from caller_info and ignoring "
-                "standalone authorizer parameter."
-            )
 
         log.debug("transport request state initialized")
         for attempt in range(self.max_retries + 1):

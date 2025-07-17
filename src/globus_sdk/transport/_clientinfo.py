@@ -12,8 +12,6 @@ import typing as t
 
 from globus_sdk import __version__, exc
 
-if t.TYPE_CHECKING:
-    from globus_sdk.authorizers import GlobusAuthorizer
 
 _RESERVED_CHARS = ";,="
 
@@ -129,12 +127,3 @@ def _check_reserved_chars(key: str, value: str) -> None:
         )
 
 
-class RequestCallerInfo:
-    """
-    Data object that holds contextual information about the caller of a request.
-
-    :param authorizer: The authorizer object from the client making the request
-    """
-
-    def __init__(self, *, authorizer: GlobusAuthorizer | None = None) -> None:
-        self.authorizer = authorizer
