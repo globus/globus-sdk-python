@@ -55,6 +55,9 @@ def test_requests_transport_accepts_caller_info():
 
         assert response.status_code == 200
 
+        sent_request = mock_session.send.call_args[0][0]
+        assert sent_request.headers["Authorization"] == "Bearer token"
+
 
 def test_requests_transport_caller_info_required():
     transport = RequestsTransport()
