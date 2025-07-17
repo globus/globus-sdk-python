@@ -328,7 +328,7 @@ class RequestsTransport:
         :param url: URL for the request
         :param method: HTTP request method, as an all caps string
         :param caller_info: Contextual information about the caller of the request,
-            including the authorizer. This parameter is required.
+            including the authorizer.
         :param query_params: Parameters to be encoded as a query string
         :param headers: HTTP headers to add to the request
         :param data: Data to send as the request body. May pass through encoding.

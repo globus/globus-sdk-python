@@ -1,5 +1,7 @@
 from unittest import mock
 
+import pytest
+
 from globus_sdk.authorizers import NullAuthorizer
 from globus_sdk.transport import RequestCallerInfo, RequestsTransport
 
@@ -52,3 +54,23 @@ def test_requests_transport_accepts_caller_info():
         )
 
         assert response.status_code == 200
+
+
+def test_requests_transport_caller_info_required():
+    transport = RequestsTransport()
+
+    with pytest.raises(TypeError):
+        transport.request("GET", "https://example.com")
+
+
+def test_requests_transport_keyword_only():
+    transport = RequestsTransport()
+    caller_info = RequestCallerInfo(authorizer=None)
+
+    with pytest.raises(TypeError):
+        transport.request("GET", "https://example.com", caller_info)
+
+
+def test_request_caller_info_with_none_authorizer():
+    caller_info = RequestCallerInfo(authorizer=None)
+    assert caller_info.authorizer is None
