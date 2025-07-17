@@ -1,7 +1,7 @@
 from unittest import mock
 
 from globus_sdk.services.transfer.transport import TransferRequestsTransport
-from globus_sdk.transport import RetryCheckRunner, RetryContext
+from globus_sdk.transport import RequestCallerInfo, RetryCheckRunner, RetryContext
 
 
 def test_transfer_does_not_retry_external():
@@ -19,7 +19,8 @@ def test_transfer_does_not_retry_external():
     dummy_response = mock.Mock()
     dummy_response.json = lambda: body
     dummy_response.status_code = 502
-    ctx = RetryContext(1, response=dummy_response)
+    caller_info = RequestCallerInfo(authorizer=None)
+    ctx = RetryContext(1, caller_info=caller_info, response=dummy_response)
 
     assert checker.should_retry(ctx) is False
 
@@ -42,7 +43,8 @@ def test_transfer_does_not_retry_endpoint_error():
     dummy_response = mock.Mock()
     dummy_response.json = lambda: body
     dummy_response.status_code = 502
-    ctx = RetryContext(1, response=dummy_response)
+    caller_info = RequestCallerInfo(authorizer=None)
+    ctx = RetryContext(1, caller_info=caller_info, response=dummy_response)
 
     assert checker.should_retry(ctx) is False
 
@@ -57,6 +59,7 @@ def test_transfer_retries_others():
     dummy_response = mock.Mock()
     dummy_response.json = _raise_value_error
     dummy_response.status_code = 502
-    ctx = RetryContext(1, response=dummy_response)
+    caller_info = RequestCallerInfo(authorizer=None)
+    ctx = RetryContext(1, caller_info=caller_info, response=dummy_response)
 
     assert checker.should_retry(ctx) is True

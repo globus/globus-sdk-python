@@ -34,7 +34,7 @@ class RetryContext:
         self,
         attempt: int,
         *,
-        caller_info: RequestCallerInfo | None = None,
+        caller_info: RequestCallerInfo,
         response: requests.Response | None = None,
         exception: Exception | None = None,
     ) -> None:
