@@ -493,7 +493,7 @@ class BaseClient:
                 authorizer = self._app.get_authorizer(self.resource_server)
         else:
             authorizer = None
-        
+
         # create caller info with the authorizer
         caller_info = RequestCallerInfo(authorizer=authorizer)
 

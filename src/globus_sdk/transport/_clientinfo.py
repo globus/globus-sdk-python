@@ -12,7 +12,6 @@ import typing as t
 
 from globus_sdk import __version__, exc
 
-
 _RESERVED_CHARS = ";,="
 
 
@@ -125,5 +124,3 @@ def _check_reserved_chars(key: str, value: str) -> None:
             "X-Globus-Client-Info reserved characters cannot be used in keys or "
             f"values. Bad usage: '{key}: {value}'"
         )
-
-

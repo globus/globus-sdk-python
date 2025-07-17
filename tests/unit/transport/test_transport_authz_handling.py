@@ -52,5 +52,3 @@ def test_requests_transport_accepts_caller_info():
         )
 
         assert response.status_code == 200
-
-
