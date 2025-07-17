@@ -1,6 +1,11 @@
 from unittest import mock
 
-from globus_sdk.transport import RequestCallerInfo, RetryCheckResult, RetryCheckRunner, RetryContext
+from globus_sdk.transport import (
+    RequestCallerInfo,
+    RetryCheckResult,
+    RetryCheckRunner,
+    RetryContext,
+)
 
 
 def _make_test_retry_context(*, status=200, exception=None, response=None):
