@@ -232,6 +232,45 @@ In version 4, this has been removed, but the collection types provide
 scopes for the Globus Transfer service via ``list(TransferClient.scopes)`` or
 similar usage.
 
+Token Storage Subpackage Renamed
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The subpackage providing token storage components has been renamed and slightly
+restructured.
+
+The package name is changed from
+``globus_sdk.tokenstorage`` to ``globus_sdk.token_storage``.
+
+Furthermore, the legacy :ref:`storage adapters <storage_adapters>` are now only
+available from ``globus_sdk.token_storage.v1``.
+
+Therefore, usages of the modern :ref:`token storage interface <token_storages>`
+should update like so:
+
+.. code-block:: python
+
+    # globus-sdk v3
+    from globus_sdk.tokenstorage import JSONTokenStorage
+
+    # globus-sdk v4
+    from globus_sdk.token_storage import JSONTokenStorage
+
+For legacy adapter usage, update like so:
+
+.. code-block:: python
+
+    # globus-sdk v3
+    from globus_sdk.tokenstorage import SimpleJSONFileAdapter
+
+    # globus-sdk v4
+    from globus_sdk.token_storage.v1 import SimpleJSONFileAdapter
+
+.. note::
+
+    The v1 or "legacy" interface is soft-deprecated.
+    In version 4.0.0 it will not emit deprecation warnings.
+    Future SDK versions will eventually deprecate and remove these interfaces.
+
 Deprecated Timers Aliases Removed
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -4,7 +4,8 @@ import os
 import pytest
 
 from globus_sdk import __version__
-from globus_sdk.token_storage import JSONTokenStorage, SimpleJSONFileAdapter
+from globus_sdk.token_storage import JSONTokenStorage
+from globus_sdk.token_storage.v1 import SimpleJSONFileAdapter
 
 IS_WINDOWS = os.name == "nt"
 

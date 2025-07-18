@@ -1,10 +1,3 @@
-from .v1 import (
-    FileAdapter,
-    MemoryAdapter,
-    SimpleJSONFileAdapter,
-    SQLiteAdapter,
-    StorageAdapter,
-)
 from .v2 import (
     FileTokenStorage,
     HasRefreshTokensValidator,
@@ -23,20 +16,14 @@ from .v2 import (
 )
 
 __all__ = (
-    # [v1] "StorageAdapter" Constructs
-    "StorageAdapter",
-    "FileAdapter",
-    "SimpleJSONFileAdapter",
-    "SQLiteAdapter",
-    "MemoryAdapter",
-    # [v2] "TokenStorage" Constructs
+    # "TokenStorage" Constructs
     "TokenStorage",
     "TokenStorageData",
     "FileTokenStorage",
     "JSONTokenStorage",
     "SQLiteTokenStorage",
     "MemoryTokenStorage",
-    # [v2] "ValidatingTokenStorage" Constructs
+    # "ValidatingTokenStorage" Constructs
     "ValidatingTokenStorage",
     "TokenValidationContext",
     "TokenDataValidator",

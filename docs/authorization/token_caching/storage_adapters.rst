@@ -15,7 +15,7 @@ received from authentication and token refreshes.
 Usage
 -----
 
-StorageAdapter is available under the name ``globus_sdk.token_storage``.
+StorageAdapter is available under the name ``globus_sdk.token_storage.v1``.
 
 Storage adapters are the main objects of this subpackage. Primarily, usage
 should revolve around creating a storage adapter, potentially loading data from
@@ -27,7 +27,7 @@ For example:
 
     import os
     import globus_sdk
-    from globus_sdk.token_storage import SimpleJSONFileAdapter
+    from globus_sdk.token_storage.v1 import SimpleJSONFileAdapter
 
     my_file_adapter = SimpleJSONFileAdapter(os.path.expanduser("~/mytokens.json"))
 
@@ -76,19 +76,12 @@ For example:
     tc = globus_sdk.TransferClient(authorizer=authorizer)
 
 
-Complete Example Usage
-~~~~~~~~~~~~~~~~~~~~~~
-
-The :ref:`Group Listing With Token Storage Script <example_group_listing_with_token_storage>`
-provides a complete and runnable example which leverages ``token_storage``.
-
-
 Adapter Types
 -------------
 
-.. module:: globus_sdk.token_storage
+.. module:: globus_sdk.token_storage.v1
 
-``globus_sdk.token_storage`` provides base classes for building your own storage
+``globus_sdk.token_storage.v1`` provides base classes for building your own storage
 adapters, and several complete adapters.
 
 The :class:`SimpleJSONFileAdapter` is good for the "simplest possible"
