@@ -3,7 +3,7 @@ from __future__ import annotations
 import typing as t
 import uuid
 
-from .client import AuthClient, ConfidentialAppAuthClient
+from .client import AuthClient
 
 
 def is_username(val: str) -> bool:
@@ -131,7 +131,7 @@ class IdentityMap:
 
     def __init__(
         self,
-        auth_client: AuthClient | ConfidentialAppAuthClient,
+        auth_client: AuthClient,
         identity_ids: t.Iterable[str] | None = None,
         *,
         id_batch_size: int | None = None,

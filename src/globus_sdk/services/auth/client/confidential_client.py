@@ -5,7 +5,7 @@ import typing as t
 import uuid
 
 from globus_sdk import exc
-from globus_sdk._internal.remarshal import commajoin, strseq_iter, strseq_listify
+from globus_sdk._internal.remarshal import strseq_iter, strseq_listify
 from globus_sdk._missing import MISSING, MissingType
 from globus_sdk.authorizers import BasicAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
@@ -13,11 +13,7 @@ from globus_sdk.scopes import Scope
 
 from .._common import stringify_requested_scopes
 from ..flow_managers import GlobusAuthorizationCodeFlowManager
-from ..response import (
-    GetIdentitiesResponse,
-    OAuthClientCredentialsResponse,
-    OAuthDependentTokenResponse,
-)
+from ..response import OAuthClientCredentialsResponse, OAuthDependentTokenResponse
 from .base_login_client import AuthLoginClient
 
 log = logging.getLogger(__name__)
@@ -61,49 +57,6 @@ class ConfidentialAppAuthClient(AuthLoginClient):
             base_url=base_url,
             app_name=app_name,
             transport_params=transport_params,
-        )
-
-    def get_identities(
-        self,
-        *,
-        usernames: t.Iterable[str] | str | MissingType = MISSING,
-        ids: t.Iterable[uuid.UUID | str] | uuid.UUID | str | MissingType = MISSING,
-        provision: bool = False,
-        query_params: dict[str, t.Any] | None = None,
-    ) -> GetIdentitiesResponse:
-        """
-        Perform a call to the Get Identities API using the direct client
-        credentials of this client.
-
-        This method is considered deprecated -- callers should instead use client
-        credentials to get a token and then use that token to call the API via a
-        :class:`~.AuthClient`.
-
-        :param usernames: A username or list of usernames to lookup. Mutually exclusive
-            with ``ids``
-        :param ids: An identity ID or list of IDs to lookup. Mutually exclusive
-            with ``usernames``
-        :param provision: Create identities if they do not exist, allowing clients to
-            get username-to-identity mappings prior to the identity being used
-        :param query_params: Any additional parameters to be passed through
-            as query params.
-        """
-        exc.warn_deprecated(
-            "ConfidentialAuthClient.get_identities() is deprecated. "
-            "Get a token via `oauth2_client_credentials_tokens` "
-            "and use that to call the API instead."
-        )
-        query_params = {
-            "usernames": commajoin(usernames),
-            # only specify `provision` if `usernames` is given
-            "provision": (
-                str(provision).lower() if usernames is not MISSING else MISSING
-            ),
-            "ids": commajoin(ids),
-            **(query_params or {}),
-        }
-        return GetIdentitiesResponse(
-            self.get("/v2/api/identities", query_params=query_params)
         )
 
     def oauth2_client_credentials_tokens(

@@ -112,6 +112,36 @@ To control when a submission ID is fetched, use
         submission_id=submission_id,
     )
 
+
+``ConfidentialAppAuthClient`` Cannot Directly Call ``get_identities``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Users of client identities are now required to get tokens in order to use the
+Get Identities API, and will need to use the ``AuthClient`` class for this
+purpose.
+This can most simply be managed by use of a ``ClientApp`` to automatically
+fetch the appropriate tokens.
+
+Update usage like so:
+
+.. code-block:: python
+
+    # globus-sdk v3
+    from globus_sdk import ConfidentialAppAuthClient
+
+    client = ConfidentialAppAuthClient(CLIENT_ID, CLIENT_SECRET)
+
+    identities = client.get_identities(usernames="globus@globus.org")
+
+    # globus-sdk v4
+    from globus_sdk import ClientApp, AuthClient
+
+    app = ClientApp(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
+    client = AuthClient(app=app)
+
+    identities = client.get_identities(usernames="globus@globus.org")
+
+
 Scope Constants Are Now Objects
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
