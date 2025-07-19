@@ -72,7 +72,6 @@ class AuthClient(client.BaseClient):
 
     def __init__(
         self,
-        client_id: uuid.UUID | str | None = None,
         environment: str | None = None,
         base_url: str | None = None,
         app: GlobusApp | None = None,
@@ -90,37 +89,6 @@ class AuthClient(client.BaseClient):
             app_name=app_name,
             transport_params=transport_params,
         )
-
-        self._client_id = str(client_id) if client_id is not None else None
-        if client_id is not None:
-            exc.warn_deprecated(
-                "The client_id parameter is no longer accepted by `AuthClient` / "
-                "`AuthClient`. When creating a client which represents an "
-                "application, use `NativeAppAuthClient` or "
-                "`ConfidentialAppAuthClient` instead."
-            )
-
-    # this attribute is preserved for compatibility, but will be removed in a
-    # future release
-    @property
-    def client_id(self) -> str | None:
-        exc.warn_deprecated(
-            "The client_id attribute on `AuthClient` / "
-            "`AuthClient` is deprecated. "
-            "For clients with client IDs, use `NativeAppAuthClient` or "
-            "`ConfidentialAppAuthClient` instead."
-        )
-        return self._client_id
-
-    @client_id.setter
-    def client_id(self, value: uuid.UUID | str) -> None:
-        exc.warn_deprecated(
-            "The client_id attribute on `AuthClient` / "
-            "`AuthClient` is deprecated. "
-            "For clients with client IDs, use `NativeAppAuthClient` or "
-            "`ConfidentialAppAuthClient` instead."
-        )
-        self._client_id = str(value) if value is not None else None
 
     # FYI: this get_openid_configuration method is duplicated in AuthLoginBaseClient
     # if this code is modified, please update that copy as well
@@ -807,7 +775,6 @@ class AuthClient(client.BaseClient):
                 .. code-block:: pycon
 
                     >>> ac = globus_sdk.AuthClient(...)
-                    >>> client_id = ...
                     >>> r = ac.create_policy(
                     ...     project_id="da84e531-1afb-43cb-8c87-135ab580516a",
                     ...     high_assurance=True,
