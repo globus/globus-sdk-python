@@ -149,13 +149,10 @@ class ComputeClientV2(client.BaseClient):
         """  # noqa: E501
         return self.post(f"/v2/endpoints/{endpoint_id}/lock")
 
-    def register_function(
-        self,
-        function_data: dict[str, t.Any],
-    ) -> GlobusHTTPResponse:
+    def register_function(self, data: dict[str, t.Any]) -> GlobusHTTPResponse:
         """Register a new function.
 
-        :param function_data: A function registration document.
+        :param data: A function registration document.
 
         .. tab-set::
 
@@ -165,7 +162,7 @@ class ComputeClientV2(client.BaseClient):
                     :service: compute
                     :ref: Functions/operation/register_function_v2_functions_post
         """  # noqa: E501
-        return self.post("/v2/functions", data=function_data)
+        return self.post("/v2/functions", data=data)
 
     def get_function(self, function_id: uuid.UUID | str) -> GlobusHTTPResponse:
         """Get information about a registered function.
