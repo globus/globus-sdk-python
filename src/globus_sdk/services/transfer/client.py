@@ -394,6 +394,10 @@ class TransferClient(client.BaseClient):
 
         :param data: An endpoint document with fields for the new endpoint
         """
+        exc.warn_deprecated(
+            "create_endpoint is specific to Globus Connect Server v4, "
+            "which is no longer supported by the Transfer API. "
+        )
         if data.get("myproxy_server") and data.get("oauth_server"):
             raise exc.GlobusSDKUsageError(
                 "an endpoint cannot be created using multiple identity "
@@ -561,6 +565,11 @@ class TransferClient(client.BaseClient):
         :param query_params: Any additional parameters will be passed through
             as query params.
         """  # noqa: E501
+        exc.warn_deprecated(
+            "endpoint_autoactivate is specific to Globus Connect Server v4, "
+            "which is no longer supported by the Transfer API. "
+        )
+
         if query_params is None:
             query_params = {}
         if if_expires_in is not None:
@@ -586,6 +595,10 @@ class TransferClient(client.BaseClient):
         :param query_params: Any additional parameters will be passed through
             as query params.
         """
+        exc.warn_deprecated(
+            "endpoint_deactivate is specific to Globus Connect Server v4, "
+            "which is no longer supported by the Transfer API. "
+        )
         log.debug(f"TransferClient.endpoint_deactivate({endpoint_id})")
         return self.post(
             f"endpoint/{endpoint_id}/deactivate", query_params=query_params
@@ -612,6 +625,10 @@ class TransferClient(client.BaseClient):
         :param query_params: Any additional parameters will be passed through
             as query params.
         """
+        exc.warn_deprecated(
+            "endpoint_activate is specific to Globus Connect Server v4, "
+            "which is no longer supported by the Transfer API. "
+        )
         log.debug(f"TransferClient.endpoint_activate({endpoint_id})")
         return self.post(
             f"endpoint/{endpoint_id}/activate",
@@ -636,6 +653,11 @@ class TransferClient(client.BaseClient):
         :param query_params: Any additional parameters will be passed through
             as query params.
         """
+        exc.warn_deprecated(
+            "endpoint_get_activation_requirements is specific to "
+            "Globus Connect Server v4, "
+            "which is no longer supported by the Transfer API. "
+        )
         return ActivationRequirementsResponse(
             self.get(
                 f"endpoint/{endpoint_id}/activation_requirements",
@@ -850,6 +872,10 @@ class TransferClient(client.BaseClient):
         :param endpoint_id: The endpoint under which the server is being registered
         :param server_data: Fields for the new server, as a server document
         """
+        exc.warn_deprecated(
+            "add_endpoint_server is specific to Globus Connect Server v4, "
+            "which is no longer supported by the Transfer API. "
+        )
         log.debug(f"TransferClient.add_endpoint_server({endpoint_id}, ...)")
         return self.post(f"endpoint/{endpoint_id}/server", data=server_data)
 
@@ -869,6 +895,10 @@ class TransferClient(client.BaseClient):
         :param server_id: The ID of the server to update
         :param server_data: Fields on the server to update, as a partial server document
         """
+        exc.warn_deprecated(
+            "update_endpoint_server is specific to Globus Connect Server v4, "
+            "which is no longer supported by the Transfer API. "
+        )
         log.debug(
             "TransferClient.update_endpoint_server(%s, %s, ...)",
             endpoint_id,
@@ -888,6 +918,10 @@ class TransferClient(client.BaseClient):
         :param endpoint_id: The endpoint under which the server is registered
         :param server_id: The ID of the server to delete
         """
+        exc.warn_deprecated(
+            "delete_endpoint_server is specific to Globus Connect Server v4, "
+            "which is no longer supported by the Transfer API. "
+        )
         log.debug(
             "TransferClient.delete_endpoint_server(%s, %s)", endpoint_id, server_id
         )

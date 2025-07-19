@@ -5,6 +5,7 @@ import uuid
 import pytest
 
 import globus_sdk
+import globus_sdk.exc
 from globus_sdk._testing import get_last_request, load_response
 from tests.common import GO_EP1_ID, register_api_route_fixture_file
 
@@ -81,7 +82,8 @@ def test_create_endpoint(client):
     load_response(client.create_endpoint)
 
     create_data = {"display_name": "Name", "description": "desc"}
-    create_doc = client.create_endpoint(create_data)
+    with pytest.warns(globus_sdk.exc.RemovedInV4Warning):
+        create_doc = client.create_endpoint(create_data)
 
     # make sure response is a successful update
     assert create_doc["DATA_TYPE"] == "endpoint_create_result"
@@ -95,7 +97,8 @@ def test_create_endpoint(client):
 def test_create_endpoint_invalid_activation_servers(client):
     create_data = {"oauth_server": "foo", "myproxy_server": "bar"}
     with pytest.raises(globus_sdk.GlobusSDKUsageError) as excinfo:
-        client.create_endpoint(create_data)
+        with pytest.warns(globus_sdk.exc.RemovedInV4Warning):
+            client.create_endpoint(create_data)
 
     assert "either MyProxy or OAuth, not both" in str(excinfo.value)
 
@@ -114,7 +117,8 @@ def test_autoactivation(client):
     )
 
     # load and check the activation doc
-    res = client.endpoint_autoactivate(GO_EP1_ID)
+    with pytest.warns(globus_sdk.exc.RemovedInV4Warning):
+        res = client.endpoint_autoactivate(GO_EP1_ID)
     assert res["code"] == "AutoActivated.CachedCredential"
 
     # check the formatted url for the request
@@ -131,7 +135,8 @@ def test_autoactivation(client):
         method="POST",
         replace=True,
     )
-    res = client.endpoint_autoactivate(GO_EP1_ID, if_expires_in=300)
+    with pytest.warns(globus_sdk.exc.RemovedInV4Warning):
+        res = client.endpoint_autoactivate(GO_EP1_ID, if_expires_in=300)
     assert res["code"] == "AlreadyActivated"
 
     req = get_last_request()
