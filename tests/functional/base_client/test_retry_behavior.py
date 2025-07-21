@@ -293,7 +293,9 @@ def test_transport_caller_info_with_retry(client):
             return True
 
     authorizer = DummyAuthorizer()
-    caller_info = RequestCallerInfo(authorizer=authorizer)
+    caller_info = RequestCallerInfo(
+        retry_checks=client.request_retry_checks, authorizer=authorizer
+    )
 
     # Test direct transport usage with caller_info
     response = client.transport.request(

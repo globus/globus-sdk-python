@@ -12,7 +12,12 @@ from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.paging import PaginatorTable
 from globus_sdk.response import GlobusHTTPResponse
 from globus_sdk.scopes import Scope, ScopeCollection
-from globus_sdk.transport import RequestCallerInfo, RequestsTransport
+from globus_sdk.transport import (
+    DefaultRetryCheckCollection,
+    RequestCallerInfo,
+    RequestsTransport,
+    RetryCheckCollection,
+)
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
@@ -51,7 +56,9 @@ class BaseClient:
     :param transport: A :class:`RequestsTransport` object for sending and
         retrying requests. By default, one will be constructed by the client.
 
-    All other parameters are for internal use and should be ignored.
+    :ivar RetryCheckCollection request_retry_checks: The retry checks for a
+        given client, as an ordered collection. These determine which requests will
+        be retried on failure.
     """
 
     # service name is used to lookup a service URL from config
@@ -65,10 +72,6 @@ class BaseClient:
     #: the class for errors raised by this client on HTTP 4xx and 5xx errors
     #: this can be set in subclasses, but must always be a subclass of GlobusError
     error_class: type[exc.GlobusAPIError] = exc.GlobusAPIError
-
-    #: a function or class which will be used to construct a transport if one
-    #: is not provided, defaults to ``RequestsTransport``
-    default_transport_factory: t.Callable[[], RequestsTransport] = RequestsTransport
 
     #: the scopes for this client may be present as a ``ScopeCollection``
     scopes: ScopeCollection | None = None
@@ -109,9 +112,10 @@ class BaseClient:
         # resolve the base_url for the client (see docstring for resolution precedence)
         self.base_url = self._resolve_base_url(base_url, self.environment)
 
-        self.transport = (
-            transport if transport is not None else self.default_transport_factory()
+        self.request_retry_checks: RetryCheckCollection = (
+            self._get_default_retry_checks()
         )
+        self.transport = transport if transport is not None else RequestsTransport()
         log.debug(f"initialized transport of type {type(self.transport)}")
 
         # setup paginated methods
@@ -142,6 +146,14 @@ class BaseClient:
         return sane results while the Base Client is being initialized.
         """
         raise NotImplementedError
+
+    def _get_default_retry_checks(self) -> RetryCheckCollection:
+        """
+        Create the default for 'request_retry_checks'.
+
+        This is called during init and may be overridden by subclasses.
+        """
+        return DefaultRetryCheckCollection()
 
     @classmethod
     def _resolve_base_url(cls, init_base_url: str | None, environment: str) -> str:
@@ -500,8 +512,11 @@ class BaseClient:
         else:
             authorizer = None
 
-        # create caller info with the authorizer
-        caller_info = RequestCallerInfo(authorizer=authorizer)
+        # capture info about this client as the caller to pass to the transport
+        caller_info = RequestCallerInfo(
+            retry_checks=self.request_retry_checks,
+            authorizer=authorizer,
+        )
 
         # make the request
         log.debug("request will hit URL: %s", url)

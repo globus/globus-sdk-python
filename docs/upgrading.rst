@@ -330,14 +330,11 @@ One was to customize a client class by setting the ``transport_class`` class
 attribute, and the other was to pass ``transport_params`` to the client
 initializer.
 
-In version 4, these mechanisms have both been replaced.
-Client initialization now accepts a fully instantiated ``RequestsTransport``
-object, instead of ``transport_params``.
-And client classes now define a ``default_transport_factory`` attribute, which is a
-callable which returns a transport object.
+In version 4, these mechanisms have been replaced with support for passing a
+``RequestsTransport`` object directly to the initializer.
 
-For users who are customizing the parameters to the transport class, either explicitly
-instantiate the transport object:
+For users who are customizing the parameters to the transport class, they
+should now explicitly instantiate the transport object:
 
 .. code-block:: python
 
@@ -369,26 +366,65 @@ or use the ``tune()`` context manager:
     with client.transport.tune(http_timeout=120.0):
         my_groups = client.get_my_groups()
 
-For users who are customizing the transport class for a custom client, update like so:
+Retry Check Mechanisms Moved to ``request_retry_checks``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In Globus SDK v3, a client's ``transport`` contained all of its retry
+behaviors, including the checks which are run on each request, the
+configuration of those checks, and the sleep and backoff behaviors.
+
+Under v4, the configuration of checks has been split off into a separate
+attribute of the client, ``request_retry_checks``. These can be directly
+inspected and modified, and separate per-service configuration of these checks
+from the user-instantiable ``transport`` object.
+
+These changes impact users who were using a custom ``RequestsTransport`` class.
+The transport class no longer defines the HTTP status codes which drive the
+default retry checks.
+These capabilities have been moved to
+``globus_sdk.transport.DefaultRetryCheckCollection``, a new object which is
+configured on clients and which can be reconfigured in order to change these
+check behaviors.
+
+For example, users could previously declare a custom transport type which
+treats only 502s as transient errors which may resolve with a simple retry.
+This could then be configured on a custom client class:
 
 .. code-block:: python
 
     # globus-sdk v3
     import globus_sdk
-    from .mylibrary import CustomTransport
+    from globus_sdk.transport import RequestsTransport
 
 
-    class MyClient(globus_sdk.GroupsClient):
-        transport_class = CustomTransport
+    class MyTransport(RequestsTransport):
+        TRANSIENT_ERROR_STATUS_CODES = (502,)
 
+
+    class MyClientClass(globus_sdk.GroupsClient):
+        transport_class = MyTransport
+
+
+    client = MyClientClass()
+
+Because the ``transport_class`` has been removed from clients, this mechanism
+has changed.
+In order to customize the same information, users should first instantiate a
+client and then modify the attributes of the ``request_retry_checks`` object:
+
+.. code-block:: python
 
     # globus-sdk v4
     import globus_sdk
-    from .mylibrary import CustomTransport
 
+    client = globus_sdk.GroupsClient()
+    client.request_retry_checks.transient_error_status_codes = (502,)
 
-    class MyClient(globus_sdk.GroupsClient):
-        default_transport_factory = CustomTransport
+.. note::
+
+    Client classes may use types for ``request_retry_checks`` other than
+    ``DefaultRetryCheckCollection``, but all SDK-defined clients use subclasses
+    of this type.
 
 From 1.x or 2.x to 3.0
 -----------------------

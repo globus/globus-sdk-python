@@ -15,10 +15,7 @@ def mocksleep():
 
 @pytest.fixture
 def no_retry_transport():
-    class NoRetryTransport(RequestsTransport):
-        DEFAULT_MAX_RETRIES = 0
-
-    return NoRetryTransport
+    return RequestsTransport(max_retries=0)
 
 
 @pytest.fixture(autouse=True)

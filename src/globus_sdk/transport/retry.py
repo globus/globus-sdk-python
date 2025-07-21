@@ -7,7 +7,7 @@ import typing as t
 import requests
 
 if t.TYPE_CHECKING:
-    from globus_sdk.transport.requests import RequestCallerInfo
+    from .caller_info import RequestCallerInfo
 
 log = logging.getLogger(__name__)
 
@@ -117,7 +117,7 @@ class RetryCheckRunner:
 
     # check configs: a list of pairs, (check, flags)
     # a check without flags is assumed to have flags=NONE
-    def __init__(self, checks: list[RetryCheck]) -> None:
+    def __init__(self, checks: t.Iterable[RetryCheck]) -> None:
         self._checks: list[RetryCheck] = []
         self._check_data: dict[RetryCheck, dict[str, t.Any]] = {}
         for check in checks:
@@ -147,3 +147,40 @@ class RetryCheckRunner:
 
         # fallthrough: don't retry any request which isn't marked for retry
         return False
+
+
+class RetryCheckCollection:
+    """
+    A RetryCheckCollection is an ordered collection of retry checks which are
+    used to determine whether or not a request should be retried.
+
+    Notably, the collection does not decide
+    - how many times a request should retry
+    - how or how long the call should wait between attempts
+      (except via the backoff which may be set)
+    - what kinds of request parameters (e.g., timeouts) are used
+
+    It *only* contains `RetryCheck` methods which can look at a response or
+    error and decide whether or not to retry.
+    """
+
+    def __init__(self) -> None:
+        self.checks: list[RetryCheck] = []
+
+    def register_check(self, func: RetryCheck) -> RetryCheck:
+        """
+        Register a retry check with this policy.
+
+        A retry checker is a callable responsible for implementing
+        `check(RetryContext) -> RetryCheckResult`
+
+        `check` should *not* perform any sleeps or delays.
+        Multiple checks should be chainable and callable in any order.
+
+        :param func: The function or other callable to register as a retry check
+        """
+        self.checks.append(func)
+        return func
+
+    def __iter__(self) -> t.Iterator[RetryCheck]:
+        yield from self.checks

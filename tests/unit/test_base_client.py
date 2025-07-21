@@ -23,9 +23,12 @@ def auth_client():
 def base_client_class(no_retry_transport):
     class CustomClient(globus_sdk.BaseClient):
         service_name = "transfer"
-        default_transport_factory = no_retry_transport
         scopes = TransferScopes
         default_scope_requirements = [TransferScopes.all]
+
+        def __init__(self, **kwargs) -> None:
+            kwargs["transport"] = no_retry_transport
+            super().__init__(**kwargs)
 
     return CustomClient
 

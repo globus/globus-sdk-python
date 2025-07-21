@@ -1,13 +1,17 @@
 """
-Custom Transport class for the TransferClient that overrides
-default_check_transient_error
+Custom retry check collection for the TransferClient that overrides
+the default check_transient_error
 """
 
-from globus_sdk.transport import RequestsTransport, RetryCheckResult, RetryContext
+from globus_sdk.transport import (
+    DefaultRetryCheckCollection,
+    RetryCheckResult,
+    RetryContext,
+)
 
 
-class TransferRequestsTransport(RequestsTransport):
-    def default_check_transient_error(self, ctx: RetryContext) -> RetryCheckResult:
+class TransferDefaultRetryCheckCollection(DefaultRetryCheckCollection):
+    def check_transient_error(self, ctx: RetryContext) -> RetryCheckResult:
         """
         check for transient error status codes which could be resolved by
         retrying the request. Does not retry ExternalErrors or EndpointErrors
@@ -17,7 +21,7 @@ class TransferRequestsTransport(RequestsTransport):
             retries which may already have been attempted
         """
         if ctx.response is not None and (
-            ctx.response.status_code in self.TRANSIENT_ERROR_STATUS_CODES
+            ctx.response.status_code in self.transient_error_status_codes
         ):
             try:
                 code = ctx.response.json()["code"]

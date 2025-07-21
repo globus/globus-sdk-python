@@ -14,19 +14,17 @@ CLIENT_ID = "d0f1d9b0-bd81-4108-be74-ea981664453a"
 
 @pytest.fixture
 def native_client(no_retry_transport):
-    class CustomAuthClient(globus_sdk.NativeAppAuthClient):
-        default_transport_factory = no_retry_transport
-
-    return CustomAuthClient(client_id=CLIENT_ID)
+    return globus_sdk.NativeAppAuthClient(
+        client_id=CLIENT_ID, transport=no_retry_transport
+    )
 
 
 @pytest.fixture
 def confidential_client(no_retry_transport):
-    class CustomAuthClient(globus_sdk.ConfidentialAppAuthClient):
-        default_transport_factory = no_retry_transport
-
-    return CustomAuthClient(
-        client_id=CLIENT_ID, client_secret="SECRET_SECRET_HES_GOT_A_SECRET"
+    return globus_sdk.ConfidentialAppAuthClient(
+        client_id=CLIENT_ID,
+        client_secret="SECRET_SECRET_HES_GOT_A_SECRET",
+        transport=no_retry_transport,
     )
 
 

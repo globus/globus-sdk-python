@@ -8,10 +8,7 @@ from globus_sdk.testing import get_last_request, load_response
 
 @pytest.fixture
 def search_client(no_retry_transport):
-    class CustomSearchClient(globus_sdk.SearchClient):
-        default_transport_factory = no_retry_transport
-
-    return CustomSearchClient()
+    return globus_sdk.SearchClient(transport=no_retry_transport)
 
 
 def test_search_role_create(search_client):

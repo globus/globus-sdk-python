@@ -18,37 +18,13 @@ from globus_sdk.transport.encoders import (
 )
 
 from ._clientinfo import GlobusClientInfo
+from .caller_info import RequestCallerInfo
 from .retry import (
-    RetryCheck,
-    RetryCheckFlags,
-    RetryCheckResult,
     RetryCheckRunner,
     RetryContext,
-    set_retry_check_flags,
 )
 
 log = logging.getLogger(__name__)
-
-
-class RequestCallerInfo:
-    """
-    Data object that holds contextual information about the caller of a request.
-
-    :param authorizer: The authorizer object from the client making the request
-    """
-
-    def __init__(self, *, authorizer: GlobusAuthorizer | None = None) -> None:
-        self.authorizer = authorizer
-
-
-def _parse_retry_after(response: requests.Response) -> int | None:
-    val = response.headers.get("Retry-After")
-    if not val:
-        return None
-    try:
-        return int(val)
-    except ValueError:
-        return None
 
 
 def _exponential_backoff(ctx: RetryContext) -> float:
@@ -85,8 +61,6 @@ class RequestsTransport:
     :param retry_backoff: A function which determines how long to sleep between calls
         based on the RetryContext. Defaults to exponential backoff with jitter based on
         the context ``attempt`` number.
-    :param retry_checks: A list of initial retry checks. Any hooks registered,
-        including the default hooks, will run after these checks.
     :param max_sleep: The maximum sleep time between retries (in seconds). If the
         computed sleep time or the backoff requested by a retry check exceeds this
         value, this amount of time will be used instead
@@ -98,13 +72,6 @@ class RequestsTransport:
 
     #: default maximum number of retries
     DEFAULT_MAX_RETRIES = 5
-
-    #: status codes for responses which may have a Retry-After header
-    RETRY_AFTER_STATUS_CODES: tuple[int, ...] = (429, 503)
-    #: status codes for error responses which should generally be retried
-    TRANSIENT_ERROR_STATUS_CODES: tuple[int, ...] = (429, 500, 502, 503, 504)
-    #: status codes indicating that authorization info was missing or expired
-    EXPIRED_AUTHORIZATION_STATUS_CODES: tuple[int, ...] = (401,)
 
     #: the encoders are a mapping of encoding names to encoder objects
     encoders: dict[str, RequestEncoder] = {
@@ -120,7 +87,6 @@ class RequestsTransport:
         verify_ssl: bool | str | pathlib.Path | None = None,
         http_timeout: float | None = None,
         retry_backoff: t.Callable[[RetryContext], float] = _exponential_backoff,
-        retry_checks: list[RetryCheck] | None = None,
         max_sleep: float | int = 10,
         max_retries: int | None = None,
     ) -> None:
@@ -143,9 +109,6 @@ class RequestsTransport:
         self.max_retries = (
             max_retries if max_retries is not None else self.DEFAULT_MAX_RETRIES
         )
-        self.retry_checks = list(retry_checks if retry_checks else [])  # copy
-        # register internal checks
-        self.register_default_retry_checks()
 
     def close(self) -> None:
         """
@@ -346,7 +309,7 @@ class RequestsTransport:
         log.debug("starting request for %s", url)
         resp: requests.Response | None = None
         req = self._encode(method, url, query_params, data, headers, encoding)
-        checker = RetryCheckRunner(self.retry_checks)
+        checker = RetryCheckRunner(caller_info.retry_checks.checks)
 
         log.debug("transport request state initialized")
         for attempt in range(self.max_retries + 1):
@@ -388,107 +351,3 @@ class RequestsTransport:
             raise ValueError("Somehow, retries ended without a response")
         log.warning("request reached max retries, done (fail, response)")
         return resp
-
-    # decorator which lets you add a check to a retry policy
-    def register_retry_check(self, func: RetryCheck) -> RetryCheck:
-        """
-        Register a retry check with this transport.
-
-        A retry checker is a callable responsible for implementing
-        `check(RetryContext) -> RetryCheckResult`
-
-        `check` should *not* perform any sleeps or delays.
-        Multiple checks should be chainable and callable in any order.
-
-        :param func: The function or other callable to register as a retry check
-        """
-        self.retry_checks.append(func)
-        return func
-
-    def register_default_retry_checks(self) -> None:
-        """
-        This hook is called during transport initialization. By default, it registers
-        the following hooks:
-
-        - default_check_expired_authorization
-        - default_check_request_exception
-        - default_check_retry_after_header
-        - default_check_transient_error
-
-        It can be overridden to register additional hooks or to remove the default
-        hooks.
-        """
-        self.register_retry_check(self.default_check_expired_authorization)
-        self.register_retry_check(self.default_check_request_exception)
-        self.register_retry_check(self.default_check_retry_after_header)
-        self.register_retry_check(self.default_check_transient_error)
-
-    def default_check_request_exception(self, ctx: RetryContext) -> RetryCheckResult:
-        """
-        Check if a network error was encountered
-
-        :param ctx: The context object which describes the state of the request and the
-            retries which may already have been attempted.
-        """
-        if ctx.exception and isinstance(ctx.exception, requests.RequestException):
-            return RetryCheckResult.do_retry
-        return RetryCheckResult.no_decision
-
-    def default_check_retry_after_header(self, ctx: RetryContext) -> RetryCheckResult:
-        """
-        Check for a retry-after header if the response had a matching status
-
-        :param ctx: The context object which describes the state of the request and the
-            retries which may already have been attempted.
-        """
-        if (
-            ctx.response is None
-            or ctx.response.status_code not in self.RETRY_AFTER_STATUS_CODES
-        ):
-            return RetryCheckResult.no_decision
-        retry_after = _parse_retry_after(ctx.response)
-        if retry_after:
-            ctx.backoff = float(retry_after)
-        return RetryCheckResult.do_retry
-
-    def default_check_transient_error(self, ctx: RetryContext) -> RetryCheckResult:
-        """
-        Check for transient error status codes which could be resolved by retrying
-        the request
-
-        :param ctx: The context object which describes the state of the request and the
-            retries which may already have been attempted.
-        """
-        if ctx.response is not None and (
-            ctx.response.status_code in self.TRANSIENT_ERROR_STATUS_CODES
-        ):
-            return RetryCheckResult.do_retry
-        return RetryCheckResult.no_decision
-
-    @set_retry_check_flags(RetryCheckFlags.RUN_ONCE)
-    def default_check_expired_authorization(
-        self, ctx: RetryContext
-    ) -> RetryCheckResult:
-        """
-        This check evaluates whether or not there is invalid or expired authorization
-        information which could be updated with some action -- most typically a token
-        refresh for an expired access token.
-
-        The check is flagged to only run once per request.
-
-        :param ctx: The context object which describes the state of the request and the
-            retries which may already have been attempted.
-        """
-        if (  # is the current check applicable?
-            ctx.response is None
-            or ctx.caller_info is None
-            or ctx.caller_info.authorizer is None
-            or ctx.response.status_code not in self.EXPIRED_AUTHORIZATION_STATUS_CODES
-        ):
-            return RetryCheckResult.no_decision
-
-        # run the authorizer's handler, and 'do_retry' if the handler indicated
-        # that it was able to make a change which should make the request retryable
-        if ctx.caller_info.authorizer.handle_missing_authorization():
-            return RetryCheckResult.do_retry
-        return RetryCheckResult.no_decision

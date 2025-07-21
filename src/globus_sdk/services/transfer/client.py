@@ -15,7 +15,7 @@ from globus_sdk.scopes import GCSCollectionScopes, Scope, TransferScopes
 from .data import DeleteData, TransferData
 from .errors import TransferAPIError
 from .response import ActivationRequirementsResponse, IterableTransferResponse
-from .transport import TransferRequestsTransport
+from .transport import TransferDefaultRetryCheckCollection
 
 log = logging.getLogger(__name__)
 
@@ -129,12 +129,13 @@ class TransferClient(client.BaseClient):
     """
 
     service_name = "transfer"
-    default_transport_factory: t.Callable[[], TransferRequestsTransport] = (
-        TransferRequestsTransport
-    )
     error_class = TransferAPIError
     scopes = TransferScopes
     default_scope_requirements = [TransferScopes.all]
+
+    def _get_default_retry_checks(self) -> TransferDefaultRetryCheckCollection:
+        """Override the default retry checks."""
+        return TransferDefaultRetryCheckCollection()
 
     def add_app_data_access_scope(
         self, collection_ids: uuid.UUID | str | t.Iterable[uuid.UUID | str]
