@@ -48,7 +48,8 @@ class BaseClient:
         intelligently by default. Set it when inheriting from BaseClient or
         communicating through a proxy. This value takes precedence over the class
         attribute of the same name.
-    :param transport_params: Options to pass to the transport for this client
+    :param transport: A :class:`RequestsTransport` object for sending and
+        retrying requests. By default, one will be constructed by the client.
 
     All other parameters are for internal use and should be ignored.
     """
@@ -65,8 +66,9 @@ class BaseClient:
     #: this can be set in subclasses, but must always be a subclass of GlobusError
     error_class: type[exc.GlobusAPIError] = exc.GlobusAPIError
 
-    #: the type of Transport which will be used, defaults to ``RequestsTransport``
-    transport_class: type[RequestsTransport] = RequestsTransport
+    #: a function or class which will be used to construct a transport if one
+    #: is not provided, defaults to ``RequestsTransport``
+    default_transport_factory: t.Callable[[], RequestsTransport] = RequestsTransport
 
     #: the scopes for this client may be present as a ``ScopeCollection``
     scopes: ScopeCollection | None = None
@@ -80,7 +82,7 @@ class BaseClient:
         app_scopes: list[Scope] | None = None,
         authorizer: GlobusAuthorizer | None = None,
         app_name: str | None = None,
-        transport_params: dict[str, t.Any] | None = None,
+        transport: RequestsTransport | None = None,
     ) -> None:
         # check for input parameter conflicts
         if app_scopes and not app:
@@ -107,7 +109,9 @@ class BaseClient:
         # resolve the base_url for the client (see docstring for resolution precedence)
         self.base_url = self._resolve_base_url(base_url, self.environment)
 
-        self.transport = self.transport_class(**(transport_params or {}))
+        self.transport = (
+            transport if transport is not None else self.default_transport_factory()
+        )
         log.debug(f"initialized transport of type {type(self.transport)}")
 
         # setup paginated methods

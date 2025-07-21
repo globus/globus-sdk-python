@@ -11,6 +11,7 @@ from globus_sdk.authorizers import NullAuthorizer
 from globus_sdk.scopes import Scope, TransferScopes
 from globus_sdk.testing import RegisteredResponse, get_last_request
 from globus_sdk.token_storage import TokenValidationError
+from globus_sdk.transport import RequestsTransport
 
 
 @pytest.fixture
@@ -22,7 +23,7 @@ def auth_client():
 def base_client_class(no_retry_transport):
     class CustomClient(globus_sdk.BaseClient):
         service_name = "transfer"
-        transport_class = no_retry_transport
+        default_transport_factory = no_retry_transport
         scopes = TransferScopes
         default_scope_requirements = [TransferScopes.all]
 
@@ -89,10 +90,10 @@ def test_set_http_timeout(base_client):
         client = FooClient()
         assert client.transport.http_timeout == 60.0
 
-        client = FooClient(transport_params={"http_timeout": None})
+        client = FooClient(transport=RequestsTransport(http_timeout=None))
         assert client.transport.http_timeout == 60.0
 
-        client = FooClient(transport_params={"http_timeout": -1})
+        client = FooClient(transport=RequestsTransport(http_timeout=-1))
         assert client.transport.http_timeout is None
 
         os.environ["GLOBUS_SDK_HTTP_TIMEOUT"] = "120"

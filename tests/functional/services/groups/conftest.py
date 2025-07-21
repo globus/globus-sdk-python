@@ -6,7 +6,7 @@ import globus_sdk
 @pytest.fixture
 def groups_client(no_retry_transport):
     class CustomGroupsClient(globus_sdk.GroupsClient):
-        transport_class = no_retry_transport
+        default_transport_factory = no_retry_transport
 
     return CustomGroupsClient()
 

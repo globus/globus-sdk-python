@@ -129,7 +129,9 @@ class TransferClient(client.BaseClient):
     """
 
     service_name = "transfer"
-    transport_class: type[TransferRequestsTransport] = TransferRequestsTransport
+    default_transport_factory: t.Callable[[], TransferRequestsTransport] = (
+        TransferRequestsTransport
+    )
     error_class = TransferAPIError
     scopes = TransferScopes
     default_scope_requirements = [TransferScopes.all]

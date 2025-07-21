@@ -321,6 +321,75 @@ Change:
     auth_client.oauth2_start_flow(requested_scopes=globus_sdk.TransferClient.scopes.all)
     authorize_url = auth_client.oauth2_get_authorize_url()
 
+Customizing the Transport Has Changed
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In version 3, SDK users could customize the ``RequestsTransport`` object
+contained within a client in two ways.
+One was to customize a client class by setting the ``transport_class`` class
+attribute, and the other was to pass ``transport_params`` to the client
+initializer.
+
+In version 4, these mechanisms have both been replaced.
+Client initialization now accepts a fully instantiated ``RequestsTransport``
+object, instead of ``transport_params``.
+And client classes now define a ``default_transport_factory`` attribute, which is a
+callable which returns a transport object.
+
+For users who are customizing the parameters to the transport class, either explicitly
+instantiate the transport object:
+
+.. code-block:: python
+
+    # globus-sdk v3
+    import globus_sdk
+
+    client = globus_sdk.GroupsClient(transport_params={"http_timeout": 120.0})
+
+    # globus-sdk v4
+    import globus_sdk
+    from globus_sdk.transport import RequestsTransport
+
+    client = globus_sdk.GroupsClient(transport=RequestsTransport(http_timeout=120.0))
+
+or use the ``tune()`` context manager:
+
+.. code-block:: python
+
+    # globus-sdk v3
+    import globus_sdk
+
+    client = globus_sdk.GroupsClient(transport_params={"http_timeout": 120.0})
+    my_groups = client.get_my_groups()
+
+    # globus-sdk v4
+    import globus_sdk
+
+    client = globus_sdk.GroupsClient()
+    with client.transport.tune(http_timeout=120.0):
+        my_groups = client.get_my_groups()
+
+For users who are customizing the transport class for a custom client, update like so:
+
+.. code-block:: python
+
+    # globus-sdk v3
+    import globus_sdk
+    from .mylibrary import CustomTransport
+
+
+    class MyClient(globus_sdk.GroupsClient):
+        transport_class = CustomTransport
+
+
+    # globus-sdk v4
+    import globus_sdk
+    from .mylibrary import CustomTransport
+
+
+    class MyClient(globus_sdk.GroupsClient):
+        default_transport_factory = CustomTransport
+
 From 1.x or 2.x to 3.0
 -----------------------
 

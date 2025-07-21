@@ -10,6 +10,7 @@ from globus_sdk._missing import MISSING, MissingType
 from globus_sdk.authorizers import BasicAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
 from globus_sdk.scopes import Scope
+from globus_sdk.transport import RequestsTransport
 
 from .._common import stringify_requested_scopes
 from ..flow_managers import GlobusAuthorizationCodeFlowManager
@@ -52,7 +53,7 @@ class ConfidentialAppAuthClient(AuthLoginClient):
         environment: str | None = None,
         base_url: str | None = None,
         app_name: str | None = None,
-        transport_params: dict[str, t.Any] | None = None,
+        transport: RequestsTransport | None = None,
     ) -> None:
         super().__init__(
             client_id=client_id,
@@ -60,7 +61,7 @@ class ConfidentialAppAuthClient(AuthLoginClient):
             environment=environment,
             base_url=base_url,
             app_name=app_name,
-            transport_params=transport_params,
+            transport=transport,
         )
 
     def get_identities(
