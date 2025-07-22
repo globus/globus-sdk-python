@@ -12,8 +12,10 @@ from tests.common import register_api_route_fixture_file
 
 
 @pytest.fixture
-def search_client(no_retry_transport):
-    return globus_sdk.SearchClient(transport=no_retry_transport)
+def search_client():
+    client = globus_sdk.SearchClient()
+    with client.retry_configuration.tune(max_retries=0):
+        yield client
 
 
 def test_search_query_simple(search_client):

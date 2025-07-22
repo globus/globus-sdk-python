@@ -6,17 +6,17 @@ import globus_sdk
 
 
 @pytest.fixture
-def flows_client(no_retry_transport):
-    return globus_sdk.FlowsClient(transport=no_retry_transport)
+def flows_client():
+    client = globus_sdk.FlowsClient()
+    with client.retry_configuration.tune(max_retries=0):
+        yield client
 
 
 @pytest.fixture
-def specific_flow_client_class(
-    no_retry_transport,
-) -> t.Type[globus_sdk.SpecificFlowClient]:
+def specific_flow_client_class() -> t.Type[globus_sdk.SpecificFlowClient]:
     class CustomSpecificFlowClient(globus_sdk.SpecificFlowClient):
         def __init__(self, **kwargs) -> None:
-            kwargs["transport"] = no_retry_transport
             super().__init__(**kwargs)
+            self.retry_configuration.max_retries = 0
 
     return CustomSpecificFlowClient

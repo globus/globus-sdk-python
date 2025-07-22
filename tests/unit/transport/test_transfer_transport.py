@@ -1,12 +1,17 @@
 from unittest import mock
 
 from globus_sdk.services.transfer.transport import TransferDefaultRetryCheckCollection
-from globus_sdk.transport import RequestCallerInfo, RetryCheckRunner, RetryContext
+from globus_sdk.transport import (
+    RequestCallerInfo,
+    RetryCheckRunner,
+    RetryConfiguration,
+    RetryContext,
+)
 
 
 def test_transfer_does_not_retry_external():
-    retry_checks = TransferDefaultRetryCheckCollection()
-    checker = RetryCheckRunner(retry_checks)
+    retry_config = RetryConfiguration(checks=TransferDefaultRetryCheckCollection())
+    checker = RetryCheckRunner(retry_config.checks)
 
     body = {
         "HTTP status": "502",
@@ -19,15 +24,15 @@ def test_transfer_does_not_retry_external():
     dummy_response = mock.Mock()
     dummy_response.json = lambda: body
     dummy_response.status_code = 502
-    caller_info = RequestCallerInfo(retry_checks=retry_checks)
+    caller_info = RequestCallerInfo(retry_configuration=retry_config)
     ctx = RetryContext(1, caller_info=caller_info, response=dummy_response)
 
     assert checker.should_retry(ctx) is False
 
 
 def test_transfer_does_not_retry_endpoint_error():
-    retry_checks = TransferDefaultRetryCheckCollection()
-    checker = RetryCheckRunner(retry_checks)
+    retry_config = RetryConfiguration(checks=TransferDefaultRetryCheckCollection())
+    checker = RetryCheckRunner(retry_config.checks)
 
     body = {
         "HTTP status": "502",
@@ -43,15 +48,15 @@ def test_transfer_does_not_retry_endpoint_error():
     dummy_response = mock.Mock()
     dummy_response.json = lambda: body
     dummy_response.status_code = 502
-    caller_info = RequestCallerInfo(retry_checks=retry_checks)
+    caller_info = RequestCallerInfo(retry_configuration=retry_config)
     ctx = RetryContext(1, caller_info=caller_info, response=dummy_response)
 
     assert checker.should_retry(ctx) is False
 
 
 def test_transfer_retries_others():
-    retry_checks = TransferDefaultRetryCheckCollection()
-    checker = RetryCheckRunner(retry_checks)
+    retry_config = RetryConfiguration(checks=TransferDefaultRetryCheckCollection())
+    checker = RetryCheckRunner(retry_config.checks)
 
     def _raise_value_error():
         raise ValueError()
@@ -59,7 +64,7 @@ def test_transfer_retries_others():
     dummy_response = mock.Mock()
     dummy_response.json = _raise_value_error
     dummy_response.status_code = 502
-    caller_info = RequestCallerInfo(retry_checks=retry_checks)
+    caller_info = RequestCallerInfo(retry_configuration=retry_config)
     ctx = RetryContext(1, caller_info=caller_info, response=dummy_response)
 
     assert checker.should_retry(ctx) is True

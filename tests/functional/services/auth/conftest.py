@@ -4,10 +4,14 @@ import globus_sdk
 
 
 @pytest.fixture
-def login_client(no_retry_transport):
-    return globus_sdk.AuthLoginClient(transport=no_retry_transport)
+def login_client():
+    client = globus_sdk.AuthLoginClient()
+    with client.retry_configuration.tune(max_retries=0):
+        yield client
 
 
 @pytest.fixture
-def service_client(no_retry_transport):
-    return globus_sdk.AuthClient(transport=no_retry_transport)
+def service_client():
+    client = globus_sdk.AuthClient()
+    with client.retry_configuration.tune(max_retries=0):
+        yield client

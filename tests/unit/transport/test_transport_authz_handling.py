@@ -7,6 +7,7 @@ from globus_sdk.transport import (
     DefaultRetryCheckCollection,
     RequestCallerInfo,
     RequestsTransport,
+    RetryConfiguration,
 )
 
 
@@ -37,11 +38,12 @@ def test_will_null_authz_header_with_null_authorizer():
 
 
 def test_requests_transport_accepts_caller_info():
+    retry_config = RetryConfiguration(checks=DefaultRetryCheckCollection())
     transport = RequestsTransport()
     mock_authorizer = mock.Mock()
     mock_authorizer.get_authorization_header.return_value = "Bearer token"
     caller_info = RequestCallerInfo(
-        retry_checks=DefaultRetryCheckCollection(), authorizer=mock_authorizer
+        retry_configuration=retry_config, authorizer=mock_authorizer
     )
 
     with mock.patch.object(transport, "session") as mock_session:
@@ -66,8 +68,9 @@ def test_requests_transport_caller_info_required():
 
 
 def test_requests_transport_keyword_only():
+    retry_config = RetryConfiguration(checks=DefaultRetryCheckCollection())
     transport = RequestsTransport()
-    caller_info = RequestCallerInfo(retry_checks=DefaultRetryCheckCollection())
+    caller_info = RequestCallerInfo(retry_configuration=retry_config)
 
     with pytest.raises(TypeError):
         transport.request("GET", "https://example.com", caller_info)

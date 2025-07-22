@@ -4,5 +4,7 @@ import globus_sdk
 
 
 @pytest.fixture
-def client(no_retry_transport):
-    return globus_sdk.TransferClient(transport=no_retry_transport)
+def client():
+    client = globus_sdk.TransferClient()
+    with client.retry_configuration.tune(max_retries=0):
+        yield client

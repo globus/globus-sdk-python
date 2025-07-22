@@ -13,19 +13,19 @@ CLIENT_ID = "d0f1d9b0-bd81-4108-be74-ea981664453a"
 
 
 @pytest.fixture
-def native_client(no_retry_transport):
-    return globus_sdk.NativeAppAuthClient(
-        client_id=CLIENT_ID, transport=no_retry_transport
-    )
+def native_client():
+    client = globus_sdk.NativeAppAuthClient(client_id=CLIENT_ID)
+    with client.retry_configuration.tune(max_retries=0):
+        yield client
 
 
 @pytest.fixture
-def confidential_client(no_retry_transport):
-    return globus_sdk.ConfidentialAppAuthClient(
-        client_id=CLIENT_ID,
-        client_secret="SECRET_SECRET_HES_GOT_A_SECRET",
-        transport=no_retry_transport,
+def confidential_client():
+    client = globus_sdk.ConfidentialAppAuthClient(
+        client_id=CLIENT_ID, client_secret="SECRET_SECRET_HES_GOT_A_SECRET"
     )
+    with client.retry_configuration.tune(max_retries=0):
+        yield client
 
 
 # build a nearly-diagonal matrix over

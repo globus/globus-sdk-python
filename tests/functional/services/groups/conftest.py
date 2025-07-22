@@ -4,8 +4,10 @@ import globus_sdk
 
 
 @pytest.fixture
-def groups_client(no_retry_transport):
-    return globus_sdk.GroupsClient(transport=no_retry_transport)
+def groups_client():
+    client = globus_sdk.GroupsClient()
+    with client.retry_configuration.tune(max_retries=0):
+        yield client
 
 
 @pytest.fixture

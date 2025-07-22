@@ -4,10 +4,14 @@ import globus_sdk
 
 
 @pytest.fixture
-def compute_client_v2(no_retry_transport):
-    return globus_sdk.ComputeClientV2(transport=no_retry_transport)
+def compute_client_v2():
+    client = globus_sdk.ComputeClientV2()
+    with client.retry_configuration.tune(max_retries=0):
+        yield client
 
 
 @pytest.fixture
-def compute_client_v3(no_retry_transport):
-    return globus_sdk.ComputeClientV3(transport=no_retry_transport)
+def compute_client_v3():
+    client = globus_sdk.ComputeClientV3()
+    with client.retry_configuration.tune(max_retries=0):
+        yield client

@@ -20,15 +20,15 @@ def auth_client():
 
 
 @pytest.fixture
-def base_client_class(no_retry_transport):
+def base_client_class():
     class CustomClient(globus_sdk.BaseClient):
         service_name = "transfer"
         scopes = TransferScopes
         default_scope_requirements = [TransferScopes.all]
 
         def __init__(self, **kwargs) -> None:
-            kwargs["transport"] = no_retry_transport
             super().__init__(**kwargs)
+            self.retry_configuration.max_retries = 0
 
     return CustomClient
 

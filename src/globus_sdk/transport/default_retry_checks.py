@@ -12,28 +12,10 @@ from .retry import (
 
 
 class DefaultRetryCheckCollection(RetryCheckCollection):
-    """The default checks for the SDK.
+    """The default checks for the SDK."""
 
-    :param retry_after_status_codes: status codes for responses which may have
-        a Retry-After header
-    :param transient_error_status_codes: status codes for error responses which
-        should generally be retried
-    :param expired_authorization_status_codes: status codes indicating that
-        authorization info was missing or expired
-    """
-
-    def __init__(
-        self,
-        *,
-        retry_after_status_codes: tuple[int, ...] = (429, 503),
-        transient_error_status_codes: tuple[int, ...] = (429, 500, 502, 503, 504),
-        expired_authorization_status_codes: tuple[int, ...] = (401,),
-    ) -> None:
+    def __init__(self) -> None:
         super().__init__()
-
-        self.retry_after_status_codes = retry_after_status_codes
-        self.transient_error_status_codes = transient_error_status_codes
-        self.expired_authorization_status_codes = expired_authorization_status_codes
 
         self.register_check(self.check_expired_authorization)
         self.register_check(self.check_request_exception)
@@ -58,9 +40,9 @@ class DefaultRetryCheckCollection(RetryCheckCollection):
         :param ctx: The context object which describes the state of the request and the
             retries which may already have been attempted.
         """
-        if (
-            ctx.response is None
-            or ctx.response.status_code not in self.retry_after_status_codes
+        retry_config = ctx.caller_info.retry_configuration
+        if ctx.response is None or (
+            ctx.response.status_code not in retry_config.retry_after_status_codes
         ):
             return RetryCheckResult.no_decision
         retry_after = self.parse_retry_after(ctx.response)
@@ -76,8 +58,9 @@ class DefaultRetryCheckCollection(RetryCheckCollection):
         :param ctx: The context object which describes the state of the request and the
             retries which may already have been attempted.
         """
+        retry_config = ctx.caller_info.retry_configuration
         if ctx.response is not None and (
-            ctx.response.status_code in self.transient_error_status_codes
+            ctx.response.status_code in retry_config.transient_error_status_codes
         ):
             return RetryCheckResult.do_retry
         return RetryCheckResult.no_decision
@@ -94,11 +77,15 @@ class DefaultRetryCheckCollection(RetryCheckCollection):
         :param ctx: The context object which describes the state of the request and the
             retries which may already have been attempted.
         """
+        retry_config = ctx.caller_info.retry_configuration
         if (  # is the current check applicable?
             ctx.response is None
             or ctx.caller_info is None
             or ctx.caller_info.authorizer is None
-            or ctx.response.status_code not in self.expired_authorization_status_codes
+            or (
+                ctx.response.status_code
+                not in retry_config.expired_authorization_status_codes
+            )
         ):
             return RetryCheckResult.no_decision
 
@@ -109,7 +96,11 @@ class DefaultRetryCheckCollection(RetryCheckCollection):
         return RetryCheckResult.no_decision
 
     def parse_retry_after(self, response: requests.Response) -> int | None:
-        """Get the 'Retry-After' header as an int."""
+        """
+        Get the 'Retry-After' header as an int.
+
+        :param response: The response to parse.
+        """
         val = response.headers.get("Retry-After")
         if not val:
             return None

@@ -16,7 +16,7 @@ from globus_sdk.transport import (
     DefaultRetryCheckCollection,
     RequestCallerInfo,
     RequestsTransport,
-    RetryCheckCollection,
+    RetryConfiguration,
 )
 
 if sys.version_info >= (3, 10):
@@ -56,9 +56,10 @@ class BaseClient:
     :param transport: A :class:`RequestsTransport` object for sending and
         retrying requests. By default, one will be constructed by the client.
 
-    :ivar RetryCheckCollection request_retry_checks: The retry checks for a
-        given client, as an ordered collection. These determine which requests will
-        be retried on failure.
+    :ivar RetryCheckCollection retry_configuration: The retry configuration for a
+        given client. This determines which requests will be retried on failure,
+        how many retries will be attempted, and how long the SDK may wait
+        between retries.
     """
 
     # service name is used to lookup a service URL from config
@@ -112,9 +113,7 @@ class BaseClient:
         # resolve the base_url for the client (see docstring for resolution precedence)
         self.base_url = self._resolve_base_url(base_url, self.environment)
 
-        self.request_retry_checks: RetryCheckCollection = (
-            self._get_default_retry_checks()
-        )
+        self.retry_configuration: RetryConfiguration = self._get_default_retry_config()
         self.transport = transport if transport is not None else RequestsTransport()
         log.debug(f"initialized transport of type {type(self.transport)}")
 
@@ -147,13 +146,13 @@ class BaseClient:
         """
         raise NotImplementedError
 
-    def _get_default_retry_checks(self) -> RetryCheckCollection:
+    def _get_default_retry_config(self) -> RetryConfiguration:
         """
-        Create the default for 'request_retry_checks'.
+        Create the default retry configuration.
 
         This is called during init and may be overridden by subclasses.
         """
-        return DefaultRetryCheckCollection()
+        return RetryConfiguration(checks=DefaultRetryCheckCollection())
 
     @classmethod
     def _resolve_base_url(cls, init_base_url: str | None, environment: str) -> str:
@@ -514,7 +513,7 @@ class BaseClient:
 
         # capture info about this client as the caller to pass to the transport
         caller_info = RequestCallerInfo(
-            retry_checks=self.request_retry_checks,
+            retry_configuration=self.retry_configuration,
             authorizer=authorizer,
         )
 

@@ -8,10 +8,11 @@ from .retry import (
     RetryCheckCollection,
     RetryCheckFlags,
     RetryCheckResult,
-    RetryCheckRunner,
     RetryContext,
     set_retry_check_flags,
 )
+from .retry_check_runner import RetryCheckRunner
+from .retry_config import RetryConfiguration
 
 __all__ = (
     "RequestsTransport",
@@ -23,6 +24,7 @@ __all__ = (
     "RetryCheckRunner",
     "set_retry_check_flags",
     "RetryContext",
+    "RetryConfiguration",
     "DefaultRetryCheckCollection",
     "RequestEncoder",
     "JSONRequestEncoder",

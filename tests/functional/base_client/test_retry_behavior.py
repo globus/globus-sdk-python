@@ -38,7 +38,7 @@ def test_retry_disabled_via_tune(client, mocksleep):
 
     # the error is seen by the client (automatic retry does not hide it)
     with pytest.raises(globus_sdk.GlobusAPIError) as excinfo:
-        with client.transport.tune(max_retries=0):
+        with client.retry_configuration.tune(max_retries=0):
             client.get("/bar")
     assert excinfo.value.http_status == 500
 
@@ -96,7 +96,7 @@ def test_retry_limit(client, mocksleep, num_errors, expect_err):
 
 def test_transport_retry_limit(client, mocksleep):
     # this limit is a safety to protect against a bad policy causing infinite retries
-    client.transport.max_retries = 2
+    client.retry_configuration.max_retries = 2
 
     for _i in range(3):
         load_response(
@@ -115,11 +115,11 @@ def test_transport_retry_limit(client, mocksleep):
 
 
 def test_bad_max_retries_causes_error(client):
-    # this test exploits the fact that we loop to (transport.max_retries + 1) in order
+    # this test exploits the fact that we loop to (max_retries + 1) in order
     # to ensure that no requests are ever sent
     # the transport should throw an error in this case, since it doesn't have a response
     # value to return
-    client.transport.max_retries = -1
+    client.retry_configuration.max_retries = -1
 
     with pytest.raises(ValueError):
         client.get("/bar")
@@ -294,7 +294,7 @@ def test_transport_caller_info_with_retry(client):
 
     authorizer = DummyAuthorizer()
     caller_info = RequestCallerInfo(
-        retry_checks=client.request_retry_checks, authorizer=authorizer
+        retry_configuration=client.retry_configuration, authorizer=authorizer
     )
 
     # Test direct transport usage with caller_info

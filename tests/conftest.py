@@ -4,18 +4,12 @@ import pytest
 import responses
 
 import globus_sdk
-from globus_sdk.transport import RequestsTransport
 
 
 @pytest.fixture(autouse=True)
 def mocksleep():
     with mock.patch("time.sleep") as m:
         yield m
-
-
-@pytest.fixture
-def no_retry_transport():
-    return RequestsTransport(max_retries=0)
 
 
 @pytest.fixture(autouse=True)

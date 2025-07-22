@@ -20,8 +20,9 @@ class TransferDefaultRetryCheckCollection(DefaultRetryCheckCollection):
         :param ctx: The context object which describes the state of the request and the
             retries which may already have been attempted
         """
+        retry_config = ctx.caller_info.retry_configuration
         if ctx.response is not None and (
-            ctx.response.status_code in self.transient_error_status_codes
+            ctx.response.status_code in retry_config.transient_error_status_codes
         ):
             try:
                 code = ctx.response.json()["code"]

@@ -5,12 +5,14 @@ from globus_sdk.transport import (
     RequestCallerInfo,
     RetryCheckResult,
     RetryCheckRunner,
+    RetryConfiguration,
     RetryContext,
 )
 
 
 def _make_test_retry_context(*, status=200, exception=None, response=None):
-    caller_info = RequestCallerInfo(retry_checks=DefaultRetryCheckCollection())
+    retry_config = RetryConfiguration(checks=DefaultRetryCheckCollection())
+    caller_info = RequestCallerInfo(retry_configuration=retry_config)
     if exception:
         return RetryContext(1, caller_info=caller_info, exception=exception)
     elif response:
