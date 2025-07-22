@@ -28,7 +28,7 @@ def base_client_class():
 
         def __init__(self, **kwargs) -> None:
             super().__init__(**kwargs)
-            self.retry_configuration.max_retries = 0
+            self.retry_config.max_retries = 0
 
     return CustomClient
 

@@ -6,7 +6,7 @@ import globus_sdk
 @pytest.fixture
 def groups_client():
     client = globus_sdk.GroupsClient()
-    with client.retry_configuration.tune(max_retries=0):
+    with client.retry_config.tune(max_retries=0):
         yield client
 
 

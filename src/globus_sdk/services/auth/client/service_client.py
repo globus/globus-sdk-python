@@ -12,7 +12,7 @@ from globus_sdk._missing import MISSING, MissingType
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.response import GlobusHTTPResponse, IterableResponse
 from globus_sdk.scopes import AuthScopes, Scope
-from globus_sdk.transport import RequestsTransport
+from globus_sdk.transport import RequestsTransport, RetryConfig
 
 if t.TYPE_CHECKING:
     from globus_sdk.globus_app import GlobusApp
@@ -81,6 +81,7 @@ class AuthClient(client.BaseClient):
         authorizer: GlobusAuthorizer | None = None,
         app_name: str | None = None,
         transport: RequestsTransport | None = None,
+        retry_config: RetryConfig | None = None,
     ) -> None:
         super().__init__(
             environment=environment,
@@ -90,6 +91,7 @@ class AuthClient(client.BaseClient):
             authorizer=authorizer,
             app_name=app_name,
             transport=transport,
+            retry_config=retry_config,
         )
 
         self._client_id = str(client_id) if client_id is not None else None

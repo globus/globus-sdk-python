@@ -96,6 +96,8 @@ class RetryCheckCollection:
     A RetryCheckCollection is an ordered collection of retry checks which are
     used to determine whether or not a request should be retried.
 
+    Checks are stored in registration order.
+
     Notably, the collection does not decide
     - how many times a request should retry
     - how or how long the call should wait between attempts
@@ -107,7 +109,7 @@ class RetryCheckCollection:
     """
 
     def __init__(self) -> None:
-        self.checks: list[RetryCheck] = []
+        self._data: list[RetryCheck] = []
 
     def register_check(self, func: RetryCheck) -> RetryCheck:
         """
@@ -121,8 +123,20 @@ class RetryCheckCollection:
 
         :param func: The function or other callable to register as a retry check
         """
-        self.checks.append(func)
+        self._data.append(func)
         return func
 
+    def register_many_checks(self, funcs: t.Iterable[RetryCheck]) -> None:
+        """
+        Register all checks in a collection of checks.
+
+        :param funcs: An iterable collection of retry check callables
+        """
+        for f in funcs:
+            self.register_check(f)
+
     def __iter__(self) -> t.Iterator[RetryCheck]:
-        yield from self.checks
+        yield from self._data
+
+    def __len__(self) -> int:
+        return len(self._data)

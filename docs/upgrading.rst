@@ -353,12 +353,6 @@ or use the ``tune()`` context manager:
 
 .. code-block:: python
 
-    # globus-sdk v3
-    import globus_sdk
-
-    client = globus_sdk.GroupsClient(transport_params={"http_timeout": 120.0})
-    my_groups = client.get_my_groups()
-
     # globus-sdk v4
     import globus_sdk
 
@@ -366,15 +360,15 @@ or use the ``tune()`` context manager:
     with client.transport.tune(http_timeout=120.0):
         my_groups = client.get_my_groups()
 
-Retry Check Configuration Moved to ``retry_configuration``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Retry Check Configuration Moved to ``retry_config``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In Globus SDK v3, a client's ``transport`` contained all of its retry
 behaviors, including the checks which are run on each request, the
 configuration of those checks, and the sleep and backoff behaviors.
 
 Under v4, the configuration of checks has been split off into a separate
-attribute of the client, ``retry_configuration``.
+attribute of the client, ``retry_config``.
 
 These changes primarily impact users who were using a custom
 ``RequestsTransport`` class, and should simplify their usage.
@@ -401,7 +395,7 @@ This could then be configured on a custom client class:
     client = MyClientClass()
 
 Under SDK v4, in order to customize the same information, users can simply
-client and then modify the attributes of the ``retry_configuration`` object:
+client and then modify the attributes of the ``retry_config`` object:
 
 .. code-block:: python
 
@@ -409,7 +403,7 @@ client and then modify the attributes of the ``retry_configuration`` object:
     import globus_sdk
 
     client = globus_sdk.GroupsClient()
-    client.retry_configuration.transient_error_status_codes = (502,)
+    client.retry_config.transient_error_status_codes = (502,)
 
 Similar to the ``tune()`` context manager of ``RequestsTransport``, there is
 also a ``tune()`` context manager for the retry configuration. ``tune()``
@@ -423,9 +417,19 @@ For example, users can suppress retries:
     import globus_sdk
 
     client = globus_sdk.GroupsClient()
-    with client.retry_configuration.tune(max_retries=1):
+    with client.retry_config.tune(max_retries=1):
         my_groups = client.get_my_groups()
 
+A ``retry_config`` can also be passed to clients on initialization:
+
+.. code-block:: python
+
+    # globus-sdk v4
+    import globus_sdk
+    from globus_sdk.transport import RetryConfig
+
+    client = globus_sdk.GroupsClient(retry_config=RetryConfig(max_retries=2))
+    my_groups = client.get_my_groups()
 
 
 From 1.x or 2.x to 3.0

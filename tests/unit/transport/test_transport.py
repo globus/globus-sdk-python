@@ -3,12 +3,7 @@ from unittest import mock
 
 import pytest
 
-from globus_sdk.transport import (
-    DefaultRetryCheckCollection,
-    RequestsTransport,
-    RetryConfiguration,
-    RetryContext,
-)
+from globus_sdk.transport import RequestsTransport, RetryConfig, RetryContext
 from globus_sdk.transport.retry_config import _exponential_backoff
 
 
@@ -65,7 +60,7 @@ def test_transport_tuning(param_name, init_value, tune_value):
 )
 def test_retry_tuning(param_name, init_value, tune_value):
     init_kwargs = {param_name: init_value}
-    config = RetryConfiguration(DefaultRetryCheckCollection(), **init_kwargs)
+    config = RetryConfig(**init_kwargs)
 
     assert getattr(config, param_name) == init_value
 

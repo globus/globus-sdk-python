@@ -12,6 +12,7 @@ BASE_CLIENT_PARAMS = (
     "app_name",
     "base_url",
     "transport",
+    "retry_config",
 )
 
 

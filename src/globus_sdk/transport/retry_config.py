@@ -17,7 +17,7 @@ def _exponential_backoff(ctx: RetryContext) -> float:
 
 
 @dataclasses.dataclass
-class RetryConfiguration:
+class RetryConfig:
     """
     Configuration for a client which is going to retry requests.
 
@@ -25,7 +25,7 @@ class RetryConfiguration:
     :param max_sleep: The maximum sleep time between retries (in seconds). If the
         computed sleep time or the backoff requested by a retry check exceeds this
         value, this amount of time will be used instead.
-    :param retry_backoff: A function which determines how long to sleep between calls
+    :param backoff: A function which determines how long to sleep between calls
         based on the RetryContext. Defaults to exponential backoff with jitter based on
         the context ``attempt`` number.
     :param retry_after_status_codes: HTTP status codes for responses which may have
@@ -38,14 +38,16 @@ class RetryConfiguration:
         responses and exceptions, as a ``RetryCheckCollection``.
     """
 
-    checks: RetryCheckCollection
-
     max_retries: int = 5
     max_sleep: float | int = 10
     backoff: t.Callable[[RetryContext], float] = _exponential_backoff
     retry_after_status_codes: tuple[int, ...] = (429, 503)
     transient_error_status_codes: tuple[int, ...] = (429, 500, 502, 503, 504)
     expired_authorization_status_codes: tuple[int, ...] = (401,)
+
+    checks: RetryCheckCollection = dataclasses.field(
+        default_factory=RetryCheckCollection
+    )
 
     @contextlib.contextmanager
     def tune(

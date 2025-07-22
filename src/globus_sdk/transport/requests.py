@@ -20,7 +20,7 @@ from ._clientinfo import GlobusClientInfo
 from .caller_info import RequestCallerInfo
 from .retry import RetryContext
 from .retry_check_runner import RetryCheckRunner
-from .retry_config import RetryConfiguration
+from .retry_config import RetryConfig
 
 log = logging.getLogger(__name__)
 
@@ -143,7 +143,7 @@ class RequestsTransport:
         >>> with client.transport.tune(http_timeout=120):
         >>>     foo = client.get_foo()
 
-        See also: :meth:`RetryConfiguration.tune`.
+        See also: :meth:`RetryConfig.tune`.
         """
         saved_settings = (
             self.verify_ssl,
@@ -199,9 +199,7 @@ class RequestsTransport:
             else:
                 req.headers.pop("Authorization", None)  # remove any possible value
 
-    def _retry_sleep(
-        self, retry_configuration: RetryConfiguration, ctx: RetryContext
-    ) -> None:
+    def _retry_sleep(self, retry_config: RetryConfig, ctx: RetryContext) -> None:
         """
         Given a retry context, compute the amount of time to sleep and sleep that much
         This is always the minimum of the backoff (run on the context) and the
@@ -210,13 +208,11 @@ class RequestsTransport:
         :param ctx: The context object which describes the state of the request and the
             retries which may already have been attempted.
         """
-        sleep_period = min(
-            retry_configuration.backoff(ctx), retry_configuration.max_sleep
-        )
+        sleep_period = min(retry_config.backoff(ctx), retry_config.max_sleep)
         log.debug(
             "request retry_sleep(%s) [max=%s]",
             sleep_period,
-            retry_configuration.max_sleep,
+            retry_config.max_sleep,
         )
         time.sleep(sleep_period)
 
@@ -257,11 +253,11 @@ class RequestsTransport:
         log.debug("starting request for %s", url)
         resp: requests.Response | None = None
         req = self._encode(method, url, query_params, data, headers, encoding)
-        retry_configuration = caller_info.retry_configuration
-        checker = RetryCheckRunner(retry_configuration.checks)
+        retry_config = caller_info.retry_config
+        checker = RetryCheckRunner(caller_info.retry_config.checks)
 
         log.debug("transport request state initialized")
-        for attempt in range(retry_configuration.max_retries + 1):
+        for attempt in range(retry_config.max_retries + 1):
             log.debug("transport request retry cycle. attempt=%d", attempt)
             # add Authorization header, or (if it's a NullAuthorizer) possibly
             # explicitly remove the Authorization header
@@ -281,10 +277,7 @@ class RequestsTransport:
             except requests.RequestException as err:
                 log.debug("request hit error (RequestException)")
                 ctx.exception = err
-                if (
-                    attempt >= retry_configuration.max_retries
-                    or not checker.should_retry(ctx)
-                ):
+                if attempt >= retry_config.max_retries or not checker.should_retry(ctx):
                     log.warning("request done (fail, error)")
                     raise exc.convert_request_exception(err)
                 log.debug("request may retry (should-retry=true)")
@@ -296,9 +289,9 @@ class RequestsTransport:
                 log.debug("request may retry, will check attempts")
 
             # the request will be retried, so sleep...
-            if attempt < retry_configuration.max_retries:
+            if attempt < retry_config.max_retries:
                 log.debug("under attempt limit, will sleep")
-                self._retry_sleep(retry_configuration, ctx)
+                self._retry_sleep(retry_config, ctx)
         if resp is None:
             raise ValueError("Somehow, retries ended without a response")
         log.warning("request reached max retries, done (fail, response)")

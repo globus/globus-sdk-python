@@ -17,7 +17,7 @@ def id_token_sub():
 @pytest.fixture
 def cc_auth_client():
     client = globus_sdk.ConfidentialAppAuthClient("dummy_id", "dummy_secret")
-    with client.retry_configuration.tune(max_retries=0):
+    with client.retry_config.tune(max_retries=0):
         yield client
 
 

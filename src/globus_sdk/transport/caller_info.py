@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from globus_sdk.authorizers import GlobusAuthorizer
 
-from .retry_config import RetryConfiguration
+from .retry_config import RetryConfig
 
 
 class RequestCallerInfo:
@@ -16,8 +16,8 @@ class RequestCallerInfo:
     def __init__(
         self,
         *,
-        retry_configuration: RetryConfiguration,
+        retry_config: RetryConfig,
         authorizer: GlobusAuthorizer | None = None,
     ) -> None:
         self.authorizer = authorizer
-        self.retry_configuration = retry_configuration
+        self.retry_config = retry_config

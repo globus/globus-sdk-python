@@ -1,6 +1,5 @@
 from ._clientinfo import GlobusClientInfo
 from .caller_info import RequestCallerInfo
-from .default_retry_checks import DefaultRetryCheckCollection
 from .encoders import FormRequestEncoder, JSONRequestEncoder, RequestEncoder
 from .requests import RequestsTransport
 from .retry import (
@@ -12,7 +11,7 @@ from .retry import (
     set_retry_check_flags,
 )
 from .retry_check_runner import RetryCheckRunner
-from .retry_config import RetryConfiguration
+from .retry_config import RetryConfig
 
 __all__ = (
     "RequestsTransport",
@@ -24,8 +23,7 @@ __all__ = (
     "RetryCheckRunner",
     "set_retry_check_flags",
     "RetryContext",
-    "RetryConfiguration",
-    "DefaultRetryCheckCollection",
+    "RetryConfig",
     "RequestEncoder",
     "JSONRequestEncoder",
     "FormRequestEncoder",

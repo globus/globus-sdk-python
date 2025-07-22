@@ -11,11 +11,12 @@ from globus_sdk._internal.remarshal import commajoin
 from globus_sdk._internal.type_definitions import DateLike, IntLike
 from globus_sdk._missing import MISSING, MissingType
 from globus_sdk.scopes import GCSCollectionScopes, Scope, TransferScopes
+from globus_sdk.transport import RetryConfig
 
 from .data import DeleteData, TransferData
 from .errors import TransferAPIError
 from .response import ActivationRequirementsResponse, IterableTransferResponse
-from .transport import TransferDefaultRetryCheckCollection
+from .transport import TRANSFER_DEFAULT_RETRY_CHECKS
 
 log = logging.getLogger(__name__)
 
@@ -133,9 +134,9 @@ class TransferClient(client.BaseClient):
     scopes = TransferScopes
     default_scope_requirements = [TransferScopes.all]
 
-    def _get_default_retry_checks(self) -> TransferDefaultRetryCheckCollection:
+    def _register_standard_retry_checks(self, retry_config: RetryConfig) -> None:
         """Override the default retry checks."""
-        return TransferDefaultRetryCheckCollection()
+        retry_config.checks.register_many_checks(TRANSFER_DEFAULT_RETRY_CHECKS)
 
     def add_app_data_access_scope(
         self, collection_ids: uuid.UUID | str | t.Iterable[uuid.UUID | str]

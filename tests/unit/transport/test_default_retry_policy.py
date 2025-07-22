@@ -3,26 +3,31 @@ from unittest import mock
 import pytest
 
 from globus_sdk.transport import (
-    DefaultRetryCheckCollection,
     RequestCallerInfo,
     RequestsTransport,
     RetryCheckResult,
     RetryCheckRunner,
-    RetryConfiguration,
+    RetryConfig,
     RetryContext,
+)
+from globus_sdk.transport.default_retry_checks import (
+    DEFAULT_RETRY_CHECKS,
+    check_retry_after_header,
+    check_transient_error,
 )
 
 
 @pytest.mark.parametrize("http_status", (429, 503))
 def test_retry_policy_respects_retry_after(mocksleep, http_status):
-    retry_config = RetryConfiguration(checks=DefaultRetryCheckCollection())
+    retry_config = RetryConfig()
+    retry_config.checks.register_many_checks(DEFAULT_RETRY_CHECKS)
     transport = RequestsTransport()
     checker = RetryCheckRunner(retry_config.checks)
 
     dummy_response = mock.Mock()
     dummy_response.headers = {"Retry-After": "5"}
     dummy_response.status_code = http_status
-    caller_info = RequestCallerInfo(retry_configuration=retry_config)
+    caller_info = RequestCallerInfo(retry_config=retry_config)
     ctx = RetryContext(1, caller_info=caller_info, response=dummy_response)
 
     assert checker.should_retry(ctx) is True
@@ -34,14 +39,15 @@ def test_retry_policy_respects_retry_after(mocksleep, http_status):
 @pytest.mark.parametrize("http_status", (429, 503))
 def test_retry_policy_ignores_retry_after_too_high(mocksleep, http_status):
     # set explicit max sleep to confirm that the value is capped here
-    retry_config = RetryConfiguration(max_sleep=5, checks=DefaultRetryCheckCollection())
+    retry_config = RetryConfig(max_sleep=5)
+    retry_config.checks.register_many_checks(DEFAULT_RETRY_CHECKS)
     transport = RequestsTransport()
     checker = RetryCheckRunner(retry_config.checks)
 
     dummy_response = mock.Mock()
     dummy_response.headers = {"Retry-After": "20"}
     dummy_response.status_code = http_status
-    caller_info = RequestCallerInfo(retry_configuration=retry_config)
+    caller_info = RequestCallerInfo(retry_config=retry_config)
     ctx = RetryContext(1, caller_info=caller_info, response=dummy_response)
 
     assert checker.should_retry(ctx) is True
@@ -52,14 +58,15 @@ def test_retry_policy_ignores_retry_after_too_high(mocksleep, http_status):
 
 @pytest.mark.parametrize("http_status", (429, 503))
 def test_retry_policy_ignores_malformed_retry_after(mocksleep, http_status):
-    retry_config = RetryConfiguration(checks=DefaultRetryCheckCollection())
+    retry_config = RetryConfig()
+    retry_config.checks.register_many_checks(DEFAULT_RETRY_CHECKS)
     transport = RequestsTransport()
     checker = RetryCheckRunner(retry_config.checks)
 
     dummy_response = mock.Mock()
     dummy_response.headers = {"Retry-After": "not-an-integer"}
     dummy_response.status_code = http_status
-    caller_info = RequestCallerInfo(retry_configuration=retry_config)
+    caller_info = RequestCallerInfo(retry_config=retry_config)
     ctx = RetryContext(1, caller_info=caller_info, response=dummy_response)
 
     assert checker.should_retry(ctx) is True
@@ -69,15 +76,13 @@ def test_retry_policy_ignores_malformed_retry_after(mocksleep, http_status):
 
 
 @pytest.mark.parametrize(
-    "checkname",
-    [
-        "check_retry_after_header",
-        "check_transient_error",
-    ],
+    "check_method",
+    [check_retry_after_header, check_transient_error],
+    ids=lambda f: f.__name__,
 )
-def test_default_retry_check_noop_on_exception(checkname, mocksleep):
-    retry_config = RetryConfiguration(checks=DefaultRetryCheckCollection())
-    method = getattr(retry_config.checks, checkname)
-    caller_info = RequestCallerInfo(retry_configuration=retry_config)
+def test_default_retry_check_noop_on_exception(check_method, mocksleep):
+    retry_config = RetryConfig()
+    retry_config.checks.register_many_checks(DEFAULT_RETRY_CHECKS)
+    caller_info = RequestCallerInfo(retry_config=retry_config)
     ctx = RetryContext(1, caller_info=caller_info, exception=Exception("foo"))
-    assert method(ctx) is RetryCheckResult.no_decision
+    assert check_method(ctx) is RetryCheckResult.no_decision
