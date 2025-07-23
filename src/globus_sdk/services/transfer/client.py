@@ -14,7 +14,7 @@ from globus_sdk.scopes import GCSCollectionScopes, Scope, TransferScopes
 
 from .data import DeleteData, TransferData
 from .errors import TransferAPIError
-from .response import ActivationRequirementsResponse, IterableTransferResponse
+from .response import IterableTransferResponse
 from .transport import TransferRequestsTransport
 
 log = logging.getLogger(__name__)
@@ -281,18 +281,6 @@ class TransferClient(client.BaseClient):
                 .. extdoclink:: Update Globus Connect Personal collection by id
                     :ref: transfer/gcp_management/#update_collection_by_id
         """  # noqa: E501
-        if data.get("myproxy_server"):
-            if data.get("oauth_server"):
-                raise exc.GlobusSDKUsageError(
-                    "an endpoint cannot be reconfigured to use multiple "
-                    "identity providers for activation; specify either "
-                    "MyProxy or OAuth, not both"
-                )
-            else:
-                data["oauth_server"] = None
-        elif data.get("oauth_server"):
-            data["myproxy_server"] = None
-
         log.debug(f"TransferClient.update_endpoint({endpoint_id}, ...)")
         return self.put(
             f"/v0.10/endpoint/{endpoint_id}", data=data, query_params=query_params
@@ -547,125 +535,6 @@ class TransferClient(client.BaseClient):
         log.debug(f"TransferClient.endpoint_search({query_params})")
         return IterableTransferResponse(
             self.get("/v0.10/endpoint_search", query_params=query_params)
-        )
-
-    def endpoint_autoactivate(
-        self,
-        endpoint_id: uuid.UUID | str,
-        *,
-        if_expires_in: int | MissingType = MISSING,
-        query_params: dict[str, t.Any] | None = None,
-    ) -> response.GlobusHTTPResponse:
-        r"""
-        .. warning::
-
-            This method is deprecated with the end of Globus Connect Server v4
-            support and may no longer function with the Transfer API.
-
-        :param endpoint_id: The ID of the endpoint to autoactivate
-        :param if_expires_in: A number of seconds. Autoactivation will only be attempted
-            if the current activation expires within this timeframe. Otherwise,
-            autoactivation will succeed with a code of 'AlreadyActivated'
-        :param query_params: Any additional parameters will be passed through
-            as query params.
-        """  # noqa: E501
-        exc.warn_deprecated(
-            "endpoint_autoactivate is specific to Globus Connect Server v4, "
-            "which is no longer supported by the Transfer API."
-        )
-        query_params = {
-            "if_expires_in": if_expires_in,
-            **(query_params or {}),
-        }
-        log.debug(f"TransferClient.endpoint_autoactivate({endpoint_id})")
-        return self.post(
-            f"/v0.10/endpoint/{endpoint_id}/autoactivate", query_params=query_params
-        )
-
-    def endpoint_deactivate(
-        self,
-        endpoint_id: uuid.UUID | str,
-        *,
-        query_params: dict[str, t.Any] | None = None,
-    ) -> response.GlobusHTTPResponse:
-        """
-        .. warning::
-
-            This method is deprecated with the end of Globus Connect Server v4
-            support and may no longer function with the Transfer API.
-
-        :param endpoint_id: The ID of the endpoint to deactivate
-        :param query_params: Any additional parameters will be passed through
-            as query params.
-        """
-        exc.warn_deprecated(
-            "endpoint_deactivate is specific to Globus Connect Server v4, "
-            "which is no longer supported by the Transfer API."
-        )
-        log.debug(f"TransferClient.endpoint_deactivate({endpoint_id})")
-        return self.post(
-            f"/v0.10/endpoint/{endpoint_id}/deactivate", query_params=query_params
-        )
-
-    def endpoint_activate(
-        self,
-        endpoint_id: uuid.UUID | str,
-        *,
-        requirements_data: dict[str, t.Any] | None,
-        query_params: dict[str, t.Any] | None = None,
-    ) -> response.GlobusHTTPResponse:
-        """
-        .. warning::
-
-            This method is deprecated with the end of Globus Connect Server v4
-            support and may no longer function with the Transfer API.
-
-        :param endpoint_id: The ID of the endpoint to activate
-        :pram requirements_data: Filled in activation requirements data, as can be
-            fetched from :meth:`~endpoint_get_activation_requirements`. Only the fields
-            for the activation type being used need to be filled in.
-        :param requirements_data: An optional body for the request
-        :param query_params: Any additional parameters will be passed through
-            as query params.
-        """
-        exc.warn_deprecated(
-            "endpoint_activate is specific to Globus Connect Server v4, "
-            "which is no longer supported by the Transfer API."
-        )
-        log.debug(f"TransferClient.endpoint_activate({endpoint_id})")
-        return self.post(
-            f"/v0.10/endpoint/{endpoint_id}/activate",
-            data=requirements_data,
-            query_params=query_params,
-        )
-
-    def endpoint_get_activation_requirements(
-        self,
-        endpoint_id: uuid.UUID | str,
-        *,
-        query_params: dict[str, t.Any] | None = None,
-    ) -> ActivationRequirementsResponse:
-        """
-        .. warning::
-
-            This method is deprecated with the end of Globus Connect Server v4
-            support and may no longer function with the Transfer API.
-
-        :param endpoint_id: The ID of the endpoint whose activation requirements data is
-            being looked up
-        :param query_params: Any additional parameters will be passed through
-            as query params.
-        """
-        exc.warn_deprecated(
-            "endpoint_get_activation_requirements is specific to "
-            "Globus Connect Server v4, "
-            "which is no longer supported by the Transfer API."
-        )
-        return ActivationRequirementsResponse(
-            self.get(
-                f"/v0.10/endpoint/{endpoint_id}/activation_requirements",
-                query_params=query_params,
-            )
         )
 
     def my_effective_pause_rule_list(

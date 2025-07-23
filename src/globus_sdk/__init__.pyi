@@ -119,7 +119,6 @@ from .services.timers import (
     TransferTimer,
 )
 from .services.transfer import (
-    ActivationRequirementsResponse,
     DeleteData,
     IterableTransferResponse,
     TransferAPIError,
@@ -238,7 +237,6 @@ __all__ = (
     "TimersAPIError",
     "TimersClient",
     "TransferTimer",
-    "ActivationRequirementsResponse",
     "DeleteData",
     "IterableTransferResponse",
     "TransferAPIError",

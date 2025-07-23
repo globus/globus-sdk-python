@@ -42,10 +42,6 @@ error, rather than a generic :class:`GlobusAPIError`.
 Transfer Responses
 ------------------
 
-.. autoclass:: ActivationRequirementsResponse
-   :members:
-   :show-inheritance:
-
 .. autoclass:: IterableTransferResponse
    :members:
    :show-inheritance:
