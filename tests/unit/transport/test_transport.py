@@ -3,8 +3,8 @@ from unittest import mock
 
 import pytest
 
-from globus_sdk.transport import RequestsTransport, RetryContext
-from globus_sdk.transport.requests import _exponential_backoff
+from globus_sdk.transport import RequestsTransport, RetryConfig, RetryContext
+from globus_sdk.transport.retry_config import _exponential_backoff
 
 
 def _linear_backoff(ctx: RetryContext) -> float:
@@ -30,11 +30,6 @@ ca_bundle_non_existent = ca_bundle_directory / "bogus.bogus"
         ("verify_ssl", True, ca_bundle_non_existent),
         ("verify_ssl", True, str(ca_bundle_non_existent)),
         ("http_timeout", 60, 120),
-        ("retry_backoff", _exponential_backoff, _linear_backoff),
-        ("max_sleep", 10, 10),
-        ("max_sleep", 10, 1),
-        ("max_retries", 0, 5),
-        ("max_retries", 10, 0),
     ],
 )
 def test_transport_tuning(param_name, init_value, tune_value):
@@ -51,6 +46,29 @@ def test_transport_tuning(param_name, init_value, tune_value):
         assert getattr(transport, param_name) == expected_value
 
     assert getattr(transport, param_name) == init_value
+
+
+@pytest.mark.parametrize(
+    "param_name, init_value, tune_value",
+    [
+        ("backoff", _exponential_backoff, _linear_backoff),
+        ("max_sleep", 10, 10),
+        ("max_sleep", 10, 1),
+        ("max_retries", 0, 5),
+        ("max_retries", 10, 0),
+    ],
+)
+def test_retry_tuning(param_name, init_value, tune_value):
+    init_kwargs = {param_name: init_value}
+    config = RetryConfig(**init_kwargs)
+
+    assert getattr(config, param_name) == init_value
+
+    tune_kwargs = {param_name: tune_value}
+    with config.tune(**tune_kwargs):
+        assert getattr(config, param_name) == tune_value
+
+    assert getattr(config, param_name) == init_value
 
 
 def test_transport_can_manipulate_user_agent():

@@ -4,8 +4,7 @@ import globus_sdk
 
 
 @pytest.fixture
-def client(no_retry_transport):
-    class CustomSearchClient(globus_sdk.SearchClient):
-        transport_class = no_retry_transport
-
-    return CustomSearchClient()
+def client():
+    client = globus_sdk.SearchClient()
+    with client.retry_config.tune(max_retries=0):
+        yield client

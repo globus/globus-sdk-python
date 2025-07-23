@@ -4,8 +4,7 @@ import globus_sdk
 
 
 @pytest.fixture
-def auth_client(no_retry_transport):
-    class CustomAuthClient(globus_sdk.NativeAppAuthClient):
-        transport_class = no_retry_transport
-
-    return CustomAuthClient("dummy_client_id")
+def auth_client():
+    client = globus_sdk.NativeAppAuthClient("dummy_client_id")
+    with client.retry_config.tune(max_retries=0):
+        yield client

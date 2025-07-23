@@ -4,16 +4,14 @@ import globus_sdk
 
 
 @pytest.fixture
-def login_client(no_retry_transport):
-    class CustomAuthClient(globus_sdk.AuthLoginClient):
-        transport_class = no_retry_transport
-
-    return CustomAuthClient()
+def login_client():
+    client = globus_sdk.AuthLoginClient()
+    with client.retry_config.tune(max_retries=0):
+        yield client
 
 
 @pytest.fixture
-def service_client(no_retry_transport):
-    class CustomAuthClient(globus_sdk.AuthClient):
-        transport_class = no_retry_transport
-
-    return CustomAuthClient()
+def service_client():
+    client = globus_sdk.AuthClient()
+    with client.retry_config.tune(max_retries=0):
+        yield client

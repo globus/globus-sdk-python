@@ -11,6 +11,7 @@ from globus_sdk._missing import MISSING, MissingType
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.globus_app import GlobusApp
 from globus_sdk.scopes import GCSCollectionScopes, GCSEndpointScopes, Scope
+from globus_sdk.transport import RequestsTransport, RetryConfig
 
 from .data import (
     CollectionDocument,
@@ -56,7 +57,8 @@ class GCSClient(client.BaseClient):
         environment: str | None = None,
         authorizer: GlobusAuthorizer | None = None,
         app_name: str | None = None,
-        transport_params: dict[str, t.Any] | None = None,
+        transport: RequestsTransport | None = None,
+        retry_config: RetryConfig | None = None,
     ) -> None:
         # check if the provided address was a DNS name or an HTTPS URL
         if not gcs_address.startswith("https://"):
@@ -76,7 +78,8 @@ class GCSClient(client.BaseClient):
             app_scopes=app_scopes,
             authorizer=authorizer,
             app_name=app_name,
-            transport_params=transport_params,
+            transport=transport,
+            retry_config=retry_config,
         )
 
     @staticmethod

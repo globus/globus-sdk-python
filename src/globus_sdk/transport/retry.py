@@ -1,17 +1,18 @@
 from __future__ import annotations
 
 import enum
-import logging
 import typing as t
 
 import requests
 
 if t.TYPE_CHECKING:
-    from globus_sdk.transport.requests import RequestCallerInfo
-
-log = logging.getLogger(__name__)
+    from .caller_info import RequestCallerInfo
 
 C = t.TypeVar("C", bound=t.Callable[..., t.Any])
+
+
+# alias useful for declaring retry-related types
+RetryCheck = t.Callable[["RetryContext"], "RetryCheckResult"]
 
 
 class RetryContext:
@@ -90,60 +91,52 @@ def set_retry_check_flags(flag: RetryCheckFlags) -> t.Callable[[C], C]:
     return decorator
 
 
-# types useful for declaring RetryCheckRunner and related types
-RetryCheck = t.Callable[[RetryContext], RetryCheckResult]
-
-
-class RetryCheckRunner:
+class RetryCheckCollection:
     """
-    A RetryCheckRunner is an object responsible for running retry checks over the
-    lifetime of a request. Unlike the checks or the retry context, the runner persists
-    between retries. It can therefore implement special logic for checks like "only try
-    this check once".
+    A RetryCheckCollection is an ordered collection of retry checks which are
+    used to determine whether or not a request should be retried.
 
-    Its primary responsibility is to answer the question "should_retry(context)?" with a
-    boolean.
+    Checks are stored in registration order.
 
-    It takes as its input a list of checks. Checks may be paired with flags to indicate
-    their configuration options. When not paired with flags, the flags are taken to be
-    "NONE".
+    Notably, the collection does not decide
+    - how many times a request should retry
+    - how or how long the call should wait between attempts
+      (except via the backoff which may be set)
+    - what kinds of request parameters (e.g., timeouts) are used
 
-    Supported flags:
-
-    ``RUN_ONCE``
-      The check will run at most once for a given request. Once it has run, it is
-      recorded as "has_run" and will not be run again on that request.
+    It *only* contains ``RetryCheck`` methods which can look at a response or
+    error and decide whether or not to retry.
     """
 
-    # check configs: a list of pairs, (check, flags)
-    # a check without flags is assumed to have flags=NONE
-    def __init__(self, checks: list[RetryCheck]) -> None:
-        self._checks: list[RetryCheck] = []
-        self._check_data: dict[RetryCheck, dict[str, t.Any]] = {}
-        for check in checks:
-            self._checks.append(check)
-            self._check_data[check] = {}
+    def __init__(self) -> None:
+        self._data: list[RetryCheck] = []
 
-    def should_retry(self, context: RetryContext) -> bool:
-        for check in self._checks:
-            flags = getattr(check, "_retry_check_flags", RetryCheckFlags.NONE)
+    def register_check(self, func: RetryCheck) -> RetryCheck:
+        """
+        Register a retry check with this policy.
 
-            if flags & RetryCheckFlags.RUN_ONCE:
-                if self._check_data[check].get("has_run"):
-                    continue
-                else:
-                    self._check_data[check]["has_run"] = True
+        A retry checker is a callable responsible for implementing
+        `check(RetryContext) -> RetryCheckResult`
 
-            result = check(context)
-            log.debug(  # try to get name but don't fail if it's not a function...
-                "ran retry check (%s) => %s", getattr(check, "__name__", check), result
-            )
-            if result is RetryCheckResult.no_decision:
-                continue
-            elif result is RetryCheckResult.do_not_retry:
-                return False
-            else:
-                return True
+        `check` should *not* perform any sleeps or delays.
+        Multiple checks should be chainable and callable in any order.
 
-        # fallthrough: don't retry any request which isn't marked for retry
-        return False
+        :param func: The function or other callable to register as a retry check
+        """
+        self._data.append(func)
+        return func
+
+    def register_many_checks(self, funcs: t.Iterable[RetryCheck]) -> None:
+        """
+        Register all checks in a collection of checks.
+
+        :param funcs: An iterable collection of retry check callables
+        """
+        for f in funcs:
+            self.register_check(f)
+
+    def __iter__(self) -> t.Iterator[RetryCheck]:
+        yield from self._data
+
+    def __len__(self) -> int:
+        return len(self._data)

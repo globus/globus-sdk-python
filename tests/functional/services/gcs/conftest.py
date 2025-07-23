@@ -1,12 +1,11 @@
 import pytest
 
-from globus_sdk import GCSClient
+import globus_sdk
 
 
 @pytest.fixture
-def client(no_retry_transport):
-    class CustomGCSClient(GCSClient):
-        transport_class = no_retry_transport
-
+def client():
     # default fqdn for GCS client testing
-    return CustomGCSClient("abc.xyz.data.globus.org")
+    client = globus_sdk.GCSClient("abc.xyz.data.globus.org")
+    with client.retry_config.tune(max_retries=0):
+        yield client

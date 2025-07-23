@@ -12,6 +12,7 @@ from globus_sdk._missing import MISSING, MissingType
 from globus_sdk.authorizers import GlobusAuthorizer, NullAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
 from globus_sdk.scopes import AuthScopes, Scope
+from globus_sdk.transport import RequestsTransport, RetryConfig
 
 from .._common import get_jwk_data, pem_decode_jwk_data
 from ..errors import AuthAPIError
@@ -52,14 +53,16 @@ class AuthLoginClient(client.BaseClient):
         base_url: str | None = None,
         authorizer: GlobusAuthorizer | None = None,
         app_name: str | None = None,
-        transport_params: dict[str, t.Any] | None = None,
+        transport: RequestsTransport | None = None,
+        retry_config: RetryConfig | None = None,
     ) -> None:
         super().__init__(
             environment=environment,
             base_url=base_url,
             authorizer=authorizer,
             app_name=app_name,
-            transport_params=transport_params,
+            transport=transport,
+            retry_config=retry_config,
         )
         self.client_id: str | None = str(client_id) if client_id is not None else None
         # an AuthClient may contain a GlobusOAuth2FlowManager in order to

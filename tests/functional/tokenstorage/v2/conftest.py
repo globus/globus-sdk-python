@@ -15,11 +15,10 @@ def id_token_sub():
 
 
 @pytest.fixture
-def cc_auth_client(no_retry_transport):
-    class CustomAuthClient(globus_sdk.ConfidentialAppAuthClient):
-        transport_class = no_retry_transport
-
-    return CustomAuthClient("dummy_id", "dummy_secret")
+def cc_auth_client():
+    client = globus_sdk.ConfidentialAppAuthClient("dummy_id", "dummy_secret")
+    with client.retry_config.tune(max_retries=0):
+        yield client
 
 
 @pytest.fixture

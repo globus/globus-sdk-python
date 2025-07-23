@@ -11,7 +11,8 @@ BASE_CLIENT_PARAMS = (
     "authorizer",
     "app_name",
     "base_url",
-    "transport_params",
+    "transport",
+    "retry_config",
 )
 
 
