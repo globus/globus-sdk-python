@@ -1336,44 +1336,6 @@ class TransferClient(client.BaseClient):
             f"/v0.10/operation/endpoint/{endpoint_id}/stat", query_params=query_params
         )
 
-    def operation_symlink(
-        self,
-        endpoint_id: uuid.UUID | str,
-        symlink_target: str,
-        path: str,
-        *,
-        query_params: dict[str, t.Any] | None = None,
-    ) -> response.GlobusHTTPResponse:
-        """
-        :param endpoint_id: The ID of the endpoint on which to create a symlink
-        :param symlink_target: The path referenced by the new symlink
-        :param path: The name of (path to) the new symlink
-        :param query_params: Additional passthrough query parameters
-
-        .. warning::
-
-            This method is not currently supported by any collections.
-        """  # noqa: E501
-        exc.warn_deprecated(
-            "operation_symlink is not currently supported by any collections. "
-            "To reduce confusion, this method will be removed."
-        )
-        log.debug(
-            "TransferClient.operation_symlink({}, {}, {}, {})".format(
-                endpoint_id, symlink_target, path, query_params
-            )
-        )
-        data = {
-            "DATA_TYPE": "symlink",
-            "symlink_target": symlink_target,
-            "path": path,
-        }
-        return self.post(
-            f"/v0.10/operation/endpoint/{endpoint_id}/symlink",
-            data=data,
-            query_params=query_params,
-        )
-
     #
     # Task Submission
     #
