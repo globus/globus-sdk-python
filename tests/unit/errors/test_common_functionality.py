@@ -3,7 +3,7 @@ import itertools
 import pytest
 import requests
 
-from globus_sdk import ErrorSubdocument, GlobusAPIError, RemovedInV4Warning, exc
+from globus_sdk import ErrorSubdocument, GlobusAPIError, exc
 from globus_sdk.testing import construct_error
 
 
@@ -50,19 +50,6 @@ def test_binary_content_property():
     body_text = "some data"
     err = construct_error(body=body_text, http_status=400)
     assert err.binary_content == body_text.encode("utf-8")
-
-
-def test_raw_text_property_warns():
-    body_text = "some data"
-    err = construct_error(body=body_text, http_status=400)
-    with pytest.warns(
-        RemovedInV4Warning,
-        match=(
-            r"The 'raw_text' property of GlobusAPIError objects is deprecated\. "
-            r"Use the 'text' property instead\."
-        ),
-    ):
-        assert err.raw_text == body_text
 
 
 @pytest.mark.parametrize(
