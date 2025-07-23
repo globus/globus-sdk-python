@@ -48,8 +48,6 @@ from .services.compute import (
     ComputeAPIError,
     ComputeClientV2,
     ComputeClientV3,
-    ComputeFunctionDocument,
-    ComputeFunctionMetadata,
 )
 from .services.flows import (
     FlowsAPIError,
@@ -177,8 +175,6 @@ __all__ = (
     "ComputeAPIError",
     "ComputeClientV2",
     "ComputeClientV3",
-    "ComputeFunctionDocument",
-    "ComputeFunctionMetadata",
     "FlowsAPIError",
     "FlowsClient",
     "IterableFlowsResponse",

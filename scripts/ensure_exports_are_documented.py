@@ -23,10 +23,7 @@ PACKAGE_LOCS_TO_SCAN = (
     "globus_sdk/testing/",
 )
 
-DEPRECATED_NAMES = {
-    "ComputeFunctionDocument",
-    "ComputeFunctionMetadata",
-}
+DEPRECATED_NAMES: set[str] = set()
 
 
 def load_docs() -> dict[str, str]:
