@@ -1,7 +1,7 @@
 import time
 from unittest import mock
 
-from globus_sdk.token_storage import MemoryAdapter
+from globus_sdk.token_storage.v1 import MemoryAdapter
 
 
 def test_memory_adapter_store_overwrites_only_new_data():

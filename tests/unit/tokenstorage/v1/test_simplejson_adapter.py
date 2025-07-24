@@ -3,7 +3,7 @@ import json
 import pytest
 
 from globus_sdk import __version__ as sdkversion
-from globus_sdk.token_storage import SimpleJSONFileAdapter
+from globus_sdk.token_storage.v1 import SimpleJSONFileAdapter
 
 
 def test_simplejson_reading_bad_data(tmp_path):

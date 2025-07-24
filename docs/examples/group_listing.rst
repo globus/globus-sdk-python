@@ -62,7 +62,7 @@ For simplicity, the script will prompt for login on each use.
 Group Listing With Token Storage
 --------------------------------
 
-``globus_sdk.token_storage`` provides tools for managing refresh tokens. The
+``globus_sdk.token_storage.v1`` provides tools for managing refresh tokens. The
 following example script shows how you might use this to provide a complete
 script which lists the current user's groups using refresh tokens.
 
@@ -72,7 +72,7 @@ script which lists the current user's groups using refresh tokens.
     import os
 
     from globus_sdk import GroupsClient, NativeAppAuthClient, RefreshTokenAuthorizer
-    from globus_sdk.token_storage import SimpleJSONFileAdapter
+    from globus_sdk.token_storage.v1 import SimpleJSONFileAdapter
 
     CLIENT_ID = "61338d24-54d5-408f-a10d-66c06b59f6d2"
     AUTH_CLIENT = NativeAppAuthClient(CLIENT_ID)
