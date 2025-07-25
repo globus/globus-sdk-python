@@ -11,9 +11,8 @@ import urllib.parse
 from globus_sdk._internal.utils import slash_join
 from globus_sdk._missing import MISSING, MissingType, filter_missing
 from globus_sdk.exc import GlobusSDKUsageError
-from globus_sdk.scopes import Scope
+from globus_sdk.scopes import Scope, ScopeParser
 
-from .._common import stringify_requested_scopes
 from ..response import OAuthAuthorizationCodeResponse
 from .base import GlobusOAuthFlowManager
 
@@ -125,7 +124,7 @@ class GlobusNativeAppFlowManager(GlobusOAuthFlowManager):
             )
 
         # convert scopes iterable to string immediately on load
-        self.requested_scopes = stringify_requested_scopes(requested_scopes)
+        self.requested_scopes = ScopeParser.serialize(requested_scopes)
 
         # default to `/v2/web/auth-code` on whatever environment we're looking
         # at -- most typically it will be `https://auth.globus.org/`

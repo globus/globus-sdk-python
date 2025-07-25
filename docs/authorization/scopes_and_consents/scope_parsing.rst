@@ -24,12 +24,3 @@ ScopeParser Reference
 .. autoclass:: ScopeParseError
 
 .. autoclass:: ScopeCycleError
-
-.. rubric:: Utility Functions
-
-``globus_sdk.scopes`` also provides helper functions which are used to
-manipulate scope objects.
-
-.. autofunction:: scopes_to_str
-
-.. autofunction:: scopes_to_scope_list

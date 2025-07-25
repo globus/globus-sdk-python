@@ -6,9 +6,8 @@ import urllib.parse
 
 from globus_sdk._internal.utils import slash_join
 from globus_sdk._missing import filter_missing
-from globus_sdk.scopes import Scope
+from globus_sdk.scopes import Scope, ScopeParser
 
-from .._common import stringify_requested_scopes
 from ..response import OAuthAuthorizationCodeResponse
 from .base import GlobusOAuthFlowManager
 
@@ -56,7 +55,7 @@ class GlobusAuthorizationCodeFlowManager(GlobusOAuthFlowManager):
     ) -> None:
         # convert a scope object or iterable to string immediately on load
         # and default to the default requested scopes
-        self.requested_scopes: str = stringify_requested_scopes(requested_scopes)
+        self.requested_scopes: str = ScopeParser.serialize(requested_scopes)
 
         # store the remaining parameters directly, with no transformation
         self.client_id = auth_client.client_id

@@ -1,4 +1,3 @@
-from ._normalize import scopes_to_scope_list, scopes_to_str
 from .collection import DynamicScopeCollection, ScopeCollection, StaticScopeCollection
 from .data import (
     AuthScopes,
@@ -36,6 +35,4 @@ __all__ = (
     "SearchScopes",
     "TimersScopes",
     "TransferScopes",
-    "scopes_to_str",
-    "scopes_to_scope_list",
 )

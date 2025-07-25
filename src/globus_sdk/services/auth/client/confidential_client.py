@@ -9,9 +9,8 @@ from globus_sdk._internal.remarshal import strseq_iter, strseq_listify
 from globus_sdk._missing import MISSING, MissingType
 from globus_sdk.authorizers import BasicAuthorizer
 from globus_sdk.response import GlobusHTTPResponse
-from globus_sdk.scopes import Scope
+from globus_sdk.scopes import Scope, ScopeParser
 
-from .._common import stringify_requested_scopes
 from ..flow_managers import GlobusAuthorizationCodeFlowManager
 from ..response import OAuthClientCredentialsResponse, OAuthDependentTokenResponse
 from .base_login_client import AuthLoginClient
@@ -83,7 +82,7 @@ class ConfidentialAppAuthClient(AuthLoginClient):
             >>> transfer_token_info = tokens.by_resource_server["transfer.api.globus.org"]
             >>> transfer_token = transfer_token_info["access_token"]
         """  # noqa: E501
-        requested_scopes_string = stringify_requested_scopes(requested_scopes)
+        requested_scopes_string = ScopeParser.serialize(requested_scopes)
         log.debug(
             "Fetching token(s) using client credentials, "
             f"scope={requested_scopes_string}"

@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import typing as t
+
+from globus_sdk import exc
+
 from ._graph_parser import ScopeGraph
 from .representation import Scope
 
@@ -72,3 +76,39 @@ class ScopeParser:
         return cls.parse(
             " ".join([str(s) for s in scopes_a] + [str(s) for s in scopes_b])
         )
+
+    @classmethod
+    def serialize(
+        cls, scopes: str | Scope | t.Iterable[str | Scope], *, reject_empty: bool = True
+    ) -> str:
+        """
+        Normalize scopes to a space-separated scope string.
+
+        The results of this method are suitable for sending to Globus Auth.
+        Scopes are not parsed, merged, or normalized by this method.
+
+        :param scopes: A scope string, scope object, or an iterable of scope strings
+            and scope objects.
+        :param reject_empty: When true (the default), raise an error if the
+            scopes serialize to the empty string.
+        :returns: A space-separated scope string.
+
+        Example usage:
+
+        .. code-block:: pycon
+
+            >>> ScopeParser.serialize([Scope("foo"), "bar", Scope("qux")])
+            'foo bar qux'
+        """
+        scope_iter: t.Iterable[str | Scope]
+        if isinstance(scopes, (str, Scope)):
+            scope_iter = (scopes,)
+        else:
+            scope_iter = scopes
+
+        result = " ".join(str(scope) for scope in scope_iter)
+        if reject_empty and result == "":
+            raise exc.GlobusSDKUsageError(
+                "'scopes' cannot be the empty string or empty collection."
+            )
+        return result

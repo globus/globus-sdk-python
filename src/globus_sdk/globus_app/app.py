@@ -14,7 +14,7 @@ from globus_sdk import (
 )
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.gare import GlobusAuthorizationParameters
-from globus_sdk.scopes import AuthScopes, Scope, ScopeParser, scopes_to_scope_list
+from globus_sdk.scopes import AuthScopes, Scope, ScopeParser
 from globus_sdk.token_storage import (
     ScopeRequirementsValidator,
     TokenStorage,
@@ -130,7 +130,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
             return {}
 
         return {
-            resource_server: scopes_to_scope_list(scopes)
+            resource_server: list(self._iter_scopes(scopes))
             for resource_server, scopes in scope_requirements.items()
         }
 
@@ -424,7 +424,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         """
         for resource_server, scopes in scope_requirements.items():
             curr = self._scope_requirements.setdefault(resource_server, [])
-            curr.extend(scopes_to_scope_list(scopes))
+            curr.extend(self._iter_scopes(scopes))
 
         self._authorizer_factory.clear_cache(*scope_requirements.keys())
 
@@ -462,3 +462,18 @@ class GlobusApp(metaclass=abc.ABCMeta):
         """
         # Scopes are mutable objects so we return a deepcopy
         return copy.deepcopy(self._scope_requirements)
+
+    def _iter_scopes(
+        self, scopes: str | Scope | t.Iterable[str | Scope]
+    ) -> t.Iterator[Scope]:
+        """Normalize scopes in various formats to an iterator of Scope objects."""
+        if isinstance(scopes, str):
+            yield from ScopeParser.parse(scopes)
+        elif isinstance(scopes, Scope):
+            yield scopes
+        else:
+            for item in scopes:
+                if isinstance(item, str):
+                    yield from ScopeParser.parse(item)
+                else:
+                    yield item

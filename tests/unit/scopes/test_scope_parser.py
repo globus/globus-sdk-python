@@ -2,6 +2,7 @@ import time
 
 import pytest
 
+from globus_sdk import exc
 from globus_sdk.scopes import Scope, ScopeCycleError, ScopeParseError, ScopeParser
 
 
@@ -200,3 +201,65 @@ def test_scope_init_forbids_special_chars(scope_str):
 )
 def test_scope_parsing_normalizes_optionals(original, reserialized):
     assert {str(s) for s in ScopeParser.parse(original)} == reserialized
+
+
+@pytest.mark.parametrize(
+    "scope_str",
+    (
+        "foo",
+        "*foo",
+        "foo[bar] baz",
+        " foo  ",
+        "foo[bar] bar[foo]",
+    ),
+)
+def test_serialize_of_scope_string_is_exact(scope_str):
+    assert ScopeParser.serialize(scope_str) == scope_str
+
+
+def test_serialize_of_scope_object():
+    assert ScopeParser.serialize(Scope("scope1")) == "scope1"
+
+
+@pytest.mark.parametrize(
+    "scope_collection",
+    (
+        ("scope1",),
+        ["scope1"],
+        {"scope1"},
+        (s for s in ["scope1"]),
+    ),
+)
+def test_serialize_of_simple_collection_of_strings(scope_collection):
+    assert ScopeParser.serialize(scope_collection) == "scope1"
+
+
+@pytest.mark.parametrize(
+    "scope_collection, expect_str",
+    (
+        (("scope1", Scope("scope2")), "scope1 scope2"),
+        ((Scope("scope1"), Scope("scope2")), "scope1 scope2"),
+        ((Scope("scope1"), Scope("scope2"), "scope3"), "scope1 scope2 scope3"),
+        (
+            (Scope("scope1"), Scope("scope2"), "scope3 scope4"),
+            "scope1 scope2 scope3 scope4",
+        ),
+        ([Scope("scope1"), "scope2", "scope3 scope4"], "scope1 scope2 scope3 scope4"),
+    ),
+)
+def test_serialize_handles_mixed_data(scope_collection, expect_str):
+    assert ScopeParser.serialize(scope_collection) == expect_str
+
+
+@pytest.mark.parametrize("input_obj", ("", [], set(), ()))
+def test_serialize_rejects_empty_by_default(input_obj):
+    with pytest.raises(
+        exc.GlobusSDKUsageError,
+        match="'scopes' cannot be the empty string or empty collection",
+    ):
+        ScopeParser.serialize(input_obj)
+
+
+@pytest.mark.parametrize("input_obj", ("", [], set(), ()))
+def test_serialize_allows_empty_string_with_flag(input_obj):
+    assert ScopeParser.serialize(input_obj, reject_empty=False) == ""

@@ -1,7 +1,7 @@
 import typing as t
 
 import globus_sdk
-from globus_sdk.scopes import Scope, scopes_to_str
+from globus_sdk.scopes import Scope, ScopeParser
 from globus_sdk.services.auth import (
     GlobusAuthorizationCodeFlowManager,
     GlobusNativeAppFlowManager,
@@ -24,7 +24,7 @@ cc_client = globus_sdk.ConfidentialAppAuthClient(
 
 # this function should type-check okay
 def foo(x: str | Scope | t.Iterable[str | Scope]) -> str:
-    return scopes_to_str(x)
+    return ScopeParser.serialize(x)
 
 
 foo("somestring")
