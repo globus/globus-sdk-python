@@ -203,7 +203,7 @@ class GroupsClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
-        Get policies for the given group
+        Get policies for the given group.
 
         :param group_id: the ID of the group
         :param query_params: additional passthrough query parameters
@@ -394,3 +394,36 @@ class GroupsClient(client.BaseClient):
                     :ref: group_membership_post_actions_v2_groups__group_id__post
         """
         return self.post(f"/groups/{group_id}", data=actions, query_params=query_params)
+
+    def set_subscription_admin_verified_id(
+        self,
+        group_id: uuid.UUID | str,
+        subscription_id: uuid.UUID | str | None,
+        *,
+        query_params: dict[str, t.Any] | None = None,
+    ) -> response.GlobusHTTPResponse:
+        """
+        Verify a group as belonging to a subscription or disassociate a verified group
+            from a subscription.
+
+        :param group_id: the ID of the group
+        :param subscription_id: the ID of the subscription to which the group belongs,
+            or ``None`` to disassociate the group from a subscription
+        :param query_params: additional passthrough query parameters
+
+        .. tab-set::
+
+            .. tab-item:: API Info
+
+                ``PUT /v2/groups/<group_id>/subscription_admin_verified``
+
+                .. extdoclink:: Update the group's subscription admin verified ID
+                    :service: groups
+                    :ref: update_subscription_admin_verified_id_v2_groups__group_id__
+                        subscription_admin_verified_put
+        """
+        return self.put(
+            f"/groups/{group_id}/subscription_admin_verified",
+            data={"subscription_admin_verified_id": subscription_id},
+            query_params=query_params,
+        )
