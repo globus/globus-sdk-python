@@ -67,6 +67,6 @@ def test_can_create_authorizer_from_scope_objects(client):
     assert a1.scopes == "foo"
 
     a2 = ClientCredentialsAuthorizer(
-        client, [Scope("foo"), "bar", Scope("baz").with_dependency("buzz")]
+        client, [Scope("foo"), "bar", Scope("baz").with_dependency(Scope("buzz"))]
     )
     assert a2.scopes == "foo bar baz[buzz]"

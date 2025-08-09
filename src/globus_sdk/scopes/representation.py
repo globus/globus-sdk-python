@@ -77,6 +77,11 @@ class Scope:
 
         :param other_scope: The scope upon which the current scope depends.
         """
+        if not isinstance(other_scope, Scope):
+            raise TypeError(
+                "Scope.with_dependency() takes a Scope as its input. "
+                f"Got: '{type(other_scope).__qualname__}'"
+            )
         return dataclasses.replace(
             self, dependencies=self.dependencies + (other_scope,)
         )
@@ -89,8 +94,16 @@ class Scope:
 
         :param other_scopes: The scopes upon which the current scope depends.
         """
+        other_scopes_tuple = tuple(other_scopes)
+        for i, item in enumerate(other_scopes_tuple):
+            if not isinstance(item, Scope):
+                raise TypeError(
+                    "Scope.with_dependencies() takes "
+                    "an Iterable of Scopes as its input. "
+                    f"At position {i}, got: '{type(item).__qualname__}'"
+                )
         return dataclasses.replace(
-            self, dependencies=self.dependencies + tuple(other_scopes)
+            self, dependencies=self.dependencies + other_scopes_tuple
         )
 
     def with_optional(self, optional: bool) -> Scope:

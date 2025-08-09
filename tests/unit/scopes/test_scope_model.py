@@ -1,5 +1,7 @@
 import uuid
 
+import pytest
+
 from globus_sdk.scopes import Scope
 
 
@@ -37,3 +39,36 @@ def test_scope_with_optional_leaves_original_unchanged():
     assert not s1.optional
     assert s2.optional
     assert not s3.optional
+
+
+def test_scope_with_string_dependency_gets_typeerror():
+    s = Scope("x")
+    with pytest.raises(
+        TypeError,
+        match=r"Scope\.with_dependency\(\) takes a Scope as its input\. Got: 'str'",
+    ):
+        s.with_dependency("y")
+
+
+def test_scope_with_string_dependencies_gets_typeerror():
+    s = Scope("x")
+    with pytest.raises(
+        TypeError,
+        match=(
+            r"Scope\.with_dependencies\(\) takes an Iterable of Scopes as its input\. "
+            "At position 0, got: 'str'"
+        ),
+    ):
+        s.with_dependencies(["y"])
+
+
+def test_scope_with_mixed_dependencies_gets_typeerror():
+    s = Scope("x")
+    with pytest.raises(
+        TypeError,
+        match=(
+            r"Scope\.with_dependencies\(\) takes an Iterable of Scopes as its input\. "
+            "At position 1, got: 'str'"
+        ),
+    ):
+        s.with_dependencies([Scope("y"), "z"])
