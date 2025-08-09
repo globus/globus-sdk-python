@@ -25,8 +25,8 @@ def test_mixed_optional_dependencies():
 
 
 def test_different_dependencies():
-    s1 = [Scope("foo").with_dependency("bar")]
-    s2 = [Scope("foo").with_dependency("baz")]
+    s1 = [Scope("foo").with_dependency(Scope("bar"))]
+    s2 = [Scope("foo").with_dependency(Scope("baz"))]
     merged = ScopeParser.merge_scopes(s1, s2)
     assert len(merged) == 1
     assert merged[0].scope_string == "foo"
@@ -38,8 +38,8 @@ def test_different_dependencies():
 
 
 def test_optional_dependencies():
-    s1 = [Scope("foo").with_dependency("bar")]
-    s2 = [Scope("foo").with_dependency("*bar")]
+    s1 = [Scope("foo").with_dependency(Scope("bar"))]
+    s2 = [Scope("foo").with_dependency(Scope("bar", optional=True))]
     merged = ScopeParser.merge_scopes(s1, s2)
     assert len(merged) == 1
     assert merged[0].scope_string == "foo"
@@ -50,8 +50,8 @@ def test_optional_dependencies():
 
 
 def test_different_dependencies_on_mixed_optional_base():
-    s1 = [Scope("foo").with_dependency("bar")]
-    s2 = [Scope("foo", optional=True).with_dependency("baz")]
+    s1 = [Scope("foo").with_dependency(Scope("bar"))]
+    s2 = [Scope("foo", optional=True).with_dependency(Scope("baz"))]
     merged = ScopeParser.merge_scopes(s1, s2)
     assert len(merged) == 2
 
