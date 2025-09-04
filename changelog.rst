@@ -12,6 +12,20 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-3.63.0:
+
+v3.63.0 (2025-09-04)
+====================
+
+Changed
+-------
+
+- Renamed the ``GroupsClient`` method ``set_subscription_admin_verified_id`` to
+  ``set_subscription_admin_verified``. (:pr:`1302`)
+
+  - ``GroupsClient.set_subscription_admin_verified_id`` still exists but emits a
+    deprecation warning.
+
 .. _changelog-3.62.0:
 
 v3.62.0 (2025-07-31)
