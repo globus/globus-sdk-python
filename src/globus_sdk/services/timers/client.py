@@ -12,7 +12,7 @@ from globus_sdk.scopes import (
     TransferScopes,
 )
 
-from .data import TimerJob, TransferTimer
+from .data import FlowTimer, TimerJob, TransferTimer
 from .errors import TimersAPIError
 
 log = logging.getLogger(__name__)
@@ -138,7 +138,7 @@ class TimersClient(client.BaseClient):
         return self.get(f"/jobs/{job_id}", query_params=query_params)
 
     def create_timer(
-        self, timer: dict[str, t.Any] | TransferTimer
+        self, timer: dict[str, t.Any] | TransferTimer | FlowTimer
     ) -> response.GlobusHTTPResponse:
         """
         :param timer: a document defining the new timer

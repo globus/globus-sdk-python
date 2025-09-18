@@ -16,7 +16,11 @@ Globus Timers
 Helper Objects
 --------------
 
-A helper is provided for constructing Transfer Timers:
+A helper is provided for constructing Transfer and Flows timers:
+
+.. autoclass:: FlowTimer
+   :members:
+   :show-inheritance:
 
 .. autoclass:: TransferTimer
    :members:

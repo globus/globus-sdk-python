@@ -111,6 +111,7 @@ from .services.search import (
 )
 from .services.timer import TimerAPIError, TimerClient
 from .services.timers import (
+    FlowTimer,
     OnceTimerSchedule,
     RecurringTimerSchedule,
     TimerJob,
@@ -239,6 +240,7 @@ __all__ = (
     "TimerJob",
     "TimersAPIError",
     "TimersClient",
+    "FlowTimer",
     "TransferTimer",
     "ActivationRequirementsResponse",
     "DeleteData",

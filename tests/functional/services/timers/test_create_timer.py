@@ -46,3 +46,24 @@ def test_transfer_timer_creation(client):
     assert sent["timer"]["body"] == {
         k: v for k, v in body.items() if k != "skip_activation_check"
     }
+
+
+def test_flow_timer_creation(client):
+    # Setup
+    meta = load_response(client.create_timer, case="flow_timer_success").metadata
+
+    # Act
+    client.create_timer(
+        timer=globus_sdk.FlowTimer(
+            flow_id=meta["flow_id"],
+            body=meta["callback_body"],
+            schedule=meta["schedule"],
+        )
+    )
+
+    # Verify
+    req = get_last_request()
+    sent = json.loads(req.body)
+    assert sent["timer"]["flow_id"] == meta["flow_id"]
+    assert sent["timer"]["body"] == meta["callback_body"]
+    assert sent["timer"]["schedule"] == meta["schedule"]

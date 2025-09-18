@@ -44,6 +44,41 @@ V2_TRANSFER_TIMER = {
     },
     "status": "new",
     "submitted_at": "2023-10-26T20:31:09+00:00",
+    "timer_type": "transfer",
+}
+
+
+FLOW_ID = str(uuid.uuid4())
+V2_FLOW_TIMER = {
+    "callback_body": {
+        "body": {"input_key": "input_value"},
+        "run_managers": [f"urn:globus:auth:identity:{uuid.uuid4()}"],
+    },
+    "callback_url": f"https://flows.automate.globus.org/flows/{FLOW_ID}/run",
+    "inactive_reason": None,
+    "interval": None,
+    "job_id": str(uuid.uuid4()),
+    "last_ran_at": None,
+    "n_errors": 0,
+    "n_runs": 0,
+    "name": "Very Cool Timer",
+    "next_run": "2025-10-27T05:00:00+00:00",
+    "results": [],
+    "schedule": {
+        "datetime": "2025-10-27T05:00:00+00:00",
+        "type": "once",
+    },
+    "scope": (
+        f"https://auth.globus.org/scopes/{FLOW_ID}"
+        f"/flow_{FLOW_ID.replace('-', '_')}_user"
+    ),
+    "status": "new",
+    "stop_after": {
+        "date": None,
+        "n_runs": 1,
+    },
+    "submitted_at": "2025-08-01T20:31:09+00:00",
+    "timer_type": "flow",
 }
 
 

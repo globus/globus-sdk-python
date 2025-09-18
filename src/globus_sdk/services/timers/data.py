@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime as dt
 import logging
 import typing as t
+import uuid
 
 from globus_sdk.config import get_service_url
 from globus_sdk.exc import warn_deprecated
@@ -121,6 +122,114 @@ class TransferTimer(PayloadWrapper):
         new_body.pop("submission_id", None)
         new_body.pop("skip_activation_check", None)
         return new_body
+
+
+class FlowTimer(PayloadWrapper):
+    """
+    A helper for defining a payload for Flow Timer creation.
+    Use this along with :meth:`create_timer <globus_sdk.TimersClient.create_timer>` to
+    create a timer.
+
+    ..  note::
+
+        ``TimersClient`` has two methods for creating timers:
+        ``create_timer`` and ``create_job``.
+
+        This helper class only works with the ``create_timer`` method.
+
+    :param flow_id: The flow ID to run when the timer runs.
+    :param name: A name to identify this timer.
+    :param schedule: The schedule on which the timer runs
+    :param body: A transfer payload for the timer to use.
+
+    The ``schedule`` field determines when the timer will run.
+    Timers may be "run once" or "recurring", and "recurring" timers may specify an end
+    date or the number of executions after which the timer will stop.
+    A ``schedule`` is specified as a dict, but the SDK provides two helpers
+    for constructing these data.
+
+    **Example Schedules**
+
+    .. tab-set::
+
+        .. tab-item:: Run Once, Right Now
+
+            .. code-block:: python
+
+                schedule = OnceTimerSchedule()
+
+        .. tab-item:: Run Once, At a Specific Time
+
+            .. code-block:: python
+
+                schedule = OnceTimerSchedule(datetime="2023-09-22T00:00:00Z")
+
+        .. tab-item:: Run Every 5 Minutes, Until a Specific Time
+
+            .. code-block:: python
+
+                schedule = RecurringTimerSchedule(
+                    interval_seconds=300,
+                    end={"condition": "time", "datetime": "2023-10-01T00:00:00Z"},
+                )
+
+        .. tab-item:: Run Every 30 Minutes, 10 Times
+
+            .. code-block:: python
+
+                schedule = RecurringTimerSchedule(
+                    interval_seconds=1800,
+                    end={"condition": "iterations", "iterations": 10},
+                )
+
+        .. tab-item:: Run Every 10 Minutes, Indefinitely
+
+            .. code-block:: python
+
+                schedule = RecurringTimerSchedule(interval_seconds=600)
+
+    Using these schedules, you can create a timer:
+
+    .. code-block:: pycon
+
+        >>> from globus_sdk import FlowTimer
+        >>> schedule = ...
+        >>> timer = FlowTimer(
+        ...     name="my timer",
+        ...     flow_id="00000000-19a9-44e6-9c1a-867da59d84ab",
+        ...     schedule=schedule,
+        ...     body={
+        ...         "body": {
+        ...             "input_key": "input_value",
+        ...         },
+        ...         "run_managers": [
+        ...             "urn:globus:auth:identity:11111111-be6a-473a-a027-4cfe4ceeafe3"
+        ...         ],
+        ...     },
+        ... )
+
+    Submit the timer to the Timers service with
+    :meth:`create_timer <globus_sdk.TimersClient.create_timer>`.
+    """
+
+    def __init__(
+        self,
+        *,
+        flow_id: uuid.UUID | str,
+        name: str | MissingType = MISSING,
+        schedule: dict[str, t.Any] | RecurringTimerSchedule | OnceTimerSchedule,
+        body: dict[str, t.Any],
+    ) -> None:
+        super().__init__()
+        self["timer_type"] = "flow"
+        self["flow_id"] = flow_id
+        self["name"] = name
+        self["schedule"] = schedule
+        self["body"] = self._preprocess_body(body)
+
+    def _preprocess_body(self, body: dict[str, t.Any]) -> dict[str, t.Any]:
+        # Additional processing may be added in the future.
+        return body.copy()
 
 
 class RecurringTimerSchedule(PayloadWrapper):
