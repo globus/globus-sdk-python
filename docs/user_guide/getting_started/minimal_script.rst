@@ -92,11 +92,18 @@ will prompt you to login.
 Summary: Complete Examples
 --------------------------
 
-For ease of use, here are a pair of examples.
+For ease of use, here are a set of examples.
 
 One of them is exactly the same as the tutorial steps above, in a single block.
-The other example includes an explicit login step, so you can control when that
+
+The next is a version of the tutorial which leverages the context manager
+interfaces of the app and client to do cleanup.
+This is slightly more verbose, but such usage is recommended because it ensures
+resources associated with the client and app are properly closed.
+
+The final example includes an explicit login step, so you can control when that
 login flow happens!
+It also uses the context manager style.
 
 *These examples are complete. They should run without errors "as is".*
 
@@ -106,6 +113,14 @@ login flow happens!
 
         .. literalinclude:: list_groups.py
             :caption: ``list_groups.py`` [:download:`download <list_groups.py>`]
+            :language: python
+
+    ..  tab-item:: With Context Managers
+
+        This example is the same as the tutorial, but does safer resource cleanup.
+
+        .. literalinclude:: list_groups_improved.py
+            :caption: ``list_groups_improved.py`` [:download:`download <list_groups_improved.py>`]
             :language: python
 
     ..  tab-item:: Explicit ``login()`` Step
