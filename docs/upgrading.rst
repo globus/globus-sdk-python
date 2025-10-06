@@ -181,6 +181,40 @@ And convert usage which builds scope objects like so:
 
     my_scope: Scope = AuthScopes.openid
 
+``ScopeBuilder``\s are now ``ScopeCollection``\s
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As part of the refactor of scope constants, the objects which were previously
+called "scope builders" are now "scope collections".
+Scope collections may be static or dynamic, depending on whether or not they
+statically provide their scopes at the class level or dynamically compute scopes
+as instance attributes.
+
+The following entities are therefore renamed in addition to having changes to
+their implementations:
+
+..  csv-table::
+    :header: "Old name", "New name"
+
+    "``GCSEndpointScopeBuilder``", "``GCSEndpointScopes``"
+    "``GCSCollectionScopeBuilder``", "``GCSCollectionScopes``"
+    "``SpecificFlowScopeBuilder``", "``SpecificFlowScopes``"
+
+Scope collections provide ``Scope`` objects, not strings.
+Therefore, update code like so:
+
+.. code-block:: python
+
+    # globus-sdk v3
+    from globus_sdk.scopes import Scope, SpecificFlowScopeBuilder
+
+    my_flow_scope = Scope(SpecificFlowScopeBuilder(FLOW_ID).user)
+
+    # globus-sdk v4
+    from globus_sdk.scopes import SpecificFlowScopes
+
+    my_flow_scope = SpecificFlowScopes(FLOW_ID).user
+
 Scopes Are Immutable and Have New Methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
