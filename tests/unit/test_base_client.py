@@ -356,3 +356,28 @@ def test_cannot_attach_app_with_mismatched_environment(base_client_class):
         ),
     ):
         c.attach_globus_app(app)
+
+
+def test_client_close_implicitly_closes_internal_transport(base_client_class):
+    # test the private _close() method directly
+    client = base_client_class()
+    with mock.patch.object(client.transport, "close") as transport_close:
+        client.close()
+
+        transport_close.assert_called_once()
+
+
+def test_client_close_does_not_close_explicitly_passed_transport(base_client_class):
+    # test the private _close() method directly
+    client = base_client_class(transport=RequestsTransport())
+    with mock.patch.object(client.transport, "close") as transport_close:
+        client.close()
+
+        transport_close.assert_not_called()
+
+
+def test_client_context_manager_exit_calls_close(base_client_class):
+    with mock.patch.object(globus_sdk.BaseClient, "close") as client_close_method:
+        with base_client_class():
+            client_close_method.assert_not_called()
+        client_close_method.assert_called_once()

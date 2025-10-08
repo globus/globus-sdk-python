@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import sys
+import types
 import typing as t
 import urllib.parse
 
@@ -19,6 +20,11 @@ if sys.version_info >= (3, 10):
     from typing import TypeAlias
 else:
     from typing_extensions import TypeAlias
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 if t.TYPE_CHECKING:
     from globus_sdk.globus_app import GlobusApp
@@ -111,7 +117,15 @@ class BaseClient:
         self.retry_config: RetryConfig = retry_config or RetryConfig()
         self._register_standard_retry_checks(self.retry_config)
 
-        self.transport = transport if transport is not None else RequestsTransport()
+        # the client is responsible for closing the Transport on close if and only if
+        # the client creates the Transport
+        self._transports_to_close: list[RequestsTransport] = []
+        if transport is not None:
+            self.transport = transport
+        else:
+            self.transport = RequestsTransport()
+            self._transports_to_close.append(self.transport)
+
         log.debug(f"initialized transport of type {type(self.transport)}")
 
         # setup paginated methods
@@ -330,6 +344,29 @@ class BaseClient:
         if self_or_cls.scopes is None:
             return None
         return self_or_cls.scopes.resource_server
+
+    def close(self) -> None:
+        """
+        Close all resources which are owned by this client.
+
+        This only closes transports which are created implicitly via client init.
+        Externally constructed transports will not be closed.
+        """
+        for transport in self._transports_to_close:
+            log.debug(f"closing transport for {type(self).__name__}")
+            transport.close()
+
+    # clients can act as context managers, and such usage calls close()
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: types.TracebackType | None,
+    ) -> None:
+        self.close()
 
     def get(  # pylint: disable=missing-param-doc
         self,

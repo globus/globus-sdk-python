@@ -13,8 +13,11 @@ MAPPED_COLLECTION_ID = "6c54cade-bde5-45c1-bdea-f4bd71dba2cc"
 
 
 def main():
-    gcs_client = globus_sdk.GCSClient(ENDPOINT_HOSTNAME, app=USER_APP)
+    with globus_sdk.GCSClient(ENDPOINT_HOSTNAME, app=USER_APP) as client:
+        create_guest_collection(client)
 
+
+def create_guest_collection(gcs_client: globus_sdk.GCSClient):
     # Comment out this line if the mapped collection is high assurance
     attach_data_access_scope(gcs_client, MAPPED_COLLECTION_ID)
 

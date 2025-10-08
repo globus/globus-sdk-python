@@ -3,6 +3,9 @@ from __future__ import annotations
 import abc
 import contextlib
 import copy
+import logging
+import sys
+import types
 import typing as t
 import uuid
 
@@ -25,6 +28,13 @@ from globus_sdk.token_storage import (
 from .authorizer_factory import AuthorizerFactory
 from .config import DEFAULT_CONFIG, KNOWN_TOKEN_STORAGES, GlobusAppConfig
 from .protocols import TokenStorageProvider
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
+
+log = logging.getLogger(__name__)
 
 
 class GlobusApp(metaclass=abc.ABCMeta):
@@ -73,6 +83,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
     ) -> None:
         self.app_name = app_name
         self.config = config
+        self._token_storages_to_close: list[TokenStorage] = []
         self._token_validation_error_handling_enabled = True
 
         self.client_id, self._login_client = self._resolve_client_info(
@@ -83,11 +94,15 @@ class GlobusApp(metaclass=abc.ABCMeta):
             login_client=login_client,
         )
         self._scope_requirements = self._resolve_scope_requirements(scope_requirements)
-        self._token_storage = self._resolve_token_storage(
+
+        # create the inner token storage object, and pick up on whether or not this
+        # call handled creation or got a value from the outside
+        inner_token_storage, token_storage_created_here = self._resolve_token_storage(
             app_name=self.app_name,
             client_id=self.client_id,
             config=self.config,
         )
+        self._token_storage = inner_token_storage
 
         # create a consent client for token validation
         # this client won't be ready for immediate use, but will have the app attached
@@ -101,6 +116,8 @@ class GlobusApp(metaclass=abc.ABCMeta):
             consent_client=consent_client,
             scope_requirements=self._scope_requirements,
         )
+        if token_storage_created_here:
+            self._token_storages_to_close.append(self.token_storage)
 
         # setup an ID Token Decoder based on config; build one if it was not provided
         self._id_token_decoder = self._initialize_id_token_decoder(
@@ -221,39 +238,50 @@ class GlobusApp(metaclass=abc.ABCMeta):
 
     def _resolve_token_storage(
         self, app_name: str, client_id: uuid.UUID | str, config: GlobusAppConfig
-    ) -> TokenStorage:
+    ) -> tuple[TokenStorage, bool]:
         """
-        Resolve the raw token storage to be used by the app.
+        Resolve the raw token storage to be used by the app, and whether or not it was
+        created explicitly here.
 
-        This may be:
+        The storage may be:
             1.  A TokenStorage instance provided by the user, which we use directly.
             2.  A TokenStorageProvider, which we use to get a TokenStorage.
             3.  A string value, which we map onto supported TokenStorage types.
 
-        :returns: TokenStorage instance to be used by the app.
+        And in the case of (1), the bool is false. In the case of (2) and (3) it is
+        true.
+
+        :returns: TokenStorage instance to be used by the app, and whether or not this
+            function created the storage.
         :raises: GlobusSDKUsageError if the provided token_storage value is unsupported.
         """
         token_storage = config.token_storage
         # TODO - make namespace configurable
         namespace = "DEFAULT"
         if isinstance(token_storage, TokenStorage):
-            return token_storage
+            return (token_storage, False)
 
         elif isinstance(token_storage, TokenStorageProvider):
-            return token_storage.for_globus_app(
-                app_name=app_name,
-                config=config,
-                client_id=client_id,
-                namespace=namespace,
+            return (
+                token_storage.for_globus_app(
+                    app_name=app_name,
+                    config=config,
+                    client_id=client_id,
+                    namespace=namespace,
+                ),
+                True,
             )
 
         elif token_storage in KNOWN_TOKEN_STORAGES:
             provider = KNOWN_TOKEN_STORAGES[token_storage]
-            return provider.for_globus_app(
-                app_name=app_name,
-                config=config,
-                client_id=client_id,
-                namespace=namespace,
+            return (
+                provider.for_globus_app(
+                    app_name=app_name,
+                    config=config,
+                    client_id=client_id,
+                    namespace=namespace,
+                ),
+                True,
             )
 
         raise GlobusSDKUsageError(
@@ -356,6 +384,27 @@ class GlobusApp(metaclass=abc.ABCMeta):
 
         # Invalidate any cached authorizers
         self._authorizer_factory.clear_cache()
+
+    def close(self) -> None:
+        """
+        Close all resources currently held by the app.
+        This does not trigger a logout.
+        """
+        for storage in self._token_storages_to_close:
+            log.debug("closing app associated token storage")
+            storage.close()
+
+    # apps can act as context managers, and such usage calls close()
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: types.TracebackType | None,
+    ) -> None:
+        self.close()
 
     @abc.abstractmethod
     def _run_login_flow(
