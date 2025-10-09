@@ -64,6 +64,20 @@ def test_timers_client_add_app_data_access_scope(app):
     assert expected in str_list
 
 
+def test_timers_client_add_app_flow_user_scope(app):
+    client = globus_sdk.TimersClient(app=app)
+
+    flow_id = str(uuid.UUID(int=0))
+    client.add_app_flow_user_scope(flow_id)
+    str_list = [
+        str(s) for s in app.scope_requirements[globus_sdk.TimersClient.resource_server]
+    ]
+
+    flow_client = globus_sdk.SpecificFlowClient(flow_id, app=app)
+    expected = f"{globus_sdk.TimersClient.scopes.timer}[{flow_client.scopes.user}]"  # noqa: E501
+    assert expected in str_list
+
+
 def test_specific_flow_client_add_app_data_access_scope(app):
     flow_id = str(uuid.UUID(int=1))
     client = globus_sdk.SpecificFlowClient(flow_id, app=app)
@@ -87,6 +101,27 @@ def test_transfer_client_add_app_data_access_scope_chaining(app):
     str_list = [str(s) for s in app.scope_requirements["transfer.api.globus.org"]]
     expected_1 = f"urn:globus:auth:scope:transfer.api.globus.org:all[*https://auth.globus.org/scopes/{collection_id_1}/data_access]"  # noqa: E501
     expected_2 = f"urn:globus:auth:scope:transfer.api.globus.org:all[*https://auth.globus.org/scopes/{collection_id_2}/data_access]"  # noqa: E501
+    assert expected_1 in str_list
+    assert expected_2 in str_list
+
+
+def test_timers_client_add_app_flow_user_scope_chaining(app):
+    flow_id_1 = str(uuid.UUID(int=1))
+    flow_id_2 = str(uuid.UUID(int=2))
+    (
+        globus_sdk.TimersClient(app=app)
+        .add_app_flow_user_scope(flow_id_1)
+        .add_app_flow_user_scope(flow_id_2)
+    )
+
+    str_list = [
+        str(s) for s in app.scope_requirements[globus_sdk.TimersClient.resource_server]
+    ]
+    flow_client_1 = globus_sdk.SpecificFlowClient(flow_id_1, app=app)
+    expected_1 = f"{globus_sdk.TimersClient.scopes.timer}[{flow_client_1.scopes.user}]"  # noqa: E501
+    flow_client_2 = globus_sdk.SpecificFlowClient(flow_id_2, app=app)
+    expected_2 = f"{globus_sdk.TimersClient.scopes.timer}[{flow_client_2.scopes.user}]"  # noqa: E501
+
     assert expected_1 in str_list
     assert expected_2 in str_list
 
@@ -136,6 +171,23 @@ def test_timers_client_add_app_data_access_scope_in_iterable(app):
     assert (expected_2, True) in transfer_dependencies
 
 
+def test_timers_client_add_app_flow_user_scope_in_iterable(app):
+    flow_id_1 = str(uuid.UUID(int=1))
+    flow_id_2 = str(uuid.UUID(int=2))
+    globus_sdk.TimersClient(app=app).add_app_flow_user_scope((flow_id_1, flow_id_2))
+
+    timer_dependencies = [
+        scope_dep.scope_string
+        for scope in app.scope_requirements[globus_sdk.TimersClient.resource_server]
+        for scope_dep in scope.dependencies
+    ]
+    flow_client_1 = globus_sdk.SpecificFlowClient(flow_id_1, app=app)
+    flow_client_2 = globus_sdk.SpecificFlowClient(flow_id_2, app=app)
+
+    assert flow_client_1.scopes.user.scope_string in timer_dependencies
+    assert flow_client_2.scopes.user.scope_string in timer_dependencies
+
+
 def test_transfer_client_add_app_data_access_scope_catches_bad_uuid(app):
     with pytest.raises(ValueError, match="'collection_ids' must be a valid UUID"):
         globus_sdk.TransferClient(app=app).add_app_data_access_scope("foo")
@@ -154,12 +206,23 @@ def test_timers_client_add_app_data_access_scope_catches_bad_uuid(app):
         globus_sdk.TimersClient(app=app).add_app_transfer_data_access_scope("foo")
 
 
+def test_timers_client_add_app_flow_user_scope_catches_bad_uuid(app):
+    with pytest.raises(ValueError, match="'flow_ids' must be a valid UUID"):
+        globus_sdk.TimersClient(app=app).add_app_flow_user_scope("foo")
+
+
 def test_timers_client_add_app_data_access_scope_catches_bad_uuid_in_iterable(app):
     collection_id_1 = str(uuid.UUID(int=1))
     with pytest.raises(ValueError, match=r"'collection_ids\[1\]' must be a valid UUID"):
         globus_sdk.TimersClient(app=app).add_app_transfer_data_access_scope(
             [collection_id_1, "foo"]
         )
+
+
+def test_timers_client_add_app_flow_user_scope_catches_bad_uuid_in_iterable(app):
+    flow_id = str(uuid.UUID(int=1))
+    with pytest.raises(ValueError, match=r"'flow_ids\[1\]' must be a valid UUID"):
+        globus_sdk.TimersClient(app=app).add_app_flow_user_scope([flow_id, "foo"])
 
 
 def test_auth_client_default_scopes(app):
