@@ -36,18 +36,17 @@ We'll do this with a new ``uses_data_access`` helper and a :class:`TransferClien
 
 .. code-block:: python
 
-    transfer_client = globus_sdk.TransferClient(app=USER_APP)
+    with globus_sdk.TransferClient(app=app) as transfer_client:
+        ...  # a code block which can use the helper
 
 
-    def uses_data_access(collection_id: str) -> bool:
+    def uses_data_access(client: globus_sdk.TransferClient, collection_id: str) -> bool:
         """
-        Use the `transfer_client` associated with the app to lookup the given
-        collection ID.
-
+        Lookup the given collection ID.
         Having looked up the record, return `True` if it uses a `data_access` scope
         and `False` otherwise.
         """
-        doc = transfer_client.get_endpoint(collection_id)
+        doc = client.get_endpoint(collection_id)
         if doc["entity_type"] != "GCSv5_mapped_collection":
             return False
         if doc["high_assurance"]:
@@ -58,9 +57,9 @@ This will allow us to guard our use of the ``data_access`` scope thusly:
 
 .. code-block:: python
 
-    if uses_data_access(SRC_COLLECTION):
+    if uses_data_access(transfer_client, SRC_COLLECTION):
         timers_client.add_app_transfer_data_access_scope(SRC_COLLECTION)
-    if uses_data_access(DST_COLLECTION):
+    if uses_data_access(transfer_client, DST_COLLECTION):
         timers_client.add_app_transfer_data_access_scope(DST_COLLECTION)
 
 .. note::

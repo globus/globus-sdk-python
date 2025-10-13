@@ -3,7 +3,6 @@ from globus_sdk.globus_app import UserApp
 
 # Tutorial Client ID - <replace this with your own client>
 NATIVE_CLIENT_ID = "61338d24-54d5-408f-a10d-66c06b59f6d2"
-USER_APP = UserApp("my-simple-transfer", client_id=NATIVE_CLIENT_ID)
 
 # Globus Tutorial Collection 1
 # https://app.globus.org/file-manager/collections/6c54cade-bde5-45c1-bdea-f4bd71dba2cc
@@ -17,8 +16,12 @@ DST_PATH = "/~/example-transfer-script-destination.txt"
 
 
 def main():
-    transfer_client = globus_sdk.TransferClient(app=USER_APP)
+    with UserApp("my-simple-transfer", client_id=NATIVE_CLIENT_ID) as app:
+        with globus_sdk.TransferClient(app=app) as client:
+            submit_transfer(client)
 
+
+def submit_transfer(transfer_client: globus_sdk.TransferClient):
     # Comment out each of these lines if the referenced collection is either
     #   (1) A guest collection or (2) high assurance.
     transfer_client.add_app_data_access_scope(SRC_COLLECTION)

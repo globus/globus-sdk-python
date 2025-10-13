@@ -3,7 +3,6 @@ from globus_sdk.globus_app import UserApp
 
 # Tutorial Client ID - <replace this with your own client>
 NATIVE_CLIENT_ID = "61338d24-54d5-408f-a10d-66c06b59f6d2"
-USER_APP = UserApp("my-simple-user-collection", client_id=NATIVE_CLIENT_ID)
 
 # Globus Tutorial Collection 1
 # https://app.globus.org/file-manager/collections/6c54cade-bde5-45c1-bdea-f4bd71dba2cc
@@ -13,8 +12,12 @@ MAPPED_COLLECTION_ID = "6c54cade-bde5-45c1-bdea-f4bd71dba2cc"
 
 
 def main():
-    gcs_client = globus_sdk.GCSClient(ENDPOINT_HOSTNAME, app=USER_APP)
+    with UserApp("my-simple-user-collection", client_id=NATIVE_CLIENT_ID) as app:
+        with globus_sdk.GCSClient(ENDPOINT_HOSTNAME, app=app) as client:
+            create_guest_collection(client)
 
+
+def create_guest_collection(gcs_client: globus_sdk.GCSClient):
     # Comment out this line if the mapped collection is high assurance
     attach_data_access_scope(gcs_client, MAPPED_COLLECTION_ID)
 

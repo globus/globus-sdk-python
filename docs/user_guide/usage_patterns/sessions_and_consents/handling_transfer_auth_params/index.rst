@@ -107,23 +107,22 @@ work the first time that it runs.
     NATIVE_CLIENT_ID = "61338d24-54d5-408f-a10d-66c06b59f6d2"
     # set the collection ID to your test collection
     COLLECTION_ID = "..."
-    USER_APP = globus_sdk.UserApp("ls-session", client_id=NATIVE_CLIENT_ID)
 
+    with globus_sdk.UserApp("ls-session", client_id=NATIVE_CLIENT_ID) as app:
+        client = globus_sdk.TransferClient(app=app)
 
-    client = globus_sdk.TransferClient(app=USER_APP)
+        # because the recommended test configuration uses a mapped collection
+        # without High Assurance capabilities, it will have a data_access scope
+        # requirement
+        # comment out this line if your collection does not use data_access
+        client.add_app_data_access_scope(COLLECTION_ID)
 
-    # because the recommended test configuration uses a mapped collection
-    # without High Assurance capabilities, it will have a data_access scope
-    # requirement
-    # comment out this line if your collection does not use data_access
-    client.add_app_data_access_scope(COLLECTION_ID)
-
-    ls_result = client.operation_ls(COLLECTION_ID)
-    for item in ls_result:
-        name = item["name"]
-        if item["type"] == "dir":
-            name += "/"
-        print(name)
+        ls_result = client.operation_ls(COLLECTION_ID)
+        for item in ls_result:
+            name = item["name"]
+            if item["type"] == "dir":
+                name += "/"
+            print(name)
 
 Run Again, Observe the Session Error
 ------------------------------------
@@ -168,18 +167,9 @@ We can check for this easily:
     NATIVE_CLIENT_ID = "61338d24-54d5-408f-a10d-66c06b59f6d2"
     # set the collection ID to your test collection
     COLLECTION_ID = "..."
-    USER_APP = globus_sdk.UserApp("ls-session", client_id=NATIVE_CLIENT_ID)
-
-    client = globus_sdk.TransferClient(app=USER_APP)
-
-    # because the recommended test configuration uses a mapped collection
-    # without High Assurance capabilities, it will have a data_access scope
-    # requirement
-    # comment out this line if your collection does not use data_access
-    client.add_app_data_access_scope(COLLECTION_ID)
 
 
-    def print_ls_data():
+    def print_ls_data(client):
         ls_result = client.operation_ls(COLLECTION_ID)
         for item in ls_result:
             name = item["name"]
@@ -188,14 +178,23 @@ We can check for this easily:
             print(name)
 
 
-    # do the `ls` and detect the authorization_parameters as being present
-    try:
-        print_ls_data()
-    except globus_sdk.TransferAPIError as err:
-        if err.info.authorization_parameters:
-            print("An authorization requirement was not met.")
-        else:
-            raise
+    with globus_sdk.UserApp("ls-session", client_id=NATIVE_CLIENT_ID) as app:
+        client = globus_sdk.TransferClient(app=app)
+
+        # because the recommended test configuration uses a mapped collection
+        # without High Assurance capabilities, it will have a data_access scope
+        # requirement
+        # comment out this line if your collection does not use data_access
+        client.add_app_data_access_scope(COLLECTION_ID)
+
+        # do the `ls` and detect the authorization_parameters as being present
+        try:
+            print_ls_data()
+        except globus_sdk.TransferAPIError as err:
+            if err.info.authorization_parameters:
+                print("An authorization requirement was not met.")
+            else:
+                raise
 
 Convert the Error to GARE Format
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -210,7 +209,7 @@ converted to the GARE format using the tooling in ``globus_sdk.gare``:
     import globus_sdk.gare
 
     try:
-        print_ls_data()
+        print_ls_data(client)
     except globus_sdk.TransferAPIError as err:
         if err.info.authorization_parameters:
             print("An authorization requirement was not met.")
@@ -233,7 +232,7 @@ Having done so, we can repeat the login step using that information:
 .. code-block:: python
 
     try:
-        print_ls_data()
+        print_ls_data(client)
     except globus_sdk.TransferAPIError as err:
         if err.info.authorization_parameters:
             print("An authorization requirement was not met. Logging in again...")
