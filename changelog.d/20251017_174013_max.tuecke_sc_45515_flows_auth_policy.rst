@@ -1,0 +1,4 @@
+Added
+-----
+
+- Updated ``create_flow`` and ``update_flow`` to accept an authentication policy to assign to a flow. (:pr:`NUMBER`)
