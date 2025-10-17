@@ -64,6 +64,7 @@ class FlowsClient(client.BaseClient):
         run_monitors: list[str] | MissingType = MISSING,
         keywords: list[str] | MissingType = MISSING,
         subscription_id: uuid.UUID | str | None | MissingType = MISSING,
+        authentication_policy_id: uuid.UUID | str | None | MissingType = MISSING,
         additional_fields: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
         """
@@ -154,6 +155,8 @@ class FlowsClient(client.BaseClient):
             discovery operations (0 - 1024 items)
         :param subscription_id: The ID of the subscription to associate with the flow,
             marking as a subscription tier flow.
+        :param authentication_policy_id: The ID of the authentication policy to associate
+             with the flow.
         :param additional_fields: Additional Key/Value pairs sent to the create API
 
         .. tab-set::
@@ -206,6 +209,7 @@ class FlowsClient(client.BaseClient):
             "run_monitors": run_monitors,
             "keywords": keywords,
             "subscription_id": subscription_id,
+            "authentication_policy_id": authentication_policy_id,
             **(additional_fields or {}),
         }
         return self.post("/flows", data=data)
@@ -359,6 +363,7 @@ class FlowsClient(client.BaseClient):
         run_monitors: list[str] | MissingType = MISSING,
         keywords: list[str] | MissingType = MISSING,
         subscription_id: uuid.UUID | str | t.Literal["DEFAULT"] | MissingType = MISSING,
+        authentication_policy_id: uuid.UUID | str | MissingType = MISSING,
         additional_fields: dict[str, t.Any] | None = None,
     ) -> GlobusHTTPResponse:
         """
@@ -453,6 +458,7 @@ class FlowsClient(client.BaseClient):
         :param keywords: A set of terms used to categorize the flow used in query and
             discovery operations (0 - 1024 items)
         :param subscription_id: A subscription ID to assign to the flow.
+        :param authentication_policy_id: An authentication policy to assign to the flow.
         :param additional_fields: Additional Key/Value pairs sent to the create API
 
         .. tab-set::
@@ -494,6 +500,7 @@ class FlowsClient(client.BaseClient):
             "run_monitors": run_monitors,
             "keywords": keywords,
             "subscription_id": subscription_id,
+            "authentication_policy_id": authentication_policy_id,
             **(additional_fields or {}),
         }
         return self.put(f"/flows/{flow_id}", data=data)
