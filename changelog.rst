@@ -12,6 +12,17 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-4.1.0:
+
+v4.1.0 (2025-10-23)
+===================
+
+Added
+-----
+
+- Updated ``create_flow`` and ``update_flow`` to accept an authentication policy to assign to a flow. (:pr:`1334`)
+    - Note: SDK support for this feature is being released in advance of service support, which will follow at a later time.
+
 .. _changelog-4.0.1:
 
 v4.0.1 (2025-10-13)
