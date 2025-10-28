@@ -120,7 +120,8 @@ class TimersClient(client.BaseClient):
                 .. code-block:: python
 
                     app = UserApp("myapp", client_id=NATIVE_APP_CLIENT_ID)
-                    client = TimersClient(app=app).add_app_flow_user_scope(FLOW_ID)
+                    client = TimersClient(app=app)
+                    client.add_app_flow_user_scope(FLOW_ID)
 
                     flow_timer = FlowTimer(
                         name="my flow timer",
