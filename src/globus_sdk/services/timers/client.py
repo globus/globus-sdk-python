@@ -9,6 +9,7 @@ from globus_sdk._internal import guards
 from globus_sdk.scopes import (
     GCSCollectionScopes,
     Scope,
+    SpecificFlowScopes,
     TimersScopes,
     TransferScopes,
 )
@@ -95,6 +96,60 @@ class TimersClient(client.BaseClient):
         transfer_scope = TransferScopes.all.with_dependencies(dependencies)
 
         timers_scope = TimersScopes.timer.with_dependency(transfer_scope)
+        self.add_app_scope(timers_scope)
+        return self
+
+    def add_app_flow_user_scope(
+        self, flow_ids: uuid.UUID | str | t.Iterable[uuid.UUID | str]
+    ) -> TimersClient:
+        """
+        Add a dependent flow ``user`` scope for one or more given ``flow_ids``
+        to this client's ``GlobusApp``, under the Timers ``timer`` scope.
+        Needed to prevent ``ConsentRequired`` errors when creating flow timers.
+
+        Returns ``self`` for chaining.
+
+        Raises ``GlobusSDKUsageError`` if this client was not initialized with an app.
+
+        :param flow_ids: a flow ID or an iterable of IDs.
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    app = UserApp("myapp", client_id=NATIVE_APP_CLIENT_ID)
+                    client = TimersClient(app=app)
+                    client.add_app_flow_user_scope(FLOW_ID)
+
+                    flow_timer = FlowTimer(
+                        name="my flow timer",
+                        flow_id=FLOW_ID,
+                        schedule=RecurringTimerSchedule(24 * 60 * 60),
+                        body={
+                            "body": {
+                                "input_key": "input_value",
+                            },
+                        },
+                    )
+
+                    client.create_timer(flow_timer)
+        """  # noqa: E501
+        if isinstance(flow_ids, (str, uuid.UUID)):
+            guards.validators.uuidlike("flow_ids", flow_ids)
+            # wrap the flow_ids input in a list for consistent iteration below
+            flow_ids_ = [flow_ids]
+        else:
+            # copy to a list so that ephemeral iterables can be iterated multiple times
+            flow_ids_ = list(flow_ids)
+            for i, c in enumerate(flow_ids_):
+                guards.validators.uuidlike(f"flow_ids[{i}]", c)
+
+        dependencies: list[Scope] = [
+            SpecificFlowScopes(flow_id).user for flow_id in flow_ids_
+        ]
+        timers_scope = TimersScopes.timer.with_dependencies(dependencies)
         self.add_app_scope(timers_scope)
         return self
 
