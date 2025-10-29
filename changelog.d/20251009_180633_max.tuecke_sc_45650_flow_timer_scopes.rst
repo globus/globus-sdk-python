@@ -3,4 +3,4 @@ Added
 
 - Add ``TimersClient.add_app_flow_user_scope`` for ``TimersClient``
   instances which are integrated with ``GlobusApp``. This method registers the
-  specific flow ``user`` scope dependency needed for a flow timer. (:pr:`NUMBER`)
+  specific flow ``user`` scope dependency needed for a flow timer. (:pr:`1333`)
