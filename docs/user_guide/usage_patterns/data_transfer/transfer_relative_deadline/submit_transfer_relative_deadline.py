@@ -5,7 +5,6 @@ from globus_sdk.globus_app import UserApp
 
 # Tutorial Client ID - <replace this with your own client>
 NATIVE_CLIENT_ID = "61338d24-54d5-408f-a10d-66c06b59f6d2"
-USER_APP = UserApp("relative-deadline-transfer", client_id=NATIVE_CLIENT_ID)
 
 # Globus Tutorial Collection 1
 # https://app.globus.org/file-manager/collections/6c54cade-bde5-45c1-bdea-f4bd71dba2cc
@@ -24,19 +23,19 @@ def make_relative_deadline(offset: datetime.timedelta) -> str:
     return deadline.isoformat()
 
 
-transfer_client = globus_sdk.TransferClient(app=USER_APP)
+with UserApp("relative-deadline-transfer", client_id=NATIVE_CLIENT_ID) as app:
+    with globus_sdk.TransferClient(app=app) as transfer_client:
+        # Comment out each of these lines if the referenced collection is either
+        #   (1) A guest collection or (2) high assurance.
+        transfer_client.add_app_data_access_scope(SRC_COLLECTION)
+        transfer_client.add_app_data_access_scope(DST_COLLECTION)
 
-# Comment out each of these lines if the referenced collection is either
-#   (1) A guest collection or (2) high assurance.
-transfer_client.add_app_data_access_scope(SRC_COLLECTION)
-transfer_client.add_app_data_access_scope(DST_COLLECTION)
+        transfer_request = globus_sdk.TransferData(
+            SRC_COLLECTION,
+            DST_COLLECTION,
+            deadline=make_relative_deadline(datetime.timedelta(hours=1)),
+        )
+        transfer_request.add_item(SRC_PATH, DST_PATH)
 
-transfer_request = globus_sdk.TransferData(
-    SRC_COLLECTION,
-    DST_COLLECTION,
-    deadline=make_relative_deadline(datetime.timedelta(hours=1)),
-)
-transfer_request.add_item(SRC_PATH, DST_PATH)
-
-task = transfer_client.submit_transfer(transfer_request)
-print(f"Submitted transfer. Task ID: {task['task_id']}")
+        task = transfer_client.submit_transfer(transfer_request)
+        print(f"Submitted transfer. Task ID: {task['task_id']}")

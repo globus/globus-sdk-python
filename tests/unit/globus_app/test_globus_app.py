@@ -604,3 +604,30 @@ class CountingCommandLineLoginFlowManager(CommandLineLoginFlowManager):
     ) -> globus_sdk.OAuthTokenResponse:
         self.counter += 1
         return super().run_login_flow(auth_parameters)
+
+
+def test_closing_app_closes_implicitly_created_token_storage():
+    user_app = UserApp("test-app", client_id="mock_client_id")
+
+    with mock.patch.object(user_app.token_storage, "close") as token_storage_close:
+        user_app.close()
+        token_storage_close.assert_called_once()
+
+
+def test_closing_app_does_not_close_explicitly_passed_token_storage():
+    user_app = UserApp(
+        "test-app",
+        client_id="mock_client_id",
+        config=GlobusAppConfig(token_storage=MemoryTokenStorage()),
+    )
+
+    with mock.patch.object(user_app.token_storage, "close") as token_storage_close:
+        user_app.close()
+        token_storage_close.assert_not_called()
+
+
+def test_app_context_manager_exit_calls_close():
+    with mock.patch.object(UserApp, "close") as app_close_method:
+        with UserApp("test-app", client_id="mock_client_id"):
+            app_close_method.assert_not_called()
+        app_close_method.assert_called_once()
