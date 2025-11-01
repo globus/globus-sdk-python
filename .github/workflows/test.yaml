@@ -86,6 +86,6 @@ jobs:
             # cache-paths:
             #   - ".mypy_cache/"
 
-    uses: "globus/workflows/.github/workflows/tox.yaml@f41714f6a8b102569807b348fce50960f9617df8" # v1.2
+    uses: "globus/workflows/.github/workflows/tox.yaml@d370cf87e31ead9ba566b6fa07f05f63918a9149" # v1.3
     with:
       config: "${{ toJSON(matrix) }}"
