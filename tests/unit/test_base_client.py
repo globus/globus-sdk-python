@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import uuid
 from unittest import mock
@@ -365,6 +366,15 @@ def test_client_close_implicitly_closes_internal_transport(base_client_class):
         client.close()
 
         transport_close.assert_called_once()
+
+
+def test_client_close_debug_logs_internal_transport_close(base_client_class, caplog):
+    caplog.set_level(logging.DEBUG)
+
+    client = base_client_class()
+    client.close()
+
+    assert "closing resource of type RequestsTransport for CustomClient" in caplog.text
 
 
 def test_client_close_does_not_close_explicitly_passed_transport(base_client_class):

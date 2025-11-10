@@ -15,6 +15,7 @@ from globus_sdk import (
     GlobusSDKUsageError,
     IDTokenDecoder,
 )
+from globus_sdk._internal.type_definitions import Closable
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.gare import GlobusAuthorizationParameters
 from globus_sdk.scopes import AuthScopes, Scope, ScopeParser
@@ -67,6 +68,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
     # this allows code during init call into otherwise unsafe codepaths in the app,
     # namely those which manipulate scope requirements
     _authorizer_factory: AuthorizerFactory[GlobusAuthorizer]
+    _token_storage: TokenStorage
     token_storage: ValidatingTokenStorage
 
     def __init__(
@@ -84,6 +86,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
         self.app_name = app_name
         self.config = config
         self._token_validation_error_handling_enabled = True
+        self._resources_to_close: list[Closable] = []
 
         self.client_id, self._login_client = self._resolve_client_info(
             app_name=self.app_name,
@@ -96,27 +99,29 @@ class GlobusApp(metaclass=abc.ABCMeta):
 
         # create the inner token storage object, and pick up on whether or not this
         # call handled creation or got a value from the outside
-        # if creation was done here, then this app "owns" the storage
-        inner_token_storage, token_storage_created_here = self._resolve_token_storage(
+        self._token_storage, token_storage_created_here = self._resolve_token_storage(
             app_name=self.app_name,
             client_id=self.client_id,
             config=self.config,
         )
-        self._token_storage = inner_token_storage
-        self._owns_token_storage = token_storage_created_here
 
         # create a consent client for token validation
         # this client won't be ready for immediate use, but will have the app attached
         # at the end of init
         consent_client = AuthClient(environment=config.environment)
+        self._resources_to_close.append(consent_client)
 
         # create the requisite token storage for the app, with validation based on
         # the provided parameters
+        # if the token storage was created by the app, the validating wrapper is added
+        # to the resources to close when closed
         self.token_storage = self._initialize_validating_token_storage(
             token_storage=self._token_storage,
             consent_client=consent_client,
             scope_requirements=self._scope_requirements,
         )
+        if token_storage_created_here:
+            self._resources_to_close.append(self.token_storage)
 
         # setup an ID Token Decoder based on config; build one if it was not provided
         self._id_token_decoder = self._initialize_id_token_decoder(
@@ -168,6 +173,9 @@ class GlobusApp(metaclass=abc.ABCMeta):
                     abstract method: _initialize_login_client``.
             2.  Extract the client_id from a supplied login_client.
 
+        If a new client is created here, it is also added to the set of resources to
+        close when this app is closed.
+
         :returns: tuple of client_id and login_client
         :raises: GlobusSDKUsageError if a single client ID or login client could not be
             definitively resolved.
@@ -195,6 +203,7 @@ class GlobusApp(metaclass=abc.ABCMeta):
             login_client = self._initialize_login_client(
                 app_name, config, client_id, client_secret
             )
+            self._resources_to_close.append(login_client)
             return client_id, login_client
 
         else:
@@ -389,11 +398,12 @@ class GlobusApp(metaclass=abc.ABCMeta):
         Close all resources currently held by the app.
         This does not trigger a logout.
         """
-        # if the app owns the token storage (meaning it was created by this app on init)
-        # then it will close the storage
-        if self._owns_token_storage:
-            log.debug("closing app associated token storage")
-            self.token_storage.close()
+        for resource in self._resources_to_close:
+            log.debug(
+                f"closing resource of type {type(resource).__name__} "
+                f"for {type(self).__name__}(app_name={self.app_name!r})"
+            )
+            resource.close()
 
     # apps can act as context managers, and such usage calls close()
     def __enter__(self) -> Self:

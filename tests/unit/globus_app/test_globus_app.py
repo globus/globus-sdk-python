@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 import time
 from unittest import mock
@@ -606,12 +607,28 @@ class CountingCommandLineLoginFlowManager(CommandLineLoginFlowManager):
         return super().run_login_flow(auth_parameters)
 
 
-def test_closing_app_closes_implicitly_created_token_storage():
-    user_app = UserApp("test-app", client_id="mock_client_id")
+@pytest.mark.parametrize("config", (None, GlobusAppConfig(token_storage="memory")))
+def test_closing_app_closes_implicitly_created_token_storage(config):
+    if config is None:
+        user_app = UserApp("test-app", client_id="mock_client_id")
+    else:
+        user_app = UserApp("test-app", client_id="mock_client_id", config=config)
 
     with mock.patch.object(user_app.token_storage, "close") as token_storage_close:
         user_app.close()
         token_storage_close.assert_called_once()
+
+    user_app.token_storage.close()  # cleanup
+
+
+def test_closing_app_closes_implicitly_created_login_client():
+    user_app = UserApp("test-app", client_id="mock_client_id")
+
+    with mock.patch.object(user_app._login_client, "close") as login_client_close:
+        user_app.close()
+        login_client_close.assert_called_once()
+
+    user_app._login_client.close()  # cleanup
 
 
 def test_closing_app_does_not_close_explicitly_passed_token_storage():
@@ -631,3 +648,25 @@ def test_app_context_manager_exit_calls_close():
         with UserApp("test-app", client_id="mock_client_id"):
             app_close_method.assert_not_called()
         app_close_method.assert_called_once()
+
+
+def test_app_close_debug_logs_closure_of_resources(caplog):
+    """Debug logs show both of the internal clients, plus the token storage"""
+    caplog.set_level(logging.DEBUG)
+
+    user_app = UserApp("test-app", client_id="mock_client_id")
+    user_app.close()
+
+    # 3 resources at least: consent_client, login_client, token_storage
+    assert (
+        "closing resource of type AuthClient for UserApp(app_name='test-app')"
+        in caplog.text
+    )
+    assert (
+        "closing resource of type NativeAppAuthClient for "
+        "UserApp(app_name='test-app')"
+    ) in caplog.text
+    assert (
+        "closing resource of type ValidatingTokenStorage for "
+        "UserApp(app_name='test-app')"
+    ) in caplog.text

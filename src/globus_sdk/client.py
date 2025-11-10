@@ -8,6 +8,7 @@ import urllib.parse
 
 from globus_sdk import GlobusSDKUsageError, config, exc
 from globus_sdk._internal.classprop import classproperty
+from globus_sdk._internal.type_definitions import Closable
 from globus_sdk._internal.utils import slash_join
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.paging import PaginatorTable
@@ -99,6 +100,8 @@ class BaseClient:
                 f"A {type(self).__name__} cannot use both an 'app' and an 'authorizer'."
             )
 
+        self._resources_to_close: list[Closable] = []
+
         # Determine the client's environment
         # Either the provided kwarg or derived from the app used
         #
@@ -121,10 +124,9 @@ class BaseClient:
         # if and only if the client creates the Transport
         if transport is not None:
             self.transport = transport
-            self._owns_transport = False
         else:
             self.transport = RequestsTransport()
-            self._owns_transport = True
+            self._resources_to_close.append(self.transport)
 
         log.debug(f"initialized transport of type {type(self.transport)}")
 
@@ -352,9 +354,12 @@ class BaseClient:
         This only closes transports which are created implicitly via client init.
         Externally constructed transports will not be closed.
         """
-        if self._owns_transport:
-            log.debug(f"closing transport for {type(self).__name__}")
-            self.transport.close()
+        for resource in self._resources_to_close:
+            log.debug(
+                f"closing resource of type {type(resource).__name__} "
+                f"for {type(self).__name__}"
+            )
+            resource.close()
 
     # clients can act as context managers, and such usage calls close()
     def __enter__(self) -> Self:
