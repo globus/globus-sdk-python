@@ -117,14 +117,14 @@ class BaseClient:
         self.retry_config: RetryConfig = retry_config or RetryConfig()
         self._register_standard_retry_checks(self.retry_config)
 
-        # the client is responsible for closing the Transport on close if and only if
-        # the client creates the Transport
-        self._transports_to_close: list[RequestsTransport] = []
+        # the client owns the Transport, and is responsible for closing on close,
+        # if and only if the client creates the Transport
         if transport is not None:
             self.transport = transport
+            self._owns_transport = False
         else:
             self.transport = RequestsTransport()
-            self._transports_to_close.append(self.transport)
+            self._owns_transport = True
 
         log.debug(f"initialized transport of type {type(self.transport)}")
 
@@ -352,9 +352,9 @@ class BaseClient:
         This only closes transports which are created implicitly via client init.
         Externally constructed transports will not be closed.
         """
-        for transport in self._transports_to_close:
+        if self._owns_transport:
             log.debug(f"closing transport for {type(self).__name__}")
-            transport.close()
+            self.transport.close()
 
     # clients can act as context managers, and such usage calls close()
     def __enter__(self) -> Self:

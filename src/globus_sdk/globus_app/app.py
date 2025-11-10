@@ -83,7 +83,6 @@ class GlobusApp(metaclass=abc.ABCMeta):
     ) -> None:
         self.app_name = app_name
         self.config = config
-        self._token_storages_to_close: list[TokenStorage] = []
         self._token_validation_error_handling_enabled = True
 
         self.client_id, self._login_client = self._resolve_client_info(
@@ -97,12 +96,14 @@ class GlobusApp(metaclass=abc.ABCMeta):
 
         # create the inner token storage object, and pick up on whether or not this
         # call handled creation or got a value from the outside
+        # if creation was done here, then this app "owns" the storage
         inner_token_storage, token_storage_created_here = self._resolve_token_storage(
             app_name=self.app_name,
             client_id=self.client_id,
             config=self.config,
         )
         self._token_storage = inner_token_storage
+        self._owns_token_storage = token_storage_created_here
 
         # create a consent client for token validation
         # this client won't be ready for immediate use, but will have the app attached
@@ -116,8 +117,6 @@ class GlobusApp(metaclass=abc.ABCMeta):
             consent_client=consent_client,
             scope_requirements=self._scope_requirements,
         )
-        if token_storage_created_here:
-            self._token_storages_to_close.append(self.token_storage)
 
         # setup an ID Token Decoder based on config; build one if it was not provided
         self._id_token_decoder = self._initialize_id_token_decoder(
@@ -390,9 +389,11 @@ class GlobusApp(metaclass=abc.ABCMeta):
         Close all resources currently held by the app.
         This does not trigger a logout.
         """
-        for storage in self._token_storages_to_close:
+        # if the app owns the token storage (meaning it was created by this app on init)
+        # then it will close the storage
+        if self._owns_token_storage:
             log.debug("closing app associated token storage")
-            storage.close()
+            self.token_storage.close()
 
     # apps can act as context managers, and such usage calls close()
     def __enter__(self) -> Self:
