@@ -49,8 +49,8 @@ For example, in the following usage, the user must close the transport:
         with SearchClient(app=app, transport=my_transport) as client:
             ...  # any usage
 
-    # at this stage, the transport will not be closed
-    # it should be explicitly closed
+    # At this stage, the transport will still be open.
+    # It should be explicitly closed:
     my_transport.close()
 
 

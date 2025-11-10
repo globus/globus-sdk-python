@@ -110,8 +110,8 @@ For example,
     # after the context manager, any storage is implicitly closed
 
 
-However, when token storages are created explicitly, they are not automatically
-closed, and the user becomes responsible for closing them. For example,
+However, when token storage instances are created by the user, they are not automatically
+closed, and the user is responsible for closing them. For example,
 in the following usage, the user must close the token storage:
 
 .. code-block:: python
@@ -119,7 +119,7 @@ in the following usage, the user must close the token storage:
     from globus_sdk import GlobusAppConfig, UserApp
     from globus_sdk.token_storage import SQLiteTokenStorage
 
-    # this manually created storage will not be automatically closed
+    # this token storage is created by the user and will not be closed automatically
     sql_storage = SQLiteTokenStorage("tokens.sqlite")
 
     # create an app configured to use this storage
@@ -131,8 +131,8 @@ in the following usage, the user must close the token storage:
     with UserApp("a-different-app", client_id="OTHER_ID", config=config) as app:
         do_stuff(app)
 
-    # at this stage, the storage will still not be closed
-    # it should be explicitly closed
+    # At this stage, the storage will still be open.
+    # It should be explicitly closed:
     sql_storage.close()
 
 
