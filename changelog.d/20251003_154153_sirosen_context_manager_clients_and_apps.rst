@@ -3,7 +3,7 @@ Added
 
 - ``GlobusApp`` and SDK client classes now support usage as context managers, and
   feature a new ``close()`` method to close internal resources.
-  ``close()`` is automatically called on exit. (:pr:`NUMBER`)
+  ``close()`` is automatically called on exit. (:pr:`1326`)
 
   - In support of this, token storages now all feature a ``close()`` method,
     which does nothing in the default implementation.
