@@ -36,16 +36,18 @@ the service:
 
     # Tutorial Client ID - <replace this with your own client>
     NATIVE_CLIENT_ID = "61338d24-54d5-408f-a10d-66c06b59f6d2"
-    USER_APP = globus_sdk.UserApp("detect-data-access-example", client_id=NATIVE_CLIENT_ID)
 
     # Globus Tutorial Collection 1
     # https://app.globus.org/file-manager/collections/6c54cade-bde5-45c1-bdea-f4bd71dba2cc
     # replace with your own COLLECTION_ID
     COLLECTION_ID = "6c54cade-bde5-45c1-bdea-f4bd71dba2cc"
 
-    transfer_client = globus_sdk.TransferClient(app=USER_APP)
 
-    collection_doc = transfer_client.get_endpoint(COLLECTION_ID)
+    with globus_sdk.UserApp(
+        "detect-data-access-example", client_id=NATIVE_CLIENT_ID
+    ) as app:
+        transfer_client = globus_sdk.TransferClient(app=app)
+        collection_doc = transfer_client.get_endpoint(COLLECTION_ID)
 
 .. note::
 

@@ -6,12 +6,6 @@ CLIENT_ID = "61338d24-54d5-408f-a10d-66c06b59f6d2"
 
 with globus_sdk.UserApp("my-user-app", client_id=CLIENT_ID) as my_app:
     with globus_sdk.GroupsClient(app=my_app) as groups_client:
-
-        # Important! The login step needs to happen after the `groups_client` is created
-        # so that the app will know that you need credentials for Globus Groups
-        my_app.login()
-
-        # call out to the Groups service to get a listing
         my_groups = groups_client.get_my_groups()
 
 # print in CSV format

@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import logging
 import sys
+import types
 import typing as t
 import urllib.parse
 
 from globus_sdk import GlobusSDKUsageError, config, exc
 from globus_sdk._internal.classprop import classproperty
+from globus_sdk._internal.type_definitions import Closable
 from globus_sdk._internal.utils import slash_join
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.paging import PaginatorTable
@@ -19,6 +21,11 @@ if sys.version_info >= (3, 10):
     from typing import TypeAlias
 else:
     from typing_extensions import TypeAlias
+
+if sys.version_info >= (3, 11):
+    from typing import Self
+else:
+    from typing_extensions import Self
 
 if t.TYPE_CHECKING:
     from globus_sdk.globus_app import GlobusApp
@@ -93,6 +100,8 @@ class BaseClient:
                 f"A {type(self).__name__} cannot use both an 'app' and an 'authorizer'."
             )
 
+        self._resources_to_close: list[Closable] = []
+
         # Determine the client's environment
         # Either the provided kwarg or derived from the app used
         #
@@ -111,7 +120,14 @@ class BaseClient:
         self.retry_config: RetryConfig = retry_config or RetryConfig()
         self._register_standard_retry_checks(self.retry_config)
 
-        self.transport = transport if transport is not None else RequestsTransport()
+        # the client owns the Transport, and is responsible for closing on close,
+        # if and only if the client creates the Transport
+        if transport is not None:
+            self.transport = transport
+        else:
+            self.transport = RequestsTransport()
+            self._resources_to_close.append(self.transport)
+
         log.debug(f"initialized transport of type {type(self.transport)}")
 
         # setup paginated methods
@@ -330,6 +346,32 @@ class BaseClient:
         if self_or_cls.scopes is None:
             return None
         return self_or_cls.scopes.resource_server
+
+    def close(self) -> None:
+        """
+        Close all resources which are owned by this client.
+
+        This only closes transports which are created implicitly via client init.
+        Externally constructed transports will not be closed.
+        """
+        for resource in self._resources_to_close:
+            log.debug(
+                f"closing resource of type {type(resource).__name__} "
+                f"for {type(self).__name__}"
+            )
+            resource.close()
+
+    # clients can act as context managers, and such usage calls close()
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: types.TracebackType | None,
+    ) -> None:
+        self.close()
 
     def get(  # pylint: disable=missing-param-doc
         self,

@@ -26,3 +26,7 @@ class ResponseLike(t.Protocol):
 
     @property
     def binary_content(self) -> bytes: ...
+
+
+class Closable(t.Protocol):
+    def close(self) -> None: ...

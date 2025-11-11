@@ -125,6 +125,13 @@ class TokenStorage(metaclass=abc.ABCMeta):
         else:
             return None
 
+    def close(self) -> None:  # noqa: B027
+        """
+        Close any resources associated with this token storage.
+
+        By default, this does nothing, but subclasses may override it.
+        """
+
 
 class FileTokenStorage(TokenStorage, metaclass=abc.ABCMeta):
     """

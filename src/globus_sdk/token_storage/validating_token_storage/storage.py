@@ -40,6 +40,10 @@ class ValidatingTokenStorage(TokenStorage):
         )
         super().__init__(namespace=token_storage.namespace)
 
+    def close(self) -> None:
+        """Closing a validating storage closes the storage it contains."""
+        self.token_storage.close()
+
     def _make_context(
         self, token_data_by_resource_server: t.Mapping[str, TokenStorageData]
     ) -> TokenValidationContext:

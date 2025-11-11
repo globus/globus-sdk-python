@@ -4,12 +4,6 @@ from globus_sdk.globus_app import ClientApp
 # Confidential Client ID/Secret - <replace these with real client values>
 CONFIDENTIAL_CLIENT_ID = "..."
 CONFIDENTIAL_CLIENT_SECRET = "..."
-CLIENT_APP = ClientApp(
-    "my-simple-client-collection",
-    client_id=CONFIDENTIAL_CLIENT_ID,
-    client_secret=CONFIDENTIAL_CLIENT_SECRET,
-)
-
 
 # Globus Tutorial Collection 1
 # https://app.globus.org/file-manager/collections/6c54cade-bde5-45c1-bdea-f4bd71dba2cc
@@ -19,8 +13,16 @@ MAPPED_COLLECTION_ID = "6c54cade-bde5-45c1-bdea-f4bd71dba2cc"
 
 
 def main():
-    gcs_client = globus_sdk.GCSClient(ENDPOINT_HOSTNAME, app=CLIENT_APP)
+    with ClientApp(
+        "my-simple-client-collection",
+        client_id=CONFIDENTIAL_CLIENT_ID,
+        client_secret=CONFIDENTIAL_CLIENT_SECRET,
+    ) as app:
+        with globus_sdk.GCSClient(ENDPOINT_HOSTNAME, app=app) as gcs_client:
+            create_guest_collection(gcs_client)
 
+
+def create_guest_collection(gcs_client: globus_sdk.GCSClient):
     # Comment out this line if the mapped collection is high assurance
     attach_data_access_scope(gcs_client, MAPPED_COLLECTION_ID)
 
