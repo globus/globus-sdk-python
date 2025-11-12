@@ -44,9 +44,6 @@ And linting with
 Optional, but recommended, linting setup
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-If you didn't use the pre-canned `make install` above, we recommend setting up linting
-and autofixing integrations with your editor and git.
-
 The Globus SDK uses  https://pre-commit.com/[`pre-commit`] to automatically run linters
 and fixers. Install `pre-commit` and then run
 
