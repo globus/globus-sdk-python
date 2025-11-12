@@ -20,6 +20,11 @@ tag-release:
 	git tag -s "$(SDK_VERSION)" -m "v$(SDK_VERSION)"
 	-git push $(shell git rev-parse --abbrev-ref @{push} | cut -d '/' -f1) refs/tags/$(SDK_VERSION)
 
+.PHONY: install
+install:
+	tox -e install-venv
+	pre-commit install
+
 .PHONY: clean
 clean:
 	rm -rf dist build *.egg-info .tox .venv
