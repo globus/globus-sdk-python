@@ -15,26 +15,21 @@ For a good bug report:
   - Provide a code sample to reproduce bugs
 
 
-Installing Your Development Environment
+Installing a Development Environment
 ---------------------------------------
 
-To install the development environment in a new repo:
+To install the development environment (virtualenv and pre-commit hooks) in a new repo,
+run
 
     make install
 
 To update an install for an existing development environment, e.g., after updating the
-dependency list
+dependency list, run
 
     make clean && make install
 
-This will have the following effects:
-
-1. Configure an isolated python environment with required dependencies at `./.venv`
-
-2. Install `pre-commit` hooks, enabling auto-linting and formatting as commit hooks
-
-Testing
--------
+Linting & Testing
+-----------------
 
 Testing the SDK requires https://tox.readthedocs.io/en/latest/[tox].
 
@@ -45,6 +40,21 @@ Run the full test suite with
 And linting with
 
     tox -e lint
+
+Optional, but recommended, linting setup
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you didn't use the pre-canned `make install` above, we recommend setting up linting
+and autofixing integrations with your editor and git.
+
+The Globus SDK uses  https://pre-commit.com/[`pre-commit`] to automatically run linters
+and fixers. Install `pre-commit` and then run
+
+    $ pre-commit install
+
+to setup the hooks.
+
+The configured linters and fixers can be seen in `.pre-commit-config.yaml`.
 
 Writing changelog fragments
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

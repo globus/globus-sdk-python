@@ -22,8 +22,8 @@ tag-release:
 
 .PHONY: install
 install:
-	tox -e install-venv
-	pre-commit install
+	python -m venv .venv --upgrade-deps
+	.venv/bin/pip install -e . --group test
 
 .PHONY: clean
 clean:
