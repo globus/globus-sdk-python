@@ -99,10 +99,10 @@ steps (e.g., consent, MFA) without any additional code.
 
 .. code-block:: python
 
-    from globus_sdk import GlobusApp, GlobusAppConfig, TransferClient
+    from globus_sdk import UserApp, GlobusAppConfig, TransferClient
 
     config = GlobusAppConfig(auto_redrive_gares=True)
-    with GlobusApp("my-gare-demo", "<client-id>", config=config) as app:
+    with UserApp("my-gare-demo", "<client-id>", config=config) as app:
         tc = TransferClient(app=app)
 
         # If the transfer service were to return a 403 GARE, the script runner would be

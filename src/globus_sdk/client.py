@@ -78,9 +78,6 @@ class BaseClient:
     #: the scopes for this client may be present as a ``ScopeCollection``
     scopes: ScopeCollection | None = None
 
-    # internal flag to avoid recursion when loading resource_server
-    _is_loading_resource_server: bool = False
-
     def __init__(
         self,
         *,
