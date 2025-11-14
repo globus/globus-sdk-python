@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import json
 import logging
 import os
@@ -9,12 +7,7 @@ from unittest import mock
 import pytest
 
 import globus_sdk
-from globus_sdk import (
-    GlobusApp,
-    GlobusAppConfig,
-    GlobusSDKUsageError,
-    UserApp,
-)
+from globus_sdk import GlobusApp, GlobusAppConfig, GlobusSDKUsageError, UserApp
 from globus_sdk.authorizers import NullAuthorizer
 from globus_sdk.scopes import Scope, TransferScopes
 from globus_sdk.testing import RegisteredResponse, get_last_request
