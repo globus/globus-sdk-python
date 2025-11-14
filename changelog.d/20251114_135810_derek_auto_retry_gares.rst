@@ -3,7 +3,7 @@ Added
 -----
 
 -   Added automatic Globus Auth Requirements Error (GARE) redriving to GlobusApp
-    (:pr:`NUMBER`).
+    (:pr:`1339`).
 
     -   More details available at :ref:`globus_app_gare_integration`
     -   This feature is disabled by default but can be turned on by setting
