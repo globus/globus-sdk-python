@@ -8,6 +8,9 @@ import sys
 import types
 import typing as t
 import uuid
+from json import JSONDecodeError
+
+from requests import Response
 
 from globus_sdk import (
     AuthClient,
@@ -17,13 +20,20 @@ from globus_sdk import (
 )
 from globus_sdk._internal.type_definitions import Closable
 from globus_sdk.authorizers import GlobusAuthorizer
-from globus_sdk.gare import GlobusAuthorizationParameters
+from globus_sdk.gare import GARE, GlobusAuthorizationParameters, to_gare
 from globus_sdk.scopes import AuthScopes, Scope, ScopeParser
 from globus_sdk.token_storage import (
     ScopeRequirementsValidator,
     TokenStorage,
     TokenValidationError,
     ValidatingTokenStorage,
+)
+from globus_sdk.transport import (
+    RetryCheck,
+    RetryCheckFlags,
+    RetryCheckResult,
+    RetryContext,
+    set_retry_check_flags,
 )
 
 from .authorizer_factory import AuthorizerFactory
@@ -512,6 +522,12 @@ class GlobusApp(metaclass=abc.ABCMeta):
                 return self._authorizer_factory.get_authorizer(resource_server)
             raise e
 
+    def get_client_retry_checks(self) -> t.Sequence[RetryCheck]:
+        if not self.config.auto_redrive_gares:
+            return []
+        else:
+            return [_RedriveGlobusAppGARE(self)]
+
     @property
     def scope_requirements(self) -> dict[str, list[Scope]]:
         """
@@ -537,3 +553,43 @@ class GlobusApp(metaclass=abc.ABCMeta):
                     yield from ScopeParser.parse(item)
                 else:
                     yield item
+
+
+@set_retry_check_flags(RetryCheckFlags.RUN_ONCE)
+class _RedriveGlobusAppGARE:
+    """
+    A client.transport RetryCheck specific to GlobusApps.
+
+    Upon receiving a GARE-parsable 403 response, this check will initiate a login,
+    refresh the authorizer, and dispatch a retry.
+    """
+
+    def __init__(self, app: GlobusApp) -> None:
+        self.app = app
+
+    def __call__(self, ctx: RetryContext) -> RetryCheckResult:
+        if (resource_server := ctx.caller_info.resource_server) is None:
+            return RetryCheckResult.no_decision
+
+        elif (gare := self._load_response_gare(ctx.response)) is None:
+            return RetryCheckResult.no_decision
+
+        log.debug("Intercepted re-drivable GARE; initiating app login.")
+        self.app.login(auth_params=gare.authorization_parameters)
+        updated_authorizer = self.app.get_authorizer(resource_server)
+        log.debug("Acquired updated authorizer after GARE login; retrying.")
+
+        ctx.caller_info.authorizer = updated_authorizer
+        return RetryCheckResult.do_retry
+
+    @staticmethod
+    def _load_response_gare(response: Response | None) -> GARE | None:
+        """Return a parsed GARE from a 403 response or None if not possible."""
+        if response is None or response.status_code != 403:
+            return None
+        try:
+            decoded_body = response.json()
+        except JSONDecodeError:
+            return None
+        else:
+            return to_gare(decoded_body)

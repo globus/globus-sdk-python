@@ -276,8 +276,11 @@ class BaseClient:
         if self.app_name is None:
             self.app_name = app.app_name
 
-        # finally, register the scope requirements on the app side
+        # register the scope requirements on the app side
         self._app.add_scope_requirements({self.resource_server: self.app_scopes})
+
+        # finally, set up auto-gare redriving by attaching any necessary retry checks.
+        self.retry_config.checks.register_many_checks(app.get_client_retry_checks())
 
     def add_app_scope(
         self, scope_collection: str | Scope | t.Iterable[str | Scope]
@@ -542,18 +545,14 @@ class BaseClient:
         else:
             url = slash_join(self.base_url, urllib.parse.quote(path))
 
+        caller_info = RequestCallerInfo(retry_config=self.retry_config)
+
         # either use given authorizer or get one from app
         if automatic_authorization:
-            authorizer = self.authorizer
-            if self._app and self.resource_server:
-                authorizer = self._app.get_authorizer(self.resource_server)
-        else:
-            authorizer = None
-
-        # capture info about this client as the caller to pass to the transport
-        caller_info = RequestCallerInfo(
-            retry_config=self.retry_config, authorizer=authorizer
-        )
+            caller_info.authorizer = self.authorizer
+            if self._app and (resource_server := self.resource_server):
+                caller_info.resource_server = resource_server
+                caller_info.authorizer = self._app.get_authorizer(resource_server)
 
         # make the request
         log.debug("request will hit URL: %s", url)

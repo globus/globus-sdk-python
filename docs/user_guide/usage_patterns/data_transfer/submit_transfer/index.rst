@@ -55,24 +55,24 @@ Transferring data where at least one collection is unknown
 ----------------------------------------------------------
 
 In the case where your script does not know the full set of collections that it will
-be interacting with, you may need to reactively solve the ``ConsentRequired`` errors
+be interacting with, you may need to reactively respond to ``ConsentRequired`` errors
 instead of proactively attaching the "data_access" scope.
 
 This script demonstrates how to do that by:
 
-#. Attempting to submit the transfer without any "data_access" scopes.
-#. Intercepting any raised ``ConsentRequired`` errors if the request fails.
-#. Attaching any scope requirements detailed in the error.
-#. Retrying the transfer which implicitly puts your user through a consent flow to
-   resolve their auth state.
+#. Enabling auto-redrive of GAREs on the GlobusApp.
+#. Submitting the transfer without any "data_access" scopes.
+
+If the API signals that we did need a data_access scope, the script will prompt the
+user to login again with the proper consent & re-attempt the transfer submission.
 
 .. note::
     The script references two globus hosted "tutorial" collections. Replace these ids &
     paths with your own collection ids and paths to move your own data.
 
-.. note::
-    Given that this script reactively fixes auth states, it can involve two user login
-    interactions instead of the one required by the above proactive approach.
+.. warning::
+    Given that this script reactively fixes auth states, it could involve two user login
+    interactions instead of the one guaranteed by the above proactive approach.
 
 .. literalinclude:: submit_transfer_collections_unknown.py
     :caption: ``submit_transfer_collections_unknown.py`` [:download:`download <submit_transfer_collections_unknown.py>`]
