@@ -28,14 +28,14 @@ from globus_sdk.token_storage import (
     TokenValidationError,
     ValidatingTokenStorage,
 )
-
-from ..transport import (
+from globus_sdk.transport import (
     RetryCheck,
     RetryCheckFlags,
     RetryCheckResult,
     RetryContext,
     set_retry_check_flags,
 )
+
 from .authorizer_factory import AuthorizerFactory
 from .config import DEFAULT_CONFIG, KNOWN_TOKEN_STORAGES, GlobusAppConfig
 from .protocols import TokenStorageProvider
