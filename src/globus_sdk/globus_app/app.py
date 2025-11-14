@@ -568,23 +568,25 @@ class _RedriveGlobusAppGARE:
         self.app = app
 
     def __call__(self, ctx: RetryContext) -> RetryCheckResult:
-        if (resource_server := ctx.caller_info.resource_server) is not None:
-            if (response := ctx.response) is not None and response.status_code == 403:
-                if (gare := self._load_gare_from_response(response)) is not None:
-                    log.debug("Intercepted re-drivable GARE; initiating app login.")
+        if (resource_server := ctx.caller_info.resource_server) is None:
+            return RetryCheckResult.no_decision
 
-                    # There is a resource server and a 403-status GARE, so redrive it.
-                    self.app.login(auth_params=gare.authorization_parameters)
-                    updated_authorizer = self.app.get_authorizer(resource_server)
-                    log.debug("Acquired updated authorizer after GARE login; retrying.")
+        elif (gare := self._load_response_gare(ctx.response)) is None:
+            return RetryCheckResult.no_decision
 
-                    # Update the authorizer in the context for the subsequent retry.
-                    ctx.caller_info.authorizer = updated_authorizer
-                    return RetryCheckResult.do_retry
-        return RetryCheckResult.no_decision
+        log.debug("Intercepted re-drivable GARE; initiating app login.")
+        self.app.login(auth_params=gare.authorization_parameters)
+        updated_authorizer = self.app.get_authorizer(resource_server)
+        log.debug("Acquired updated authorizer after GARE login; retrying.")
+
+        ctx.caller_info.authorizer = updated_authorizer
+        return RetryCheckResult.do_retry
 
     @staticmethod
-    def _load_gare_from_response(response: Response) -> GARE | None:
+    def _load_response_gare(response: Response | None) -> GARE | None:
+        """Return a parsed GARE from a 403 response or None if not possible."""
+        if response is None or response.status_code != 403:
+            return None
         try:
             decoded_body = response.json()
         except JSONDecodeError:
