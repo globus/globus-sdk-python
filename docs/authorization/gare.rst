@@ -74,7 +74,7 @@ classes in an ``extra`` attribute.
     using non-canonical fields for any data that should be generically understood by
     a consumer of the error response.
 
-.. _globus_app_gare_integration
+.. _globus_app_gare_integration:
 
 GlobusApp Integration
 ---------------------
