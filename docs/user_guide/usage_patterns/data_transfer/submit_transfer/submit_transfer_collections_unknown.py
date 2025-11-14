@@ -1,5 +1,5 @@
 import globus_sdk
-from globus_sdk.globus_app import UserApp
+from globus_sdk import GlobusAppConfig, UserApp
 
 # Tutorial Client ID - <replace this with your own client>
 NATIVE_CLIENT_ID = "61338d24-54d5-408f-a10d-66c06b59f6d2"
@@ -16,7 +16,11 @@ DST_PATH = "/~/example-transfer-script-destination.txt"
 
 
 def main():
-    with UserApp("my-simple-transfer", client_id=NATIVE_CLIENT_ID) as app:
+    with UserApp(
+        "my-simple-transfer",
+        client_id=NATIVE_CLIENT_ID,
+        config=GlobusAppConfig(auto_redrive_gares=True),
+    ) as app:
         with globus_sdk.TransferClient(app=app) as client:
             submit_transfer(client)
 
@@ -25,16 +29,7 @@ def submit_transfer(transfer_client: globus_sdk.TransferClient):
     transfer_request = globus_sdk.TransferData(SRC_COLLECTION, DST_COLLECTION)
     transfer_request.add_item(SRC_PATH, DST_PATH)
 
-    try:
-        task = transfer_client.submit_transfer(transfer_request)
-    except globus_sdk.TransferAPIError as err:
-        if not err.info.consent_required:
-            raise
-
-        print("Additional consent required.")
-        transfer_client.add_app_scope(err.info.consent_required.required_scopes)
-
-        task = transfer_client.submit_transfer(transfer_request)
+    task = transfer_client.submit_transfer(transfer_request)
     print(f"Submitted transfer. Task ID: {task['task_id']}.")
 
 
