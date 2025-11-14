@@ -103,7 +103,7 @@ steps (e.g., consent, MFA) without any additional code.
 
     config = GlobusAppConfig(auto_redrive_gares=True)
     with GlobusApp("my-gare-demo", "<client-id>", config=config) as app:
-        tc = app.get_transfer_client()
+        tc = TransferClient(app=app)
 
         # If the transfer service were to return a 403 GARE, the script runner would be
         # prompted to log in with any explicit specifications, e.g., MFA, consents.
