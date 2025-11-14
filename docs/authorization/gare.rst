@@ -74,6 +74,44 @@ classes in an ``extra`` attribute.
     using non-canonical fields for any data that should be generically understood by
     a consumer of the error response.
 
+.. _globus_app_gare_integration
+
+GlobusApp Integration
+---------------------
+
+In order to standardize a common GARE-handling approach, the SDK's
+:ref:`GlobusApp <globus_apps>` contains a built-in GARE redrive mechanism (disabled
+by default).
+
+When enabled (setting the config flag ``auto_redrive_gares`` to ``True``), any
+client created with a GlobusApp will receive an additional request-transport retry
+handler. This handler will intercept the first occurrence of a 403 response which
+parses as a GARE and "redrive it", by:
+
+1. Initiating a fresh login request with the defined ``LoginFlowManager``
+2. Caching new tokens for subsequent requests
+3. Re-attempting the original request with the new tokens
+
+This allows for very simple error-handling, particularly in scripts, wherein the
+executing user or client is automatically prompted to remediate manually-required
+steps (e.g., consent, MFA) without any additional code.
+
+
+.. code-block:: python
+
+    from globus_sdk import GlobusApp, GlobusAppConfig, TransferClient
+
+    config = GlobusAppConfig(auto_redrive_gares=True)
+    with GlobusApp("my-gare-demo", "<client-id>", config=config) as app:
+        tc = app.get_transfer_client()
+
+        # If the transfer service were to return a 403 GARE, the script runner would be
+        # prompted to log in with any explicit specifications, e.g., MFA, consents.
+        # Once they complete the login flow (by providing the newly minted auth code),
+        # the original request is attempted once more.
+        task = tc.submit_transfer(your_transfer_data)
+
+
 Parsing Responses
 -----------------
 

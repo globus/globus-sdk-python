@@ -107,7 +107,7 @@ globus_sdk = [
 # non-packaging tool configs follow
 
 [tool.pytest.ini_options]
-addopts = "--no-success-flaky-report --color=yes"
+#addopts = "--no-success-flaky-report --color=yes"
 testpaths = ["tests"]
 norecursedirs = ["tests/non-pytest", "tests/benchmark"]
 filterwarnings = [

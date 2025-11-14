@@ -67,6 +67,9 @@ class GlobusAppConfig:
     :ivar bool request_refresh_tokens: Whether to request ``refresh tokens`` (expire
         after 6 months of no use) or use exclusively ``access tokens`` (expire 2 hours
         after issuance). Default: ``False``.
+    :ivar bool auto_redrive_gares: If true, Globus Authorization Required Errors (GAREs)
+        encountered during service interaction will automatically trigger a login flow
+        to obtain new tokens and retry the failed request. Default: ``False``.
 
     :ivar str | ``TokenStorage`` | ``TokenStorageProvider`` token_storage:
         A class responsible for storing and retrieving tokens.
@@ -119,6 +122,7 @@ class GlobusAppConfig:
     login_redirect_uri: str | None = None
     token_storage: KnownTokenStorage | TokenStorageProvider | TokenStorage = "json"
     request_refresh_tokens: bool = False
+    auto_redrive_gares: bool = False
     token_validation_error_handler: TokenValidationErrorHandler | None = (
         resolve_by_login_flow
     )
