@@ -1,4 +1,6 @@
 import inspect
+import sys
+import types
 import typing as t
 import uuid
 
@@ -14,6 +16,11 @@ from globus_sdk import (
 )
 from globus_sdk._missing import MISSING, MissingType, filter_missing
 from globus_sdk.transport import JSONRequestEncoder
+
+if sys.version_info >= (3, 10):
+    UnionTypes = (t.Union, types.UnionType)
+else:
+    UnionTypes = (t.Union,)
 
 STUB_SG_ID = uuid.uuid1()  # storage gateway
 STUB_MC_ID = uuid.uuid1()  # mapped collection
@@ -307,7 +314,8 @@ def _gen_value(_type):
         return ["STRING"]
     if _type is bool:
         return [True, False]
-    if _type is t.Union[uuid.UUID, str]:
+    # Union[UUID, str] | (UUID | str)
+    if t.get_origin(_type) in UnionTypes and set(t.get_args(_type)) == {uuid.UUID, str}:
         return [str(uuid.uuid1()), uuid.uuid1()]
     if _type is t.Iterable[str]:
         return [[], ["a", "b", "c"]]
