@@ -5,7 +5,7 @@ from responses.matchers import json_params_matcher
 
 from globus_sdk.testing.models import RegisteredResponse, ResponseSet
 
-_COMMON_RESPONSE_RECORD = {
+_COMMON_RESPONSE_RECORD: dict[str, t.Any] = {
     "fqdns": [],
     "links": {"privacy_policy": None, "terms_and_conditions": None},
     "parent_client": None,
@@ -17,7 +17,7 @@ _COMMON_RESPONSE_RECORD = {
     "userinfo_from_effective_identity": True,
 }
 
-PUBLIC_CLIENT_RESPONSE_RECORD = {
+PUBLIC_CLIENT_RESPONSE_RECORD: dict[str, t.Any] = {
     "client_type": "public_installed_client",
     "grant_types": ["authorization_code", "refresh_token"],
     **_COMMON_RESPONSE_RECORD,

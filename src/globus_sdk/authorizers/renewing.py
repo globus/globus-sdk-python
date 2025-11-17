@@ -57,8 +57,8 @@ class RenewingAuthorizer(GlobusAuthorizer, t.Generic[ResponseT], metaclass=abc.A
         expires_at: int | None = None,
         on_refresh: None | t.Callable[[ResponseT], t.Any] = None,
     ) -> None:
-        self._access_token = None
-        self._access_token_hash = None
+        self._access_token: str | None = None
+        self._access_token_hash: str | None = None
 
         log.debug(
             "Setting up a RenewingAuthorizer. It will use an "

@@ -212,7 +212,9 @@ class _ParsedPYIData:
                     f"'{self.pyi_filename}', '__all__' was not a tuple "
                 )
             for element in statement.value.elts:
-                if not isinstance(element, ast.Constant):
+                if not isinstance(element, ast.Constant) or not isinstance(
+                    element.value, str
+                ):
                     continue
                 self._all_names.append(element.value)
 
