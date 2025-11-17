@@ -2,8 +2,6 @@
 Test that globus_sdk.testing can accept a non-default requests mock
 """
 
-import sys
-
 import pytest
 import requests
 import responses
@@ -18,13 +16,6 @@ def custom_requests_mock():
 
     with responses.RequestsMock() as m:
         yield m
-
-    if sys.version_info < (3, 7):
-        # start the default mock again afterwards, so that test fixture teardown doesn't
-        # double-stop and fail on responses==0.17.0
-        # use an `if version_info` check to allow pyupgrade to remove this automatically
-        # in the future
-        responses.start()
 
 
 def test_get_last_request_on_empty_custom_mock_returns_none(custom_requests_mock):
