@@ -7,6 +7,7 @@ These classes generally shouldn't need to be used directly.
 
 from __future__ import annotations
 
+import importlib.resources
 import os
 import queue
 import socket
@@ -21,15 +22,10 @@ from urllib.parse import parse_qsl, urlparse
 from . import html_files
 from .errors import LocalServerLoginError
 
-if sys.version_info >= (3, 9):
-    import importlib.resources as importlib_resources
-else:  # Python < 3.9
-    import importlib_resources
-
 _IS_WINDOWS = os.name == "nt"
 
 DEFAULT_HTML_TEMPLATE = Template(
-    importlib_resources.files(html_files)
+    importlib.resources.files(html_files)
     .joinpath("local_server_landing_page.html")
     .read_text()
 )

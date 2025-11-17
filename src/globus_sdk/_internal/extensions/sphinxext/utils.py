@@ -61,7 +61,7 @@ def derive_doc_url_base(service: str | None) -> str:
         raise ValueError(f"Unsupported extdoclink service '{service}'")
 
 
-@functools.lru_cache(maxsize=None)
+@functools.cache
 def read_sphinx_params(docstring: str) -> tuple[str, ...]:
     """
     Given a docstring, extract the `:param:` declarations into a tuple of strings.

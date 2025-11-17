@@ -220,14 +220,9 @@ class _ParsedPYIData:
 def _parse_pyi_ast(anchor_module_name: str, pyi_filename: str) -> ast.Module:
     import importlib.resources
 
-    if sys.version_info >= (3, 9):
-        source = (
-            importlib.resources.files(anchor_module_name)  # pylint: disable=no-member
-            .joinpath(pyi_filename)
-            .read_bytes()
-        )
-    else:
-        source = importlib.resources.read_binary(  # pylint: disable=deprecated-method
-            anchor_module_name, pyi_filename
-        )
+    source = (
+        importlib.resources.files(anchor_module_name)  # pylint: disable=no-member
+        .joinpath(pyi_filename)
+        .read_bytes()
+    )
     return ast.parse(source)
