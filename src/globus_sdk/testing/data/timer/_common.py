@@ -1,3 +1,4 @@
+import typing as t
 import uuid
 
 TIMER_ID = str(uuid.uuid1())
@@ -49,7 +50,7 @@ V2_TRANSFER_TIMER = {
 
 
 FLOW_ID = str(uuid.uuid4())
-V2_FLOW_TIMER = {
+V2_FLOW_TIMER: dict[str, t.Any] = {
     "callback_body": {
         "body": {"input_key": "input_value"},
         "run_managers": [f"urn:globus:auth:identity:{uuid.uuid4()}"],
@@ -84,7 +85,7 @@ V2_FLOW_TIMER = {
 
 # V1 API data
 
-_transfer_data = {
+_transfer_data: dict[str, t.Any] = {
     "data": {
         "action_id": "15jfdBESgveZQ",
         "completion_time": "2022-04-01T19:30:05.973261+00:00",

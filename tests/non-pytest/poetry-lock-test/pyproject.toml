@@ -5,7 +5,7 @@ description = ""
 authors = ["Stephen Rosen <sirosen@globus.org>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 globus-sdk = { path = "../../.." }
 
 [build-system]
