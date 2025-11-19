@@ -15,6 +15,7 @@ Globus SDK Experimental Components
     :maxdepth: 1
 
     gcs_collection_client
+    gcs_downloader
 
 Experimental Construct Lifecycle
 --------------------------------
