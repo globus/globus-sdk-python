@@ -14,12 +14,26 @@ For a good bug report:
   - Check if there's a matching issue before opening a new issue
   - Provide a code sample to reproduce bugs
 
+
+Installing a Development Environment
+---------------------------------------
+
+To install the development environment (virtualenv and pre-commit hooks) in a new repo,
+run
+
+    make install
+
+To update an install for an existing development environment, e.g., after updating the
+dependency list, run
+
+    make clean && make install
+
 Linting & Testing
 -----------------
 
 Testing the SDK requires https://tox.readthedocs.io/en/latest/[tox].
 
-Run tests with
+Run the full test suite with
 
     tox
 
@@ -30,11 +44,8 @@ And linting with
 Optional, but recommended, linting setup
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For the best development experience, we recommend setting up linting and
-autofixing integrations with your editor and git.
-
-The Globus SDK uses  https://pre-commit.com/[`pre-commit`] to automatically run linters and fixers.
-Install `pre-commit` and then run
+The Globus SDK uses  https://pre-commit.com/[`pre-commit`] to automatically run linters
+and fixers. Install `pre-commit` and then run
 
     $ pre-commit install
 
