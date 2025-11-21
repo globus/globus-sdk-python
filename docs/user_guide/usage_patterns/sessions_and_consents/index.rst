@@ -34,3 +34,4 @@ operation closely resembles the session handling workflow.
     :maxdepth: 1
 
     handling_transfer_auth_params/index
+    coalescing_requirements_errors/index
