@@ -66,7 +66,8 @@ repos:
   rev: v1.7.7
   hooks:
     - id: actionlint
-
+      additional_dependencies:
+        - github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.11.1
 # custom local hooks
 - repo: local
   hooks:
