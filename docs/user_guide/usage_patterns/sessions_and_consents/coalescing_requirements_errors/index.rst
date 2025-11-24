@@ -48,11 +48,10 @@ These fields are:
 - ``required_scopes``
 - ``session_required_policies``
 
-Additionally, a key field to handle is the ``code``.
+Additionally, the ``code`` field is defined as a non-semantic hint, and is
+therefore safe to rewrite.
 Although services may use other values in practice, there are only two
 well-defined values for the ``code`` string:
-
-There are currently two supported values for the code field:
 
 - ``ConsentRequired``: indicates that the user must consent to additional scopes
   in order to authorize the resource server(s) to complete the requested action.
@@ -61,9 +60,6 @@ There are currently two supported values for the code field:
 
 Because ``AuthorizationRequired`` is generic, it can always be safely used for
 a ``GARE`` produced from other requirements.
-
-As long as there are no other fields, a pair of ``GARE``\s with these
-safe-to-merge fields can be combined.
 
 Safe Merge Example
 ^^^^^^^^^^^^^^^^^^
@@ -235,8 +231,9 @@ applications.
 
 This example merges together these documents, represented as
 :class:`globus_sdk.gare.GARE` objects, only in cases which are defined to
-be safe. If a ``session_message`` or ``prompt`` value is supplied, it will
-be used and will allow the ``GARE``\s to merge more aggressively.
+be safe. If ``session_message`` or ``prompt`` values are supplied, they
+will override any values for these fields present in the GAREs, allowing
+the ``GARE``\s to merge more aggressively.
 
 .. literalinclude:: coalesce_gares.py
     :caption: ``coalesce_gares.py`` [:download:`download <coalesce_gares.py>`]

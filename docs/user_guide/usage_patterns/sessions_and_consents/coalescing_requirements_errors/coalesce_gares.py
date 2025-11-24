@@ -6,12 +6,14 @@ def coalesce(
     session_message: str | None = None,
     prompt: str | None = None,
 ) -> list[globus_sdk.gare.GARE]:
+    # build a list of GARE fields which are allowed to merge
     safe_fields = ["session_required_policies", "required_scopes"]
     if session_message is not None:
         safe_fields.append("session_message")
     if prompt is not None:
         safe_fields.append("prompt")
 
+    # Build lists of GAREs that can and cannot be merged
     candidates, non_candidates = [], []
     for g in gares:
         if _is_candidate(g, safe_fields):
@@ -19,22 +21,25 @@ def coalesce(
         else:
             non_candidates.append(g)
 
+    # if no GAREs were safe to merge, return early
     if not candidates:
         return non_candidates
 
+    # merge safe GAREs and override any provided field values
     combined = _safe_combine(candidates)
     if session_message is not None:
         combined.authorization_parameters.session_message = session_message
     if prompt is not None:
         combined.authorization_parameters.prompt = prompt
 
+    # return the reduced list of GAREs
     return [combined] + non_candidates
 
 
 def _is_candidate(g: globus_sdk.gare.GARE, safe_fields: list[str]) -> bool:
     params = g.authorization_parameters
 
-    # look for an "unsafe field" with a value set
+    # check all of the supported GARE fields
     for field_name in (
         "session_message",
         "session_required_identities",
@@ -44,8 +49,11 @@ def _is_candidate(g: globus_sdk.gare.GARE, safe_fields: list[str]) -> bool:
         "required_scopes",
         "prompt",
     ):
+        # if the field is considered safe, ignore it
         if field_name in safe_fields:
             continue
+        # if the field isn't considered safe and it is set,
+        # then the GARE shouldn't be merged
         if getattr(params, field_name) is not None:
             return False
 
