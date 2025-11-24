@@ -2,4 +2,4 @@
 Development
 -----------
 
-- Added a new ``make install`` recipe. (:pr:`NUMBER`)
+- Added a new ``make install`` recipe.
