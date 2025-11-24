@@ -2,83 +2,83 @@ ci:
   autoupdate_schedule: "quarterly"
 
 repos:
-- repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v6.0.0
-  hooks:
-    - id: check-merge-conflict
-    - id: trailing-whitespace
-    - id: end-of-file-fixer
-    - id: mixed-line-ending
-      args:
-        - "--fix=lf"
-- repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.34.0
-  hooks:
-    - id: check-github-workflows
-    - id: check-readthedocs
-- repo: https://github.com/asottile/pyupgrade
-  rev: v3.20.0
-  hooks:
-    - id: pyupgrade
-      args: ["--py39-plus"]
-- repo: https://github.com/psf/black-pre-commit-mirror
-  rev: 25.9.0
-  hooks:
-    - id: black
-      name: "Autoformat python files"
-- repo: https://github.com/adamchainz/blacken-docs
-  rev: 1.20.0
-  hooks:
-    - id: blacken-docs
-      additional_dependencies: ['black==25.1.0']
-- repo: https://github.com/PyCQA/flake8
-  rev: 7.3.0
-  hooks:
-    - id: flake8
-      name: "Lint python files"
-      additional_dependencies:
-        - 'flake8-bugbear==24.12.12'
-        - 'flake8-comprehensions==3.16.0'
-        - 'flake8-typing-as-t==1.0.0'
-- repo: https://github.com/PyCQA/isort
-  rev: 6.1.0
-  hooks:
-    - id: isort
-      name: "Sort python imports"
-- repo: https://github.com/sirosen/rstbebe
-  rev: 0.2.0
-  hooks:
-    - id: bad-backticks
-- repo: https://github.com/sirosen/slyp
-  rev: 0.8.2
-  hooks:
-    - id: slyp
-- repo: https://github.com/codespell-project/codespell
-  rev: v2.4.1
-  hooks:
-    - id: codespell
-      args: ["--ignore-regex", "https://[^\\s]*"]
-- repo: https://github.com/sirosen/texthooks
-  rev: 0.7.1
-  hooks:
-    - id: alphabetize-codeowners
-- repo: https://github.com/rhysd/actionlint
-  rev: v1.7.7
-  hooks:
-    - id: actionlint
-      additional_dependencies:
-        - github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.11.1
-# custom local hooks
-- repo: local
-  hooks:
-    - id: forbid-code-block-without-language
-      name: Require code-block directives to specify a language
-      types_or: [python,rst]
-      language: pygrep
-      entry: "\\.\\. +code-block::$"
-    - id: ensure-all-exports-documented
-      name: "Check that all public symbols are documented"
-      entry: ./scripts/ensure_exports_are_documented.py
-      language: python
-      always_run: true
-      pass_filenames: false
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-merge-conflict
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args:
+          - "--fix=lf"
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.34.0
+    hooks:
+      - id: check-github-workflows
+      - id: check-readthedocs
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.20.0
+    hooks:
+      - id: pyupgrade
+        args: ["--py39-plus"]
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 25.9.0
+    hooks:
+      - id: black
+        name: "Autoformat python files"
+  - repo: https://github.com/adamchainz/blacken-docs
+    rev: 1.20.0
+    hooks:
+      - id: blacken-docs
+        additional_dependencies: ['black==25.1.0']
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.3.0
+    hooks:
+      - id: flake8
+        name: "Lint python files"
+        additional_dependencies:
+          - 'flake8-bugbear==24.12.12'
+          - 'flake8-comprehensions==3.16.0'
+          - 'flake8-typing-as-t==1.0.0'
+  - repo: https://github.com/PyCQA/isort
+    rev: 6.1.0
+    hooks:
+      - id: isort
+        name: "Sort python imports"
+  - repo: https://github.com/sirosen/rstbebe
+    rev: 0.2.0
+    hooks:
+      - id: bad-backticks
+  - repo: https://github.com/sirosen/slyp
+    rev: 0.8.2
+    hooks:
+      - id: slyp
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+        args: ["--ignore-regex", "https://[^\\s]*"]
+  - repo: https://github.com/sirosen/texthooks
+    rev: 0.7.1
+    hooks:
+      - id: alphabetize-codeowners
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.7
+    hooks:
+      - id: actionlint
+        additional_dependencies:
+          - github.com/wasilibs/go-shellcheck/cmd/shellcheck@v0.11.1
+  # custom local hooks
+  - repo: local
+    hooks:
+      - id: forbid-code-block-without-language
+        name: Require code-block directives to specify a language
+        types_or: [python,rst]
+        language: pygrep
+        entry: "\\.\\. +code-block::$"
+      - id: ensure-all-exports-documented
+        name: "Check that all public symbols are documented"
+        entry: ./scripts/ensure_exports_are_documented.py
+        language: python
+        always_run: true
+        pass_filenames: false
