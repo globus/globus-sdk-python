@@ -30,25 +30,17 @@ Example Usage
 
 .. code-block:: python
 
-    import argparse
-
     import globus_sdk
     from globus_sdk.experimental.gcs_downloader import GCSDownloader
 
     # SDK Tutorial Client ID - <replace this with your own client>
     CLIENT_ID = "61338d24-54d5-408f-a10d-66c06b59f6d2"
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--url",
-        # example value is used as a default
-        default=(
-            "https://m-d3a2c3.collection1.tutorials.globus.org"
-            "/home/share/godata/file2.txt"
-        ),
+    # this example is a path on the Globus Tutorial Collections
+    FILE_URL = (
+        "https://m-d3a2c3.collection1.tutorials.globus.org/home/share/godata/file2.txt"
     )
-    args = parser.parse_args()
 
     with globus_sdk.UserApp("gcs-downloader-demo", client_id=CLIENT_ID) as app:
         with GCSDownloader(app) as downloader:
-            print(downloader.read_file(args.url))
+            print(downloader.read_file(FILE_URL))
