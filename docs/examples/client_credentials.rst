@@ -47,12 +47,14 @@ The shortest version of the flow looks like this:
     CLIENT_SECRET = "..."
 
     client = globus_sdk.ConfidentialAppAuthClient(CLIENT_ID, CLIENT_SECRET)
-    token_response = client.oauth2_client_credentials_tokens()
+    token_response = client.oauth2_client_credentials_tokens(
+        requested_scopes=globus_sdk.TransferClient.scopes.all
+    )
 
     # the useful values that you want at the end of this
-    globus_auth_data = token_response.by_resource_server["auth.globus.org"]
-    globus_transfer_data = token_response.by_resource_server["transfer.api.globus.org"]
-    globus_auth_token = globus_auth_data["access_token"]
+    globus_transfer_data = token_response.by_resource_server[
+        globus_sdk.TransferClient.resource_server
+    ]
     globus_transfer_token = globus_transfer_data["access_token"]
 
 
@@ -81,8 +83,7 @@ Handling Token Expiration
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When you get access tokens, you also get their expiration time in seconds.
-You can inspect the ``globus_transfer_data`` and ``globus_auth_data``
-structures in the example to see.
+You can inspect the ``globus_transfer_data`` structure in the example to see.
 
 Tokens should have a long enough lifetime for any short-running operations
 (less than a day).
@@ -104,16 +105,16 @@ Use it like so:
 
     import globus_sdk
 
-    # you must have a client ID
+    # you must have a client ID and secret
     CLIENT_ID = "..."
-    # the secret, loaded from wherever you store it
     CLIENT_SECRET = "..."
 
     confidential_client = globus_sdk.ConfidentialAppAuthClient(
         client_id=CLIENT_ID, client_secret=CLIENT_SECRET
     )
-    scopes = "urn:globus:auth:scope:transfer.api.globus.org:all"
-    cc_authorizer = globus_sdk.ClientCredentialsAuthorizer(confidential_client, scopes)
+    cc_authorizer = globus_sdk.ClientCredentialsAuthorizer(
+        confidential_client, globus_sdk.TransferClient.scopes.all
+    )
     # create a new client
     tc = globus_sdk.TransferClient(authorizer=cc_authorizer)
 
