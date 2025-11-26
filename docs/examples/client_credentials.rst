@@ -46,8 +46,8 @@ The shortest version of the flow looks like this:
     # the secret, loaded from wherever you store it
     CLIENT_SECRET = "..."
 
-    client = globus_sdk.ConfidentialAppAuthClient(CLIENT_ID, CLIENT_SECRET)
-    token_response = client.oauth2_client_credentials_tokens(
+    confidential_client = globus_sdk.ConfidentialAppAuthClient(CLIENT_ID, CLIENT_SECRET)
+    token_response = confidential_client.oauth2_client_credentials_tokens(
         requested_scopes=globus_sdk.TransferClient.scopes.all
     )
 
@@ -71,9 +71,9 @@ For example, after running the code above,
 
     authorizer = globus_sdk.AccessTokenAuthorizer(globus_transfer_token)
     tc = globus_sdk.TransferClient(authorizer=authorizer)
-    print("Endpoints Belonging to {}@clients.auth.globus.org:".format(CLIENT_ID))
+    print(f"Endpoints Belonging to {CLIENT_ID}@clients.auth.globus.org:")
     for ep in tc.endpoint_search(filter_scope="my-endpoints"):
-        print("[{}] {}".format(ep["id"], ep["display_name"]))
+        print(f"[{ep['id']}] {ep['display_name']}")
 
 Note that we're doing a search for "my endpoints", but we refer to the results
 as belonging to ``<CLIENT_ID>@clients.auth.globus.org``. The "current user" is
@@ -119,6 +119,6 @@ Use it like so:
     tc = globus_sdk.TransferClient(authorizer=cc_authorizer)
 
     # usage is still the same
-    print("Endpoints Belonging to {}@clients.auth.globus.org:".format(CLIENT_ID))
+    print(f"Endpoints Belonging to {CLIENT_ID}@clients.auth.globus.org:")
     for ep in tc.endpoint_search(filter_scope="my-endpoints"):
-        print("[{}] {}".format(ep["id"], ep["display_name"]))
+        print(f"[{ep['id']}] {ep['display_name']}")
