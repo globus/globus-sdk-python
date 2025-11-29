@@ -3,21 +3,17 @@
 #
 # no other usages are supported
 import pathlib
-import subprocess
 import sys
 
+import mddj.api
 import ruamel.yaml
 
+dj = mddj.api.DJ()
 YAML = ruamel.yaml.YAML(typ="safe")
 REPO_ROOT = pathlib.Path(__file__).parent.parent
 
-proc = subprocess.run(
-    ["python", "-m", "mddj", "read", "requires-python", "--lower-bound"],
-    check=True,
-    capture_output=True,
-    cwd=REPO_ROOT,
-)
-requires_python_version = proc.stdout.decode().strip()
+requires_python_version = dj.read.requires_python(lower_bound=True)
+print("requires-python:", requires_python_version)
 
 with open(REPO_ROOT / ".github" / "workflows" / "test.yaml") as f:
     workflow = YAML.load(f)
@@ -35,6 +31,7 @@ with open(REPO_ROOT / ".github" / "workflows" / "test.yaml") as f:
         raise ValueError("Could not find a '-mindeps' tox-post-environment.")
 
     python_version, _, _ = environment.partition("-")
+    print("test-mindeps job python:", python_version)
     if python_version != f"py{requires_python_version}":
         print("ERROR: ensure_min_python_is_tested.py failed!")
         print(
@@ -45,13 +42,8 @@ with open(REPO_ROOT / ".github" / "workflows" / "test.yaml") as f:
         sys.exit(1)
 
 
-proc = subprocess.run(
-    ["python", "-m", "mddj", "read", "tox", "min-version"],
-    check=True,
-    capture_output=True,
-    cwd=REPO_ROOT,
-)
-tox_min_python_version = proc.stdout.decode().strip()
+tox_min_python_version = dj.read.tox.min_python_version()
+print("tox min python version:", tox_min_python_version)
 if tox_min_python_version != requires_python_version:
     print("ERROR: ensure_min_python_is_tested.py failed!")
     print(
