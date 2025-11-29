@@ -90,7 +90,7 @@ typing-mindeps = [
 ]
 check-project-metadata = [
     "ruamel.yaml<0.19",
-    "mddj==0.1.0",
+    "mddj==0.4.2",
 ]
 
 [tool.setuptools.packages.find]
