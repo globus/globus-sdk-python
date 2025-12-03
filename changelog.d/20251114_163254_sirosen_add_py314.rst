@@ -1,4 +1,0 @@
-Python Support
---------------
-
-- Add support for Python 3.14. (:pr:`1340`)

@@ -1,4 +1,0 @@
-Python Support
---------------
-
-- Remove support for Python 3.8. (:pr:`1341`)
