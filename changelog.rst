@@ -12,6 +12,62 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-4.2.0:
+
+v4.2.0 (2025-12-03)
+===================
+
+Python Support
+--------------
+
+- Add support for Python 3.14. (:pr:`1340`)
+
+- Remove support for Python 3.8. (:pr:`1341`)
+
+Added
+-----
+
+- ``GlobusApp`` and SDK client classes now support usage as context managers, and
+  feature a new ``close()`` method to close internal resources.
+  ``close()`` is automatically called on exit. (:pr:`1326`)
+
+  - In support of this, token storages now all feature a ``close()`` method,
+    which does nothing in the default implementation.
+    Previously, only storages with underlying resources to manage featured a
+    ``close()`` method.
+
+  - ``GlobusApp`` will close any token storage via ``close()`` if the token storage
+    was created by the app on init. Explicitly created storages will not be closed
+    and must be explicitly closed via their ``close()`` method.
+
+  - Any class inheriting from ``BaseClient`` features ``close()``, which will
+    close any transport object created during client construction.
+
+  - Transports which are created explicitly will not be closed by their clients,
+    and must be explicitly closed.
+
+- Add ``TimersClient.add_app_flow_user_scope`` for ``TimersClient``
+  instances which are integrated with ``GlobusApp``. This method registers the
+  specific flow ``user`` scope dependency needed for a flow timer. (:pr:`1333`)
+
+-   Added automatic Globus Auth Requirements Error (GARE) redriving to GlobusApp
+    (:pr:`1339`).
+
+    -   More details available at :ref:`globus_app_gare_integration`
+    -   This feature is disabled by default but can be turned on by setting
+        ``auto_retry_gares=True`` in a GlobusAppConfig.
+
+Fixed
+-----
+
+- Fixed a resource leak in which a ``GlobusApp`` would create internal client
+  objects and never close the associated transports. (:pr:`1326`)
+
+Development
+-----------
+
+- Added a new ``make install`` recipe.
+
 .. _changelog-4.1.0:
 
 v4.1.0 (2025-10-23)
