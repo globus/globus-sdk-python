@@ -540,7 +540,7 @@ class BaseClient:
 
         # if a client is asked to make a request against a full URL, not just the path
         # component, then do not resolve the path, simply pass it through as the URL
-        if path.startswith("https://") or path.startswith("http://"):
+        if path.startswith(("https://", "http://")):
             url = path
         else:
             url = slash_join(self.base_url, urllib.parse.quote(path))
