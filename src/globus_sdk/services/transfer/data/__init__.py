@@ -6,5 +6,6 @@ be Payload types, so they can be passed seamlessly to
 
 from .delete_data import DeleteData
 from .transfer_data import TransferData
+from .tunnel_data import CreateTunnelData
 
-__all__ = ("TransferData", "DeleteData")
+__all__ = ("TransferData", "DeleteData", "CreateTunnelData")
