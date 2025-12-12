@@ -1,5 +1,5 @@
 from .client import TransferClient
-from .data import DeleteData, TransferData
+from .data import CreateTunnelData, DeleteData, TransferData
 from .errors import TransferAPIError
 from .response import IterableTransferResponse
 
@@ -9,4 +9,5 @@ __all__ = (
     "DeleteData",
     "TransferAPIError",
     "IterableTransferResponse",
+    "CreateTunnelData",
 )

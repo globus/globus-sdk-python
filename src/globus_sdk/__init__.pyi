@@ -116,6 +116,7 @@ from .services.timers import (
     TransferTimer,
 )
 from .services.transfer import (
+    CreateTunnelData,
     DeleteData,
     IterableTransferResponse,
     TransferAPIError,
