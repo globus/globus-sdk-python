@@ -1,7 +1,7 @@
 Added
 -----
 
-- Added support to the ``TransferClient`` for the Streams API (:pr:`NUMBER`)
+- Added support to the ``TransferClient`` for the Streams API (:pr:`1351`)
 
   - ``CreateTunnelData`` is a payload builder for tunnel creation documents
   - ``TransferClient.create_tunnel()`` supports tunnel creation
