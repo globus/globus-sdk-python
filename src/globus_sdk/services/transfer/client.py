@@ -13,7 +13,7 @@ from globus_sdk._missing import MISSING, MissingType
 from globus_sdk.scopes import GCSCollectionScopes, Scope, TransferScopes
 from globus_sdk.transport import RetryConfig
 
-from .data import DeleteData, TransferData
+from .data import CreateTunnelData, DeleteData, TransferData
 from .errors import TransferAPIError
 from .response import IterableTransferResponse
 from .transport import TRANSFER_DEFAULT_RETRY_CHECKS
@@ -2699,3 +2699,195 @@ class TransferClient(client.BaseClient):
             f"/v0.10/endpoint_manager/pause_rule/{pause_rule_id}",
             query_params=query_params,
         )
+
+    # Tunnel methods
+
+    def create_tunnel(
+        self,
+        data: dict[str, t.Any] | CreateTunnelData,
+    ) -> response.GlobusHTTPResponse:
+        """
+        :param data: Parameters for the tunnel creation
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TunnelClient(...)
+                    result = tc.create_tunnel(data)
+                    print(result["data"]["id"])
+
+            .. tab-item:: API Info
+
+                ``POST /v2/tunnels``
+        """
+        log.debug("TransferClient.create_tunnel(...)")
+        try:
+            data_element = data["data"]
+        except KeyError as e:
+            raise exc.GlobusSDKUsageError(
+                "create_tunnel() body was malformed (missing the 'data' key). "
+                "Use CreateTunnelData to easily create correct documents."
+            ) from e
+
+        try:
+            attributes = data_element["attributes"]
+        except KeyError:
+            data_element["attributes"] = {}
+            attributes = data_element["attributes"]
+        if attributes.get("submission_id", MISSING) is MISSING:
+            log.debug("create_tunnel auto-fetching submission_id")
+            attributes["submission_id"] = self.get_submission_id()["value"]
+
+        r = self.post("/v2/tunnels", data=data)
+        return r
+
+    def update_tunnel(
+        self,
+        tunnel_id: str,
+        update_doc: dict[str, t.Any],
+    ) -> response.GlobusHTTPResponse:
+        r"""
+        :param tunnel_id: The ID of the Tunnel.
+        :param update_doc: The document that will be sent to the patch API.
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TunnelClient(...)
+                    "data" = {
+                        "type": "Tunnel",
+                        "attributes": {
+                            "state": "STOPPING",
+                        },
+                    }
+                    result = tc.update_tunnel(tunnel_id, data)
+                    print(result["data"])
+
+            .. tab-item:: API Info
+
+                ``PATCH /v2/tunnels/<tunnel_id>``
+        """
+        r = self.patch(f"/v2/tunnels/{tunnel_id}", data=update_doc)
+        return r
+
+    def get_tunnel(
+        self,
+        tunnel_id: str,
+        *,
+        query_params: dict[str, t.Any] | None = None,
+    ) -> response.GlobusHTTPResponse:
+        """
+        :param tunnel_id: The ID of the Tunnel which we are fetching details about.
+        :param query_params: Any additional parameters will be passed through
+            as query params.
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TunnelClient(...)
+                    result = tc.show_tunnel(tunnel_id)
+                    print(result["data"])
+
+            .. tab-item:: API Info
+
+                ``GET /v2/tunnels/<tunnel_id>``
+        """
+        log.debug("TransferClient.get_tunnel(...)")
+        r = self.get(f"/v2/tunnels/{tunnel_id}", query_params=query_params)
+        return r
+
+    def delete_tunnel(
+        self,
+        tunnel_id: str,
+    ) -> response.GlobusHTTPResponse:
+        """
+        :param tunnel_id: The ID of the Tunnel to be deleted.
+
+        This will clean up all data associated with a Tunnel.
+        Note that Tunnels must be stopped before they can be deleted.
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TunnelClient(...)
+                    tc.delete_tunnel(tunnel_id)
+
+            .. tab-item:: API Info
+
+                ``DELETE /v2/tunnels/<tunnel_id>``
+        """
+        log.debug("TransferClient.delete_tunnel(...)")
+        r = self.delete(f"/v2/tunnels/{tunnel_id}")
+        return r
+
+    def list_tunnels(
+        self,
+        *,
+        query_params: dict[str, t.Any] | None = None,
+    ) -> IterableTransferResponse:
+        """
+        :param query_params: Any additional parameters will be passed through
+            as query params.
+
+        This will list all the Tunnels created by the authorized user.
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TunnelClient(...)
+                    tc.list_tunnels(tunnel_id)
+
+            .. tab-item:: API Info
+
+                ``GET /v2/tunnels/``
+        """
+        log.debug("TransferClient.list_tunnels(...)")
+        r = self.get("/v2/tunnels", query_params=query_params)
+        return IterableTransferResponse(r)
+
+    def get_stream_access_point(
+        self,
+        stream_ap_id: str,
+        *,
+        query_params: dict[str, t.Any] | None = None,
+    ) -> response.GlobusHTTPResponse:
+        """
+        :param stream_ap_id: The ID of the steaming access point to lookup.
+        :param query_params: Any additional parameters will be passed through
+            as query params.
+
+        This will list all the Tunnels created by the authorized user.
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TunnelClient(...)
+                    tc.get_stream_ap(stream_ap_id)
+
+            .. tab-item:: API Info
+
+                ``GET /v2/stream_access_points/<stream_ap_id>``
+        """
+        log.debug("TransferClient.get_stream_ap(...)")
+        r = self.get(
+            f"/v2/stream_access_points/{stream_ap_id}", query_params=query_params
+        )
+        return r
