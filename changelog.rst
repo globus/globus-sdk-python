@@ -12,6 +12,24 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-4.3.0:
+
+v4.3.0 (2025-12-17)
+===================
+
+Added
+-----
+
+- Added support to the ``TransferClient`` for the Streams API (:pr:`1351`)
+
+  - ``CreateTunnelData`` is a payload builder for tunnel creation documents
+  - ``TransferClient.create_tunnel()`` supports tunnel creation
+  - ``TransferClient.update_tunnel()`` supports updates to a tunnel
+  - ``TransferClient.get_tunnel()`` fetches a tunnel by ID
+  - ``TransferClient.delete_tunnel()`` deletes a tunnel
+  - ``TransferClient.list_tunnels()`` fetches all of the current user's tunnels
+  - ``TransferClient.get_stream_access_point()`` fetches a Stream Access Point by ID
+
 .. _changelog-4.2.0:
 
 v4.2.0 (2025-12-03)
