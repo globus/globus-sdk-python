@@ -2746,7 +2746,7 @@ class TransferClient(client.BaseClient):
 
     def update_tunnel(
         self,
-        tunnel_id: str,
+        tunnel_id: str | uuid.UUID,
         update_doc: dict[str, t.Any],
     ) -> response.GlobusHTTPResponse:
         r"""
@@ -2778,7 +2778,7 @@ class TransferClient(client.BaseClient):
 
     def get_tunnel(
         self,
-        tunnel_id: str,
+        tunnel_id: str | uuid.UUID,
         *,
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
@@ -2807,7 +2807,7 @@ class TransferClient(client.BaseClient):
 
     def delete_tunnel(
         self,
-        tunnel_id: str,
+        tunnel_id: str | uuid.UUID,
     ) -> response.GlobusHTTPResponse:
         """
         :param tunnel_id: The ID of the Tunnel to be deleted.
@@ -2862,7 +2862,7 @@ class TransferClient(client.BaseClient):
 
     def get_stream_access_point(
         self,
-        stream_ap_id: str,
+        stream_ap_id: str | uuid.UUID,
         *,
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
