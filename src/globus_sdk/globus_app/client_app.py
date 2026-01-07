@@ -61,7 +61,7 @@ class ClientApp(GlobusApp):
         client_id: uuid.UUID | str | None = None,
         client_secret: str | None = None,
         scope_requirements: (
-            dict[str, str | Scope | t.Iterable[str | Scope]] | None
+            t.Mapping[str, str | Scope | t.Iterable[str | Scope]] | None
         ) = None,
         config: GlobusAppConfig = DEFAULT_CONFIG,
     ) -> None:
