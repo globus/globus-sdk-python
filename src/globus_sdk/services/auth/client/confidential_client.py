@@ -112,8 +112,7 @@ class ConfidentialAppAuthClient(AuthLoginClient):
 
         :param redirect_uri: The page that users should be directed to after
             authenticating at the authorize URL.
-        :param requested_scopes: The scopes on the token(s) being requested. Defaults to
-            ``openid profile email urn:globus:auth:scope:transfer.api.globus.org:all``
+        :param requested_scopes: The scopes on the token(s) being requested.
         :param state: This string allows an application to pass information back to
             itself in the course of the OAuth flow. Because the user will navigate away
             from the application to complete the flow, this parameter lets the app pass
