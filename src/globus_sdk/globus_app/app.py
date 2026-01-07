@@ -535,6 +535,13 @@ class GlobusApp(metaclass=abc.ABCMeta):
 
         Modifying the returned dict will not affect the app's scope requirements.
         To add scope requirements, use ``GlobusApp.add_scope_requirements()``.
+
+        .. note::
+
+            Users may observe that Globus Auth (``'auth.globus.org'``) is always
+            present, and always maps to the ``openid`` scope, even when the user has
+            not added this scope. This mapping is expected, as the ``openid`` scope is
+            needed internally for the functionality provided by ``GlobusApp``.
         """
         # Scopes are mutable objects so we return a deepcopy
         return copy.deepcopy(self._scope_requirements)
