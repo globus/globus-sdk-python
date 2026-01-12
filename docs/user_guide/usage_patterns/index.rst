@@ -29,3 +29,4 @@ transfers.
 
     data_transfer/index
     sessions_and_consents/index
+    client_identities/index
