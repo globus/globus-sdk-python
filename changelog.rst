@@ -12,6 +12,23 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-4.3.1:
+
+v4.3.1 (2026-01-14)
+===================
+
+Fixed
+-----
+
+- The type of ``scope_requirements`` in the init signature for ``ClientApp``
+  has been expanded to ``typing.Mapping`` to match other locations where a
+  ``scope_requirements`` mapping is accepted. (:pr:`1360`)
+
+Development
+-----------
+
+- Update the Streams-related type annotations to accept UUIDs. (:pr:`1353`)
+
 .. _changelog-4.3.0:
 
 v4.3.0 (2025-12-17)
