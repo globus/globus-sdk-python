@@ -1,17 +1,17 @@
-.. _userguide_register_client_identity:
+.. _userguide_register_service_account:
 
-Registering a Client Identity
+Registering a Service Account
 =============================
 
-In order to be used as a Client Identity or "service account", a client must
+In order to be used as a Service Account or "Client Identity", a client must
 be registered in Globus Auth under the correct type.
 
 This is similar to the
 :ref:`getting started documentation on registering an app <tutorial_register_app>`,
 but using some different settings.
 
-Creating the Client Identity
-----------------------------
+Creating the Client
+-------------------
 
 The following steps will walk you through how to register a client for use as a
 service account.
