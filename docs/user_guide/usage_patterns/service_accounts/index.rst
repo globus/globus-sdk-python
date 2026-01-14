@@ -29,6 +29,25 @@ these tokens appropriately.
     Put another way: having client credentials is *necessary but not sufficient*
     for this kind of usage.
 
+
+Disambiguation: "Clients" vs "Client Identities" vs "Service Accounts"
+----------------------------------------------------------------------
+
+There are two different meanings for the word "client", from different domains.
+
+Conventionally, a library's adapter for a web API is a "client".
+In the SDK, we primarily use the word "client" to refer to these API connectors,
+as in ``TransferClient``, ``GroupsClient``, etc.
+
+OAuth2 calls an application registered with the service a "client".
+A "Client Identity" is a Globus Auth concept which uses this meaning of
+"client".
+
+As a result of this ambiguity, this documentation will prefer to refer to
+"Client Identities" as "Service Accounts", which is the term which is used in
+other Globus documentation and the web interface.
+
+
 .. toctree::
     :caption: Using Service Accounts with the SDK
     :maxdepth: 1
