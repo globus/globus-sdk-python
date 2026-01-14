@@ -3,7 +3,7 @@
 Using Client Identities
 =======================
 
-Clients registered in Globus can be used as "service accounts",
+Some clients registered in Globus may operate as independent "service accounts",
 distinct actors with their own identities.
 This is useful for a wide range of automation tasks, in which users want to
 leverage Globus APIs, but without handling login flows and user credentials.
@@ -14,7 +14,7 @@ its tokens.
 Once it is so registered, such a client will have an ID and secret, which can be
 passed into interfaces in the SDK.
 The client credentials (ID and secret) are used to get tokens to power
-interactions with Globus APIs, and SDK tools will automatically cache and reload
+interactions with Globus APIs, and SDK's GlobusApp will automatically cache and reload
 these tokens appropriately.
 
 .. note::

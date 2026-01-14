@@ -15,7 +15,8 @@ Instantiating a ClientApp
 
 Constructing an app takes three required parameters,
 
-- the name of the app for use in the SDK (this does not have to match your registered client name)
+- a human readable name to identify your app in HTTP requests and token caching (e.g., “My Cool Weathervane”).
+   - this does not need match the name you supplied during client registration.
 - the client ID
 - the client secret
 
