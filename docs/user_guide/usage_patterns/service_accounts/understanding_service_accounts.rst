@@ -65,3 +65,62 @@ Their permissions are isolated.
 
 Users of Service Accounts need to separately assign permissions to these
 identities, depending on what resources the client is meant to access.
+
+
+Policies Which Conflict With Service Accounts
+---------------------------------------------
+
+A number of the configurable policies on Globus resources conflict with use of
+Service Accounts.
+Users often find that they cannot substitute Service Accounts for their own
+credentials without also adapting their workflows or configurations to support
+this usage.
+
+In particular, users should be aware of the following classes of issues, and
+potential workarounds.
+
+Identity-specific Permissions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Because clients are not associated with their owners, identity-specific
+permissions for users can't be directly "shared" with their clients.
+
+If your account has permissions to access a resource, but you wish to use a
+Service Account to interact with it, add a second permission to give the Service
+Account access as well.
+
+Domain Requirements
+~~~~~~~~~~~~~~~~~~~
+
+Resources may apply policies which require a specific domain for users.
+For example, a University of Chicago Collection may require ``uchicago.edu``
+usernames.
+
+Service Accounts have a fixed domain of ``clients.auth.globus.org`` and
+therefore cannot satisfy these requirements.
+
+Use user-specific access policies or permissions delegation features, like Guest
+Collections, to allow Service Accounts to specifically access resources.
+
+Session Timeouts
+~~~~~~~~~~~~~~~~
+
+Globus resources may configure authentication timeouts, forcing users to
+reauthenticate within a fixed time window to use a resource.
+This is done by checking the Globus Auth session associated with the user's
+tokens for last authentication times.
+
+For example, a Collection may require that users have logged in within the last
+hour to access data -- this is part of the suite of features for High Assurance
+data access.
+
+A Service Account authenticates each time it fetches a token, but does not have
+a Globus Auth session associated with those authentications. (There is no
+browser session interaction in such cases.)
+As such, a Service Account cannot satisfy these policies under a naive
+interpretation.
+
+Globus Connect Server implements a special rule to handle this case: session
+timeouts are never enforced on Service Accounts.
+Other services may implement similar policies or require that access to Service
+Accounts be configured separately from regular user permissions.
