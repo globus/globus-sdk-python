@@ -7,7 +7,7 @@ Some clients registered in Globus may operate as independent "service accounts",
 distinct actors with their own identities.
 These are also referred to as "client identities" because the actor in question
 is the client itself.
-Service accounts useful for a wide range of automation tasks, in which users
+Service accounts are useful for a wide range of automation tasks, in which users
 want to leverage Globus APIs, but without handling login flows and user
 credentials.
 
