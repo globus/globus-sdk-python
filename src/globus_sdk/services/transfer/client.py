@@ -2891,3 +2891,32 @@ class TransferClient(client.BaseClient):
             f"/v2/stream_access_points/{stream_ap_id}", query_params=query_params
         )
         return r
+
+    def get_tunnel_events(
+        self,
+        tunnel_id: str | uuid.UUID,
+        *,
+        query_params: dict[str, t.Any] | None = None,
+    ) -> response.GlobusHTTPResponse:
+        """
+        :param tunnel_id: The ID of the Tunnel which we are fetching events about.
+        :param query_params: Any additional parameters will be passed through
+            as query params.
+
+        .. tab-set::
+
+            .. tab-item:: Example Usage
+
+                .. code-block:: python
+
+                    tc = globus_sdk.TunnelClient(...)
+                    result = tc.get_tunnel_events(tunnel_id)
+                    print(result["data"])
+
+            .. tab-item:: API Info
+
+                ``GET /v2/tunnels/<tunnel_id>/events``
+        """
+        log.debug("TransferClient.get_tunnel_events(...)")
+        r = self.get(f"/v2/tunnels/{tunnel_id}/events", query_params=query_params)
+        return r
