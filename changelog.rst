@@ -12,6 +12,16 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-4.4.0:
+
+v4.4.0 (2026-02-13)
+===================
+
+Added
+-----
+
+ - Added ``TransferClient.get_tunnel_events()``, which fetches the events associated with a tunnel
+
 .. _changelog-4.3.1:
 
 v4.3.1 (2026-01-14)
