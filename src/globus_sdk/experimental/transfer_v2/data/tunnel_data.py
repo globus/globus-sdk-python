@@ -11,6 +11,12 @@ log = logging.getLogger(__name__)
 
 
 class CreateTunnelData(GlobusPayload):
+    """
+    Convenience class for constructing a tunnel document to use as the
+    ``data`` parameter to
+    :meth:`create_tunnel <globus_sdk.TransferClientV2.create_tunnel>`.
+    """
+
     def __init__(
         self,
         initiator_stream_access_point: uuid.UUID | str,
@@ -23,7 +29,7 @@ class CreateTunnelData(GlobusPayload):
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        log.debug("Creating a new TunnelData object")
+        log.debug("Creating a new CreateTunnelData object")
 
         relationships = {
             "listener": {
