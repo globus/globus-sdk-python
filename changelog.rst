@@ -20,7 +20,8 @@ v4.4.0 (2026-02-13)
 Added
 -----
 
- - Added ``TransferClient.get_tunnel_events()``, which fetches the events associated with a tunnel
+- Added ``TransferClient.get_tunnel_events()``, which fetches the events
+  associated with a tunnel.
 
 .. _changelog-4.3.1:
 
