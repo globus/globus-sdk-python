@@ -5,6 +5,7 @@ import logging
 import typing as t
 import uuid
 
+from globus_sdk._internal.remarshal import stringify
 from globus_sdk._missing import MISSING, MissingType
 from globus_sdk._payload import GlobusPayload
 
@@ -176,7 +177,7 @@ class TransferData(GlobusPayload):
         self["destination_endpoint"] = destination_endpoint
         self["label"] = label
         self["submission_id"] = submission_id
-        self["deadline"] = deadline
+        self["deadline"] = stringify(deadline)
         self["source_local_user"] = source_local_user
         self["destination_local_user"] = destination_local_user
         self["verify_checksum"] = verify_checksum
