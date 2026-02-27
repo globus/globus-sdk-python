@@ -12,6 +12,18 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-4.4.1:
+
+v4.4.1 (2026-02-27)
+===================
+
+Fixed
+-----
+
+- Fixed a bug in ``globus_sdk.TransferData`` which failed to convert
+  ``deadline`` to a string when a ``datetime.datetime`` object is given.
+  (:pr:`1372`)
+
 .. _changelog-4.4.0:
 
 v4.4.0 (2026-02-13)
