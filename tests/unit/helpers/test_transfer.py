@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 
 from globus_sdk import MISSING, DeleteData, TransferData
@@ -298,3 +300,17 @@ def test_add_filter_rule():
 )
 def test_ls_format_filter(filter, expected):
     assert _format_filter(filter) == expected
+
+
+@pytest.mark.parametrize(
+    "deadline_str",
+    [
+        pytest.param("2026-02-27 09:36:50.517299", id="naive_w_microseconds"),
+        pytest.param("2020-01-01 08:22:12+04:00", id="plus4"),
+    ],
+)
+def test_transfer_data_stringifies_deadline(deadline_str):
+    deadline_dt = datetime.datetime.fromisoformat(deadline_str)
+
+    tdata = TransferData(GO_EP1_ID, GO_EP2_ID, deadline=deadline_dt)
+    assert tdata["deadline"] == deadline_str
