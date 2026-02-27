@@ -23,3 +23,16 @@ Once an interface has been evaluated and proven to be sufficiently coherent, we 
 "stabilize" it, moving it to an appropriate section in the main module and leaving
 behind an alias in the requisite experimental module to minimize import breakage. These
 aliases will persist until the next major version release of the SDK (e.g., v3 -> v4).
+
+
+Service Client Lifecycle
+------------------------
+
+A service client is added in the ``experimental`` module when the service
+functionality it provides an interface to in Beta or under active development
+and may experience changes in that could break the interfaces in the SDK.
+
+Once the service has moved out of active development the service client
+will be moved into the main services module leaving behind an alias in the
+experimental module to minimize import breakage. These aliases will persist
+until the next major version release of the SDK (e.g., v3 -> v4).

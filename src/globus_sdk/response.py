@@ -251,3 +251,10 @@ class ArrayResponse(GlobusHTTPResponse):
                 f"type is '{type(self.data).__name__}'"
             )
         return len(self.data)
+
+
+class IterableJSONAPIResponse(IterableResponse):
+    """This response class is for iterating on JSON:API responses that have an
+    array of data in their top level `data` key."""
+
+    default_iter_key = "data"

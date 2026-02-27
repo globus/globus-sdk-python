@@ -1,4 +1,5 @@
 from .base import Paginator, has_paginator
+from .jsonapi import JSONAPIPaginator
 from .last_key import LastKeyPaginator
 from .limit_offset import HasNextPaginator, LimitOffsetTotalPaginator
 from .marker import MarkerPaginator, NullableMarkerPaginator
@@ -15,4 +16,5 @@ __all__ = (
     "LastKeyPaginator",
     "HasNextPaginator",
     "LimitOffsetTotalPaginator",
+    "JSONAPIPaginator",
 )
