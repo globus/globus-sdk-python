@@ -1,7 +1,7 @@
 from globus_sdk.testing import get_last_request, load_response
 
 
-def test_list_tunnel(client):
+def test_list_tunnels(client):
     load_response(client.list_tunnels)
 
     res = client.list_tunnels()

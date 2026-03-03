@@ -34,7 +34,7 @@ class TransferClientV2(client.BaseClient):
     ``TransferClientV2.paginated.foo``.
     Using ``TransferClientV2.list_stream_access_points`` as an example::
 
-        from globus_sdk.experimental.transfer_v2 import TransferClientV2
+        from globus_sdk.experimental import TransferClientV2
         tc = TransferClientV2(...)
 
         # this is the unpaginated version

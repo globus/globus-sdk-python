@@ -37,7 +37,6 @@ def test_create_tunnel(client):
 
 def test_create_tunnel_no_submission(client):
     meta = load_response(client.create_tunnel).metadata
-    load_response(client.get_submission_id)
 
     data = CreateTunnelData(
         meta["initiator_ap"], meta["listener_ap"], label=meta["display_name"]
