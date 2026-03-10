@@ -14,7 +14,7 @@ from globus_sdk.scopes import GCSCollectionScopes
 class _GCSCollectionScopesClassStub(GCSCollectionScopes):
     """
     This internal stub object ensures that the type deductions for type checkers (e.g.
-    mypy) on SpecificFlowClient.scopes are correct.
+    mypy) on GCSCollectionClient.scopes are correct.
 
     Primarily, it should be possible to access the `scopes` attribute, the `user`
     scope, and the `resource_server`, but these usages should raise specific and
