@@ -42,14 +42,11 @@ class GCSCollectionClient(globus_sdk.BaseClient):
     A client for interacting directly with a GCS Collection.
     Typically for HTTPS upload/download via HTTPS-enabled collections.
 
-    .. note::
-
-        Because the client communicates directly with paths on the collection, rather
-        than with the Endpoint hosting it, the ``base_url`` parameter is required.
-
     .. sdk-sphinx-copy-params:: BaseClient
 
         :param collection_id: The ID of the collection.
+        :param collection_address: The URL of the collection, as might be retrieved from
+            the ``https_server`` field in Globus Transfer.
     """
 
     scopes: GCSCollectionScopes = _GCSCollectionScopesClassStub()
@@ -57,7 +54,7 @@ class GCSCollectionClient(globus_sdk.BaseClient):
     def __init__(
         self,
         collection_id: str | uuid.UUID,
-        base_url: str,
+        collection_address: str,
         *,
         environment: str | None = None,
         app: globus_sdk.GlobusApp | None = None,
@@ -70,9 +67,12 @@ class GCSCollectionClient(globus_sdk.BaseClient):
         self.collection_id = str(collection_id)
         self.scopes = GCSCollectionScopes(self.collection_id)
 
+        if not collection_address.startswith("https://"):
+            collection_address = f"https://{collection_address}"
+
         super().__init__(
             environment=environment,
-            base_url=base_url,
+            base_url=collection_address,
             app=app,
             app_scopes=app_scopes,
             authorizer=authorizer,

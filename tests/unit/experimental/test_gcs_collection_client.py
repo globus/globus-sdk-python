@@ -34,3 +34,11 @@ def test_default_scope_is_https():
     assert client.default_scope_requirements == [
         globus_sdk.Scope("https://auth.globus.org/scopes/foo_id/https")
     ]
+
+
+# this behavior imitates the `GCSClient`, which accepts a bare hostname and prepends the
+# scheme if it is missing
+def test_https_scheme_is_added_to_bare_address():
+    client = GCSCollectionClient("foo_id", "example.com")
+
+    assert client.base_url == "https://example.com"
