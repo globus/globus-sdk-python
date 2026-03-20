@@ -10,6 +10,11 @@ Globus SDK Experimental Components
 
     **Use at your own risk.**
 
+.. toctree::
+    :caption: Experimental Constructs
+    :maxdepth: 1
+
+    gcs_collection_client
 
 Experimental Construct Lifecycle
 --------------------------------
