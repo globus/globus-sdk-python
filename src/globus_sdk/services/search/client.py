@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import logging
+import sys
 import typing as t
 import uuid
 
 from globus_sdk import client, paging, response
-from globus_sdk._internal.remarshal import strseq_listify
+from globus_sdk._internal.remarshal import commajoin, strseq_listify
 from globus_sdk._missing import MISSING, MissingType
 from globus_sdk.scopes import SearchScopes
 
@@ -13,7 +14,14 @@ from .data import SearchQueryV1, SearchScrollQuery
 from .errors import SearchAPIError
 from .response import IndexListResponse
 
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
+
 log = logging.getLogger(__name__)
+
+_VALID_ROLE_NAMES_T: TypeAlias = t.Literal["owner", "admin", "writer"]
 
 
 class SearchClient(client.BaseClient):
@@ -229,12 +237,18 @@ class SearchClient(client.BaseClient):
 
     def index_list(
         self,
+        filter_roles: (
+            _VALID_ROLE_NAMES_T | t.Iterable[_VALID_ROLE_NAMES_T] | MissingType
+        ) = MISSING,
         *,
         query_params: dict[str, t.Any] | None = None,
     ) -> response.IterableResponse:
         """
         Get a list of indices on which the caller has permissions.
 
+        :param filter_roles: An iterable of roles to use to filter the listing. By
+            default, all indices where the user has a role are returned.
+            Valid values are ``owner``, ``admin``, and ``writer``.
         :param query_params: additional parameters to pass as query params
 
         .. tab-set::
@@ -260,6 +274,7 @@ class SearchClient(client.BaseClient):
                     :ref: search/reference/index_list/
         """  # noqa: E501
         log.debug("SearchClient.index_list()")
+        query_params = {"filter_roles": commajoin(filter_roles), **(query_params or {})}
         return IndexListResponse(self.get("/v1/index_list", query_params=query_params))
 
     #
