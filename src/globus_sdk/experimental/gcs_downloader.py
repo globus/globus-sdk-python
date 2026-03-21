@@ -11,11 +11,9 @@ import typing as t
 import urllib.parse
 
 import globus_sdk
-import globus_sdk.scopes
 import globus_sdk.transport
-from globus_sdk._internal.classprop import classproperty
 from globus_sdk._internal.type_definitions import Closable
-from globus_sdk.authorizers import GlobusAuthorizer
+from globus_sdk.experimental.gcs_collection_client import GCSCollectionClient
 from globus_sdk.transport.default_retry_checks import DEFAULT_RETRY_CHECKS
 
 if sys.version_info >= (3, 11):
@@ -24,18 +22,6 @@ else:
     from typing_extensions import Self
 
 log = logging.getLogger(__name__)
-
-
-class HTTPSClientConstructor(t.Protocol):
-    """A protocol which defines the factory type used to customize a GCSDownloader."""
-
-    def __call__(
-        self,
-        *,
-        collection_client_id: str,
-        default_scope_requirements: t.Iterable[globus_sdk.Scope],
-        base_url: str,
-    ) -> GCSCollectionHTTPSClient: ...
 
 
 class GCSDownloader:
@@ -57,11 +43,8 @@ class GCSDownloader:
     >>>     print(downloader.read_file(url))
 
     :param app: The :class:`GlobusApp` used to authenticate calls to this server.
-    :param https_client: The underlying client used for the file read request. Typically
+    :param gcs_client: The underlying client used for the file read request. Typically
         omitted. When not provided, one will be constructed on demand by the downloader.
-        As an alternative to providing a client, a callable factory may be passed here,
-        which will be given the ``collection_client_id``,
-        ``default_scope_requirements``, and ``base_url`` and must return a new client.
     :param transfer_client: A client used when detecting collection information.
         Typically omitted. When not provided, one will be constructed on demand by the
         downloader.
@@ -74,7 +57,7 @@ class GCSDownloader:
         self,
         app: globus_sdk.GlobusApp,
         *,
-        https_client: GCSCollectionHTTPSClient | HTTPSClientConstructor | None = None,
+        gcs_client: GCSCollectionClient | None = None,
         transfer_client: globus_sdk.TransferClient | None = None,
         transport: globus_sdk.transport.RequestsTransport | None = None,
     ) -> None:
@@ -91,22 +74,7 @@ class GCSDownloader:
         self._retry_config = globus_sdk.transport.RetryConfig()
         self._retry_config.checks.register_many_checks(DEFAULT_RETRY_CHECKS)
 
-        # three essential cases for https_client:
-        # 1. default, setup the default client factory method
-        if https_client is None:
-            self.https_client: GCSCollectionHTTPSClient | None = None
-            self._https_client_constructor: HTTPSClientConstructor = (
-                self._default_https_client_constructor
-            )
-        # 2. concrete client, store (default factory is set for type safety, but will
-        #    not be used)
-        elif isinstance(https_client, GCSCollectionHTTPSClient):
-            self.https_client = https_client
-            self._https_client_constructor = self._default_https_client_constructor
-        # 3. factory method, store it and no client
-        else:
-            self.https_client = None
-            self._https_client_constructor = https_client
+        self.gcs_client = gcs_client
 
         # set the transfer_client if provided
         self.transfer_client = transfer_client
@@ -155,50 +123,51 @@ class GCSDownloader:
             very large files.
         """
         # dynamically build a client if needed
-        if self.https_client is None:
-            self.https_client = self._get_client_from_uri(file_uri)
-            self._resources_to_close.append(self.https_client)
+        if self.gcs_client is None:
+            self.gcs_client = self._get_client_from_uri(file_uri)
+            self._resources_to_close.append(self.gcs_client)
 
-        response = self.https_client.get(file_uri)
+        response = self.gcs_client.get(file_uri)
         if as_text:
             return response.text
         return response.binary_content
 
-    def _get_client_from_uri(self, file_uri: str) -> GCSCollectionHTTPSClient:
+    def _get_client_from_uri(self, file_uri: str) -> GCSCollectionClient:
         collection_id = self._sniff_collection_id(file_uri)
-        scopes = self._detect_scopes(collection_id)
-        base_url = _get_base_url(file_uri)
-        return self._https_client_constructor(
-            collection_client_id=collection_id,
-            default_scope_requirements=scopes,
-            base_url=base_url,
-        )
+        collection_address = _get_collection_address(file_uri)
 
-    def _default_https_client_constructor(
-        self,
-        *,
-        collection_client_id: str,
-        default_scope_requirements: t.Iterable[globus_sdk.Scope],
-        base_url: str,
-    ) -> GCSCollectionHTTPSClient:
-        return GCSCollectionHTTPSClient(
+        client = self._gcs_client_constructor(
+            collection_client_id=collection_id,
+            collection_address=collection_address,
+        )
+        self.app.add_scope_requirements(
+            {client.scopes.resource_server: self._determine_required_scopes(client)}
+        )
+        return client
+
+    def _gcs_client_constructor(
+        self, *, collection_client_id: str, collection_address: str
+    ) -> GCSCollectionClient:
+        return GCSCollectionClient(
             collection_client_id,
-            default_scope_requirements,
+            collection_address,
             app=self.app,
-            base_url=base_url,
             transport=self.transport,
         )
 
-    def _detect_scopes(self, collection_id: str) -> list[globus_sdk.Scope]:
+    def _determine_required_scopes(
+        self, client: GCSCollectionClient
+    ) -> list[globus_sdk.Scope]:
         if self.transfer_client is None:
             self.transfer_client = globus_sdk.TransferClient(
                 app=self.app, transport=self.transport
             )
             self._resources_to_close.append(self.transfer_client)
-        scopes = globus_sdk.scopes.GCSCollectionScopes(collection_id)
-        if _uses_data_access(self.transfer_client, collection_id):
-            return [scopes.https, scopes.data_access]
-        return [scopes.https]
+
+        required_scopes: list[globus_sdk.Scope] = [client.scopes.https]
+        if _uses_data_access(self.transfer_client, client.collection_id):
+            required_scopes.append(client.scopes.data_access)
+        return required_scopes
 
     def _sniff_collection_id(self, file_uri: str) -> str:
         response = self.transport.request(
@@ -239,69 +208,7 @@ class GCSDownloader:
         return client_ids[0]
 
 
-class GCSCollectionHTTPSClient(globus_sdk.BaseClient):
-    """
-    A dedicated client type for an HTTPS-capable Collection used for file downloads.
-
-    Users should generally not instantiate this class directly, but instead rely on
-    :class:`GCSDownloader` to properly initialize these clients.
-
-    .. sdk-sphinx-copy-params:: BaseClient
-
-        :param collection_client_id: The ID of the collection.
-        :param default_scope_requirements: The scopes needed for HTTPS access to the
-            collection. This should contain the `https` scope for the collection and the
-            `data_access` scope if applicable.
-    """
-
-    def __init__(
-        self,
-        collection_client_id: str,
-        default_scope_requirements: t.Iterable[globus_sdk.Scope] = (),
-        *,
-        environment: str | None = None,
-        base_url: str | None = None,
-        app: globus_sdk.GlobusApp | None = None,
-        app_scopes: list[globus_sdk.scopes.Scope] | None = None,
-        authorizer: GlobusAuthorizer | None = None,
-        app_name: str | None = None,
-        transport: globus_sdk.transport.RequestsTransport | None = None,
-        retry_config: globus_sdk.transport.RetryConfig | None = None,
-    ) -> None:
-        self.collection_client_id = collection_client_id
-        self._default_scope_requirements = list(default_scope_requirements)
-        super().__init__(
-            environment=environment,
-            base_url=base_url,
-            app=app,
-            app_scopes=app_scopes,
-            authorizer=authorizer,
-            app_name=app_name,
-            transport=transport,
-            retry_config=retry_config,
-        )
-
-    @classproperty
-    def resource_server(  # pylint: disable=missing-param-doc
-        self_or_cls: globus_sdk.BaseClient | type[globus_sdk.BaseClient],
-    ) -> str | None:
-        """
-        The resource server for a GCS collection is the ID of the collection.
-
-        This will return None if called as a classmethod as an instantiated
-        ``GCSClient`` is required to look up the client ID from the endpoint.
-        """
-        if not isinstance(self_or_cls, GCSCollectionHTTPSClient):
-            return None
-
-        return self_or_cls.collection_client_id
-
-    @property
-    def default_scope_requirements(self) -> list[globus_sdk.Scope]:
-        return self._default_scope_requirements
-
-
-def _get_base_url(file_uri: str) -> str:
+def _get_collection_address(file_uri: str) -> str:
     parsed = urllib.parse.urlparse(file_uri)
     return f"{parsed.scheme}://{parsed.netloc}"
 

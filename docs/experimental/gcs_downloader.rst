@@ -17,16 +17,12 @@ It primarily features two APIs:
     :members:
     :member-order: bysource
 
-.. autoclass:: HTTPSClientConstructor
-    :members:
-    :member-order: bysource
-
-.. autoclass:: GCSCollectionHTTPSClient
-    :members:
-    :member-order: bysource
-
 Example Usage
 -------------
+
+In this example, a ``GCSDownloader`` with a ``GlobusApp`` completely handles
+the authentication process for an HTTPS file download, which is then printed
+to stdout.
 
 .. code-block:: python
 
@@ -44,3 +40,9 @@ Example Usage
     with globus_sdk.UserApp("gcs-downloader-demo", client_id=CLIENT_ID) as app:
         with GCSDownloader(app) as downloader:
             print(downloader.read_file(FILE_URL))
+
+.. note::
+
+    This example will require you to log in twice the first time you run it.
+    This is normal behavior and is a consequence of needing to be logged in to
+    discover authentication requirements.
