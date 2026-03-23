@@ -27,7 +27,7 @@ log = logging.getLogger(__name__)
 class GCSDownloader:
     """
     An object which manages connection and authentication state to enable HTTPS
-    downloads from a specific Globus Connect Server.
+    downloads from a specific Globus Connect Server collection.
 
     The initial request to read a file features support for determining authentication
     requirements dynamically, and subsequent requests will reuse that authentication
