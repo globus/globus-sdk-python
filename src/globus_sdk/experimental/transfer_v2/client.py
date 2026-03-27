@@ -4,14 +4,13 @@ import logging
 import typing as t
 import uuid
 
-from globus_sdk import client, exc, paging, response
-from globus_sdk._missing import MISSING
+from globus_sdk import client, paging, response
 from globus_sdk.response import IterableJSONAPIResponse
 from globus_sdk.scopes import TransferScopes
 from globus_sdk.services.transfer.errors import TransferAPIError
 from globus_sdk.transport import RetryConfig
 
-from .data import CreateTunnelData
+from .data import TunnelCreateDocument, TunnelUpdateDocument
 from .transport import TRANSFER_V2_DEFAULT_RETRY_CHECKS
 
 log = logging.getLogger(__name__)
@@ -46,7 +45,7 @@ class TransferClientV2(client.BaseClient):
             for stream_access_point in page:
                 print(stream_access_point["attributes"]["display_name"])
 
-    .. automethodlist:: globus_sdk.TransferClient
+    .. automethodlist:: globus_sdk.experimental.TransferClientV2
     """
 
     service_name = "transfer"
@@ -62,7 +61,7 @@ class TransferClientV2(client.BaseClient):
 
     def create_tunnel(
         self,
-        data: dict[str, t.Any] | CreateTunnelData,
+        data: dict[str, t.Any] | TunnelCreateDocument,
     ) -> response.GlobusHTTPResponse:
         """
         :param data: Parameters for the tunnel creation
@@ -73,7 +72,8 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TrasferClientV2(...)
+                    data = globus_sdk.experimental.TunnelCreateDocument(...)
                     result = tc.create_tunnel(data)
                     print(result["data"]["id"])
 
@@ -82,30 +82,13 @@ class TransferClientV2(client.BaseClient):
                 ``POST /v2/tunnels``
         """
         log.debug("TransferClientV2.create_tunnel(...)")
-        try:
-            data_element = data["data"]
-        except KeyError as e:
-            raise exc.GlobusSDKUsageError(
-                "create_tunnel() body was malformed (missing the 'data' key). "
-                "Use CreateTunnelData to easily create correct documents."
-            ) from e
-
-        try:
-            attributes = data_element["attributes"]
-        except KeyError:
-            data_element["attributes"] = {}
-            attributes = data_element["attributes"]
-        if attributes.get("submission_id", MISSING) is MISSING:
-            log.debug("create_tunnel auto-creating submission_id")
-            attributes["submission_id"] = str(uuid.uuid1())
-
         r = self.post("/v2/tunnels", data=data)
         return r
 
     def update_tunnel(
         self,
         tunnel_id: str | uuid.UUID,
-        update_doc: dict[str, t.Any],
+        update_doc: dict[str, t.Any] | TunnelUpdateDocument,
     ) -> response.GlobusHTTPResponse:
         r"""
         :param tunnel_id: The ID of the Tunnel.
@@ -117,13 +100,8 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.TrasferClientV2(...)
-                    "data" = {
-                        "type": "Tunnel",
-                        "attributes": {
-                            "state": "STOPPING",
-                        },
-                    }
+                    tc = globus_sdk.experimental.TrasferClientV2(...)
+                    data = globus_sdk.experimental.TunnelUpdateDocument(...)
                     result = tc.update_tunnel(tunnel_id, data)
                     print(result["data"])
 
@@ -152,7 +130,7 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TrasferClientV2(...)
                     result = tc.show_tunnel(tunnel_id)
                     print(result["data"])
 
@@ -180,7 +158,7 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TrasferClientV2(...)
                     tc.delete_tunnel(tunnel_id)
 
             .. tab-item:: API Info
@@ -208,7 +186,7 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TrasferClientV2(...)
                     tc.list_tunnels(tunnel_id)
 
             .. tab-item:: API Info
@@ -236,7 +214,7 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TrasferClientV2(...)
                     result = tc.get_tunnel_events(tunnel_id)
                     print(result["data"])
 
@@ -269,7 +247,7 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TrasferClientV2(...)
                     tc.get_stream_access_point(stream_ap_id)
 
             .. tab-item:: API Info
@@ -302,7 +280,7 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TrasferClientV2(...)
                     tc.list_stream_access_points()
 
             .. tab-item:: API Info

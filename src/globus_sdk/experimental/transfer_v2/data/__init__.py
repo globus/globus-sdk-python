@@ -4,6 +4,6 @@ be Payload types, so they can be passed seamlessly to
 :class:`TransferClient <globus_sdk.TransferClient>` methods without conversion.
 """
 
-from .tunnel_data import CreateTunnelData
+from .tunnel_documents import TunnelCreateDocument, TunnelUpdateDocument
 
-__all__ = ("CreateTunnelData",)
+__all__ = ("TunnelCreateDocument", "TunnelUpdateDocument")

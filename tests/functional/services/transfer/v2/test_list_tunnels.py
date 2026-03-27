@@ -6,7 +6,7 @@ def test_list_tunnels(client):
 
     res = client.list_tunnels()
     assert res.http_status == 200
-    assert len(res["data"]) == 2
+    assert len(list(res)) == 2
 
     req = get_last_request()
     assert req.body is None

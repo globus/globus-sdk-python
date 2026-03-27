@@ -1,7 +1,8 @@
 Added
 -----
 
-- Added the experimental ``TransferClientV2`` client class (:pr:`NUMBER`)
+- Added the experimental ``TransferClientV2`` client class along with helper
+  classes ``TunnelCreateDocument`` and ``TunnelUpdateDocument`` (:pr:`NUMBER`)
 - JSON:API iteration and pagination is now supported through
   ``IterableJSONAPIResponse`` and ``JSONAPIPaginator`` (:pr:`NUMBER`)
 

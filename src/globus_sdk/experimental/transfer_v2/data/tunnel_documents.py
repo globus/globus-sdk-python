@@ -10,7 +10,7 @@ from globus_sdk._payload import GlobusPayload
 log = logging.getLogger(__name__)
 
 
-class CreateTunnelData(GlobusPayload):
+class TunnelCreateDocument(GlobusPayload):
     """
     Convenience class for constructing a tunnel document to use as the
     ``data`` parameter to
@@ -23,13 +23,20 @@ class CreateTunnelData(GlobusPayload):
         listener_stream_access_point: uuid.UUID | str,
         *,
         label: str | MissingType = MISSING,
+        listener_port: int | MissingType = MISSING,
+        listener_ip_address: str | MissingType = MISSING,
         submission_id: uuid.UUID | str | MissingType = MISSING,
         lifetime_mins: int | MissingType = MISSING,
         restartable: bool | MissingType = MISSING,
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
-        log.debug("Creating a new CreateTunnelData object")
+        log.debug("Creating a new TunnelCreateDocument object")
+
+        # Auto-create submission_id if not given now so that the same
+        # submission_id will be used across retries
+        if submission_id is MISSING:
+            submission_id = uuid.uuid1()
 
         relationships = {
             "listener": {
@@ -47,6 +54,8 @@ class CreateTunnelData(GlobusPayload):
         }
         attributes = {
             "label": label,
+            "listener_port": listener_port,
+            "listener_ip_address": listener_ip_address,
             "submission_id": submission_id,
             "restartable": restartable,
             "lifetime_mins": lifetime_mins,
@@ -57,5 +66,39 @@ class CreateTunnelData(GlobusPayload):
         self["data"] = {
             "type": "Tunnel",
             "relationships": relationships,
+            "attributes": attributes,
+        }
+
+
+class TunnelUpdateDocument(GlobusPayload):
+    """
+    Convenience class for constructing a tunnel document to use as the
+    ``data`` parameter to
+    :meth:`update_tunnel <globus_sdk.TransferClientV2.update_tunnel>`.
+    """
+
+    def __init__(
+        self,
+        *,
+        label: str | MissingType = MISSING,
+        listener_port: int | MissingType = MISSING,
+        listener_ip_address: str | MissingType = MISSING,
+        state: t.Literal["STOPPING"] | MissingType = MISSING,
+        additional_fields: dict[str, t.Any] | None = None,
+    ) -> None:
+        super().__init__()
+        log.debug("Creating a new TunnelUpdateDocument object")
+
+        attributes = {
+            "label": label,
+            "listener_port": listener_port,
+            "listener_ip_address": listener_ip_address,
+            "state": state,
+        }
+        if additional_fields is not None:
+            attributes.update(additional_fields)
+
+        self["data"] = {
+            "type": "Tunnel",
             "attributes": attributes,
         }
