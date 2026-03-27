@@ -8,11 +8,12 @@ Added
 
 Changed
 -------
-- all tunnels support in ``TransferClient`` has been labeled as Beta as the
+
+- All tunnels support in ``TransferClient`` has been labeled as Beta as the
   underlying API is still in development. For the most up to date interfaces
   it is recommended to use the ``TransferClientV2`` (:pr:`NUMBER`)
 
 Fixed
 -----
 
-- various fixes for tunnels support in ``TransferClient`` (:pr:`NUMBER`)
+- Various fixes for tunnels support in ``TransferClient`` (:pr:`NUMBER`)
