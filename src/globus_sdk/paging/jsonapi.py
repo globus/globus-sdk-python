@@ -16,7 +16,7 @@ class JSONAPIPaginator(Paginator[PageT]):
     which those changed query parameters will be passed to.
     """
 
-    _REQUIRES_METHOD_KWARGS = ("get_method",)
+    _REQUIRES_METHOD_KWARGS = ("query_params",)
 
     def _get_next_link(self, page: dict[str, t.Any]) -> str | None:
         links = page.get("links")
