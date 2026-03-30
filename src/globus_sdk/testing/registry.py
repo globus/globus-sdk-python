@@ -42,11 +42,14 @@ def _resolve_qualname(name: str) -> str:
     if "." not in name:
         return name
     prefix, suffix = name.split(".", 1)
-    if not hasattr(globus_sdk, prefix):
-        return name
 
     # something from globus_sdk, could be a client class
-    maybe_client = getattr(globus_sdk, prefix)
+    if hasattr(globus_sdk, prefix):
+        maybe_client = getattr(globus_sdk, prefix)
+    elif hasattr(globus_sdk.experimental, prefix):
+        maybe_client = getattr(globus_sdk.experimental, prefix)
+    else:
+        return name
 
     # there are a dozen ways of writing this check, but the point is
     # "if it's not a client class"

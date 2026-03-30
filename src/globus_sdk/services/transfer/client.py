@@ -10,6 +10,7 @@ from globus_sdk._internal import guards
 from globus_sdk._internal.remarshal import commajoin
 from globus_sdk._internal.type_definitions import DateLike, IntLike
 from globus_sdk._missing import MISSING, MissingType
+from globus_sdk.response import IterableJSONAPIResponse
 from globus_sdk.scopes import GCSCollectionScopes, Scope, TransferScopes
 from globus_sdk.transport import RetryConfig
 
@@ -2707,6 +2708,11 @@ class TransferClient(client.BaseClient):
         data: dict[str, t.Any] | CreateTunnelData,
     ) -> response.GlobusHTTPResponse:
         """
+        .. note::
+
+            Tunnels functionality is currently in Beta and may experience
+            changes that will break this interface
+
         :param data: Parameters for the tunnel creation
 
         .. tab-set::
@@ -2715,7 +2721,7 @@ class TransferClient(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.TunnelClient(...)
+                    tc = globus_sdk.TransferClient(...)
                     result = tc.create_tunnel(data)
                     print(result["data"]["id"])
 
@@ -2738,8 +2744,8 @@ class TransferClient(client.BaseClient):
             data_element["attributes"] = {}
             attributes = data_element["attributes"]
         if attributes.get("submission_id", MISSING) is MISSING:
-            log.debug("create_tunnel auto-fetching submission_id")
-            attributes["submission_id"] = self.get_submission_id()["value"]
+            log.debug("create_tunnel auto-creating submission_id")
+            attributes["submission_id"] = str(uuid.uuid1())
 
         r = self.post("/v2/tunnels", data=data)
         return r
@@ -2750,6 +2756,11 @@ class TransferClient(client.BaseClient):
         update_doc: dict[str, t.Any],
     ) -> response.GlobusHTTPResponse:
         r"""
+        .. note::
+
+            Tunnels functionality is currently in Beta and may experience
+            changes that will break this interface
+
         :param tunnel_id: The ID of the Tunnel.
         :param update_doc: The document that will be sent to the patch API.
 
@@ -2759,7 +2770,7 @@ class TransferClient(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.TunnelClient(...)
+                    tc = globus_sdk.TransferClient(...)
                     "data" = {
                         "type": "Tunnel",
                         "attributes": {
@@ -2773,6 +2784,7 @@ class TransferClient(client.BaseClient):
 
                 ``PATCH /v2/tunnels/<tunnel_id>``
         """
+        log.debug(f"TransferClient.update_tunnel({tunnel_id}, {update_doc})")
         r = self.patch(f"/v2/tunnels/{tunnel_id}", data=update_doc)
         return r
 
@@ -2783,6 +2795,11 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
+        .. note::
+
+            Tunnels functionality is currently in Beta and may experience
+            changes that will break this interface
+
         :param tunnel_id: The ID of the Tunnel which we are fetching details about.
         :param query_params: Any additional parameters will be passed through
             as query params.
@@ -2793,7 +2810,7 @@ class TransferClient(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.TunnelClient(...)
+                    tc = globus_sdk.TransferClient(...)
                     result = tc.show_tunnel(tunnel_id)
                     print(result["data"])
 
@@ -2801,7 +2818,7 @@ class TransferClient(client.BaseClient):
 
                 ``GET /v2/tunnels/<tunnel_id>``
         """
-        log.debug("TransferClient.get_tunnel(...)")
+        log.debug("TransferClient.get_tunnel({tunnel_id}, {query_params})")
         r = self.get(f"/v2/tunnels/{tunnel_id}", query_params=query_params)
         return r
 
@@ -2810,6 +2827,11 @@ class TransferClient(client.BaseClient):
         tunnel_id: str | uuid.UUID,
     ) -> response.GlobusHTTPResponse:
         """
+        .. note::
+
+            Tunnels functionality is currently in Beta and may experience
+            changes that will break this interface
+
         :param tunnel_id: The ID of the Tunnel to be deleted.
 
         This will clean up all data associated with a Tunnel.
@@ -2821,14 +2843,14 @@ class TransferClient(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.TunnelClient(...)
+                    tc = globus_sdk.TransferClient(...)
                     tc.delete_tunnel(tunnel_id)
 
             .. tab-item:: API Info
 
                 ``DELETE /v2/tunnels/<tunnel_id>``
         """
-        log.debug("TransferClient.delete_tunnel(...)")
+        log.debug(f"TransferClient.delete_tunnel({tunnel_id})")
         r = self.delete(f"/v2/tunnels/{tunnel_id}")
         return r
 
@@ -2836,8 +2858,13 @@ class TransferClient(client.BaseClient):
         self,
         *,
         query_params: dict[str, t.Any] | None = None,
-    ) -> IterableTransferResponse:
+    ) -> IterableJSONAPIResponse:
         """
+        .. note::
+
+            Tunnels functionality is currently in Beta and may experience
+            changes that will break this interface
+
         :param query_params: Any additional parameters will be passed through
             as query params.
 
@@ -2849,16 +2876,16 @@ class TransferClient(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.TunnelClient(...)
+                    tc = globus_sdk.TransferClient(...)
                     tc.list_tunnels(tunnel_id)
 
             .. tab-item:: API Info
 
                 ``GET /v2/tunnels/``
         """
-        log.debug("TransferClient.list_tunnels(...)")
+        log.debug(f"TransferClient.list_tunnels({query_params})")
         r = self.get("/v2/tunnels", query_params=query_params)
-        return IterableTransferResponse(r)
+        return IterableJSONAPIResponse(r)
 
     def get_stream_access_point(
         self,
@@ -2867,11 +2894,16 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
+        .. note::
+
+            Tunnels functionality is currently in Beta and may experience
+            changes that will break this interface
+
         :param stream_ap_id: The ID of the steaming access point to lookup.
         :param query_params: Any additional parameters will be passed through
             as query params.
 
-        This will list all the Tunnels created by the authorized user.
+        Get a stream access point by id.
 
         .. tab-set::
 
@@ -2879,14 +2911,16 @@ class TransferClient(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.TunnelClient(...)
+                    tc = globus_sdk.TransferClient(...)
                     tc.get_stream_ap(stream_ap_id)
 
             .. tab-item:: API Info
 
                 ``GET /v2/stream_access_points/<stream_ap_id>``
         """
-        log.debug("TransferClient.get_stream_ap(...)")
+        log.debug(
+            f"TransferClient.get_stream_access_point({stream_ap_id}, {query_params})"
+        )
         r = self.get(
             f"/v2/stream_access_points/{stream_ap_id}", query_params=query_params
         )
@@ -2899,9 +2933,16 @@ class TransferClient(client.BaseClient):
         query_params: dict[str, t.Any] | None = None,
     ) -> response.GlobusHTTPResponse:
         """
+        .. note::
+
+            Tunnels functionality is currently in Beta and may experience
+            changes that will break this interface
+
         :param tunnel_id: The ID of the Tunnel which we are fetching events about.
         :param query_params: Any additional parameters will be passed through
             as query params.
+
+        List all events for a specific tunnel.
 
         .. tab-set::
 
@@ -2909,7 +2950,7 @@ class TransferClient(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.TunnelClient(...)
+                    tc = globus_sdk.TransferClient(...)
                     result = tc.get_tunnel_events(tunnel_id)
                     print(result["data"])
 
@@ -2917,6 +2958,6 @@ class TransferClient(client.BaseClient):
 
                 ``GET /v2/tunnels/<tunnel_id>/events``
         """
-        log.debug("TransferClient.get_tunnel_events(...)")
+        log.debug(f"TransferClient.get_tunnel_events({tunnel_id}, {query_params})")
         r = self.get(f"/v2/tunnels/{tunnel_id}/events", query_params=query_params)
         return r
