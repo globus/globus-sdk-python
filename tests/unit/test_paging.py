@@ -113,7 +113,7 @@ def test_has_next_paginator(paging_simulator):
 
     def all_items():
         for page in paginator:
-            yield from list(page)
+            yield from page
 
     # confirm results
     for item, expected in zip(all_items(), range(N)):
@@ -132,7 +132,7 @@ def test_jsonapi_paginator(jsonapi_paging_simulator):
 
     def all_items():
         for page in paginator:
-            yield from list(page)
+            yield from page
 
     # confirm results
     for item, expected in zip(all_items(), range(N)):
