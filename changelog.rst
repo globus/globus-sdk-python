@@ -12,6 +12,45 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-4.5.0:
+
+v4.5.0 (2026-03-30)
+===================
+
+Added
+-----
+
+- Added a new ``globus_sdk.experimental.gcs_downloader`` module which provides
+  experimental tooling for downloading files from HTTPS GCS Collections. The
+  new module provides a ``GCSDownloader`` class for detecting requirements and
+  downloading files. (:pr:`1342`)
+
+- Added the experimental ``TransferClientV2`` client class along with helper
+  classes ``TunnelCreateDocument`` and ``TunnelUpdateDocument`` (:pr:`1370`)
+
+- JSON:API iteration and pagination is now supported through
+  ``IterableJSONAPIResponse`` and ``JSONAPIPaginator`` (:pr:`1370`)
+
+- Added a new ``GCSCollectionClient`` class in
+  ``globus_sdk.experimental.gcs_collection_client``.
+  The new client has no methods other than the base HTTP ones, but contains the
+  collection ID and scopes in the correct locations for the SDK token management
+  mechanisms to use. (:pr:`1375`)
+
+- Added support for ``filter_roles`` as a parameter to ``SearchClient.index_list``. (:pr:`1376`)
+
+Changed
+-------
+
+- All tunnels support in ``TransferClient`` has been labeled as Beta as the
+  underlying API is still in development. For the most up to date interfaces
+  it is recommended to use the ``TransferClientV2`` (:pr:`1370`)
+
+Fixed
+-----
+
+- Various fixes for tunnels support in ``TransferClient`` (:pr:`1370`)
+
 .. _changelog-4.4.1:
 
 v4.4.1 (2026-02-27)
