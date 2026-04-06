@@ -55,9 +55,7 @@ class SQLiteTokenStorage(FileTokenStorage):
                 conn: sqlite3.Connection = sqlite3.connect(
                     self.filepath, **connect_params
                 )
-            conn.executescript(
-                textwrap.dedent(
-                    """
+            conn.executescript(textwrap.dedent("""
                     CREATE TABLE token_storage (
                         namespace VARCHAR NOT NULL,
                         resource_server VARCHAR NOT NULL,
@@ -69,9 +67,7 @@ class SQLiteTokenStorage(FileTokenStorage):
                         value VARCHAR NOT NULL,
                         PRIMARY KEY (attribute)
                     );
-                    """
-                )
-            )
+                    """))
             # mark the version which was used to create the DB
             # also mark the "database schema version" in case we ever need to handle
             # graceful upgrades

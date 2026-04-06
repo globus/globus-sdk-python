@@ -18,11 +18,9 @@ def test_addcontent_generating_text(
     assert etree.get("source") == "TEST"
     paragraph_element = etree.find("paragraph")
     assert paragraph_element is not None
-    assert paragraph_element.text == textwrap.dedent(
-        """\
+    assert paragraph_element.text == textwrap.dedent("""\
         a
-        b"""
-    )
+        b""")
 
 
 def test_addcontent_generating_warning(

@@ -43,20 +43,16 @@ def test_read_sphinx_params(sphinxext):
     assert len(params) == 6
     assert params[0] == ":param param1: some doc on one line"
     assert params[1] == ":param param2: other doc\n    spanning multiple lines"
-    assert params[2] == textwrap.dedent(
-        """\
+    assert params[2] == textwrap.dedent("""\
         :param param3: a doc
             spanning
             many
-            lines"""
-    )
-    assert params[3] == textwrap.dedent(
-        """\
+            lines""")
+    assert params[3] == textwrap.dedent("""\
         :param param4: a doc
             spanning lines
 
-            with a break in the middle ^"""
-    )
+            with a break in the middle ^""")
     assert params[4] == ":param param5: another"
     assert params[5] == ":param param6: and a final one after some whitespace"
 

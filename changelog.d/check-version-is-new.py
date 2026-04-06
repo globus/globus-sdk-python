@@ -2,6 +2,7 @@
 """
 Check if the version number in the source is already present as a changelog header.
 """
+
 import os
 import re
 import sys

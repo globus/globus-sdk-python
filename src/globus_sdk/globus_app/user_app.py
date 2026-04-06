@@ -69,7 +69,7 @@ class UserApp(GlobusApp):
     """
 
     _login_client: NativeAppAuthClient | ConfidentialAppAuthClient
-    _authorizer_factory: (  # type:ignore
+    _authorizer_factory: (  # type: ignore
         AccessTokenAuthorizerFactory | RefreshTokenAuthorizerFactory
     )
 

@@ -355,7 +355,7 @@ class ConfidentialAppAuthClient(AuthLoginClient):
         :param privacy_policy: URL of client's privacy policy.
         :param required_idp: In order to use this client a user must have an identity
             from this IdP in their identity set.
-        :param preselect_idp: This pre-selects the given IdP on the Globus Auth login
+        :param preselect_idp: This preselects the given IdP on the Globus Auth login
             page if the user is not already authenticated.
         :param additional_fields: Any additional parameters to be passed through.
 
