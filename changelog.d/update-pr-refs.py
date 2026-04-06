@@ -2,6 +2,7 @@
 """
 Meant to run in the context of a PR GitHub Actions workflow from the repo root
 """
+
 import argparse
 import glob
 import json

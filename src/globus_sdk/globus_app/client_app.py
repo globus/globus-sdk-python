@@ -51,7 +51,7 @@ class ClientApp(GlobusApp):
     """
 
     _login_client: ConfidentialAppAuthClient
-    _authorizer_factory: ClientCredentialsAuthorizerFactory  # type:ignore
+    _authorizer_factory: ClientCredentialsAuthorizerFactory  # type: ignore
 
     def __init__(
         self,

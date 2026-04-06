@@ -68,8 +68,7 @@ class SQLiteAdapter(FileAdapter):
         else:
             conn = sqlite3.connect(self.dbname, **connect_params)
         if init_tables:
-            conn.executescript(
-                """
+            conn.executescript("""
 CREATE TABLE config_storage (
     namespace VARCHAR NOT NULL,
     config_name VARCHAR NOT NULL,
@@ -87,8 +86,7 @@ CREATE TABLE sdk_storage_adapter_internal (
     value VARCHAR NOT NULL,
     PRIMARY KEY (attribute)
 );
-            """
-            )
+            """)
             # mark the version which was used to create the DB
             # also mark the "database schema version" in case we ever need to handle
             # graceful upgrades

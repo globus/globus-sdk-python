@@ -119,16 +119,12 @@ class CommandLineLoginFlowManager(LoginFlowManager):
             application accesses.
         """
         login_prompt = "Please authenticate with Globus here:"
-        print(
-            textwrap.dedent(
-                f"""
+        print(textwrap.dedent(f"""
                 {login_prompt}
                 {"-" * len(login_prompt)}
                 {authorize_url}
                 {"-" * len(login_prompt)}
-                """
-            )
-        )
+                """))
 
     def prompt_for_code(self) -> str:
         """
