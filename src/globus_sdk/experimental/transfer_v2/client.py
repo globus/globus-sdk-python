@@ -77,7 +77,7 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.experimental.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TransferClientV2(...)
                     data = globus_sdk.experimental.TunnelCreateDocument(...)
                     result = tc.create_tunnel(data)
                     print(result["data"]["id"])
@@ -86,7 +86,7 @@ class TransferClientV2(client.BaseClient):
 
                 ``POST /v2/tunnels``
         """
-        log.debug("TransferClientV2.create_tunnel(...)")
+        log.debug(f"{self.__class__.__name__}.create_tunnel(...)")
         r = self.post("/v2/tunnels", data=data)
         return r
 
@@ -105,7 +105,7 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.experimental.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TransferClientV2(...)
                     data = globus_sdk.experimental.TunnelUpdateDocument(...)
                     result = tc.update_tunnel(tunnel_id, data)
                     print(result["data"])
@@ -114,7 +114,7 @@ class TransferClientV2(client.BaseClient):
 
                 ``PATCH /v2/tunnels/<tunnel_id>``
         """
-        log.debug(f"TransferClientV2.update_tunnel({tunnel_id}, {update_doc})")
+        log.debug(f"{self.__class__.__name__}.update_tunnel({tunnel_id}, {update_doc})")
         r = self.patch(f"/v2/tunnels/{tunnel_id}", data=update_doc)
         return r
 
@@ -135,7 +135,7 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.experimental.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TransferClientV2(...)
                     result = tc.get_tunnel(tunnel_id)
                     print(result["data"])
 
@@ -143,7 +143,7 @@ class TransferClientV2(client.BaseClient):
 
                 ``GET /v2/tunnels/<tunnel_id>``
         """
-        log.debug("TransferClientV2.get_tunnel({tunnel_id}, {query_params})")
+        log.debug(f"{self.__class__.__name__}.get_tunnel({tunnel_id}, {query_params})")
         r = self.get(f"/v2/tunnels/{tunnel_id}", query_params=query_params)
         return r
 
@@ -163,14 +163,14 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.experimental.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TransferClientV2(...)
                     tc.delete_tunnel(tunnel_id)
 
             .. tab-item:: API Info
 
                 ``DELETE /v2/tunnels/<tunnel_id>``
         """
-        log.debug(f"TransferClientV2.delete_tunnel({tunnel_id})")
+        log.debug(f"{self.__class__.__name__}.delete_tunnel({tunnel_id})")
         r = self.delete(f"/v2/tunnels/{tunnel_id}")
         return r
 
@@ -191,14 +191,14 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.experimental.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TransferClientV2(...)
                     tc.list_tunnels(tunnel_id)
 
             .. tab-item:: API Info
 
                 ``GET /v2/tunnels/``
         """
-        log.debug(f"TransferClientV2.list_tunnels({query_params})")
+        log.debug(f"{self.__class__.__name__}.list_tunnels({query_params})")
         r = self.get("/v2/tunnels", query_params=query_params)
         return IterableJSONAPIResponse(r)
 
@@ -219,7 +219,7 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.experimental.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TransferClientV2(...)
                     result = tc.get_tunnel_events(tunnel_id)
                     print(result["data"])
 
@@ -227,7 +227,9 @@ class TransferClientV2(client.BaseClient):
 
                 ``GET /v2/tunnels/<tunnel_id>/events``
         """
-        log.debug(f"TransferClientV2.get_tunnel_events({tunnel_id}, {query_params})")
+        log.debug(
+            f"{self.__class__.__name__}.get_tunnel_events({tunnel_id}, {query_params})"
+        )
         r = self.get(f"/v2/tunnels/{tunnel_id}/events", query_params=query_params)
         return IterableJSONAPIResponse(r)
 
@@ -252,7 +254,7 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.experimental.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TransferClientV2(...)
                     tc.get_stream_access_point(stream_ap_id)
 
             .. tab-item:: API Info
@@ -260,7 +262,8 @@ class TransferClientV2(client.BaseClient):
                 ``GET /v2/stream_access_points/<stream_ap_id>``
         """
         log.debug(
-            f"TransferClientV2.get_stream_access_point({stream_ap_id}, {query_params})"
+            f"{self.__class__.__name__}."
+            f"get_stream_access_point({stream_ap_id}, {query_params})"
         )
         r = self.get(
             f"/v2/stream_access_points/{stream_ap_id}", query_params=query_params
@@ -285,14 +288,16 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.experimental.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TransferClientV2(...)
                     tc.list_stream_access_points()
 
             .. tab-item:: API Info
 
                 ``GET /v2/stream_access_points``
         """
-        log.debug(f"TransferClientV2.list_stream_access_points({query_params})")
+        log.debug(
+            f"{self.__class__.__name__}.list_stream_access_points({query_params})"
+        )
         r = self.get("/v2/stream_access_points", query_params=query_params)
         return IterableJSONAPIResponse(r)
 
@@ -308,7 +313,7 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.experimental.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TransferClientV2(...)
                     data = globus_sdk.experimental.BookmarkCreateDocument(...)
                     result = tc.create_bookmark(data)
                     print(result["data"]["id"])
@@ -317,7 +322,7 @@ class TransferClientV2(client.BaseClient):
 
                 ``POST /v2/bookmarks``
         """
-        log.debug("TransferClientV2.create_bookmark(...)")
+        log.debug(f"{self.__class__.__name__}.create_bookmark(...)")
         r = self.post("/v2/bookmarks", data=data)
         return r
 
@@ -336,7 +341,7 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.experimental.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TransferClientV2(...)
                     data = globus_sdk.experimental.BookmarkUpdateDocument(...)
                     result = tc.update_bookmark(bookmark_id, data)
                     print(result["data"])
@@ -345,7 +350,10 @@ class TransferClientV2(client.BaseClient):
 
                 ``PATCH /v2/bookmarks/<bookmark_id>``
         """
-        log.debug(f"TransferClientV2.update_bookmark({bookmark_id}, {update_document})")
+        log.debug(
+            f"{self.__class__.__name__}."
+            f"update_bookmark({bookmark_id}, {update_document})"
+        )
         r = self.patch(f"/v2/bookmarks/{bookmark_id}", data=update_document)
         return r
 
@@ -366,7 +374,7 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.experimental.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TransferClientV2(...)
                     query_params = {"include": "collection"}
                     result = tc.get_bookmark(bookmark_id, query_params)
                     print(result["data"])
@@ -375,7 +383,9 @@ class TransferClientV2(client.BaseClient):
 
                 ``GET /v2/bookmarks/<bookmark_id>``
         """
-        log.debug(f"TransferClientV2.get_bookmark({bookmark_id}, {query_params})")
+        log.debug(
+            f"{self.__class__.__name__}.get_bookmark({bookmark_id}, {query_params})"
+        )
         r = self.get(f"/v2/bookmarks/{bookmark_id}", query_params=query_params)
         return r
 
@@ -392,14 +402,14 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.experimental.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TransferClientV2(...)
                     tc.delete_bookmark(bookmark_id)
 
             .. tab-item:: API Info
 
                 ``DELETE /v2/bookmarks/<bookmark_id>``
         """
-        log.debug(f"TransferClientV2.delete_bookmark({bookmark_id})")
+        log.debug(f"{self.__class__.__name__}.delete_bookmark({bookmark_id})")
         r = self.delete(f"/v2/bookmarks/{bookmark_id}")
         return r
 
@@ -421,7 +431,7 @@ class TransferClientV2(client.BaseClient):
 
                 .. code-block:: python
 
-                    tc = globus_sdk.experimental.TrasferClientV2(...)
+                    tc = globus_sdk.experimental.TransferClientV2(...)
                     query_params = {"include": "collection"}
                     tc.list_bookmarks(query_params)
 
@@ -429,6 +439,6 @@ class TransferClientV2(client.BaseClient):
 
                 ``GET /v2/bookmarks``
         """
-        log.debug("TransferClientV2.list_bookmarks({query_params})")
+        log.debug(f"{self.__class__.__name__}.list_bookmarks({query_params})")
         r = self.get("/v2/bookmarks", query_params=query_params)
         return IterableJSONAPIResponse(r)
