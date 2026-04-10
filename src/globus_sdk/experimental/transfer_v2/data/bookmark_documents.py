@@ -58,7 +58,7 @@ class BookmarkUpdateDocument(GlobusPayload):
     """
     Convenience class for constructing a bookmark document to use as the
     ``data`` parameter to
-    :meth:`~globus_sdk.TransferClientV2.update_bookmark>`.
+    :meth:`~globus_sdk.TransferClientV2.update_bookmark`.
     """
 
     def __init__(
