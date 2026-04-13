@@ -3,6 +3,8 @@ import sys
 import typing as t
 
 __all__ = (
+    "BookmarkCreateDocument",
+    "BookmarkUpdateDocument",
     "TransferClientV2",
     "TunnelCreateDocument",
     "TunnelUpdateDocument",
@@ -14,6 +16,8 @@ __all__ = (
 # components which do not need it
 if t.TYPE_CHECKING:
     from .transfer_v2 import (
+        BookmarkCreateDocument,
+        BookmarkUpdateDocument,
         TransferClientV2,
         TunnelCreateDocument,
         TunnelUpdateDocument,
@@ -21,6 +25,8 @@ if t.TYPE_CHECKING:
 else:
     _LAZY_IMPORT_TABLE = {
         "transfer_v2": {
+            "BookmarkCreateDocument",
+            "BookmarkUpdateDocument",
             "TransferClientV2",
             "TunnelCreateDocument",
             "TunnelUpdateDocument",
