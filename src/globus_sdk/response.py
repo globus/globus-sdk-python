@@ -4,6 +4,7 @@ import collections.abc
 import json
 import logging
 import typing as t
+from functools import cached_property
 
 from globus_sdk._internal import guards
 
@@ -55,9 +56,6 @@ class GlobusHTTPResponse:
             self._response: Response | None = None
             self.client: globus_sdk.BaseClient = self._wrapped.client
 
-            # copy parsed JSON data off of '_wrapped'
-            self._parsed_json: t.Any = self._wrapped._parsed_json
-
         # init on a Response object, this is the "normal" case
         # _wrapped is None
         else:
@@ -67,18 +65,24 @@ class GlobusHTTPResponse:
             self._response = response
             self.client = client
 
-            # JSON decoding may raise a ValueError due to an invalid JSON
-            # document. In the case of trying to fetch the "data" on an HTTP
-            # response, this means we didn't get a JSON response.
-            # store this as None, as in "no data"
-            #
-            # if the caller *really* wants the raw body of the response, they can
-            # always use `text`
-            try:
-                self._parsed_json = self._response.json()
-            except ValueError:
-                log.warning("response data did not parse as JSON, data=None")
-                self._parsed_json = None
+    @cached_property
+    def _parsed_json(self) -> t.Any:
+        # JSON decoding may raise a ValueError due to an invalid JSON
+        # document. In the case of trying to fetch the "data" on an HTTP
+        # response, this means we didn't get a JSON response.
+        # store this as None, as in "no data"
+        #
+        # if the caller *really* wants the raw body of the response, they can
+        # always use `text`
+        if self._wrapped is not None:
+            return self._wrapped._parsed_json
+
+        assert self._response is not None
+        try:
+            return self._response.json()
+        except ValueError:
+            log.warning("response data did not parse as JSON, data=None")
+            return None
 
     @property
     def _raw_response(self) -> Response:
