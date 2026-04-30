@@ -77,12 +77,17 @@ class GlobusHTTPResponse:
         if self._wrapped is not None:
             return self._wrapped._parsed_json
 
-        assert self._response is not None
-        try:
-            return self._response.json()
-        except ValueError:
-            log.warning("response data did not parse as JSON, data=None")
-            return None
+        if self._response is not None:
+            try:
+                return self._response.json()
+            except ValueError:
+                log.warning("response data did not parse as JSON, data=None")
+                return None
+
+        raise NotImplementedError(
+            "Cannot read JSON data from a response which did not "
+            "wrap another response or contain a transport-layer response."
+        )
 
     @property
     def _raw_response(self) -> Response:
