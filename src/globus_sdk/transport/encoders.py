@@ -4,9 +4,11 @@ import enum
 import typing as t
 import uuid
 
-import requests
-
+from globus_sdk._internal import orjson_compat
 from globus_sdk._missing import MISSING, filter_missing
+
+if t.TYPE_CHECKING:
+    import requests
 
 
 class RequestEncoder:
@@ -25,6 +27,8 @@ class RequestEncoder:
         data: t.Any,
         headers: dict[str, str],
     ) -> requests.Request:
+        import requests
+
         if not isinstance(data, (str, bytes)):
             raise TypeError(
                 "Cannot encode non-text in a text request. "
@@ -113,12 +117,48 @@ class JSONRequestEncoder(RequestEncoder):
         data: t.Any,
         headers: dict[str, str],
     ) -> requests.Request:
+        import requests
+
         if data is not None:
             headers = {"Content-Type": "application/json", **headers}
+
         return requests.Request(
             method,
             url,
             json=self._prepare_data(data),
+            params=self._prepare_params(params),
+            headers=self._prepare_headers(headers),
+        )
+
+
+class OrjsonRequestEncoder(RequestEncoder):
+    """
+    This encoder prepares the data as JSON, just like the JSON encoder, but using the
+    `orjson` library.
+    """
+
+    def __init__(self) -> None:
+        # eagerly error if one of these encoders is ever constructed and 'orjson' is not
+        # installed
+        orjson_compat.require()
+
+    def encode(
+        self,
+        method: str,
+        url: str,
+        params: dict[str, t.Any] | None,
+        data: t.Any,
+        headers: dict[str, str],
+    ) -> requests.Request:
+        import requests
+
+        if data is not None:
+            headers = {"Content-Type": "application/json", **headers}
+
+        return requests.Request(
+            method,
+            url,
+            data=orjson_compat.dumps(self._prepare_data(data)),
             params=self._prepare_params(params),
             headers=self._prepare_headers(headers),
         )
@@ -138,6 +178,8 @@ class FormRequestEncoder(RequestEncoder):
         data: t.Any,
         headers: dict[str, str],
     ) -> requests.Request:
+        import requests
+
         if not isinstance(data, dict):
             raise TypeError("FormRequestEncoder cannot encode non-dict data")
         return requests.Request(

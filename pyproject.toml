@@ -57,6 +57,7 @@ docs = [
     "scriv",
 ]
 coverage = ["coverage[toml]"]
+orjson = ["orjson>=3"]
 test = [
     {include-group = "coverage"},
     "pytest", "pytest-xdist", "pytest-randomly", "flaky",
@@ -83,6 +84,8 @@ typing = [
     "responses",
     # similarly, sphinx is needed to type-check our sphinx extension
     "sphinx",
+    # include any optional test deps
+    {include-group = "orjson"},
 ]
 typing-mindeps = [
     {include-group = "typing"},

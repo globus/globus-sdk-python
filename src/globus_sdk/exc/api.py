@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import contextlib
+import contextvars
 import enum
 import logging
 import sys
@@ -7,6 +9,7 @@ import textwrap
 import typing as t
 
 from globus_sdk._internal import guards
+from globus_sdk.transport.decoders import ResponseDecoder
 
 from .base import GlobusError
 from .err_info import ErrorInfoContainer
@@ -17,6 +20,11 @@ if t.TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 _CACHE_SENTINEL = object()
+
+_DEFAULT_DECODER = ResponseDecoder()
+_RESPONSE_DECODER: contextvars.ContextVar[ResponseDecoder] = contextvars.ContextVar(
+    "_RESPONSE_DECODER", default=_DEFAULT_DECODER
+)
 
 
 class _ErrorFormat(enum.Enum):
@@ -54,6 +62,8 @@ class GlobusAPIError(GlobusError):
 
         self._info: ErrorInfoContainer | None = None
         self._underlying_response = r
+
+        self._decoder: ResponseDecoder = _RESPONSE_DECODER.get()
         self._parse_response()
 
         if sys.version_info >= (3, 11):
@@ -65,6 +75,28 @@ class GlobusAPIError(GlobusError):
                 + textwrap.indent(self.text, "    ")
             )
         super().__init__(*self._get_args())
+
+    @staticmethod
+    @contextlib.contextmanager
+    def _inject_response_decoder(decoder: ResponseDecoder) -> t.Iterator[None]:
+        """
+        This is a bypass method of passing a parameter into GlobusAPIError.__init__
+        even though callers and subclasses of the error type are not aware of the
+        response decoder.
+
+        A decoder can be set here, temporarily, and will be picked up during error init,
+        without requiring that subclasses properly pass args to super() or are even
+        aware of this interaction.
+
+        This is purely for internal use, to pass the decoder used by the transport layer
+        which produced this error/response through to the errors which may be
+        subsequently raised.
+        """
+        token = _RESPONSE_DECODER.set(decoder)
+        try:
+            yield
+        finally:
+            _RESPONSE_DECODER.reset(token)
 
     @property
     def message(self) -> str | None:
@@ -136,7 +168,9 @@ class GlobusAPIError(GlobusError):
                     # technically, this could be a non-dict JSON type, like a list or
                     # string but in those cases the user can just cast -- the "normal"
                     # case is a dict
-                    self._cached_raw_json = self._underlying_response.json()
+                    self._cached_raw_json = self._decoder.get_body_json(
+                        self._underlying_response
+                    )
                 except ValueError:
                     log.error(
                         "Error body could not be JSON decoded! "

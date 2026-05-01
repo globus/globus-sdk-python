@@ -39,15 +39,15 @@ class MockDecoder(globus_sdk.IDTokenDecoder):
         return mock.Mock()
 
 
-def test_decoding_defaults_to_client_id_as_audience():
-    fake_client = mock.Mock()
-    fake_client.client_id = str(uuid.uuid1())
+def test_decoding_defaults_to_client_id_as_audience(mock_client_factory):
+    client = mock_client_factory()
+    client.client_id = str(uuid.uuid1())
 
-    decoder = MockDecoder(fake_client)
+    decoder = MockDecoder(client)
 
     with mock.patch("jwt.decode") as mock_jwt_decode:
         decoder.decode("")
-        assert mock_jwt_decode.call_args.kwargs["audience"] == fake_client.client_id
+        assert mock_jwt_decode.call_args.kwargs["audience"] == client.client_id
 
 
 @pytest.mark.parametrize("audience_value", (None, "myaud"))
@@ -63,11 +63,11 @@ def test_decoding_passes_audience(audience_value):
         assert mock_jwt_decode.call_args.kwargs["audience"] == audience_value
 
 
-def test_setting_oidc_config_on_default_decoder_unpacks_data():
+def test_setting_oidc_config_on_default_decoder_unpacks_data(mock_client_factory):
     oidc_config = {"x": 1}
     raw_response = mock.Mock(spec=requests.Response)
     raw_response.json.return_value = oidc_config
-    response = globus_sdk.GlobusHTTPResponse(raw_response, client=mock.Mock())
+    response = globus_sdk.GlobusHTTPResponse(raw_response, client=mock_client_factory())
 
     decoder = globus_sdk.IDTokenDecoder(mock.Mock())
     decoder.store_openid_configuration(response)

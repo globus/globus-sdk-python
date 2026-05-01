@@ -12,6 +12,7 @@ from globus_sdk.transport import (
     RetryConfig,
     RetryContext,
 )
+from globus_sdk.transport.decoders import ResponseDecoder
 from globus_sdk.transport.default_retry_checks import DEFAULT_RETRY_CHECKS
 
 
@@ -152,7 +153,12 @@ def test_transfer_v2_default_retry_checks(body, status_code, expected_should_ret
     dummy_response.json = lambda: body
     dummy_response.status_code = status_code
     caller_info = RequestCallerInfo(retry_config=retry_config)
-    ctx = RetryContext(1, caller_info=caller_info, response=dummy_response)
+    ctx = RetryContext(
+        1,
+        response_decoder=ResponseDecoder(),
+        caller_info=caller_info,
+        response=dummy_response,
+    )
 
     assert checker.should_retry(ctx) is expected_should_retry
 
@@ -170,6 +176,11 @@ def test_transfer_v2_default_retry_checks_value_error():
     dummy_response.json = _raise_value_error
     dummy_response.status_code = 502
     caller_info = RequestCallerInfo(retry_config=retry_config)
-    ctx = RetryContext(1, caller_info=caller_info, response=dummy_response)
+    ctx = RetryContext(
+        1,
+        response_decoder=ResponseDecoder(),
+        caller_info=caller_info,
+        response=dummy_response,
+    )
 
     assert checker.should_retry(ctx) is True

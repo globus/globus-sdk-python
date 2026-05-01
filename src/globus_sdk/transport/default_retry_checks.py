@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import requests
+import typing as t
 
 from .retry import (
     RetryCheck,
@@ -10,6 +10,9 @@ from .retry import (
     set_retry_check_flags,
 )
 
+if t.TYPE_CHECKING:
+    import requests
+
 
 def check_request_exception(ctx: RetryContext) -> RetryCheckResult:
     """
@@ -18,6 +21,8 @@ def check_request_exception(ctx: RetryContext) -> RetryCheckResult:
     :param ctx: The context object which describes the state of the request and the
         retries which may already have been attempted.
     """
+    import requests
+
     if ctx.exception and isinstance(ctx.exception, requests.RequestException):
         return RetryCheckResult.do_retry
     return RetryCheckResult.no_decision

@@ -28,10 +28,12 @@ def check_transfer_v2_transient_error(ctx: RetryContext) -> RetryCheckResult:
     if ctx.response is not None and (
         ctx.response.status_code in retry_config.transient_error_status_codes
     ):
+        decoder = ctx.response_decoder
+
         try:
             # if any of the error objects have a `code` of ExternalError or
             # EndpointError then the error likely isn't transient
-            errors = ctx.response.json()["errors"]
+            errors = decoder.get_body_json(ctx.response)["errors"]
             for error in errors:
                 if error["code"] in ("ExternalError", "EndpointError"):
                     return RetryCheckResult.no_decision

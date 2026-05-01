@@ -18,6 +18,8 @@ idna==3.16
     # via requests
 iniconfig==2.3.0
     # via pytest
+orjson==3.11.9
+    # via -r .orjson.in
 packaging==26.2
     # via pytest
 pluggy==1.6.0

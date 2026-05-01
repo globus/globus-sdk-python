@@ -14,11 +14,11 @@ babel==2.18.0
     # via sphinx
 beautifulsoup4==4.14.3
     # via furo
-certifi==2026.4.22
+certifi==2026.5.20
     # via requests
 charset-normalizer==3.4.7
     # via requests
-click==8.3.3
+click==8.4.1
     # via
     #   click-log
     #   scriv
@@ -28,7 +28,7 @@ docutils==0.22.4
     # via sphinx
 furo==2025.12.19
     # via -r .docs.in
-idna==3.15
+idna==3.16
     # via requests
 imagesize==2.0.0
     # via sphinx
@@ -51,20 +51,20 @@ pygments==2.20.0
     #   sphinx
 pyyaml==6.0.3
     # via responses
-requests==2.34.1
+requests==2.34.2
     # via
     #   responses
     #   scriv
     #   sphinx
-responses==0.26.0
+responses==0.26.1
     # via -r .docs.in
 roman-numerals==4.1.0
     # via sphinx
 scriv==1.8.0
     # via -r .docs.in
-snowballstemmer==3.0.1
+snowballstemmer==3.1.0
     # via sphinx
-soupsieve==2.8.3
+soupsieve==2.8.4
     # via beautifulsoup4
 sphinx==9.0.4
     # via

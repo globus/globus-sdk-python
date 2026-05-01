@@ -17,6 +17,7 @@ log = logging.getLogger(__name__)
 ENVNAME_VAR = "GLOBUS_SDK_ENVIRONMENT"
 HTTP_TIMEOUT_VAR = "GLOBUS_SDK_HTTP_TIMEOUT"
 SSL_VERIFY_VAR = "GLOBUS_SDK_VERIFY_SSL"
+USE_ORJSON_VAR = "GLOBUS_SDK_USE_ORJSON"
 
 
 def get_environment_name(inputenv: str | None = None) -> str:
@@ -56,6 +57,16 @@ def get_http_timeout(value: float | None = None) -> float | None:
     return result
 
 
+def get_use_orjson(value: bool | None = None) -> bool:
+    if value is not None:
+        result: bool = value
+    else:
+        var = os.getenv(USE_ORJSON_VAR, "false")
+        result = _bool_cast(var)
+    log.debug(f"get_use_orjson() got value: {result}")
+    return result
+
+
 def _ssl_verify_cast(value: t.Any) -> bool | str:
     if isinstance(value, bool):
         return value
@@ -83,3 +94,12 @@ def _float_cast(value: str) -> float:
     except ValueError as e:
         log.error(f'Value "{value}" can\'t cast to float')
         raise ValueError(f"Invalid config float: {value}") from e
+
+
+def _bool_cast(value: str) -> bool:
+    if isinstance(value, str):
+        if value.lower() in {"y", "yes", "t", "true", "on", "1"}:
+            return True
+        if value.lower() in {"n", "no", "f", "false", "off", "0"}:
+            return False
+    raise ValueError(f"Invalid config bool: {value}")

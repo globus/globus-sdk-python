@@ -8,13 +8,13 @@ alabaster==0.7.16
     # via sphinx
 babel==2.18.0
     # via sphinx
-certifi==2026.4.22
+certifi==2026.5.20
     # via requests
 charset-normalizer==3.4.7
     # via requests
 docutils==0.21.2
     # via sphinx
-idna==3.15
+idna==3.16
     # via requests
 imagesize==1.5.0
     # via sphinx
@@ -30,6 +30,8 @@ mypy==1.19.1
     # via -r .typing.in
 mypy-extensions==1.1.0
     # via mypy
+orjson==3.11.5
+    # via -r .typing.in
 packaging==26.2
     # via sphinx
 pathspec==1.1.1
@@ -42,9 +44,9 @@ requests==2.32.5
     # via
     #   responses
     #   sphinx
-responses==0.26.0
+responses==0.26.1
     # via -r .typing.in
-snowballstemmer==3.0.1
+snowballstemmer==3.1.0
     # via sphinx
 sphinx==7.4.7
     # via -r .typing.in
