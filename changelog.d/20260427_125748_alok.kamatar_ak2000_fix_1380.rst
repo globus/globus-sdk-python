@@ -1,4 +1,4 @@
 Fixed
 -----
 
-- Switch to lazy reading of response json to work with streaming responses. (:pr:`NUMBER`)
+- Switch to lazy reading of response json to work with streaming responses. (:pr:`1381`)
