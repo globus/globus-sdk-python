@@ -3,10 +3,11 @@ from __future__ import annotations
 import enum
 import typing as t
 
-import requests
-
 if t.TYPE_CHECKING:
+    import requests
+
     from .caller_info import RequestCallerInfo
+    from .decoders import ResponseDecoder
 
 C = t.TypeVar("C", bound=t.Callable[..., t.Any])
 
@@ -26,6 +27,9 @@ class RetryContext:
     or ``exception`` will be present.
 
     :param attempt: The request attempt number, starting at 0.
+    :param response_decoder: The response decoder which the transport layer is using to
+        read response data. Checks should prefer to use this decoder when reading
+        responses.
     :param caller_info: Contextual information about the caller, including authorizer
     :param response: The response on a successful request
     :param exception: The error raised when trying to send the request
@@ -35,12 +39,15 @@ class RetryContext:
         self,
         attempt: int,
         *,
+        response_decoder: ResponseDecoder,
         caller_info: RequestCallerInfo,
         response: requests.Response | None = None,
         exception: Exception | None = None,
     ) -> None:
         # retry attempt number
         self.attempt = attempt
+        # the response decoder shares a choice of implementation for decoding
+        self.response_decoder = response_decoder
         # caller info provides contextual information about the request
         self.caller_info = caller_info
         # the response or exception from a request

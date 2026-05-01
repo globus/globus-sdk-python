@@ -10,6 +10,7 @@ from globus_sdk.transport import (
     RetryConfig,
     RetryContext,
 )
+from globus_sdk.transport.decoders import ResponseDecoder
 from globus_sdk.transport.default_retry_checks import (
     DEFAULT_RETRY_CHECKS,
     check_retry_after_header,
@@ -28,7 +29,12 @@ def test_retry_policy_respects_retry_after(mocksleep, http_status):
     dummy_response.headers = {"Retry-After": "5"}
     dummy_response.status_code = http_status
     caller_info = RequestCallerInfo(retry_config=retry_config)
-    ctx = RetryContext(1, caller_info=caller_info, response=dummy_response)
+    ctx = RetryContext(
+        1,
+        response_decoder=ResponseDecoder(),
+        caller_info=caller_info,
+        response=dummy_response,
+    )
 
     assert checker.should_retry(ctx) is True
     mocksleep.assert_not_called()
@@ -48,7 +54,12 @@ def test_retry_policy_ignores_retry_after_too_high(mocksleep, http_status):
     dummy_response.headers = {"Retry-After": "20"}
     dummy_response.status_code = http_status
     caller_info = RequestCallerInfo(retry_config=retry_config)
-    ctx = RetryContext(1, caller_info=caller_info, response=dummy_response)
+    ctx = RetryContext(
+        1,
+        response_decoder=ResponseDecoder(),
+        caller_info=caller_info,
+        response=dummy_response,
+    )
 
     assert checker.should_retry(ctx) is True
     mocksleep.assert_not_called()
@@ -67,7 +78,12 @@ def test_retry_policy_ignores_malformed_retry_after(mocksleep, http_status):
     dummy_response.headers = {"Retry-After": "not-an-integer"}
     dummy_response.status_code = http_status
     caller_info = RequestCallerInfo(retry_config=retry_config)
-    ctx = RetryContext(1, caller_info=caller_info, response=dummy_response)
+    ctx = RetryContext(
+        1,
+        response_decoder=ResponseDecoder(),
+        caller_info=caller_info,
+        response=dummy_response,
+    )
 
     assert checker.should_retry(ctx) is True
     mocksleep.assert_not_called()
@@ -84,5 +100,10 @@ def test_default_retry_check_noop_on_exception(check_method, mocksleep):
     retry_config = RetryConfig()
     retry_config.checks.register_many_checks(DEFAULT_RETRY_CHECKS)
     caller_info = RequestCallerInfo(retry_config=retry_config)
-    ctx = RetryContext(1, caller_info=caller_info, exception=Exception("foo"))
+    ctx = RetryContext(
+        1,
+        response_decoder=ResponseDecoder(),
+        caller_info=caller_info,
+        exception=Exception("foo"),
+    )
     assert check_method(ctx) is RetryCheckResult.no_decision

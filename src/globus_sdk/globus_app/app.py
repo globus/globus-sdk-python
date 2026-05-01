@@ -35,6 +35,7 @@ from globus_sdk.transport import (
     RetryContext,
     set_retry_check_flags,
 )
+from globus_sdk.transport.decoders import ResponseDecoder
 
 from .authorizer_factory import AuthorizerFactory
 from .config import DEFAULT_CONFIG, KNOWN_TOKEN_STORAGES, GlobusAppConfig
@@ -578,7 +579,9 @@ class _RedriveGlobusAppGARE:
         if (resource_server := ctx.caller_info.resource_server) is None:
             return RetryCheckResult.no_decision
 
-        elif (gare := self._load_response_gare(ctx.response)) is None:
+        elif (
+            gare := self._load_response_gare(ctx.response_decoder, ctx.response)
+        ) is None:
             return RetryCheckResult.no_decision
 
         log.debug("Intercepted re-drivable GARE; initiating app login.")
@@ -590,12 +593,14 @@ class _RedriveGlobusAppGARE:
         return RetryCheckResult.do_retry
 
     @staticmethod
-    def _load_response_gare(response: Response | None) -> GARE | None:
+    def _load_response_gare(
+        response_decoder: ResponseDecoder, response: Response | None
+    ) -> GARE | None:
         """Return a parsed GARE from a 403 response or None if not possible."""
         if response is None or response.status_code != 403:
             return None
         try:
-            decoded_body = response.json()
+            decoded_body = response_decoder.get_body_json(response)
         except JSONDecodeError:
             return None
         else:

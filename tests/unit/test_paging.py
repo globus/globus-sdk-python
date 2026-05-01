@@ -1,5 +1,4 @@
 import json
-from unittest import mock
 
 import pytest
 import requests
@@ -12,7 +11,8 @@ N = 25
 
 
 class PagingSimulator:
-    def __init__(self, n) -> None:
+    def __init__(self, client, n) -> None:
+        self.client = client
         self.n = n  # the number of simulated items
 
     def simulate_get(self, *args, **params):
@@ -36,12 +36,13 @@ class PagingSimulator:
         response = requests.Response()
         response._content = json.dumps(data).encode()
         response.headers["Content-Type"] = "application/json"
-        return IterableTransferResponse(GlobusHTTPResponse(response, mock.Mock()))
+        return IterableTransferResponse(GlobusHTTPResponse(response, self.client))
 
 
 class JSONAPIPagingSimulator:
 
-    def __init__(self, n) -> None:
+    def __init__(self, client, n) -> None:
+        self.client = client
         self.n = n  # the number of simulated items
         self.page_size = 10  # arbitrary page size
 
@@ -85,17 +86,17 @@ class JSONAPIPagingSimulator:
         response = requests.Response()
         response._content = json.dumps(response_top_level).encode()
         response.headers["Content-Type"] = "application/json"
-        return IterableJSONAPIResponse(GlobusHTTPResponse(response, mock.Mock()))
+        return IterableJSONAPIResponse(GlobusHTTPResponse(response, self.client))
 
 
 @pytest.fixture
-def paging_simulator():
-    return PagingSimulator(N)
+def paging_simulator(mock_client_factory):
+    return PagingSimulator(mock_client_factory(), N)
 
 
 @pytest.fixture
-def jsonapi_paging_simulator():
-    return JSONAPIPagingSimulator(N)
+def jsonapi_paging_simulator(mock_client_factory):
+    return JSONAPIPagingSimulator(mock_client_factory(), N)
 
 
 def test_has_next_paginator(paging_simulator):

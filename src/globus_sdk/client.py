@@ -574,4 +574,6 @@ class BaseClient:
             return GlobusHTTPResponse(r, self)
 
         log.debug(f"request completed with (error) response code: {r.status_code}")
-        raise self.error_class(r)
+        with exc.GlobusAPIError._inject_response_decoder(self.transport.decoder):
+            err = self.error_class(r)
+        raise err

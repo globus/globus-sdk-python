@@ -65,6 +65,10 @@ class GlobusHTTPResponse:
             self._response = response
             self.client = client
 
+        # lift the response decoder from the attached client; this will be used
+        # whenever response data decoding is needed
+        self._response_decoder = self.client.transport.decoder
+
     @cached_property
     def _parsed_json(self) -> t.Any:
         # JSON decoding may raise a ValueError due to an invalid JSON
@@ -79,7 +83,7 @@ class GlobusHTTPResponse:
 
         if self._response is not None:
             try:
-                return self._response.json()
+                return self._response_decoder.get_body_json(self._response)
             except ValueError:
                 log.warning("response data did not parse as JSON, data=None")
                 return None
