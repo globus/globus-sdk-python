@@ -13,56 +13,50 @@ import pathlib
 import typing as t
 
 log = logging.getLogger(__name__)
-T = t.TypeVar("T")
-
 
 ENVNAME_VAR = "GLOBUS_SDK_ENVIRONMENT"
 HTTP_TIMEOUT_VAR = "GLOBUS_SDK_HTTP_TIMEOUT"
 SSL_VERIFY_VAR = "GLOBUS_SDK_VERIFY_SSL"
 
 
-@t.overload
-def _load_var(
-    varname: str,
-    default: t.Any,
-    explicit_value: t.Any | None,
-    convert: t.Callable[[t.Any, t.Any], T],
-) -> T: ...
-
-
-@t.overload
-def _load_var(
-    varname: str,
-    default: str,
-    explicit_value: str | None,
-) -> str: ...
-
-
-def _load_var(
-    varname: str,
-    default: t.Any,
-    explicit_value: t.Any | None = None,
-    convert: t.Callable[[t.Any, t.Any], T] | None = None,
-) -> t.Any:
-    # use the explicit value if given and non-None, otherwise, do an env lookup
-    value = (
-        explicit_value if explicit_value is not None else os.getenv(varname, default)
-    )
-    if convert:
-        value = convert(value, default)
-    # only info log on non-default *values*
-    # meaning that if we define the default as 'foo' and someone explicitly sets 'foo',
-    # no info log gets emitted
-    if value != default:
-        log.debug(f"on lookup, non-default setting: {varname}={value}")
+def get_environment_name(inputenv: str | None = None) -> str:
+    if inputenv is None:
+        value = os.getenv(ENVNAME_VAR, "production")
     else:
-        log.debug(f"on lookup, default setting: {varname}={value}")
+        value = inputenv
+    log.debug(f"get_environment_name() got value: {value}")
     return value
 
 
-def _ssl_verify_cast(
-    value: t.Any, default: t.Any  # pylint: disable=unused-argument
-) -> bool | str:
+def get_ssl_verify(value: bool | str | pathlib.Path | None = None) -> bool | str:
+    if value is None:
+        value = os.getenv(SSL_VERIFY_VAR, "1")
+    value = _ssl_verify_cast(value)
+    log.debug(f"get_ssl_verify() got value: {value}")
+    return value
+
+
+def get_http_timeout(value: float | None = None) -> float | None:
+    if value is not None:
+        result: float = value
+    else:
+        var = os.getenv(HTTP_TIMEOUT_VAR, "60")
+
+        # TODO: re-evaluate converting `""` to a default timeout -- it seems like this
+        # should error instead, but the behavior has been established for a long time,
+        # so will need proper deprecation
+        if var == "":
+            result = 60.0
+        else:
+            result = _float_cast(var)
+
+    log.debug(f"get_http_timeout() got value: {result}")
+    if result == -1.0:
+        return None
+    return result
+
+
+def _ssl_verify_cast(value: t.Any) -> bool | str:
     if isinstance(value, bool):
         return value
     if not isinstance(value, (str, pathlib.Path)):
@@ -83,31 +77,9 @@ def _ssl_verify_cast(
     )
 
 
-def _optfloat_cast(value: t.Any, default: t.Any) -> float | None:
+def _float_cast(value: str) -> float:
     try:
         return float(value)
-    except ValueError:
-        pass
-    if value == "":
-        return t.cast(float, default)
-    log.error(f'Value "{value}" can\'t cast to optfloat')
-    raise ValueError(f"Invalid config float: {value}")
-
-
-def get_environment_name(inputenv: str | None = None) -> str:
-    return _load_var(ENVNAME_VAR, "production", explicit_value=inputenv)
-
-
-def get_ssl_verify(value: bool | str | pathlib.Path | None = None) -> bool | str:
-    return _load_var(
-        SSL_VERIFY_VAR, default=True, explicit_value=value, convert=_ssl_verify_cast
-    )
-
-
-def get_http_timeout(value: float | None = None) -> float | None:
-    ret = _load_var(
-        HTTP_TIMEOUT_VAR, 60.0, explicit_value=value, convert=_optfloat_cast
-    )
-    if ret == -1.0:
-        return None
-    return ret
+    except ValueError as e:
+        log.error(f'Value "{value}" can\'t cast to float')
+        raise ValueError(f"Invalid config float: {value}") from e
