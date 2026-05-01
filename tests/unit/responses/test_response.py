@@ -5,6 +5,7 @@ from unittest import mock
 
 import pytest
 import requests
+import responses
 
 from globus_sdk.response import ArrayResponse, GlobusHTTPResponse, IterableResponse
 
@@ -356,3 +357,22 @@ def test_http_headers_from_response():
 
     r3 = GlobusHTTPResponse(r2)  # wrap another response
     assert r3.headers["content-length"] == "5"
+
+
+def test_streaming_response_does_not_read_body_on_init():
+    # create a streaming response with a trivial body
+    responses.add("GET", "https://www.globus.org/", json={})
+    requests_response = requests.get("https://www.globus.org/", stream=True)
+
+    # patch the underlying response stream to error -- not because it's important
+    # to test the error behavior, but because it's a very clear signal about when/if
+    # streaming is forced to evaluate
+    with mock.patch.object(
+        requests_response.raw, "stream", side_effect=RuntimeError("ohnoez")
+    ):
+        # no error on init
+        sdk_response = GlobusHTTPResponse(requests_response, client=mock.Mock())
+
+        # but accessing data causes a read, and therefore an error from streaming
+        with pytest.raises(RuntimeError, match="ohnoez"):
+            sdk_response.text
