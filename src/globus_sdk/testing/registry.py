@@ -7,6 +7,7 @@ import typing as t
 import responses
 
 import globus_sdk
+import globus_sdk.experimental
 
 from .models import RegisteredResponse, ResponseList, ResponseSet
 

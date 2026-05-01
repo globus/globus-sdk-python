@@ -6,7 +6,7 @@ import sys
 import textwrap
 import typing as t
 
-from globus_sdk._internal import guards
+from globus_sdk._internal import guards, orjson_compat
 
 from .base import GlobusError
 from .err_info import ErrorInfoContainer
@@ -132,11 +132,13 @@ class GlobusAPIError(GlobusError):
         if self._cached_raw_json == _CACHE_SENTINEL:
             self._cached_raw_json = None
             if self._json_mimetype():
+                response_loader = orjson_compat.get_response_loader()
+
                 try:
                     # technically, this could be a non-dict JSON type, like a list or
                     # string but in those cases the user can just cast -- the "normal"
                     # case is a dict
-                    self._cached_raw_json = self._underlying_response.json()
+                    self._cached_raw_json = response_loader(self._underlying_response)
                 except ValueError:
                     log.error(
                         "Error body could not be JSON decoded! "

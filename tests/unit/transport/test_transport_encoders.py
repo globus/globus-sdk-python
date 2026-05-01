@@ -6,6 +6,13 @@ from globus_sdk import MISSING
 from globus_sdk._payload import GlobusPayload
 from globus_sdk.transport import FormRequestEncoder, JSONRequestEncoder, RequestEncoder
 
+try:
+    import orjson  # noqa: F401
+
+    has_orjson = True
+except ImportError:
+    has_orjson = False
+
 
 @pytest.mark.parametrize("data", ("foo", b"bar"))
 def test_text_request_encoder_accepts_string_data(data):
@@ -159,3 +166,30 @@ def test_form_encoder_payload_preparation(
         headers={},
     )
     assert request.data == expected_data
+
+
+@pytest.mark.skipif(has_orjson, reason="test requires that orjson is not installed")
+@pytest.mark.parametrize("env_var_is_set", (True, False))
+def test_json_encoder_never_prefers_orjson_if_not_installed(
+    monkeypatch, env_var_is_set
+):
+    if env_var_is_set:
+        monkeypatch.setenv("GLOBUS_SDK_PREFER_ORJSON", "true")
+    assert JSONRequestEncoder().use_orjson is False
+
+
+@pytest.mark.skipif(not has_orjson, reason="test requires that orjson is installed")
+@pytest.mark.parametrize("env_var_is_set", (True, False))
+def test_json_encoder_prefers_orjson_based_on_env_var(monkeypatch, env_var_is_set):
+    if env_var_is_set:
+        monkeypatch.setenv("GLOBUS_SDK_PREFER_ORJSON", "true")
+
+    assert JSONRequestEncoder().use_orjson is env_var_is_set
+
+
+@pytest.mark.parametrize("env_var_is_set", (True, False))
+@pytest.mark.parametrize("initarg", (True, False))
+def test_json_encoder_can_force_orjson_usage(monkeypatch, env_var_is_set, initarg):
+    if env_var_is_set:
+        monkeypatch.setenv("GLOBUS_SDK_PREFER_ORJSON", "true")
+    assert JSONRequestEncoder(use_orjson=initarg).use_orjson is initarg

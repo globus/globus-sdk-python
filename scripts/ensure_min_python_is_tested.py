@@ -24,7 +24,7 @@ with open(REPO_ROOT / ".github" / "workflows" / "test.yaml") as f:
     else:
         raise ValueError("Could not find 'Linux' in the test matrix.")
 
-    for environment in include["tox-post-environments"]:
+    for environment in include["tox-environments"]:
         if environment.endswith("-mindeps"):
             break
     else:

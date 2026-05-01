@@ -18,6 +18,7 @@ from globus_sdk import (
     GlobusSDKUsageError,
     IDTokenDecoder,
 )
+from globus_sdk._internal import orjson_compat
 from globus_sdk._internal.type_definitions import Closable
 from globus_sdk.authorizers import GlobusAuthorizer
 from globus_sdk.gare import GARE, GlobusAuthorizationParameters, to_gare
@@ -594,8 +595,11 @@ class _RedriveGlobusAppGARE:
         """Return a parsed GARE from a 403 response or None if not possible."""
         if response is None or response.status_code != 403:
             return None
+
+        response_loader = orjson_compat.get_response_loader()
+
         try:
-            decoded_body = response.json()
+            decoded_body = response_loader(response)
         except JSONDecodeError:
             return None
         else:

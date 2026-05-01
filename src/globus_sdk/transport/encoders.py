@@ -6,6 +6,8 @@ import uuid
 
 import requests
 
+from globus_sdk import config
+from globus_sdk._internal import orjson_compat
 from globus_sdk._missing import MISSING, filter_missing
 
 
@@ -105,6 +107,13 @@ class JSONRequestEncoder(RequestEncoder):
     that APIs requiring a content-type of "application/json" are able to read the data.
     """
 
+    def __init__(self, *, use_orjson: bool | None = None) -> None:
+        self.use_orjson = (
+            use_orjson
+            if use_orjson is not None
+            else (orjson_compat.ORJSON_AVAILABLE and config.get_prefer_orjson())
+        )
+
     def encode(
         self,
         method: str,
@@ -115,13 +124,23 @@ class JSONRequestEncoder(RequestEncoder):
     ) -> requests.Request:
         if data is not None:
             headers = {"Content-Type": "application/json", **headers}
-        return requests.Request(
-            method,
-            url,
-            json=self._prepare_data(data),
-            params=self._prepare_params(params),
-            headers=self._prepare_headers(headers),
-        )
+
+        if self.use_orjson:
+            return requests.Request(
+                method,
+                url,
+                data=orjson_compat.dumps(self._prepare_data(data)),
+                params=self._prepare_params(params),
+                headers=self._prepare_headers(headers),
+            )
+        else:
+            return requests.Request(
+                method,
+                url,
+                json=self._prepare_data(data),
+                params=self._prepare_params(params),
+                headers=self._prepare_headers(headers),
+            )
 
 
 class FormRequestEncoder(RequestEncoder):

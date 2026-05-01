@@ -6,7 +6,7 @@ import logging
 import typing as t
 from functools import cached_property
 
-from globus_sdk._internal import guards
+from globus_sdk._internal import guards, orjson_compat
 
 log = logging.getLogger(__name__)
 
@@ -78,8 +78,10 @@ class GlobusHTTPResponse:
             return self._wrapped._parsed_json
 
         if self._response is not None:
+            response_loader = orjson_compat.get_response_loader()
+
             try:
-                return self._response.json()
+                return response_loader(self._response)
             except ValueError:
                 log.warning("response data did not parse as JSON, data=None")
                 return None
