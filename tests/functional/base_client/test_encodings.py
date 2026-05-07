@@ -125,7 +125,7 @@ def test_custom_decoding_applies_to_errors(client_class):
         "https://foo.api.globus.org/bar",
         body="bye",
         status=404,
-        headers={"Content-Type": "application/json"},
+        content_type="application/json",
     )
     with pytest.raises(globus_sdk.GlobusAPIError) as excinfo:
         client.post("/bar", data={"baz": 1})
