@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import contextvars
 import functools
 import logging
 import pathlib
@@ -31,6 +32,13 @@ log = logging.getLogger(__name__)
 
 
 _DEFAULT_JSON_ENCODER = JSONRequestEncoder()
+_DEFAULT_DECODER = ResponseDecoder()
+
+# a global contextvar provides the SDK with a notion of "current transport object"
+# used to retrieve decoders in responses, exceptions, and retry hooks
+_CURRENT_TRANSPORT: contextvars.ContextVar[RequestsTransport | None] = (
+    contextvars.ContextVar("_CURRENT_TRANSPORT", default=None)
+)
 
 
 class RequestsTransport:
@@ -127,6 +135,46 @@ class RequestsTransport:
         network session.
         """
         self.session.close()
+
+    @staticmethod
+    def get_current_transport() -> RequestsTransport:
+        """
+        Get the currently active transport. LookupError if there isn't one.
+
+        Transports are made active by the SDK in the following time windows:
+
+        - while a request is being sent and retried by the transport
+        - when a base client is constructing an error or response
+
+        Requests may nest (e.g., when doing an auth callout during retries). In such
+        cases, the current transport is the transport of the innermost request.
+        """
+        value = _CURRENT_TRANSPORT.get()
+        if value is None:
+            raise LookupError(
+                "No current transport is set! "
+                "The current transport can only be fetched while a transport is active."
+            )
+        return value
+
+    @contextlib.contextmanager
+    def _as_current_transport(self) -> t.Iterator[None]:
+        """Mark self as the currently active transport."""
+        token = _CURRENT_TRANSPORT.set(self)
+        try:
+            yield
+        finally:
+            _CURRENT_TRANSPORT.reset(token)
+
+    @staticmethod
+    def _safe_get_current_decoder() -> ResponseDecoder:
+        """Retrieve the current transport decoder, with a fallback to the default."""
+        try:
+            transport = RequestsTransport.get_current_transport()
+        except LookupError:
+            return _DEFAULT_DECODER
+        else:
+            return transport.decoder
 
     @property
     def user_agent(self) -> str:
@@ -303,6 +351,32 @@ class RequestsTransport:
 
         :return: ``requests.Response`` object
         """
+        with self._as_current_transport():
+            return self._send_request(
+                method,
+                url,
+                caller_info=caller_info,
+                query_params=query_params,
+                data=data,
+                headers=headers,
+                encoding=encoding,
+                allow_redirects=allow_redirects,
+                stream=stream,
+            )
+
+    def _send_request(
+        self,
+        method: str,
+        url: str,
+        *,
+        caller_info: RequestCallerInfo,
+        query_params: dict[str, t.Any] | None = None,
+        data: dict[str, t.Any] | list[t.Any] | str | bytes | None = None,
+        headers: dict[str, str] | None = None,
+        encoding: str | None = None,
+        allow_redirects: bool = True,
+        stream: bool = False,
+    ) -> requests.Response:
         import requests
 
         log.debug("starting request for %s", url)
@@ -319,9 +393,7 @@ class RequestsTransport:
             # done fresh for each request, to handle potential for refreshed credentials
             self._set_authz_header(caller_info.authorizer, req)
 
-            ctx = RetryContext(
-                attempt, response_decoder=self.decoder, caller_info=caller_info
-            )
+            ctx = RetryContext(attempt, caller_info=caller_info)
             try:
                 log.debug("request about to send")
                 resp = ctx.response = self.session.send(

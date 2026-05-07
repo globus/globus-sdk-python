@@ -14,6 +14,12 @@ Added
     -   In a future major version of the SDK, use of ``orjson`` will default to
         true when it is available.
 
+-   ``RequestsTransport`` objects are now visible via
+    ``RequestsTransport.get_current_transport()``, a staticmethod, while the
+    transport is sending a request or being used to handle a response. This
+    method raises a ``LookupError`` if there is no currently active transport.
+    (:pr:`NUMBER`)
+
 Deprecated
 ----------
 
