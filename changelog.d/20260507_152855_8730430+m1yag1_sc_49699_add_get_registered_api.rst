@@ -1,4 +1,4 @@
 Added
 -----
 
-- Added ``FlowsClient.get_registered_api()``, which retrieves a registered API by ID. (:pr:`NUMBER`)
+- Added ``FlowsClient.get_registered_api()``, which retrieves a registered API by ID. (:pr:`1386`)
