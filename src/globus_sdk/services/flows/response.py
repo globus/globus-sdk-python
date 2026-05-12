@@ -63,3 +63,24 @@ class IterableRunLogsResponse(response.IterableResponse):
     """
 
     default_iter_key = "entries"
+
+
+class IterableRegisteredAPIsResponse(response.IterableResponse):
+    """
+    An iterable response containing a "registered_apis" array of registered API records.
+
+    This response type is returned by :meth:`FlowsClient.list_registered_apis` and
+    provides iteration over individual registered API objects from a single page of
+    results.
+
+    When iterated over, yields individual registered API dictionaries, where each
+    registered API typically contains:
+
+    - ``id``: UUID of the registered API
+    - ``name``: Display name of the registered API
+    - ``description``: Description of the registered API
+    - ``created_timestamp``: Timestamp of registered API creation
+    - ``updated_timestamp``: Timestamp of last update
+    """
+
+    default_iter_key = "registered_apis"
