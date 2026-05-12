@@ -1,4 +1,4 @@
 Added
 -----
 
-- Added ``FlowsClient.list_registered_apis()``, which retrieves a list of registered APIs. (:pr:`NUMBER`)
+- Added ``FlowsClient.list_registered_apis()``, which retrieves a list of registered APIs. (:pr:`1387`)
