@@ -4,7 +4,7 @@
 #
 #    tox p -m freezedeps
 #
-certifi==2025.11.12
+certifi==2026.4.22
     # via requests
 cffi==2.0.0
     # via cryptography
@@ -22,17 +22,17 @@ flaky==3.8.1
     # via -r .test-mindeps.in
 idna==2.8
     # via requests
-importlib-metadata==8.7.0
+importlib-metadata==8.7.1
     # via pytest-randomly
 iniconfig==2.1.0
     # via pytest
-packaging==25.0
+packaging==26.2
     # via pytest
 pluggy==1.6.0
     # via pytest
 pycparser==2.23
     # via cffi
-pygments==2.19.2
+pygments==2.20.0
     # via pytest
 pyjwt==2.0.0
     # via -r .test-mindeps.in
@@ -55,7 +55,7 @@ responses==0.23.1
     # via -r .test-mindeps.in
 six==1.17.0
     # via cryptography
-tomli==2.3.0
+tomli==2.4.1
     # via
     #   coverage
     #   pytest
@@ -67,5 +67,5 @@ urllib3==1.25.11
     # via
     #   requests
     #   responses
-zipp==3.23.0
+zipp==3.23.1
     # via importlib-metadata
