@@ -12,6 +12,25 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-4.6.0:
+
+v4.6.0 (2026-05-14)
+===================
+
+Added
+-----
+
+- Support for managing bookmarks via the Transfer v2 client (:pr:`1379`)
+
+- Added ``FlowsClient.get_registered_api()``, which retrieves a registered API by ID. (:pr:`1386`)
+
+- Added ``FlowsClient.list_registered_apis()``, which retrieves a list of registered APIs. (:pr:`1387`)
+
+Fixed
+-----
+
+- Switch to lazy reading of response json to work with streaming responses. (:pr:`1381`)
+
 .. _changelog-4.5.0:
 
 v4.5.0 (2026-03-30)
