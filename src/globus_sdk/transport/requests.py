@@ -1,18 +1,19 @@
 from __future__ import annotations
 
 import contextlib
+import contextvars
+import functools
 import logging
 import pathlib
 import time
 import typing as t
 
-import requests
-
 from globus_sdk import __version__, config, exc
-from globus_sdk.authorizers import GlobusAuthorizer
+from globus_sdk.transport.decoders import OrjsonResponseDecoder, ResponseDecoder
 from globus_sdk.transport.encoders import (
     FormRequestEncoder,
     JSONRequestEncoder,
+    OrjsonRequestEncoder,
     RequestEncoder,
 )
 
@@ -22,7 +23,22 @@ from .retry import RetryContext
 from .retry_check_runner import RetryCheckRunner
 from .retry_config import RetryConfig
 
+if t.TYPE_CHECKING:
+    import requests
+
+    from globus_sdk.authorizers import GlobusAuthorizer
+
 log = logging.getLogger(__name__)
+
+
+_DEFAULT_JSON_ENCODER = JSONRequestEncoder()
+_DEFAULT_DECODER = ResponseDecoder()
+
+# a global contextvar provides the SDK with a notion of "current transport object"
+# used to retrieve decoders in responses, exceptions, and retry hooks
+_CURRENT_TRANSPORT: contextvars.ContextVar[RequestsTransport | None] = (
+    contextvars.ContextVar("_CURRENT_TRANSPORT", default=None)
+)
 
 
 class RequestsTransport:
@@ -44,6 +60,12 @@ class RequestsTransport:
         defaults to 60s but can be set via the ``GLOBUS_SDK_HTTP_TIMEOUT`` environment
         variable. Any value set via this parameter takes precedence over the environment
         variable.
+    :param use_orjson: Enable use of the 'orjson' library to encode requests and decode
+        responses. In future versions of the SDK, this will default to True when orjson
+        is installed.
+        Defaults to False but can be set via the ``GLOBUS_SDK_USE_ORJSON`` environment
+        variable.
+        Enabling this when 'orjson' is not installed results in errors.
 
     :ivar dict[str, str] headers: The headers which are sent on every request. These
         may be augmented by the transport when sending requests.
@@ -52,10 +74,16 @@ class RequestsTransport:
     #: default maximum number of retries
     DEFAULT_MAX_RETRIES = 5
 
-    #: the encoders are a mapping of encoding names to encoder objects
-    encoders: dict[str, RequestEncoder] = {
+    #: The encoders are a mapping of encoding names to encoder objects.
+    #:
+    #: .. warning::
+    #:
+    #:     This interface is deprecated, in favor of the instance-level
+    #:     ``encoder_map``. This is used to seed that mapping per instance
+    #:     and will be removed in a future release.
+    encoders: t.ClassVar[dict[str, RequestEncoder]] = {
         "text": RequestEncoder(),
-        "json": JSONRequestEncoder(),
+        "json": _DEFAULT_JSON_ENCODER,
         "form": FormRequestEncoder(),
     }
 
@@ -65,10 +93,14 @@ class RequestsTransport:
         self,
         verify_ssl: bool | str | pathlib.Path | None = None,
         http_timeout: float | None = None,
+        use_orjson: bool | None = None,
     ) -> None:
+        import requests
+
         self.session = requests.Session()
         self.verify_ssl = config.get_ssl_verify(verify_ssl)
         self.http_timeout = config.get_http_timeout(http_timeout)
+        self.use_orjson = config.get_use_orjson(use_orjson)
         self._user_agent = self.BASE_USER_AGENT
         self.globus_client_info: GlobusClientInfo = GlobusClientInfo(
             update_callback=self._handle_clientinfo_update
@@ -79,12 +111,70 @@ class RequestsTransport:
             "X-Globus-Client-Info": self.globus_client_info.format(),
         }
 
+        self.encoder_map = self._initialize_encoder_map()
+        self.decoder = self._initialize_decoder()
+
+    def _initialize_encoder_map(self) -> dict[str, RequestEncoder]:
+        # copy and return the class-level mapping
+        # replace the "json" element only if it *is* the default encoder
+        # meaning that the mapping was not modified by the user
+        mapping = self.encoders.copy()
+        if self.use_orjson and mapping["json"] is _DEFAULT_JSON_ENCODER:
+            mapping["json"] = OrjsonRequestEncoder()
+        return mapping
+
+    def _initialize_decoder(self) -> ResponseDecoder:
+        if self.use_orjson:
+            return OrjsonResponseDecoder()
+        else:
+            return ResponseDecoder()
+
     def close(self) -> None:
         """
         Closes all resources owned by the transport, primarily the underlying
         network session.
         """
         self.session.close()
+
+    @staticmethod
+    def get_current_transport() -> RequestsTransport:
+        """
+        Get the currently active transport. LookupError if there isn't one.
+
+        Transports are made active by the SDK in the following time windows:
+
+        - while a request is being sent and retried by the transport
+        - when a base client is constructing an error or response
+
+        Requests may nest (e.g., when doing an auth callout during retries). In such
+        cases, the current transport is the transport of the innermost request.
+        """
+        value = _CURRENT_TRANSPORT.get()
+        if value is None:
+            raise LookupError(
+                "No current transport is set! "
+                "The current transport can only be fetched while a transport is active."
+            )
+        return value
+
+    @contextlib.contextmanager
+    def _as_current_transport(self) -> t.Iterator[None]:
+        """Mark self as the currently active transport."""
+        token = _CURRENT_TRANSPORT.set(self)
+        try:
+            yield
+        finally:
+            _CURRENT_TRANSPORT.reset(token)
+
+    @staticmethod
+    def _safe_get_current_decoder() -> ResponseDecoder:
+        """Retrieve the current transport decoder, with a fallback to the default."""
+        try:
+            transport = RequestsTransport.get_current_transport()
+        except LookupError:
+            return _DEFAULT_DECODER
+        else:
+            return transport.decoder
 
     @property
     def user_agent(self) -> str:
@@ -162,6 +252,12 @@ class RequestsTransport:
             self.http_timeout,
         ) = saved_settings
 
+    @functools.cached_property
+    def decoder(self) -> ResponseDecoder:
+        if self.use_orjson:
+            return OrjsonResponseDecoder()
+        return ResponseDecoder()
+
     def _encode(
         self,
         method: str,
@@ -180,14 +276,19 @@ class RequestsTransport:
             if isinstance(data, (bytes, str)):
                 encoding = "text"
             else:
-                encoding = "json"
+                if self.use_orjson:
+                    encoding = "orjson"
+                else:
+                    encoding = "json"
 
-        if encoding not in self.encoders:
+        if encoding not in self.encoder_map:
             raise ValueError(
                 f"Unknown encoding '{encoding}' is not supported by this transport."
             )
 
-        return self.encoders[encoding].encode(method, url, query_params, data, headers)
+        return self.encoder_map[encoding].encode(
+            method, url, query_params, data, headers
+        )
 
     def _set_authz_header(
         self, authorizer: GlobusAuthorizer | None, req: requests.Request
@@ -250,6 +351,34 @@ class RequestsTransport:
 
         :return: ``requests.Response`` object
         """
+        with self._as_current_transport():
+            return self._send_request(
+                method,
+                url,
+                caller_info=caller_info,
+                query_params=query_params,
+                data=data,
+                headers=headers,
+                encoding=encoding,
+                allow_redirects=allow_redirects,
+                stream=stream,
+            )
+
+    def _send_request(
+        self,
+        method: str,
+        url: str,
+        *,
+        caller_info: RequestCallerInfo,
+        query_params: dict[str, t.Any] | None = None,
+        data: dict[str, t.Any] | list[t.Any] | str | bytes | None = None,
+        headers: dict[str, str] | None = None,
+        encoding: str | None = None,
+        allow_redirects: bool = True,
+        stream: bool = False,
+    ) -> requests.Response:
+        import requests
+
         log.debug("starting request for %s", url)
         resp: requests.Response | None = None
         req = self._encode(method, url, query_params, data, headers, encoding)

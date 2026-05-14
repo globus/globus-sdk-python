@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-from globus_sdk.authorizers import GlobusAuthorizer
+import typing as t
 
 from .retry_config import RetryConfig
+
+if t.TYPE_CHECKING:
+    from globus_sdk.authorizers import GlobusAuthorizer
 
 
 class RequestCallerInfo:

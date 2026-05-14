@@ -29,6 +29,7 @@ from globus_sdk.token_storage import (
     ValidatingTokenStorage,
 )
 from globus_sdk.transport import (
+    RequestsTransport,
     RetryCheck,
     RetryCheckFlags,
     RetryCheckResult,
@@ -592,10 +593,12 @@ class _RedriveGlobusAppGARE:
     @staticmethod
     def _load_response_gare(response: Response | None) -> GARE | None:
         """Return a parsed GARE from a 403 response or None if not possible."""
+        decoder = RequestsTransport._safe_get_current_decoder()
+
         if response is None or response.status_code != 403:
             return None
         try:
-            decoded_body = response.json()
+            decoded_body = decoder.get_body_json(response)
         except JSONDecodeError:
             return None
         else:

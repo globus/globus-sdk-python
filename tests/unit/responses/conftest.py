@@ -4,7 +4,7 @@ import globus_sdk
 
 
 @pytest.fixture
-def make_oauth_token_response(make_response):
+def make_oauth_token_response(make_response, mock_client_factory):
     """
     response with conveniently formatted names to help with iteration in tests
     """
@@ -40,14 +40,14 @@ def make_oauth_token_response(make_response):
                     },
                 ],
             },
-            client=client,
+            client=client if client is not None else mock_client_factory(),
         )
 
     return f
 
 
 @pytest.fixture
-def make_oauth_dependent_token_response(make_response):
+def make_oauth_dependent_token_response(make_response, mock_client_factory):
     """
     response with conveniently formatted names to help with iteration in tests
     """
@@ -75,7 +75,7 @@ def make_oauth_dependent_token_response(make_response):
                     "token_type": "bearer",
                 },
             ],
-            client=client,
+            client=client if client is not None else mock_client_factory(),
         )
 
     return f

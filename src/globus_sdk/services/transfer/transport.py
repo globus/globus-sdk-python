@@ -5,7 +5,12 @@ the default check_transient_error
 
 from __future__ import annotations
 
-from globus_sdk.transport import RetryCheck, RetryCheckResult, RetryContext
+from globus_sdk.transport import (
+    RequestsTransport,
+    RetryCheck,
+    RetryCheckResult,
+    RetryContext,
+)
 from globus_sdk.transport.default_retry_checks import (
     DEFAULT_RETRY_CHECKS,
     check_transient_error,
@@ -25,8 +30,10 @@ def check_transfer_transient_error(ctx: RetryContext) -> RetryCheckResult:
     if ctx.response is not None and (
         ctx.response.status_code in retry_config.transient_error_status_codes
     ):
+        decoder = RequestsTransport._safe_get_current_decoder()
+
         try:
-            code = ctx.response.json()["code"]
+            code = decoder.get_body_json(ctx.response)["code"]
         except (ValueError, KeyError):
             code = ""
 

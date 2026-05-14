@@ -43,6 +43,9 @@ class GlobusAPIError(GlobusError):
     RECOGNIZED_AUTHZ_SCHEMES = ["bearer", "basic", "globus-goauthtoken"]
 
     def __init__(self, r: requests.Response, *args: t.Any, **kwargs: t.Any) -> None:
+        # defer this import to avoid circularity between 'exc' and 'transport'
+        from globus_sdk.transport import RequestsTransport
+
         self._cached_raw_json: t.Any = _CACHE_SENTINEL
 
         self.http_status = r.status_code
@@ -54,6 +57,8 @@ class GlobusAPIError(GlobusError):
 
         self._info: ErrorInfoContainer | None = None
         self._underlying_response = r
+
+        self._decoder = RequestsTransport._safe_get_current_decoder()
         self._parse_response()
 
         if sys.version_info >= (3, 11):
@@ -136,7 +141,9 @@ class GlobusAPIError(GlobusError):
                     # technically, this could be a non-dict JSON type, like a list or
                     # string but in those cases the user can just cast -- the "normal"
                     # case is a dict
-                    self._cached_raw_json = self._underlying_response.json()
+                    self._cached_raw_json = self._decoder.get_body_json(
+                        self._underlying_response
+                    )
                 except ValueError:
                     log.error(
                         "Error body could not be JSON decoded! "

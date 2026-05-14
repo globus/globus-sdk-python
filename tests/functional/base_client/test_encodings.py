@@ -1,5 +1,15 @@
+from __future__ import annotations
+
+import json
+import typing as t
+
 import pytest
+import requests
 import responses
+
+import globus_sdk
+from globus_sdk.transport import RequestEncoder, RequestsTransport
+from globus_sdk.transport.decoders import ResponseDecoder
 
 
 def test_cannot_encode_dict_as_text(client):
@@ -45,3 +55,86 @@ def test_text_encoding_can_send_non_ascii_utf8_bytes(client):
 
     last_req = responses.calls[-1].request
     assert last_req.body == '{"field“: "value“}'.encode()
+
+
+def test_can_configure_custom_encoding(client_class):
+    class MyRequestEncoder(RequestEncoder):
+        def encode(
+            self,
+            method: str,
+            url: str,
+            params: dict[str, t.Any] | None,
+            data: t.Any,
+            headers: dict[str, str],
+        ) -> requests.Request:
+            if data is not None:
+                headers = {"Content-Type": "application/json", **headers}
+
+            return requests.Request(
+                method,
+                url,
+                json={"foo": self._prepare_data(data)},
+                params=self._prepare_params(params),
+                headers=self._prepare_headers(headers),
+            )
+
+    my_transport = RequestsTransport()
+    my_transport.encoder_map["myjson"] = MyRequestEncoder()
+    client = client_class(transport=my_transport)
+
+    responses.add(responses.POST, "https://foo.api.globus.org/bar", body="hi")
+    client.post("/bar", data={"baz": 1}, encoding="myjson")
+
+    my_transport.close()
+
+    last_req = responses.calls[-1].request
+    assert json.loads(last_req.body) == {"foo": {"baz": 1}}
+
+
+def test_can_configure_custom_decoding(client_class):
+    class MyDecoder(ResponseDecoder):
+        def get_body_json(self, response: requests.Response) -> t.Any:
+            return {"a": "clever-cultural-reference-goes-here"}
+
+    my_transport = RequestsTransport()
+    my_transport.decoder = MyDecoder()
+    client = client_class(transport=my_transport)
+
+    responses.add(responses.POST, "https://foo.api.globus.org/bar", body="hi")
+    response = client.post("/bar", data={"baz": 1})
+
+    my_transport.close()
+
+    # the raw text is available
+    assert response.text == "hi"
+    # but the decoded data is whatever the decoder says
+    assert response.data == {"a": "clever-cultural-reference-goes-here"}
+
+
+def test_custom_decoding_applies_to_errors(client_class):
+    class MyDecoder(ResponseDecoder):
+        def get_body_json(self, response: requests.Response) -> t.Any:
+            return {"a": "clever-cultural-reference-goes-here"}
+
+    my_transport = RequestsTransport()
+    my_transport.decoder = MyDecoder()
+    client = client_class(transport=my_transport)
+
+    responses.add(
+        responses.POST,
+        "https://foo.api.globus.org/bar",
+        body="bye",
+        status=404,
+        content_type="application/json",
+    )
+    with pytest.raises(globus_sdk.GlobusAPIError) as excinfo:
+        client.post("/bar", data={"baz": 1})
+
+    my_transport.close()
+
+    err = excinfo.value
+
+    # the raw text is available
+    assert err.text == "bye"
+    # but the decoded data is whatever the decoder says
+    assert err.raw_json == {"a": "clever-cultural-reference-goes-here"}

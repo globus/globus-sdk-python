@@ -44,6 +44,8 @@ jobs:
               - "3.14"
             tox-post-environments:
               - "py3.9-mindeps"
+              - "py3.9-orjson"
+              - "py3.14-orjson"
               - "py3.11-sphinxext"
               - "coverage_report"
 
@@ -53,6 +55,7 @@ jobs:
               - "3.11"
             tox-post-environments:
               - "py3.11-sphinxext"
+              - "py3.14-orjson"
               - "coverage_report"
 
           - name: "Windows"
@@ -62,6 +65,7 @@ jobs:
               - "3.11"
             tox-post-environments:
               - "py3.9-mindeps"
+              - "py3.14-orjson"
               - "py3.11-sphinxext"
               - "coverage_report"
 

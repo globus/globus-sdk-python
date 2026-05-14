@@ -7,6 +7,8 @@ import typing as t
 from functools import cached_property
 
 from globus_sdk._internal import guards
+from globus_sdk.transport import RequestsTransport
+from globus_sdk.transport.decoders import ResponseDecoder
 
 log = logging.getLogger(__name__)
 
@@ -55,6 +57,7 @@ class GlobusHTTPResponse:
             self._wrapped: GlobusHTTPResponse | None = response
             self._response: Response | None = None
             self.client: globus_sdk.BaseClient = self._wrapped.client
+            self._response_decoder: ResponseDecoder = response._response_decoder
 
         # init on a Response object, this is the "normal" case
         # _wrapped is None
@@ -64,6 +67,10 @@ class GlobusHTTPResponse:
             self._wrapped = None
             self._response = response
             self.client = client
+
+            # get the response decoder from the current transport; this will be used
+            # whenever response data decoding is needed
+            self._response_decoder = RequestsTransport._safe_get_current_decoder()
 
     @cached_property
     def _parsed_json(self) -> t.Any:
@@ -79,7 +86,7 @@ class GlobusHTTPResponse:
 
         if self._response is not None:
             try:
-                return self._response.json()
+                return self._response_decoder.get_body_json(self._response)
             except ValueError:
                 log.warning("response data did not parse as JSON, data=None")
                 return None
