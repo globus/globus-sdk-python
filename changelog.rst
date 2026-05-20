@@ -12,6 +12,16 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-4.7.0:
+
+v4.7.0 (2026-05-20)
+===================
+
+Added
+-----
+
+- Add a ``per_page`` parameter to the ``FlowsClient.list_registered_apis()`` method. (:pr:`1390`)
+
 .. _changelog-4.6.0:
 
 v4.6.0 (2026-05-14)
