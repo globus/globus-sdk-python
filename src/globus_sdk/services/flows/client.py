@@ -934,6 +934,7 @@ class FlowsClient(client.BaseClient):
         *,
         filter_roles: str | t.Iterable[str] | MissingType = MISSING,
         orderby: str | t.Iterable[str] | MissingType = MISSING,
+        per_page: int | MissingType = MISSING,
         marker: str | MissingType = MISSING,
         query_params: dict[str, t.Any] | None = None,
     ) -> IterableRegisteredAPIsResponse:
@@ -942,6 +943,7 @@ class FlowsClient(client.BaseClient):
 
         :param filter_roles: Role names to filter results (owner, administrator, viewer)
         :param orderby: Field and order for sorting results
+        :param per_page: Number of results per page
         :param marker: Pagination marker for continuing results
         :param query_params: Any additional parameters to be passed through
             as query params.
@@ -974,6 +976,7 @@ class FlowsClient(client.BaseClient):
                 orderby if isinstance(orderby, (str, MissingType)) else list(orderby)
             ),
             "marker": marker,
+            "per_page": per_page,
             **(query_params or {}),
         }
         return IterableRegisteredAPIsResponse(
