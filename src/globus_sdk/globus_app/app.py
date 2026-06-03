@@ -593,12 +593,12 @@ class _RedriveGlobusAppGARE:
     @staticmethod
     def _load_response_gare(response: Response | None) -> GARE | None:
         """Return a parsed GARE from a 403 response or None if not possible."""
-        decoder = RequestsTransport._safe_get_current_decoder()
+        json_provider = RequestsTransport._safe_get_current_json_provider()
 
         if response is None or response.status_code != 403:
             return None
         try:
-            decoded_body = decoder.get_body_json(response)
+            decoded_body = json_provider.decode_body(response)
         except JSONDecodeError:
             return None
         else:

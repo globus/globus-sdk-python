@@ -1,3 +1,4 @@
+import json
 from unittest import mock
 
 from globus_sdk.services.transfer.transport import TRANSFER_DEFAULT_RETRY_CHECKS
@@ -42,6 +43,7 @@ def test_transfer_does_not_retry_external():
 
     dummy_response = mock.Mock()
     dummy_response.json = lambda: body
+    dummy_response.content = json.dumps(body).encode()
     dummy_response.status_code = 502
     caller_info = RequestCallerInfo(retry_config=retry_config)
     ctx = RetryContext(1, caller_info=caller_info, response=dummy_response)
@@ -67,6 +69,7 @@ def test_transfer_does_not_retry_endpoint_error():
 
     dummy_response = mock.Mock()
     dummy_response.json = lambda: body
+    dummy_response.content = json.dumps(body).encode()
     dummy_response.status_code = 502
     caller_info = RequestCallerInfo(retry_config=retry_config)
     ctx = RetryContext(1, caller_info=caller_info, response=dummy_response)

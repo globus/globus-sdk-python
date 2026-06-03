@@ -4,16 +4,7 @@ from unittest import mock
 import pytest
 
 from globus_sdk.transport import RequestsTransport, RetryConfig, RetryContext
-from globus_sdk.transport.decoders import OrjsonResponseDecoder
-from globus_sdk.transport.encoders import OrjsonRequestEncoder
 from globus_sdk.transport.retry_config import _exponential_backoff
-
-try:
-    import orjson  # noqa: F401
-
-    has_orjson = True
-except ImportError:
-    has_orjson = False
 
 
 def _linear_backoff(ctx: RetryContext) -> float:
@@ -145,20 +136,3 @@ def test_transport_close_closes_session():
     with mock.patch.object(transport, "session") as mocked_session:
         transport.close()
         mocked_session.close.assert_called_once_with()
-
-
-@pytest.mark.skipif(has_orjson, reason="test requires that orjson is not installed")
-def test_setting_orjson_flag_fails_if_not_installed():
-    with pytest.raises(
-        RuntimeError,
-        match=r"'orjson' is not available but globus-sdk was configured to use it\.",
-    ):
-        RequestsTransport(use_orjson=True)
-
-
-@pytest.mark.skipif(not has_orjson, reason="test requires that orjson is installed")
-def test_setting_orjson_flag_works_if_installed():
-    transport = RequestsTransport(use_orjson=True)
-
-    assert isinstance(transport.decoder, OrjsonResponseDecoder)
-    assert isinstance(transport.encoder_map["json"], OrjsonRequestEncoder)

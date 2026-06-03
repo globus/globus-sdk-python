@@ -1,3 +1,4 @@
+import json
 from unittest import mock
 
 import pytest
@@ -150,6 +151,7 @@ def test_transfer_v2_default_retry_checks(body, status_code, expected_should_ret
 
     dummy_response = mock.Mock()
     dummy_response.json = lambda: body
+    dummy_response.content = json.dumps(body).encode()
     dummy_response.status_code = status_code
     caller_info = RequestCallerInfo(retry_config=retry_config)
     ctx = RetryContext(1, caller_info=caller_info, response=dummy_response)

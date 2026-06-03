@@ -30,10 +30,10 @@ def check_transfer_transient_error(ctx: RetryContext) -> RetryCheckResult:
     if ctx.response is not None and (
         ctx.response.status_code in retry_config.transient_error_status_codes
     ):
-        decoder = RequestsTransport._safe_get_current_decoder()
+        json_provider = RequestsTransport._safe_get_current_json_provider()
 
         try:
-            code = decoder.get_body_json(ctx.response)["code"]
+            code = json_provider.decode_body(ctx.response)["code"]
         except (ValueError, KeyError):
             code = ""
 

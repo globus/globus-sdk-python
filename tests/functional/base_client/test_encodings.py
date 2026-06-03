@@ -9,7 +9,10 @@ import responses
 
 import globus_sdk
 from globus_sdk.transport import RequestEncoder, RequestsTransport
-from globus_sdk.transport.decoders import ResponseDecoder
+from globus_sdk.transport.representation_providers import (
+    RequestsJsonProvider,
+    RequestsRepresentationProvider,
+)
 
 
 def test_cannot_encode_dict_as_text(client):
@@ -57,8 +60,11 @@ def test_text_encoding_can_send_non_ascii_utf8_bytes(client):
     assert last_req.body == '{"field“: "value“}'.encode()
 
 
-def test_can_configure_custom_encoding(client_class):
-    class MyRequestEncoder(RequestEncoder):
+@pytest.mark.parametrize(
+    "provider_base_class", (RequestEncoder, RequestsRepresentationProvider)
+)
+def test_can_configure_custom_encoding(client_class, provider_base_class):
+    class MyRequestEncoder(provider_base_class):
         def encode(
             self,
             method: str,
@@ -79,7 +85,7 @@ def test_can_configure_custom_encoding(client_class):
             )
 
     my_transport = RequestsTransport()
-    my_transport.encoder_map["myjson"] = MyRequestEncoder()
+    my_transport.representation_providers["myjson"] = MyRequestEncoder()
     client = client_class(transport=my_transport)
 
     responses.add(responses.POST, "https://foo.api.globus.org/bar", body="hi")
@@ -92,12 +98,12 @@ def test_can_configure_custom_encoding(client_class):
 
 
 def test_can_configure_custom_decoding(client_class):
-    class MyDecoder(ResponseDecoder):
-        def get_body_json(self, response: requests.Response) -> t.Any:
+    class MyProvider(RequestsJsonProvider):
+        def decode_body(self, response: requests.Response) -> t.Any:
             return {"a": "clever-cultural-reference-goes-here"}
 
     my_transport = RequestsTransport()
-    my_transport.decoder = MyDecoder()
+    my_transport.json_provider = MyProvider()
     client = client_class(transport=my_transport)
 
     responses.add(responses.POST, "https://foo.api.globus.org/bar", body="hi")
@@ -112,12 +118,12 @@ def test_can_configure_custom_decoding(client_class):
 
 
 def test_custom_decoding_applies_to_errors(client_class):
-    class MyDecoder(ResponseDecoder):
-        def get_body_json(self, response: requests.Response) -> t.Any:
+    class MyProvider(RequestsJsonProvider):
+        def decode_body(self, response: requests.Response) -> t.Any:
             return {"a": "clever-cultural-reference-goes-here"}
 
     my_transport = RequestsTransport()
-    my_transport.decoder = MyDecoder()
+    my_transport.json_provider = MyProvider()
     client = client_class(transport=my_transport)
 
     responses.add(

@@ -58,7 +58,7 @@ class GlobusAPIError(GlobusError):
         self._info: ErrorInfoContainer | None = None
         self._underlying_response = r
 
-        self._decoder = RequestsTransport._safe_get_current_decoder()
+        self._json_provider = RequestsTransport._safe_get_current_json_provider()
         self._parse_response()
 
         if sys.version_info >= (3, 11):
@@ -141,7 +141,7 @@ class GlobusAPIError(GlobusError):
                     # technically, this could be a non-dict JSON type, like a list or
                     # string but in those cases the user can just cast -- the "normal"
                     # case is a dict
-                    self._cached_raw_json = self._decoder.get_body_json(
+                    self._cached_raw_json = self._json_provider.decode_body(
                         self._underlying_response
                     )
                 except ValueError:

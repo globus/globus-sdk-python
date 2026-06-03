@@ -211,19 +211,3 @@ def test_service_url_from_env_var():
                 globus_sdk.config.get_webapp_url()
                 == f"https://app.{env}.globuscs.info/"
             )
-
-
-@pytest.mark.parametrize(
-    "value, expected_result",
-    [(x, True) for x in ["1", "YES", "true", "t", "True", "ON"]]
-    + [(x, False) for x in ["0", "NO", "false", "f", "False", "OFF"]]
-    + [("invalid", ValueError), ("1.0", ValueError)],
-)
-def test_get_use_orjson(value, expected_result, monkeypatch):
-    monkeypatch.setenv("GLOBUS_SDK_USE_ORJSON", value)
-    if expected_result is not ValueError:
-        assert globus_sdk.config.get_use_orjson() == expected_result
-
-    else:
-        with pytest.raises(expected_result):
-            globus_sdk.config.get_use_orjson()

@@ -9,12 +9,11 @@ import time
 import typing as t
 
 from globus_sdk import __version__, config, exc
-from globus_sdk.transport.decoders import OrjsonResponseDecoder, ResponseDecoder
-from globus_sdk.transport.encoders import (
-    FormRequestEncoder,
-    JSONRequestEncoder,
-    OrjsonRequestEncoder,
-    RequestEncoder,
+from globus_sdk.transport.representation_providers import (
+    RequestsHttpFormProvider,
+    RequestsJsonProvider,
+    RequestsPlainTextProvider,
+    RequestsRepresentationProvider,
 )
 
 from ._clientinfo import GlobusClientInfo
@@ -31,8 +30,10 @@ if t.TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 
-_DEFAULT_JSON_ENCODER = JSONRequestEncoder()
-_DEFAULT_DECODER = ResponseDecoder()
+_DEFAULT_JSON_PROVIDER = RequestsJsonProvider()
+_DEFAULT_TEXT_PROVIDER = RequestsPlainTextProvider()
+_DEFAULT_HTTP_FORM_PROVIDER = RequestsHttpFormProvider()
+
 
 # a global contextvar provides the SDK with a notion of "current transport object"
 # used to retrieve decoders in responses, exceptions, and retry hooks
@@ -60,12 +61,6 @@ class RequestsTransport:
         defaults to 60s but can be set via the ``GLOBUS_SDK_HTTP_TIMEOUT`` environment
         variable. Any value set via this parameter takes precedence over the environment
         variable.
-    :param use_orjson: Enable use of the 'orjson' library to encode requests and decode
-        responses. In future versions of the SDK, this will default to True when orjson
-        is installed.
-        Defaults to False but can be set via the ``GLOBUS_SDK_USE_ORJSON`` environment
-        variable.
-        Enabling this when 'orjson' is not installed results in errors.
 
     :ivar dict[str, str] headers: The headers which are sent on every request. These
         may be augmented by the transport when sending requests.
@@ -74,17 +69,17 @@ class RequestsTransport:
     #: default maximum number of retries
     DEFAULT_MAX_RETRIES = 5
 
-    #: The encoders are a mapping of encoding names to encoder objects.
+    #: The encoders are a mapping of encoding names to content-type providers.
     #:
     #: .. warning::
     #:
     #:     This interface is deprecated, in favor of the instance-level
-    #:     ``encoder_map``. This is used to seed that mapping per instance
+    #:     ``representation_providers``. This is used to seed that mapping per instance
     #:     and will be removed in a future release.
-    encoders: t.ClassVar[dict[str, RequestEncoder]] = {
-        "text": RequestEncoder(),
-        "json": _DEFAULT_JSON_ENCODER,
-        "form": FormRequestEncoder(),
+    encoders: t.ClassVar[dict[str, RequestsRepresentationProvider]] = {
+        "text": _DEFAULT_TEXT_PROVIDER,
+        "json": _DEFAULT_JSON_PROVIDER,
+        "form": _DEFAULT_HTTP_FORM_PROVIDER,
     }
 
     BASE_USER_AGENT = f"globus-sdk-py-{__version__}"
@@ -93,14 +88,12 @@ class RequestsTransport:
         self,
         verify_ssl: bool | str | pathlib.Path | None = None,
         http_timeout: float | None = None,
-        use_orjson: bool | None = None,
     ) -> None:
         import requests
 
         self.session = requests.Session()
         self.verify_ssl = config.get_ssl_verify(verify_ssl)
         self.http_timeout = config.get_http_timeout(http_timeout)
-        self.use_orjson = config.get_use_orjson(use_orjson)
         self._user_agent = self.BASE_USER_AGENT
         self.globus_client_info: GlobusClientInfo = GlobusClientInfo(
             update_callback=self._handle_clientinfo_update
@@ -111,23 +104,8 @@ class RequestsTransport:
             "X-Globus-Client-Info": self.globus_client_info.format(),
         }
 
-        self.encoder_map = self._initialize_encoder_map()
-        self.decoder = self._initialize_decoder()
-
-    def _initialize_encoder_map(self) -> dict[str, RequestEncoder]:
         # copy and return the class-level mapping
-        # replace the "json" element only if it *is* the default encoder
-        # meaning that the mapping was not modified by the user
-        mapping = self.encoders.copy()
-        if self.use_orjson and mapping["json"] is _DEFAULT_JSON_ENCODER:
-            mapping["json"] = OrjsonRequestEncoder()
-        return mapping
-
-    def _initialize_decoder(self) -> ResponseDecoder:
-        if self.use_orjson:
-            return OrjsonResponseDecoder()
-        else:
-            return ResponseDecoder()
+        self.representation_providers = self.encoders.copy()
 
     def close(self) -> None:
         """
@@ -167,14 +145,17 @@ class RequestsTransport:
             _CURRENT_TRANSPORT.reset(token)
 
     @staticmethod
-    def _safe_get_current_decoder() -> ResponseDecoder:
-        """Retrieve the current transport decoder, with a fallback to the default."""
+    def _safe_get_current_json_provider() -> RequestsRepresentationProvider:
+        """
+        Retrieve the current transport content-type provider, with a fallback to
+        the default JSON one.
+        """
         try:
             transport = RequestsTransport.get_current_transport()
         except LookupError:
-            return _DEFAULT_DECODER
+            return _DEFAULT_JSON_PROVIDER
         else:
-            return transport.decoder
+            return transport.json_provider
 
     @property
     def user_agent(self) -> str:
@@ -253,10 +234,8 @@ class RequestsTransport:
         ) = saved_settings
 
     @functools.cached_property
-    def decoder(self) -> ResponseDecoder:
-        if self.use_orjson:
-            return OrjsonResponseDecoder()
-        return ResponseDecoder()
+    def json_provider(self) -> RequestsRepresentationProvider:
+        return self.representation_providers["json"]
 
     def _encode(
         self,
@@ -276,17 +255,14 @@ class RequestsTransport:
             if isinstance(data, (bytes, str)):
                 encoding = "text"
             else:
-                if self.use_orjson:
-                    encoding = "orjson"
-                else:
-                    encoding = "json"
+                encoding = "json"
 
-        if encoding not in self.encoder_map:
+        if encoding not in self.representation_providers:
             raise ValueError(
                 f"Unknown encoding '{encoding}' is not supported by this transport."
             )
 
-        return self.encoder_map[encoding].encode(
+        return self.representation_providers[encoding].encode(
             method, url, query_params, data, headers
         )
 

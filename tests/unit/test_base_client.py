@@ -163,7 +163,7 @@ def test_http_methods(method, allows_body, base_client):
         req = get_last_request()
 
         assert req.method == methodname
-        assert req.body == json.dumps(jsonbody).encode("utf-8")
+        assert json.loads(req.body) == jsonbody
         assert "x" in res
         assert res["x"] == "y"
 

@@ -1,3 +1,4 @@
+import json
 import uuid
 from unittest import mock
 
@@ -67,6 +68,7 @@ def test_setting_oidc_config_on_default_decoder_unpacks_data(mock_client_factory
     oidc_config = {"x": 1}
     raw_response = mock.Mock(spec=requests.Response)
     raw_response.json.return_value = oidc_config
+    raw_response.content = json.dumps(oidc_config).encode()
     response = globus_sdk.GlobusHTTPResponse(raw_response, client=mock_client_factory())
 
     decoder = globus_sdk.IDTokenDecoder(mock.Mock())

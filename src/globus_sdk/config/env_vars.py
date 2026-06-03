@@ -17,7 +17,6 @@ log = logging.getLogger(__name__)
 ENVNAME_VAR = "GLOBUS_SDK_ENVIRONMENT"
 HTTP_TIMEOUT_VAR = "GLOBUS_SDK_HTTP_TIMEOUT"
 SSL_VERIFY_VAR = "GLOBUS_SDK_VERIFY_SSL"
-USE_ORJSON_VAR = "GLOBUS_SDK_USE_ORJSON"
 
 
 def get_environment_name(inputenv: str | None = None) -> str:
@@ -54,16 +53,6 @@ def get_http_timeout(value: float | None = None) -> float | None:
     log.debug(f"get_http_timeout() got value: {result}")
     if result == -1.0:
         return None
-    return result
-
-
-def get_use_orjson(value: bool | None = None) -> bool:
-    if value is not None:
-        result: bool = value
-    else:
-        var = os.getenv(USE_ORJSON_VAR, "false")
-        result = _bool_cast(var)
-    log.debug(f"get_use_orjson() got value: {result}")
     return result
 
 
