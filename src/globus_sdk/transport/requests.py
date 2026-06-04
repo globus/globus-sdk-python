@@ -30,6 +30,9 @@ if t.TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 
+C = t.TypeVar("C", bound=t.Callable[..., t.Any])
+
+
 _DEFAULT_JSON_PROVIDER = RequestsJsonProvider()
 _DEFAULT_TEXT_PROVIDER = RequestsPlainTextProvider()
 _DEFAULT_HTTP_FORM_PROVIDER = RequestsHttpFormProvider()
@@ -143,6 +146,17 @@ class RequestsTransport:
             yield
         finally:
             _CURRENT_TRANSPORT.reset(token)
+
+    @staticmethod
+    def _self_as_current_transport(func: C) -> C:
+        """A decorator to apply self._as_current_transport() automatically."""
+
+        @functools.wraps(func)
+        def wrapped(self: RequestsTransport, *args: t.Any, **kwargs: t.Any) -> t.Any:
+            with self._as_current_transport():
+                return func(self, *args, **kwargs)
+
+        return wrapped  # type: ignore[return-value]
 
     @staticmethod
     def _safe_get_current_json_provider() -> RequestsRepresentationProvider:
@@ -293,6 +307,7 @@ class RequestsTransport:
         )
         time.sleep(sleep_period)
 
+    @_self_as_current_transport
     def request(
         self,
         method: str,
@@ -327,32 +342,6 @@ class RequestsTransport:
 
         :return: ``requests.Response`` object
         """
-        with self._as_current_transport():
-            return self._send_request(
-                method,
-                url,
-                caller_info=caller_info,
-                query_params=query_params,
-                data=data,
-                headers=headers,
-                encoding=encoding,
-                allow_redirects=allow_redirects,
-                stream=stream,
-            )
-
-    def _send_request(
-        self,
-        method: str,
-        url: str,
-        *,
-        caller_info: RequestCallerInfo,
-        query_params: dict[str, t.Any] | None = None,
-        data: dict[str, t.Any] | list[t.Any] | str | bytes | None = None,
-        headers: dict[str, str] | None = None,
-        encoding: str | None = None,
-        allow_redirects: bool = True,
-        stream: bool = False,
-    ) -> requests.Response:
         import requests
 
         log.debug("starting request for %s", url)
