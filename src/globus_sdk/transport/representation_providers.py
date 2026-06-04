@@ -204,7 +204,7 @@ class RequestsJsonProvider(RequestsRepresentationProvider):
 
 class RequestsHttpFormProvider(RequestsRepresentationProvider):
     """
-    This provider prepares requestdata as a form-encoded body.
+    This provider prepares request data as a form-encoded body.
 
     It requires that the input data is a dict -- any other datatype will result in
     errors.

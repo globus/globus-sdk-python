@@ -83,12 +83,3 @@ def _float_cast(value: str) -> float:
     except ValueError as e:
         log.error(f'Value "{value}" can\'t cast to float')
         raise ValueError(f"Invalid config float: {value}") from e
-
-
-def _bool_cast(value: str) -> bool:
-    if isinstance(value, str):
-        if value.lower() in {"y", "yes", "t", "true", "on", "1"}:
-            return True
-        if value.lower() in {"n", "no", "f", "false", "off", "0"}:
-            return False
-    raise ValueError(f"Invalid config bool: {value}")
