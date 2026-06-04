@@ -1,8 +1,8 @@
-import json
 import uuid
 
 from globus_sdk.experimental import TunnelCreateDocument
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 
 def test_create_tunnel(client):
@@ -21,7 +21,7 @@ def test_create_tunnel(client):
     assert res["data"]["type"] == "Tunnel"
 
     req = get_last_request()
-    sent = json.loads(req.body)
+    sent = fast_json.loads(req.body)
     assert (
         sent["data"]["relationships"]["initiator"]["data"]["id"] == meta["initiator_ap"]
     )
@@ -47,5 +47,5 @@ def test_create_tunnel_no_submission(client):
     assert res.http_status == 200
 
     req = get_last_request()
-    sent = json.loads(req.body)
+    sent = fast_json.loads(req.body)
     assert sent["data"]["attributes"]["submission_id"] == str(generated_uuid)

@@ -1,4 +1,3 @@
-import json
 import uuid
 
 import pytest
@@ -6,6 +5,7 @@ import pytest
 from globus_sdk import exc
 from globus_sdk.services.transfer import CreateTunnelData
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 
 def test_create_tunnel(client):
@@ -24,7 +24,7 @@ def test_create_tunnel(client):
     assert res["data"]["type"] == "Tunnel"
 
     req = get_last_request()
-    sent = json.loads(req.body)
+    sent = fast_json.loads(req.body)
     assert (
         sent["data"]["relationships"]["initiator"]["data"]["id"] == meta["initiator_ap"]
     )
@@ -46,7 +46,7 @@ def test_create_tunnel_no_submission(client):
     assert res.http_status == 200
 
     req = get_last_request()
-    sent = json.loads(req.body)
+    sent = fast_json.loads(req.body)
     assert sent["data"]["attributes"]["submission_id"] is not None
 
 

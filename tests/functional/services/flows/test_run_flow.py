@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-import json
-
 import pytest
 
 import globus_sdk
 from globus_sdk import FlowsAPIError, SpecificFlowClient
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 
 def test_run_flow(specific_flow_client_class: type[SpecificFlowClient]):
@@ -45,7 +44,7 @@ def test_run_flow_without_activity_notification_policy(
     assert resp.http_status == 200
 
     last_req = get_last_request()
-    sent_payload = json.loads(last_req.body)
+    sent_payload = fast_json.loads(last_req.body)
     assert "activity_notification_policy" not in sent_payload
 
 
@@ -59,7 +58,7 @@ def test_run_flow_with_empty_activity_notification_policy(
     flow_client.run_flow({}, activity_notification_policy=policy)
 
     last_req = get_last_request()
-    sent_payload = json.loads(last_req.body)
+    sent_payload = fast_json.loads(last_req.body)
     assert "activity_notification_policy" in sent_payload
     assert sent_payload["activity_notification_policy"] == {}
 
@@ -74,7 +73,7 @@ def test_run_flow_with_activity_notification_policy(
     flow_client.run_flow({}, activity_notification_policy=policy)
 
     last_req = get_last_request()
-    sent_payload = json.loads(last_req.body)
+    sent_payload = fast_json.loads(last_req.body)
     assert "activity_notification_policy" in sent_payload
     assert sent_payload["activity_notification_policy"] == {
         "status": ["FAILED", "INACTIVE"]

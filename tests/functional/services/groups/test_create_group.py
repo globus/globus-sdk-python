@@ -1,6 +1,5 @@
-import json
-
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 
 def test_create_group(groups_client):
@@ -15,7 +14,7 @@ def test_create_group(groups_client):
     assert res["id"] == meta["group_id"]
 
     req = get_last_request()
-    req_body = json.loads(req.body)
+    req_body = fast_json.loads(req.body)
     assert req_body["description"] == "No stairs allowed."
 
 
@@ -31,5 +30,5 @@ def test_create_group_via_manager(groups_manager, groups_client):
     assert res["id"] == meta["group_id"]
 
     req = get_last_request()
-    req_body = json.loads(req.body)
+    req_body = fast_json.loads(req.body)
     assert req_body["description"] == "No stairs allowed."

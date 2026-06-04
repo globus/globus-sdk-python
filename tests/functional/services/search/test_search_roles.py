@@ -1,9 +1,8 @@
-import json
-
 import pytest
 
 import globus_sdk
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 
 @pytest.fixture
@@ -26,7 +25,7 @@ def test_search_role_create(search_client):
     assert res["role_name"] == "writer"
 
     last_req = get_last_request()
-    sent = json.loads(last_req.body)
+    sent = fast_json.loads(last_req.body)
     assert sent == send_data
 
 

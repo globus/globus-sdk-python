@@ -1,11 +1,10 @@
-import json
-
 import pytest
 import requests
 
 from globus_sdk.paging import HasNextPaginator, JSONAPIPaginator
 from globus_sdk.response import GlobusHTTPResponse, IterableJSONAPIResponse
 from globus_sdk.services.transfer.response import IterableTransferResponse
+from tests.common import fast_json
 
 N = 25
 
@@ -34,7 +33,7 @@ class PagingSimulator:
 
         # make the simulated response
         response = requests.Response()
-        response._content = json.dumps(data).encode()
+        response._content = fast_json.dumps(data).encode()
         response.headers["Content-Type"] = "application/json"
         return IterableTransferResponse(GlobusHTTPResponse(response, self.client))
 
@@ -84,7 +83,7 @@ class JSONAPIPagingSimulator:
 
         # make the simulated response
         response = requests.Response()
-        response._content = json.dumps(response_top_level).encode()
+        response._content = fast_json.dumps(response_top_level).encode()
         response.headers["Content-Type"] = "application/json"
         return IterableJSONAPIResponse(GlobusHTTPResponse(response, self.client))
 

@@ -1,6 +1,5 @@
-import json
-
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 
 def test_update_tunnel(client):
@@ -20,5 +19,5 @@ def test_update_tunnel(client):
     assert res["data"]["type"] == "Tunnel"
 
     req = get_last_request()
-    sent = json.loads(req.body)
+    sent = fast_json.loads(req.body)
     assert sent["data"]["attributes"]["label"] == label

@@ -1,10 +1,10 @@
 import datetime
-import json
 
 import pytest
 
 from globus_sdk import TimerJob, TimersAPIError
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 
 def test_list_jobs(client):
@@ -45,7 +45,7 @@ def test_create_job(client, start, interval):
     assert response.http_status == 201
     assert response.data["job_id"] == meta["job_id"]
 
-    req_body = json.loads(get_last_request().body)
+    req_body = fast_json.loads(get_last_request().body)
     if isinstance(start, datetime.datetime):
         assert req_body["start"] == start.isoformat()
     else:
@@ -107,5 +107,5 @@ def test_resume_job(update_credentials, client):
 
     response = client.resume_job(meta["job_id"], **kwargs)
     assert response.http_status == 200
-    assert json.loads(response._raw_response.request.body) == kwargs
+    assert fast_json.loads(response._raw_response.request.body) == kwargs
     assert "Successfully resumed" in response.data["message"]

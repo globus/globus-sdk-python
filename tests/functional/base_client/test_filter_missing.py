@@ -1,10 +1,10 @@
-import json
 import urllib.parse
 
 import pytest
 
 from globus_sdk import MISSING
 from globus_sdk.testing import RegisteredResponse, get_last_request, load_response
+from tests.common import fast_json
 
 
 @pytest.fixture(autouse=True)
@@ -43,7 +43,7 @@ def test_json_body_can_filter_missing(client):
     res = client.post("/bar", data={"foo": "bar", "baz": MISSING})
     assert res.http_status == 200
     req = get_last_request()
-    sent = json.loads(req.body)
+    sent = fast_json.loads(req.body)
     assert sent == {"foo": "bar"}
 
 

@@ -1,8 +1,6 @@
-import json
-
 from globus_sdk import GCSRoleDocument
 from globus_sdk.testing import get_last_request
-from tests.common import register_api_route_fixture_file
+from tests.common import fast_json, register_api_route_fixture_file
 
 
 def test_get_role_list(client):
@@ -79,7 +77,7 @@ def test_create_role(client):
     res = client.create_role(data)
     assert res["id"] == "{role_id_1}"
 
-    json_body = json.loads(get_last_request().body)
+    json_body = fast_json.loads(get_last_request().body)
 
     assert json_body["collection"] in (None, "{collection_id_1}")
     assert json_body["principal"] == "urn:globus:auth:identity:{user_id_1}"

@@ -1,11 +1,10 @@
-import json
-
 import pytest
 from responses import matchers
 
 from globus_sdk import MISSING, FlowsAPIError
 from globus_sdk.testing import get_last_request, load_response
 from globus_sdk.testing.models import RegisteredResponse
+from tests.common import fast_json
 
 
 @pytest.mark.parametrize("subscription_id", [MISSING, None, "dummy_subscription_id"])
@@ -18,7 +17,7 @@ def test_create_flow(flows_client, subscription_id):
     assert resp.data["title"] == "Multi Step Transfer"
 
     last_req = get_last_request()
-    req_body = json.loads(last_req.body)
+    req_body = fast_json.loads(last_req.body)
     if subscription_id is not MISSING:
         assert req_body["subscription_id"] == subscription_id
     else:
@@ -65,7 +64,7 @@ def test_create_flow_run_role_serialization(flows_client, key, value):
     flows_client.create_flow(**request_body)
 
     last_req = get_last_request()
-    req_body = json.loads(last_req.body)
+    req_body = fast_json.loads(last_req.body)
 
     if value is MISSING:
         assert key not in req_body
@@ -118,7 +117,7 @@ def test_update_flow_run_role_serialization(flows_client, key, value):
     flows_client.update_flow(metadata["flow_id"], **params)
 
     last_req = get_last_request()
-    req_body = json.loads(last_req.body)
+    req_body = fast_json.loads(last_req.body)
 
     if value is MISSING:
         assert key not in req_body

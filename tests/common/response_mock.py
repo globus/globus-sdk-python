@@ -1,7 +1,8 @@
-import json
 from unittest import mock
 
 import requests
+
+from . import fast_json
 
 
 class PickleableMockResponse(mock.NonCallableMock):
@@ -40,7 +41,7 @@ class PickleableMockResponse(mock.NonCallableMock):
 
         self._json_body = json_body
 
-        self.text = text or (json.dumps(json_body) if json_body else "")
+        self.text = text or (fast_json.dumps(json_body) if json_body else "")
         self.content = self.text.encode()
 
     def json(self):

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import typing as t
 
 import pytest
@@ -13,6 +12,7 @@ from globus_sdk.transport.representation_providers import (
     RequestsJsonProvider,
     RequestsRepresentationProvider,
 )
+from tests.common import fast_json
 
 
 def test_cannot_encode_dict_as_text(client):
@@ -94,7 +94,7 @@ def test_can_configure_custom_encoding(client_class, provider_base_class):
     my_transport.close()
 
     last_req = responses.calls[-1].request
-    assert json.loads(last_req.body) == {"foo": {"baz": 1}}
+    assert fast_json.loads(last_req.body) == {"foo": {"baz": 1}}
 
 
 def test_can_configure_custom_decoding(client_class):

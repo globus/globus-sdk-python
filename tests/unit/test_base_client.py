@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 import uuid
@@ -13,6 +12,7 @@ from globus_sdk.scopes import Scope, TransferScopes
 from globus_sdk.testing import RegisteredResponse, get_last_request
 from globus_sdk.token_storage import TokenValidationError
 from globus_sdk.transport import RequestsTransport
+from tests.common import fast_json
 
 
 @pytest.fixture
@@ -163,7 +163,7 @@ def test_http_methods(method, allows_body, base_client):
         req = get_last_request()
 
         assert req.method == methodname
-        assert json.loads(req.body) == jsonbody
+        assert fast_json.loads(req.body) == jsonbody
         assert "x" in res
         assert res["x"] == "y"
 

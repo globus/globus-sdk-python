@@ -1,11 +1,10 @@
-import json
 import time
 
 import jwt
 import pytest
 
 import globus_sdk
-from tests.common import register_api_route
+from tests.common import fast_json, register_api_route
 
 OIDC_CONFIG = {
     "issuer": "https://auth.globus.org",
@@ -44,7 +43,7 @@ JWK = {
         }
     ]
 }
-JWK_PEM = jwt.algorithms.RSAAlgorithm.from_jwk(json.dumps(JWK["keys"][0]))
+JWK_PEM = jwt.algorithms.RSAAlgorithm.from_jwk(fast_json.dumps(JWK["keys"][0]))
 
 TOKEN_PAYLOAD = {
     "access_token": "auth_access_token",
@@ -85,7 +84,7 @@ def client():
 @pytest.fixture(autouse=True)
 def register_token_response():
     register_api_route(
-        "auth", "/v2/oauth2/token", method="POST", body=json.dumps(TOKEN_PAYLOAD)
+        "auth", "/v2/oauth2/token", method="POST", body=fast_json.dumps(TOKEN_PAYLOAD)
     )
 
 
@@ -105,16 +104,16 @@ def test_decode_id_token(token_response):
         "auth",
         "/.well-known/openid-configuration",
         method="GET",
-        body=json.dumps(OIDC_CONFIG),
+        body=fast_json.dumps(OIDC_CONFIG),
     )
-    register_api_route("auth", "/jwk.json", method="GET", body=json.dumps(JWK))
+    register_api_route("auth", "/jwk.json", method="GET", body=fast_json.dumps(JWK))
 
     decoded = token_response.decode_id_token(jwt_params={"verify_exp": False})
     assert decoded["preferred_username"] == "sirosen2@globusid.org"
 
 
 def test_decode_id_token_with_saved_oidc_config(token_response):
-    register_api_route("auth", "/jwk.json", method="GET", body=json.dumps(JWK))
+    register_api_route("auth", "/jwk.json", method="GET", body=fast_json.dumps(JWK))
 
     decoded = token_response.decode_id_token(
         openid_configuration=OIDC_CONFIG, jwt_params={"verify_exp": False}
@@ -141,9 +140,9 @@ def test_decode_id_token_with_leeway(token_response):
         "auth",
         "/.well-known/openid-configuration",
         method="GET",
-        body=json.dumps(OIDC_CONFIG),
+        body=fast_json.dumps(OIDC_CONFIG),
     )
-    register_api_route("auth", "/jwk.json", method="GET", body=json.dumps(JWK))
+    register_api_route("auth", "/jwk.json", method="GET", body=fast_json.dumps(JWK))
 
     # do a decode with a leeway parameter set high enough that the ancient
     # expiration time will be tolerated

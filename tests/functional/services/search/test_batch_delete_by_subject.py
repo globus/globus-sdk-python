@@ -1,6 +1,5 @@
-import json
-
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 
 def test_batch_delete_by_subject(client):
@@ -17,7 +16,7 @@ def test_batch_delete_by_subject(client):
     assert res["task_id"] == meta["task_id"]
 
     req = get_last_request()
-    sent_data = json.loads(req.body)
+    sent_data = fast_json.loads(req.body)
     assert sent_data == {"subjects": input_subjects}
 
 
@@ -41,7 +40,7 @@ def test_batch_delete_by_subject_accepts_string(client):
     assert res["task_id"] == meta["task_id"]
 
     req = get_last_request()
-    sent_data = json.loads(req.body)
+    sent_data = fast_json.loads(req.body)
     assert sent_data == {"subjects": [input_subject]}
 
 
@@ -63,5 +62,5 @@ def test_batch_delete_by_subject_allows_additional_params(client):
     assert res["task_id"] == meta["task_id"]
 
     req = get_last_request()
-    sent_data = json.loads(req.body)
+    sent_data = fast_json.loads(req.body)
     assert sent_data == {"subjects": input_subjects, "foo": "snork"}

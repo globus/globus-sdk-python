@@ -1,9 +1,8 @@
-import json
-
 import pytest
 
 from globus_sdk import FlowsAPIError
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 
 def test_get_run_definition(flows_client):
@@ -48,7 +47,7 @@ def test_update_run(flows_client, values):
     request = get_last_request()
     assert request.method == "PUT"
     assert request.url.endswith(f"/runs/{metadata['run_id']}")
-    assert json.loads(request.body) == values
+    assert fast_json.loads(request.body) == values
 
     # Ensure deprecated routes are not used.
     assert f"/flows/{metadata['flow_id']}" not in request.url
@@ -77,7 +76,7 @@ def test_update_run_additional_fields(flows_client):
     request = get_last_request()
     assert request.method == "PUT"
     assert request.url.endswith(f"/runs/{metadata['run_id']}")
-    assert json.loads(request.body) == additional_fields
+    assert fast_json.loads(request.body) == additional_fields
 
 
 def test_delete_run_success(flows_client):

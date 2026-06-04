@@ -1,7 +1,6 @@
-import json
-
 from globus_sdk import ConnectorTable, UserCredentialDocument
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 
 def test_get_user_credential_list(client):
@@ -54,7 +53,7 @@ def test_create_user_credential(client):
     assert res.full_data["DATA_TYPE"] == "result#1.0.0"
     assert res.full_data["message"] == f"Created User Credential {uc_id}"
 
-    req_body = req_body = json.loads(get_last_request().body)
+    req_body = req_body = fast_json.loads(get_last_request().body)
     assert req_body["DATA_TYPE"] == "user_credential#1.0.0"
     assert req_body["policies"]["DATA_TYPE"] == "s3_user_credential_policies#1.0.0"
     for key, value in req_body.items():
@@ -74,7 +73,7 @@ def test_update_user_credential(client):
     assert res.full_data["DATA_TYPE"] == "result#1.0.0"
     assert res.full_data["message"] == f"Updated User Credential {uc_id}"
 
-    req_body = json.loads(get_last_request().body)
+    req_body = fast_json.loads(get_last_request().body)
     assert req_body["display_name"] == "updated_posix_credential"
 
 

@@ -1,4 +1,3 @@
-import json
 import re
 from collections import namedtuple
 from unittest import mock
@@ -8,6 +7,7 @@ import requests
 import responses
 
 from globus_sdk.response import ArrayResponse, GlobusHTTPResponse, IterableResponse
+from tests.common import fast_json
 
 _TestResponse = namedtuple("_TestResponse", ("data", "r"))
 
@@ -17,7 +17,7 @@ def _response(data=None, encoding="utf-8", headers=None, status: int = 200):
 
     is_json = isinstance(data, (dict, list))
 
-    datastr = json.dumps(data) if is_json else data
+    datastr = fast_json.dumps(data) if is_json else data
     if datastr is not None:
         if isinstance(datastr, str):
             r._content = datastr.encode("utf-8")
