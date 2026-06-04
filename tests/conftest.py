@@ -4,7 +4,6 @@ import pytest
 import responses
 
 import globus_sdk
-from globus_sdk.transport.requests import _DEFAULT_JSON_PROVIDER
 
 
 @pytest.fixture(autouse=True)
@@ -31,10 +30,6 @@ def mocked_responses():
 def mock_client_factory():
     def build():
         client = mock.Mock()
-        # because responses are deserialized using the decoder attached to the client
-        # we need to ensure it is populated if we want to be able to pass the mock
-        # clients to response classes and get good behavior
-        client.transport.json_provider = _DEFAULT_JSON_PROVIDER
         return client
 
     return build
