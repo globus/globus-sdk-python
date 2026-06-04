@@ -41,16 +41,13 @@ class PickleableMockResponse(mock.NonCallableMock):
         self._json_body = json_body
 
         self.text = text or (json.dumps(json_body) if json_body else "")
+        self.content = self.text.encode()
 
     def json(self):
         if self._json_body is not None:
             return self._json_body
         else:
             raise ValueError("globus sdk mock value error")
-
-    @property
-    def content(self):
-        return json.dumps(self.json()).encode()
 
     def __getstate__(self):
         """Custom getstate discards most of the magical mock stuff"""
