@@ -10,7 +10,6 @@ def test_update_bookmark(client):
     data = BookmarkUpdateDocument(
         meta["name"],
         meta["path"],
-        pinned=meta["pinned"],
     )
 
     res = client.update_bookmark(meta["bookmark_id"], data)
@@ -25,4 +24,3 @@ def test_update_bookmark(client):
     sent = json.loads(req.body)
     assert sent["data"]["attributes"]["name"] == meta["name"]
     assert sent["data"]["attributes"]["path"] == meta["path"]
-    assert sent["data"]["attributes"]["pinned"] == meta["pinned"]

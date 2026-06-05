@@ -23,7 +23,6 @@ RESPONSES = ResponseSet(
                 "attributes": {
                     "name": _name,
                     "path": _path,
-                    "pinned": False,
                 },
                 "relationships": {
                     "collection": {

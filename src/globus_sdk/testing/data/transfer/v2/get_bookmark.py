@@ -19,7 +19,7 @@ RESPONSES = ResponseSet(
             "data": {
                 "type": "Bookmark",
                 "id": BOOKMARK_ID,
-                "attributes": {"name": _name, "path": _path, "pinned": True},
+                "attributes": {"name": _name, "path": _path},
                 "relationships": {
                     "collection": {
                         "data": {

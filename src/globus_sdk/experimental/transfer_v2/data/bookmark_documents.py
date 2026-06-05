@@ -4,7 +4,6 @@ import logging
 import typing as t
 import uuid
 
-from globus_sdk._missing import MISSING, MissingType
 from globus_sdk._payload import GlobusPayload
 
 log = logging.getLogger(__name__)
@@ -23,7 +22,6 @@ class BookmarkCreateDocument(GlobusPayload):
         name: str,
         path: str,
         *,
-        pinned: bool | MissingType = MISSING,
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
@@ -41,7 +39,6 @@ class BookmarkCreateDocument(GlobusPayload):
         attributes = {
             "name": name,
             "path": path,
-            "pinned": pinned,
         }
 
         if additional_fields is not None:
@@ -66,7 +63,6 @@ class BookmarkUpdateDocument(GlobusPayload):
         name: str,
         path: str,
         *,
-        pinned: bool | MissingType = MISSING,
         additional_fields: dict[str, t.Any] | None = None,
     ) -> None:
         super().__init__()
@@ -75,7 +71,6 @@ class BookmarkUpdateDocument(GlobusPayload):
         attributes = {
             "name": name,
             "path": path,
-            "pinned": pinned,
         }
 
         if additional_fields is not None:

@@ -8,14 +8,12 @@ _bookmarks = [
         "collection_id": str(uuid.uuid4()),
         "name": "public datasets",
         "path": "/data_repository/public",
-        "pinned": True,
     },
     {
         "bookmark_id": str(uuid.uuid4()),
         "collection_id": str(uuid.uuid4()),
         "name": "private datasets",
         "path": "/data_repository/private",
-        "pinned": False,
     },
 ]
 
@@ -32,7 +30,6 @@ RESPONSES = ResponseSet(
                     "attributes": {
                         "name": b["name"],
                         "path": b["path"],
-                        "pinned": b["pinned"],
                     },
                     "relationships": {
                         "collection": {
