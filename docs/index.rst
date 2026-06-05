@@ -64,4 +64,5 @@ Table of Contents
     :caption: Additional Info
     :maxdepth: 1
 
+    contributing
     license

@@ -1,0 +1,123 @@
+Contributing to the Globus SDK
+==============================
+
+First off, thank you so much for taking the time to contribute!
+
+The ``globus-sdk`` is developed in `a public GitHub repo <https://github.com/globus/globus-sdk-python/>`_.
+
+Bugs & Feature Requests
+-----------------------
+
+Should be reported as
+`GitHub Issues <https://github.com/globus/globus-sdk-python/issues>`_.
+
+For a good bug report:
+
+- Check if there's a matching issue before opening a new issue
+- Provide a code sample to reproduce bugs
+
+Installing a Development Environment
+------------------------------------
+
+To install the development environment (virtualenv and pre-commit hooks) in a new repo,
+run
+
+.. code-block:: console
+
+    make install
+
+To update an install for an existing development environment, e.g., after updating the
+dependency list, run
+
+.. code-block:: console
+
+    make clean && make install
+
+Linting & Testing
+-----------------
+
+Testing the SDK requires `tox <https://tox.readthedocs.io/en/latest/>`_.
+
+Run the full test suite with
+
+.. code-block:: console
+
+    tox
+
+And linting with
+
+.. code-block:: console
+
+    tox -e lint
+
+Optional, but recommended, linting setup
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The Globus SDK uses  `pre-commit <https://pre-commit.com/>`_ to automatically run linters
+and fixers. Install ``pre-commit`` and then run
+
+.. code-block:: console
+
+    pre-commit install
+
+to setup the hooks.
+
+The configured linters and fixers can be seen in ``.pre-commit-config.yaml``.
+
+Writing changelog fragments
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you are contributing a significant change -- e.g., a new feature -- it's
+best to include a changelog fragment which documents the change. This will be
+included in the next SDK release's changelog.
+Changelog fragments are written using ``scriv``.
+
+First, make sure you have scriv installed with ``toml`` support, for example:
+
+.. code-block:: console
+
+    pipx install 'scriv[toml]'
+
+Then use ``scriv create --edit`` to create a changelog fragment. Comments in the
+template should give you further guidance.
+
+Not all changes need a changelog! If it's a minor tweak (e.g., a doc typo),
+we'll label the PR to skip our changelog requirement.
+
+Contributing Documentation
+--------------------------
+
+Documentation for the SDK is built with `sphinx <https://www.sphinx-doc.org/>`_ and
+docs are written as `reStructuredText <https://docutils.sourceforge.io/rst.html>`_
+in the ``docs/`` directory.
+
+If you want to look at local documentation, run ``tox -e docs`` and the output
+will be in ``docs/_build/dirhtml/``.
+
+Code Guidelines
+---------------
+
+These are recommendations for contributors:
+
+- Include tests for any new or changed functionality
+- Use type annotations liberally
+- New features should be documented via Sphinx
+
+Code Style
+~~~~~~~~~~
+
+Style guidance which doesn't get handled by linters and fixers:
+
+- If a docstring contains special characters like ``\\``, consider using a raw
+  string to ensure it renders correctly
+
+- Use the ``*`` marker for keyword-only arguments for any signatures which
+  take keyword arguments. (For an explanation, see
+  `PEP 3102 <https://peps.python.org/pep-3102/>`_.)
+
+- Avoid use of ``**kwargs`` to capture arbitrary keyword arguments.  Instead,
+  always define a named dict argument for any open extension points (see
+  ``query_params`` for prior art in the SDK, or ``extra`` in ``logging`` for a
+  case from the stdlib).
+  This makes type checking more effective and avoids a class of backwards
+  compatibility issues when arguments are added.
