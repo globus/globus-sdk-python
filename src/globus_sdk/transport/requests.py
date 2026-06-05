@@ -45,6 +45,17 @@ _CURRENT_TRANSPORT: contextvars.ContextVar[RequestsTransport | None] = (
 )
 
 
+def _self_as_current_transport(func: C) -> C:
+    """A decorator to apply self._as_current_transport() automatically."""
+
+    @functools.wraps(func)
+    def wrapped(self: RequestsTransport, *args: t.Any, **kwargs: t.Any) -> t.Any:
+        with self._as_current_transport():
+            return func(self, *args, **kwargs)
+
+    return wrapped  # type: ignore[return-value]
+
+
 class RequestsTransport:
     """
     The RequestsTransport handles HTTP request sending and retries.
@@ -146,17 +157,6 @@ class RequestsTransport:
             yield
         finally:
             _CURRENT_TRANSPORT.reset(token)
-
-    @staticmethod
-    def _self_as_current_transport(func: C) -> C:
-        """A decorator to apply self._as_current_transport() automatically."""
-
-        @functools.wraps(func)
-        def wrapped(self: RequestsTransport, *args: t.Any, **kwargs: t.Any) -> t.Any:
-            with self._as_current_transport():
-                return func(self, *args, **kwargs)
-
-        return wrapped  # type: ignore[return-value]
 
     @staticmethod
     def _safe_get_current_json_provider() -> RequestsRepresentationProvider:
