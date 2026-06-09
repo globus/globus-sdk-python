@@ -1,9 +1,8 @@
-import json
-
 import pytest
 
 from globus_sdk import MISSING, FlowsAPIError
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 
 @pytest.mark.parametrize("input_schema", [MISSING, {}])
@@ -22,7 +21,7 @@ def test_validate_flow(flows_client, input_schema):
 
     # Check what was actually sent
     last_req = get_last_request()
-    req_body = json.loads(last_req.body)
+    req_body = fast_json.loads(last_req.body)
     # Ensure the input schema is not sent if omitted
     assert req_body == payload
 

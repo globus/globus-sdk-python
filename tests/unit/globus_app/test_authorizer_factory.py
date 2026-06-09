@@ -90,7 +90,7 @@ def test_access_token_authorizer_factory_expired_access_token():
         factory.get_authorizer("rs1")
 
 
-def test_refresh_token_authorizer_factory():
+def test_refresh_token_authorizer_factory(mock_client_factory):
     initial_response = make_mock_token_response()
     mock_token_storage = _make_mem_token_storage(
         validators=(HasRefreshTokensValidator(),)
@@ -98,7 +98,7 @@ def test_refresh_token_authorizer_factory():
     mock_token_storage.store_token_response(initial_response)
 
     refresh_data = make_mock_token_response(token_number=2)
-    mock_auth_login_client = mock.Mock()
+    mock_auth_login_client = mock_client_factory()
     mock_refresh = mock.Mock()
     mock_refresh.return_value = refresh_data
     mock_auth_login_client.oauth2_refresh_token = mock_refresh
@@ -127,7 +127,7 @@ def test_refresh_token_authorizer_factory():
     assert authorizer3.get_authorization_header() == "Bearer rs1_access_token_1"
 
 
-def test_refresh_token_authorizer_factory_expired_access_token():
+def test_refresh_token_authorizer_factory_expired_access_token(mock_client_factory):
     initial_response = make_mock_token_response()
     initial_response.by_resource_server["rs1"]["expires_at_seconds"] = int(
         time.time() - 3600
@@ -139,7 +139,7 @@ def test_refresh_token_authorizer_factory_expired_access_token():
     mock_token_storage.store_token_response(initial_response)
 
     refresh_data = make_mock_token_response(token_number=2)
-    mock_auth_login_client = mock.Mock()
+    mock_auth_login_client = mock_client_factory()
     mock_refresh = mock.Mock()
     mock_refresh.return_value = refresh_data
     mock_auth_login_client.oauth2_refresh_token = mock_refresh

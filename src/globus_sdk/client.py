@@ -571,7 +571,10 @@ class BaseClient:
 
         if 200 <= r.status_code < 400:
             log.debug(f"request completed with response code: {r.status_code}")
-            return GlobusHTTPResponse(r, self)
+            with self.transport._as_current_transport():
+                return GlobusHTTPResponse(r, self)
 
         log.debug(f"request completed with (error) response code: {r.status_code}")
-        raise self.error_class(r)
+        with self.transport._as_current_transport():
+            err = self.error_class(r)
+        raise err

@@ -1,6 +1,6 @@
-import json
-
 import pytest
+
+from tests.common import fast_json
 
 
 def test_expand_testing_fixture_fails_on_bad_reference(sphinx_runner, capsys):
@@ -35,7 +35,7 @@ def test_expand_testing_fixture_on_valid_fixture(sphinx_runner):
     assert code_block.get("language") == "json"
 
     # check against the known values for this fixture
-    data = json.loads(code_block.text)
+    data = fast_json.loads(code_block.text)
     assert data["is_high_assurance"] is False
     assert data["group_visibility"] == "private"
 
@@ -54,6 +54,6 @@ def test_expand_testing_fixture_on_non_default_case(sphinx_runner):
     assert code_block.get("language") == "json"
 
     # check against the known values for this fixture
-    data = json.loads(code_block.text)
+    data = fast_json.loads(code_block.text)
     assert data["error_description"] == "Unauthorized"
     assert data["errors"][0]["status"] == "401"

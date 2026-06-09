@@ -1,8 +1,7 @@
-import json
-
 import globus_sdk
 from globus_sdk._missing import filter_missing
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 
 def test_dummy_timer_creation(client):
@@ -14,7 +13,7 @@ def test_dummy_timer_creation(client):
     assert timer["timer"]["job_id"] == meta["timer_id"]
 
     req = get_last_request()
-    sent = json.loads(req.body)
+    sent = fast_json.loads(req.body)
     assert sent == {"timer": {"foo": "bar"}}
 
 
@@ -38,7 +37,7 @@ def test_transfer_timer_creation(client):
     assert timer["timer"]["job_id"] == meta["timer_id"]
 
     req = get_last_request()
-    sent = json.loads(req.body)
+    sent = fast_json.loads(req.body)
     assert sent["timer"]["schedule"] == {
         "type": "recurring",
         "interval_seconds": 60,
@@ -66,7 +65,7 @@ def test_flow_timer_creation(client):
 
     # Verify
     req = get_last_request()
-    sent = json.loads(req.body)
+    sent = fast_json.loads(req.body)
     assert sent["timer"]["flow_id"] == meta["flow_id"]
     assert sent["timer"]["body"] == meta["callback_body"]
     assert sent["timer"]["schedule"] == meta["schedule"]

@@ -1,9 +1,8 @@
-import json
-
 import pytest
 
 from globus_sdk import __version__ as sdkversion
 from globus_sdk.token_storage.legacy import SimpleJSONFileAdapter
+from tests.common import fast_json
 
 
 def test_simplejson_reading_bad_data(tmp_path):
@@ -19,7 +18,7 @@ def test_simplejson_reading_bad_data(tmp_path):
 
     bar_file = tmp_path / "bar.json"
     bar_file.write_text(
-        json.dumps(
+        fast_json.dumps(
             {"by_rs": [], "format_version": "1.0", "globus-sdk.version": sdkversion}
         )
     )
@@ -34,7 +33,7 @@ def test_simplejson_reading_unsupported_format_version(tmp_path):
     # adapter explicitly that it is in a format which is unknown / not supported
     foo_file = tmp_path / "foo.json"
     foo_file.write_text(
-        json.dumps(
+        fast_json.dumps(
             {"by_rs": {}, "format_version": "0.0", "globus-sdk.version": sdkversion}
         )
     )

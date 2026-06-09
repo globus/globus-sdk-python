@@ -1,10 +1,10 @@
-import json
 import uuid
 
 import pytest
 
 from globus_sdk._missing import MISSING, filter_missing
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 
 @pytest.mark.parametrize(
@@ -36,7 +36,7 @@ def test_update_project_admin_id_styles(service_client, admin_id_style):
     assert res["project"]["id"] == meta["id"]
 
     last_req = get_last_request()
-    data = json.loads(last_req.body)
+    data = fast_json.loads(last_req.body)
     assert list(data) == ["project"], data  # 'project' is the only key
     if admin_id_style == "missing":
         assert filter_missing(data["project"]) == {"display_name": "My Project"}
@@ -74,7 +74,7 @@ def test_update_project_group_id_styles(service_client, group_id_style):
     assert res["project"]["id"] == meta["id"]
 
     last_req = get_last_request()
-    data = json.loads(last_req.body)
+    data = fast_json.loads(last_req.body)
     assert list(data) == ["project"], data  # 'project' is the only key
     assert data["project"] == {
         "contact_email": "support@globus.org",

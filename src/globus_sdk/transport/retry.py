@@ -3,9 +3,9 @@ from __future__ import annotations
 import enum
 import typing as t
 
-import requests
-
 if t.TYPE_CHECKING:
+    import requests
+
     from .caller_info import RequestCallerInfo
 
 C = t.TypeVar("C", bound=t.Callable[..., t.Any])

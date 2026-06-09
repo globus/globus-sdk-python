@@ -1,10 +1,10 @@
-import json
 import os
 
 import pytest
 
 from globus_sdk import __version__
 from globus_sdk.token_storage.legacy import SimpleJSONFileAdapter
+from tests.common import fast_json
 
 IS_WINDOWS = os.name == "nt"
 
@@ -30,7 +30,7 @@ def test_store(json_file, mock_response):
     assert not adapter.file_exists()
     adapter.store(mock_response)
 
-    data = json.loads(json_file.read_text())
+    data = fast_json.loads(json_file.read_text())
     assert data["globus-sdk.version"] == __version__
     assert data["by_rs"]["resource_server_1"]["access_token"] == "access_token_1"
     assert data["by_rs"]["resource_server_2"]["access_token"] == "access_token_2"

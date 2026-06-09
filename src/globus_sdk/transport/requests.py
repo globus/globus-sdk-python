@@ -1,19 +1,19 @@
 from __future__ import annotations
 
 import contextlib
+import contextvars
+import functools
 import logging
 import pathlib
 import time
 import typing as t
 
-import requests
-
 from globus_sdk import __version__, config, exc
-from globus_sdk.authorizers import GlobusAuthorizer
-from globus_sdk.transport.encoders import (
-    FormRequestEncoder,
-    JSONRequestEncoder,
-    RequestEncoder,
+from globus_sdk.transport.representation_providers import (
+    RequestsHttpFormProvider,
+    RequestsJsonProvider,
+    RequestsPlainTextProvider,
+    RequestsRepresentationProvider,
 )
 
 from ._clientinfo import GlobusClientInfo
@@ -22,7 +22,38 @@ from .retry import RetryContext
 from .retry_check_runner import RetryCheckRunner
 from .retry_config import RetryConfig
 
+if t.TYPE_CHECKING:
+    import requests
+
+    from globus_sdk.authorizers import GlobusAuthorizer
+
 log = logging.getLogger(__name__)
+
+
+C = t.TypeVar("C", bound=t.Callable[..., t.Any])
+
+
+_DEFAULT_JSON_PROVIDER = RequestsJsonProvider()
+_DEFAULT_TEXT_PROVIDER = RequestsPlainTextProvider()
+_DEFAULT_HTTP_FORM_PROVIDER = RequestsHttpFormProvider()
+
+
+# a global contextvar provides the SDK with a notion of "current transport object"
+# used to retrieve decoders in responses, exceptions, and retry hooks
+_CURRENT_TRANSPORT: contextvars.ContextVar[RequestsTransport | None] = (
+    contextvars.ContextVar("_CURRENT_TRANSPORT", default=None)
+)
+
+
+def _self_as_current_transport(func: C) -> C:
+    """A decorator to apply self._as_current_transport() automatically."""
+
+    @functools.wraps(func)
+    def wrapped(self: RequestsTransport, *args: t.Any, **kwargs: t.Any) -> t.Any:
+        with self._as_current_transport():
+            return func(self, *args, **kwargs)
+
+    return wrapped  # type: ignore[return-value]
 
 
 class RequestsTransport:
@@ -52,11 +83,17 @@ class RequestsTransport:
     #: default maximum number of retries
     DEFAULT_MAX_RETRIES = 5
 
-    #: the encoders are a mapping of encoding names to encoder objects
-    encoders: dict[str, RequestEncoder] = {
-        "text": RequestEncoder(),
-        "json": JSONRequestEncoder(),
-        "form": FormRequestEncoder(),
+    #: The encoders are a mapping of encoding names to content-type providers.
+    #:
+    #: .. warning::
+    #:
+    #:     This interface is deprecated, in favor of the instance-level
+    #:     ``representation_providers``. This is used to seed that mapping per instance
+    #:     and will be removed in a future release.
+    encoders: t.ClassVar[dict[str, RequestsRepresentationProvider]] = {
+        "text": _DEFAULT_TEXT_PROVIDER,
+        "json": _DEFAULT_JSON_PROVIDER,
+        "form": _DEFAULT_HTTP_FORM_PROVIDER,
     }
 
     BASE_USER_AGENT = f"globus-sdk-py-{__version__}"
@@ -66,6 +103,8 @@ class RequestsTransport:
         verify_ssl: bool | str | pathlib.Path | None = None,
         http_timeout: float | None = None,
     ) -> None:
+        import requests
+
         self.session = requests.Session()
         self.verify_ssl = config.get_ssl_verify(verify_ssl)
         self.http_timeout = config.get_http_timeout(http_timeout)
@@ -79,12 +118,58 @@ class RequestsTransport:
             "X-Globus-Client-Info": self.globus_client_info.format(),
         }
 
+        # copy and return the class-level mapping
+        self.representation_providers = self.encoders.copy()
+
     def close(self) -> None:
         """
         Closes all resources owned by the transport, primarily the underlying
         network session.
         """
         self.session.close()
+
+    @staticmethod
+    def get_current_transport() -> RequestsTransport:
+        """
+        Get the currently active transport. LookupError if there isn't one.
+
+        Transports are made active by the SDK in the following time windows:
+
+        - while a request is being sent and retried by the transport
+        - when a base client is constructing an error or response
+
+        Requests may nest (e.g., when doing an auth callout during retries). In such
+        cases, the current transport is the transport of the innermost request.
+        """
+        value = _CURRENT_TRANSPORT.get()
+        if value is None:
+            raise LookupError(
+                "No current transport is set! "
+                "The current transport can only be fetched while a transport is active."
+            )
+        return value
+
+    @contextlib.contextmanager
+    def _as_current_transport(self) -> t.Iterator[None]:
+        """Mark self as the currently active transport."""
+        token = _CURRENT_TRANSPORT.set(self)
+        try:
+            yield
+        finally:
+            _CURRENT_TRANSPORT.reset(token)
+
+    @staticmethod
+    def _safe_get_current_json_provider() -> RequestsRepresentationProvider:
+        """
+        Retrieve the current transport content-type provider, with a fallback to
+        the default JSON one.
+        """
+        try:
+            transport = RequestsTransport.get_current_transport()
+        except LookupError:
+            return _DEFAULT_JSON_PROVIDER
+        else:
+            return transport.json_provider
 
     @property
     def user_agent(self) -> str:
@@ -162,6 +247,10 @@ class RequestsTransport:
             self.http_timeout,
         ) = saved_settings
 
+    @functools.cached_property
+    def json_provider(self) -> RequestsRepresentationProvider:
+        return self.representation_providers["json"]
+
     def _encode(
         self,
         method: str,
@@ -182,12 +271,14 @@ class RequestsTransport:
             else:
                 encoding = "json"
 
-        if encoding not in self.encoders:
+        if encoding not in self.representation_providers:
             raise ValueError(
                 f"Unknown encoding '{encoding}' is not supported by this transport."
             )
 
-        return self.encoders[encoding].encode(method, url, query_params, data, headers)
+        return self.representation_providers[encoding].encode(
+            method, url, query_params, data, headers
+        )
 
     def _set_authz_header(
         self, authorizer: GlobusAuthorizer | None, req: requests.Request
@@ -216,6 +307,7 @@ class RequestsTransport:
         )
         time.sleep(sleep_period)
 
+    @_self_as_current_transport
     def request(
         self,
         method: str,
@@ -250,6 +342,8 @@ class RequestsTransport:
 
         :return: ``requests.Response`` object
         """
+        import requests
+
         log.debug("starting request for %s", url)
         resp: requests.Response | None = None
         req = self._encode(method, url, query_params, data, headers, encoding)

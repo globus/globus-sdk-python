@@ -1,4 +1,3 @@
-import json
 import urllib.parse
 import uuid
 
@@ -8,7 +7,7 @@ import responses
 import globus_sdk
 from globus_sdk._missing import filter_missing
 from globus_sdk.testing import get_last_request, load_response
-from tests.common import register_api_route_fixture_file
+from tests.common import fast_json, register_api_route_fixture_file
 
 
 @pytest.fixture
@@ -47,7 +46,7 @@ def test_search_post_query_simple(search_client, query_doc):
 
     req = get_last_request()
     assert req.body is not None
-    req_body = json.loads(req.body)
+    req_body = fast_json.loads(req.body)
     assert req_body == dict(query_doc)
 
 
@@ -64,7 +63,7 @@ def test_search_post_query_simple_with_v1_helper(search_client):
 
     req = get_last_request()
     assert req.body is not None
-    req_body = json.loads(req.body)
+    req_body = fast_json.loads(req.body)
     assert req_body == {"@version": "query#1.0.0", "q": "foo"}
 
 
@@ -87,7 +86,7 @@ def test_search_post_query_arg_overrides(search_client, doc_type):
 
     req = get_last_request()
     assert req.body is not None
-    req_body = json.loads(req.body)
+    req_body = fast_json.loads(req.body)
     assert req_body != dict(query_doc)
     assert req_body["q"] == query_doc["q"]
     assert req_body["limit"] == 100

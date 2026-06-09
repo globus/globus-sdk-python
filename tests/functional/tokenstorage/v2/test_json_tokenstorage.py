@@ -1,4 +1,3 @@
-import json
 import os
 
 import pytest
@@ -6,6 +5,7 @@ import pytest
 from globus_sdk import __version__
 from globus_sdk.token_storage import JSONTokenStorage
 from globus_sdk.token_storage.legacy import SimpleJSONFileAdapter
+from tests.common import fast_json
 
 IS_WINDOWS = os.name == "nt"
 
@@ -47,7 +47,7 @@ def test_store_token_response_with_namespace(json_file, mock_response):
     assert not adapter.file_exists()
     adapter.store_token_response(mock_response)
 
-    data = json.loads(json_file.read_text())
+    data = fast_json.loads(json_file.read_text())
     assert data["globus-sdk.version"] == __version__
     assert data["data"]["foo"]["resource_server_1"]["access_token"] == "access_token_1"
     assert data["data"]["foo"]["resource_server_2"]["access_token"] == "access_token_2"
@@ -103,5 +103,5 @@ def test_migrate_from_v1_adapter(json_file, mock_response):
 
     # confirm version is overwritten on next store
     new_adapter.store_token_response(mock_response)
-    data = json.loads(json_file.read_text())
+    data = fast_json.loads(json_file.read_text())
     assert data["format_version"] == "2.0"

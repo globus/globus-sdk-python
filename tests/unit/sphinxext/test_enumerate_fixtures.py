@@ -1,10 +1,10 @@
-import json
 import re
 import types
 
 import pytest
 
 import globus_sdk
+from tests.common import fast_json
 
 
 def test_enumerate_fixtures_rejects_wrong_object_type(sphinx_runner, capsys):
@@ -62,8 +62,8 @@ def test_enumerate_fixtures_of_search_client(sphinx_runner):
         assert example_block.get("language") == "json"
         content = example_block.text
         try:
-            json.loads(content)
-        except json.JSONDecodeError:
+            fast_json.loads(content)
+        except fast_json.JSONDecodeError:
             pytest.fail(
                 f"{fixture_title} in SearchClient fixture docs didn't have JSON content"
             )

@@ -1,7 +1,6 @@
-import json
-
 from globus_sdk.experimental import BookmarkUpdateDocument
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 
 def test_update_bookmark(client):
@@ -22,7 +21,7 @@ def test_update_bookmark(client):
     )
 
     req = get_last_request()
-    sent = json.loads(req.body)
+    sent = fast_json.loads(req.body)
     assert sent["data"]["attributes"]["name"] == meta["name"]
     assert sent["data"]["attributes"]["path"] == meta["path"]
     assert sent["data"]["attributes"]["pinned"] == meta["pinned"]

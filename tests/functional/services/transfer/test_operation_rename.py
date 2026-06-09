@@ -1,10 +1,10 @@
-import json
 import urllib.parse
 
 import pytest
 
 from globus_sdk import MISSING
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 _OMIT = object()
 
@@ -33,7 +33,7 @@ def test_operation_rename(client, local_user):
     assert res["code"] == "FileRenamed"
 
     req = get_last_request()
-    body = json.loads(req.body)
+    body = fast_json.loads(req.body)
     assert body["old_path"] == "~/old-name"
     assert body["new_path"] == "~/new-name"
     if local_user not in (_OMIT, MISSING):

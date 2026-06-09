@@ -1,4 +1,3 @@
-import json
 import re
 from collections import namedtuple
 from unittest import mock
@@ -8,6 +7,7 @@ import requests
 import responses
 
 from globus_sdk.response import ArrayResponse, GlobusHTTPResponse, IterableResponse
+from tests.common import fast_json
 
 _TestResponse = namedtuple("_TestResponse", ("data", "r"))
 
@@ -17,7 +17,7 @@ def _response(data=None, encoding="utf-8", headers=None, status: int = 200):
 
     is_json = isinstance(data, (dict, list))
 
-    datastr = json.dumps(data) if is_json else data
+    datastr = fast_json.dumps(data) if is_json else data
     if datastr is not None:
         if isinstance(datastr, str):
             r._content = datastr.encode("utf-8")
@@ -38,45 +38,55 @@ def _response(data=None, encoding="utf-8", headers=None, status: int = 200):
     return r
 
 
-def _mk_json_response(data):
-    json_response = _response(data)
-    return _TestResponse(data, GlobusHTTPResponse(json_response, client=mock.Mock()))
+@pytest.fixture
+def response_factory(mock_client_factory):
+    def build(data, *args, **kwargs):
+        return _TestResponse(
+            data, GlobusHTTPResponse(*args, **kwargs, client=mock_client_factory())
+        )
+
+    return build
 
 
 @pytest.fixture
-def dict_response():
-    return _mk_json_response({"label1": "value1", "label2": "value2"})
+def json_response_factory(response_factory):
+    def build(data):
+        json_response = _response(data)
+        return response_factory(data, json_response)
+
+    return build
 
 
 @pytest.fixture
-def list_response():
-    return _mk_json_response(["value1", "value2", "value3"])
+def dict_response(json_response_factory):
+    return json_response_factory({"label1": "value1", "label2": "value2"})
 
 
 @pytest.fixture
-def http_no_content_type_response():
+def list_response(json_response_factory):
+    return json_response_factory(["value1", "value2", "value3"])
+
+
+@pytest.fixture
+def http_no_content_type_response(response_factory):
     res = _response()
     assert "Content-Type" not in res.headers
-    return _TestResponse(None, GlobusHTTPResponse(res, client=mock.Mock()))
+    return response_factory(None, res)
 
 
 @pytest.fixture
-def malformed_http_response():
+def malformed_http_response(response_factory):
     malformed_response = _response(b"{", headers={"Content-Type": "application/json"})
-    return _TestResponse(
-        "{", GlobusHTTPResponse(malformed_response, client=mock.Mock())
-    )
+    return response_factory("{", malformed_response)
 
 
 @pytest.fixture
-def text_http_response():
+def text_http_response(response_factory):
     text_data = "text data"
     text_response = _response(
         text_data, encoding="utf-8", headers={"Content-Type": "text/plain"}
     )
-    return _TestResponse(
-        text_data, GlobusHTTPResponse(text_response, client=mock.Mock())
-    )
+    return response_factory(text_data, text_response)
 
 
 def test_data(
@@ -109,7 +119,7 @@ def test_str(dict_response, list_response):
     assert "nonexistent" not in str(list_response.r)
 
 
-def test_text_response_repr_and_str_contain_raw_data():
+def test_text_response_repr_and_str_contain_raw_data(mock_client_factory):
     expect_text = """pu-erh is a distinctive aged tea primarily produced in Yunnan
 
     depending on the tea used and how it is aged, it can be bright, floral, and fruity
@@ -118,7 +128,7 @@ def test_text_response_repr_and_str_contain_raw_data():
     raw = _response(
         expect_text, encoding="utf-8", headers={"Content-Type": "text/plain"}
     )
-    res = GlobusHTTPResponse(raw, client=mock.Mock())
+    res = GlobusHTTPResponse(raw, client=mock_client_factory())
 
     assert expect_text in repr(res)
     assert expect_text in str(res)
@@ -153,30 +163,33 @@ def test_contains(dict_response, list_response, text_http_response):
     assert "foo" not in text_http_response.r
 
 
-def test_bool(dict_response, list_response):
+def test_bool(dict_response, list_response, json_response_factory):
     assert bool(dict_response) is True
     assert bool(list_response) is True
 
-    empty_dict, empty_list = _mk_json_response({}), _mk_json_response([])
+    empty_dict, empty_list = (
+        json_response_factory({}),
+        json_response_factory([]),
+    )
     assert bool(empty_dict.r) is False
     assert bool(empty_list.r) is False
 
-    null = _mk_json_response(None)
+    null = json_response_factory(None)
     assert bool(null.r) is False
 
 
-def test_len_array(list_response):
+def test_len_array(list_response, json_response_factory):
     array = ArrayResponse(list_response.r)
     assert len(array) == len(list_response.data)
 
-    empty_list = _mk_json_response([])
+    empty_list = json_response_factory([])
     empty_array = ArrayResponse(empty_list.r)
     assert len(empty_list.data) == 0
     assert len(empty_array) == 0
 
 
-def test_len_array_bad_data(dict_response):
-    null_array = ArrayResponse(_mk_json_response(None).r)
+def test_len_array_bad_data(dict_response, json_response_factory):
+    null_array = ArrayResponse(json_response_factory(None).r)
     with pytest.raises(
         TypeError,
         match=re.escape(
@@ -193,8 +206,8 @@ def test_len_array_bad_data(dict_response):
         len(dict_array)
 
 
-def test_iter_array_bad_data(dict_response):
-    null_array = ArrayResponse(_mk_json_response(None).r)
+def test_iter_array_bad_data(dict_response, json_response_factory):
+    null_array = ArrayResponse(json_response_factory(None).r)
     with pytest.raises(
         TypeError,
         match=re.escape("Cannot iterate on ArrayResponse data when type is 'NoneType'"),
@@ -249,55 +262,59 @@ def test_no_content_type_header(http_no_content_type_response):
     assert http_no_content_type_response.r.content_type is None
 
 
-def test_client_required_with_requests_response():
+def test_client_required_with_requests_response(mock_client_factory):
     r = _response({"foo": 1})
-    GlobusHTTPResponse(r, client=mock.Mock())  # ok
+    GlobusHTTPResponse(r, client=mock_client_factory())  # ok
     with pytest.raises(ValueError):
         GlobusHTTPResponse(r)  # not ok
 
 
-def test_client_forbidden_when_wrapping():
+def test_client_forbidden_when_wrapping(mock_client_factory):
     r = _response({"foo": 1})
-    to_wrap = GlobusHTTPResponse(r, client=mock.Mock())
+    to_wrap = GlobusHTTPResponse(r, client=mock_client_factory())
 
     GlobusHTTPResponse(to_wrap)  # ok
     with pytest.raises(ValueError):
-        GlobusHTTPResponse(to_wrap, client=mock.Mock())  # not ok
+        GlobusHTTPResponse(to_wrap, client=mock_client_factory())  # not ok
 
 
-def test_value_error_indexing_on_non_json_data():
+def test_value_error_indexing_on_non_json_data(mock_client_factory):
     r = _response(b"foo: bar, baz: buzz")
-    res = GlobusHTTPResponse(r, client=mock.Mock())
+    res = GlobusHTTPResponse(r, client=mock_client_factory())
 
     with pytest.raises(ValueError):
         res["foo"]
 
 
-def test_cannot_construct_base_iterable_response():
+def test_cannot_construct_base_iterable_response(mock_client_factory):
     r = _response(b"foo: bar, baz: buzz")
     with pytest.raises(TypeError):
-        IterableResponse(r, client=mock.Mock())
+        IterableResponse(r, client=mock_client_factory())
 
 
-def test_iterable_response_using_iter_key():
+def test_iterable_response_using_iter_key(mock_client_factory):
     class MyIterableResponse(IterableResponse):
         default_iter_key = "default_iter"
 
     raw = _response({"default_iter": [0, 1], "other_iter": [3, 4]})
 
-    default = MyIterableResponse(raw, client=mock.Mock())
+    default = MyIterableResponse(raw, client=mock_client_factory())
     assert list(default) == [0, 1]
 
-    withkey = MyIterableResponse(raw, client=mock.Mock(), iter_key="other_iter")
+    withkey = MyIterableResponse(
+        raw, client=mock_client_factory(), iter_key="other_iter"
+    )
     assert list(withkey) == [3, 4]
 
 
-def test_iterable_response_errors_on_non_dict_data(list_response):
+def test_iterable_response_errors_on_non_dict_data(
+    list_response, json_response_factory
+):
     class MyIterableResponse(IterableResponse):
         default_iter_key = "default_iter"
 
     list_iterable = MyIterableResponse(list_response.r)
-    null_iterable = MyIterableResponse(_mk_json_response(None).r)
+    null_iterable = MyIterableResponse(json_response_factory(None).r)
 
     with pytest.raises(
         TypeError,
@@ -321,45 +338,53 @@ def test_can_iter_array_response(list_response):
     assert list(reversed(arr)) == list(reversed(list_response.data))
 
 
-def test_http_status_code_on_response():
+def test_http_status_code_on_response(mock_client_factory):
     r1 = _response(status=404)
     assert r1.status_code == 404
 
-    r2 = GlobusHTTPResponse(r1, client=mock.Mock())  # handle a Response object
+    r2 = GlobusHTTPResponse(
+        r1, client=mock_client_factory()
+    )  # handle a Response object
     assert r2.http_status == 404
 
     r3 = GlobusHTTPResponse(r2)  # wrap another response
     assert r3.http_status == 404
 
 
-def test_http_reason_on_response():
+def test_http_reason_on_response(mock_client_factory):
     r1 = _response(status=404)
-    r2 = GlobusHTTPResponse(r1, client=mock.Mock())  # handle a Response object
+    r2 = GlobusHTTPResponse(
+        r1, client=mock_client_factory()
+    )  # handle a Response object
     r3 = GlobusHTTPResponse(r2)  # wrap another response
     assert r1.reason == "Not Found"
     assert r2.http_reason == "Not Found"
     assert r3.http_reason == "Not Found"
 
     r4 = _response(status=200)
-    r5 = GlobusHTTPResponse(r4, client=mock.Mock())  # handle a Response object
+    r5 = GlobusHTTPResponse(
+        r4, client=mock_client_factory()
+    )  # handle a Response object
     r6 = GlobusHTTPResponse(r5)  # wrap another response
     assert r4.reason == "OK"
     assert r5.http_reason == "OK"
     assert r6.http_reason == "OK"
 
 
-def test_http_headers_from_response():
+def test_http_headers_from_response(mock_client_factory):
     r1 = _response(headers={"Content-Length": "5"})
     assert r1.headers["content-length"] == "5"
 
-    r2 = GlobusHTTPResponse(r1, client=mock.Mock())  # handle a Response object
+    r2 = GlobusHTTPResponse(
+        r1, client=mock_client_factory()
+    )  # handle a Response object
     assert r2.headers["content-length"] == "5"
 
     r3 = GlobusHTTPResponse(r2)  # wrap another response
     assert r3.headers["content-length"] == "5"
 
 
-def test_streaming_response_does_not_read_body_on_init():
+def test_streaming_response_does_not_read_body_on_init(mock_client_factory):
     # create a streaming response with a trivial body
     responses.add("GET", "https://www.globus.org/", json={})
     requests_response = requests.get("https://www.globus.org/", stream=True)
@@ -371,7 +396,9 @@ def test_streaming_response_does_not_read_body_on_init():
         requests_response.raw, "stream", side_effect=RuntimeError("ohnoez")
     ):
         # no error on init
-        sdk_response = GlobusHTTPResponse(requests_response, client=mock.Mock())
+        sdk_response = GlobusHTTPResponse(
+            requests_response, client=mock_client_factory()
+        )
 
         # but accessing data causes a read, and therefore an error from streaming
         with pytest.raises(RuntimeError, match="ohnoez"):

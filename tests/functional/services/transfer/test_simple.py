@@ -1,9 +1,9 @@
-import json
 import uuid
 
 import pytest
 
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 
 def test_get_endpoint(client):
@@ -38,4 +38,4 @@ def test_update_endpoint(epid_type, client):
     assert update_doc["message"] == "Endpoint updated successfully"
 
     req = get_last_request()
-    assert json.loads(req.body) == update_data
+    assert fast_json.loads(req.body) == update_data

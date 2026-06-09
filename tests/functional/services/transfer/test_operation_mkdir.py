@@ -1,10 +1,10 @@
-import json
 import urllib.parse
 
 import pytest
 
 from globus_sdk import MISSING
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 _OMIT = object()
 
@@ -31,7 +31,7 @@ def test_operation_mkdir(client, local_user):
     assert res["code"] == "DirectoryCreated"
 
     req = get_last_request()
-    body = json.loads(req.body)
+    body = fast_json.loads(req.body)
     assert body["path"] == "~/dir/"
     if local_user not in (_OMIT, MISSING):
         assert body["local_user"] == local_user

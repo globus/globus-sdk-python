@@ -1,6 +1,5 @@
-import json
-
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 
 def test_set_subscription_admin_verified(groups_client):
@@ -15,5 +14,5 @@ def test_set_subscription_admin_verified(groups_client):
     assert res.data["subscription_admin_verified_id"] == meta["subscription_id"]
 
     req = get_last_request()
-    req = json.loads(req.body)
+    req = fast_json.loads(req.body)
     assert req == {"subscription_admin_verified_id": meta["subscription_id"]}

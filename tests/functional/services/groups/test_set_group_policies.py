@@ -1,5 +1,3 @@
-import json
-
 import pytest
 
 from globus_sdk import (
@@ -10,6 +8,7 @@ from globus_sdk import (
     GroupVisibility,
 )
 from globus_sdk.testing import get_last_request, load_response
+from tests.common import fast_json
 
 
 @pytest.mark.parametrize(
@@ -66,7 +65,7 @@ def test_set_group_policies(
     assert "address1" in resp.data["signup_fields"]
     # ensure enums were stringified correctly
     req = get_last_request()
-    req_body = json.loads(req.body)
+    req_body = fast_json.loads(req.body)
     assert req_body["group_visibility"] == group_vis_str
     assert req_body["group_members_visibility"] == group_member_vis_str
     assert req_body["signup_fields"] == signup_fields_str
@@ -140,7 +139,7 @@ def test_set_group_policies_explicit_payload(
     groups_client.set_group_policies(meta["group_id"], payload)
     # ensure enums were stringified correctly, but also that the raw string came through
     req = get_last_request()
-    req_body = json.loads(req.body)
+    req_body = fast_json.loads(req.body)
     assert req_body["group_visibility"] == group_vis_str
     assert req_body["group_members_visibility"] == group_member_vis_str
     assert req_body["signup_fields"] == signup_fields_str

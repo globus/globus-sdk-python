@@ -1,11 +1,10 @@
-import json
 import uuid
 
 import pytest
 
 from globus_sdk import BatchMembershipActions, GroupRole
 from globus_sdk.testing import RegisteredResponse, get_last_request, load_response
-from tests.common import register_api_route_fixture_file
+from tests.common import fast_json, register_api_route_fixture_file
 
 
 def test_approve_pending(groups_manager):
@@ -54,7 +53,7 @@ def test_add_member(groups_manager, role):
     assert data["add"][0]["role"] == "admin"
 
     req = get_last_request()
-    req_body = json.loads(req.body)
+    req_body = fast_json.loads(req.body)
     assert req_body["add"][0]["role"] == rolestr
 
 
@@ -101,7 +100,7 @@ def test_batch_action_payload(groups_client, role):
     # send the request and confirm that the data is serialized correctly
     groups_client.batch_membership_action(group_id, batch_action)
     req = get_last_request()
-    req_body = json.loads(req.body)
+    req_body = fast_json.loads(req.body)
     # role should be stringified if it was an enum member
     assert all(member["role"] == rolestr for member in req_body["add"])
     # UUIDs should have been stringified
