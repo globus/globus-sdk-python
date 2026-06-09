@@ -3,13 +3,13 @@ Added
 
 -   The SDK now supports use of ``orjson`` as an alternative JSON encoder and decoder.
     When ``orjson`` is installed, the SDK will automatically use it in place of
-    the stdlib ``json`` module. (:pr:`NUMBER`)
+    the stdlib ``json`` module. (:pr:`1385`)
 
 -   ``RequestsTransport`` objects are now visible via
     ``RequestsTransport.get_current_transport()``, a staticmethod, while the
     transport is sending a request or being used to handle a response. This
     method raises a ``LookupError`` if there is no currently active transport.
-    (:pr:`NUMBER`)
+    (:pr:`1385`)
 
 -   The request encoders defined in ``globus_sdk.transport`` have been
     refactored into ``RequestsRepresentationProvider``\s, objects responsible
