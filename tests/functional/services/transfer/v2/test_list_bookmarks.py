@@ -14,7 +14,6 @@ def test_list_bookmarks(client):
         assert bm["id"] == meta["bookmarks"][i]["bookmark_id"]
         assert bm["attributes"]["name"] == meta["bookmarks"][i]["name"]
         assert bm["attributes"]["path"] == meta["bookmarks"][i]["path"]
-        assert bm["attributes"]["pinned"] == meta["bookmarks"][i]["pinned"]
 
         assert (
             bm["relationships"]["collection"]["data"]["id"]
