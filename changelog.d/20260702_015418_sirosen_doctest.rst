@@ -1,5 +1,0 @@
-Development
------------
-
-- ``globus-sdk`` testing now leverages Sphinx ``doctest`` to make select
-  examples testable. (:pr:`1406`)

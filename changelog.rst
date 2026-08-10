@@ -12,6 +12,51 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-4.9.0:
+
+v4.9.0 (2026-08-10)
+===================
+
+Added
+-----
+
+- Add Web Input-related methods to the ``FlowsClient`` class. (:pr:`1410`)
+
+  The new methods are: ``list_web_inputs``, ``get_web_input``,
+  and ``respond_to_web_input``.
+
+- Added a new flag, ``sweep``, to ``GlobusApp.logout()``.
+  Use ``logout(sweep=True)`` to ask the app to clear all tokens found in the
+  app's storage, not only the ones currently in use by the app.
+  The default behavior, ``sweep=False``, is unchanged. (:pr:`1417`)
+
+Changed
+-------
+
+-   The ``resource_server`` attribute of the clients for Auth, Compute, Flows,
+    Groups, Search, Timers, and Transfer is now annotated as ``str``, rather than
+    the inherited type of ``str | None``. (:pr:`1414`)
+
+Documentation
+-------------
+
+- Remove the ``SpecificFlowClient.run_flow`` and ``.update_run`` methods'
+  ``label`` parameter length constraint documentation. (:pr:`1408`)
+
+- Update the URL to the Flows API documentation. (:pr:`1409`)
+
+Security
+--------
+
+- GitHub Actions security is now checked with `zizmor <https://zizmor.sh>`_
+  (:pr:`1402`)
+
+Development
+-----------
+
+- ``globus-sdk`` testing now leverages Sphinx ``doctest`` to make select
+  examples testable. (:pr:`1406`)
+
 .. _changelog-4.8.1:
 
 v4.8.1 (2026-06-16)
