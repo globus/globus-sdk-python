@@ -1,0 +1,45 @@
+name: CodSpeed Benchmarks
+
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+  # `workflow_dispatch` allows CodSpeed to trigger backtest
+  # performance analysis in order to generate initial data.
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    name: run benchmarks
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # required for OIDC authentication with CodSpeed
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+
+      # Only run codspeed benchmarking on the latest stable CPython version --
+      # not on a matrix of Pythons -- to maximize value while minimizing our
+      # resource usage.
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+
+      - name: install tox
+        run: uv tool install tox --with tox-uv
+
+      - name: setup tox environment
+        run: tox run -e benchmark-codspeed --notest -vv
+
+      - name: benchmark
+        uses: CodSpeedHQ/action@373d6868929f444bc08d901fd0eb0ad52a8875ea # v5.2.1
+        with:
+          mode: simulation
+          run: tox run -e benchmark-codspeed
