@@ -9,10 +9,13 @@ from globus_sdk.transport.representation_providers import RequestsRepresentation
 @pytest.mark.parametrize(
     ("width", "depth"),
     (
-        # note that the expected number of objects is roughly "WIDTH raised to DEPTH"
-        # so relatively modest numbers like 5x10 = 5 to the 10th = 9.7 million
-        # be careful to build wide-but-shallow or deep-but-narrow trees
-        pytest.param(1, 1, id="1w-1d"),
+        # Note that the expected number of objects is roughly "WIDTH raised to DEPTH"
+        # so relatively modest numbers like 5x10 = 5 to the 10th = 9.7 million.
+        # Be careful to build wide-but-shallow or deep-but-narrow trees.
+        #
+        # Experientially, the 1x1 benchmark is so fast that it actually starts to
+        # measure noise -- e.g., from memory layout in CPython being perturbed.
+        # Therefore it is omitted and we start at the modest 1x5 and 5x1 shapes.
         pytest.param(5, 1, id="5w-1d"),
         pytest.param(1, 5, id="1w-5d"),
         pytest.param(1, 1000, id="1w-1000d"),
