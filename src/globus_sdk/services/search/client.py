@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import sys
 import typing as t
 import uuid
 
@@ -14,14 +13,9 @@ from .data import SearchQueryV1, SearchScrollQuery
 from .errors import SearchAPIError
 from .response import IndexListResponse
 
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
-
 log = logging.getLogger(__name__)
 
-_VALID_ROLE_NAMES_T: TypeAlias = t.Literal["owner", "admin", "writer"]
+_VALID_ROLE_NAMES_T: t.TypeAlias = t.Literal["owner", "admin", "writer"]
 
 
 class SearchClient(client.BaseClient):

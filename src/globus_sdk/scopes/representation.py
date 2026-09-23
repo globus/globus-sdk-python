@@ -1,18 +1,10 @@
 from __future__ import annotations
 
 import dataclasses
-import sys
 import typing as t
 
-# pass slots=True on 3.10+
-# it's not strictly necessary, but it improves performance
-if sys.version_info >= (3, 10):
-    _add_dataclass_kwargs: dict[str, bool] = {"slots": True}
-else:
-    _add_dataclass_kwargs: dict[str, bool] = {}
 
-
-@dataclasses.dataclass(frozen=True, repr=False, **_add_dataclass_kwargs)
+@dataclasses.dataclass(frozen=True, repr=False, slots=True)
 class Scope:
     """
     A scope object is a representation of a scope and its dynamic dependencies

@@ -9,16 +9,10 @@ sophisticated as building a specific internal object in a configurable way.
 from __future__ import annotations
 
 import collections.abc
-import sys
 import typing as t
 import uuid
 
 from globus_sdk._missing import MISSING, MissingType
-
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
 
 T = t.TypeVar("T")
 R = t.TypeVar("R")
@@ -28,8 +22,8 @@ R = t.TypeVar("R")
 #
 # in type systems this kind of construction is sometimes called "Optional" or "Maybe"
 # but Python uses "Optional" to mean "T | None" and in the SDK, "None" means "null"
-Omittable: TypeAlias[T] = t.Union[T, MissingType]
-NullableOmittable: TypeAlias[T] = t.Union[Omittable[T], None]
+Omittable: t.TypeAlias[T] = t.Union[T, MissingType]
+NullableOmittable: t.TypeAlias[T] = t.Union[Omittable[T], None]
 
 
 def stringify(value: NullableOmittable[object]) -> NullableOmittable[str]:

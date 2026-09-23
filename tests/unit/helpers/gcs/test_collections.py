@@ -1,5 +1,4 @@
 import inspect
-import sys
 import types
 import typing as t
 import uuid
@@ -17,10 +16,7 @@ from globus_sdk import (
 from globus_sdk._missing import MISSING, MissingType, filter_missing
 from globus_sdk.transport import JSONRequestEncoder
 
-if sys.version_info >= (3, 10):
-    UnionTypes = (t.Union, types.UnionType)
-else:
-    UnionTypes = (t.Union,)
+UnionTypes = (t.Union, types.UnionType)
 
 STUB_SG_ID = uuid.uuid1()  # storage gateway
 STUB_MC_ID = uuid.uuid1()  # mapped collection

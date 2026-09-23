@@ -10,7 +10,7 @@ ac.create_policy(
 )
 
 # create using positional args (deprecated/unsupported)
-ac.create_policy(  # type: ignore[misc]
+ac.create_policy(  # type: ignore[call-arg]
     "foo",
     True,  # type: ignore[arg-type]
     101,  # type: ignore[arg-type]

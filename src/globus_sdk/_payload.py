@@ -9,16 +9,8 @@ if sys.version_info >= (3, 11):
 else:
     from typing_extensions import Self
 
-# TODO: Remove this dispatch after we drop Python 3.8 support.
-#       In 3.9+ `dict.__class_getitem__` is available.
-if t.TYPE_CHECKING:
-    # pylint: disable=unsubscriptable-object
-    _PayloadBaseDict = t.Dict[str, t.Any]
-else:
-    _PayloadBaseDict = dict
 
-
-class GlobusPayload(_PayloadBaseDict):
+class GlobusPayload(dict[str, t.Any]):
     """
     A class for defining helper objects which wrap some kind of "payload" dict.
     Typical for helper objects which formulate a request payload.

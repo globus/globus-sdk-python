@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import dataclasses
 import enum
-import sys
 import typing as t
 from collections import defaultdict, deque
 
@@ -105,15 +104,7 @@ class ScopeGraph:
         return graph
 
 
-# pass slots=True on 3.10+
-# it's not strictly necessary, but it improves performance
-if sys.version_info >= (3, 10):
-    _add_dataclass_kwargs: dict[str, bool] = {"slots": True}
-else:
-    _add_dataclass_kwargs: dict[str, bool] = {}
-
-
-@dataclasses.dataclass(**_add_dataclass_kwargs)
+@dataclasses.dataclass(slots=True)
 class ScopeTreeNode:
     #
     # This is an intermediate representation for scope parsing.

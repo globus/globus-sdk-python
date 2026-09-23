@@ -1,0 +1,4 @@
+Python Support
+--------------
+
+- Removed support for Python 3.9. (:pr:`NUMBER`)
