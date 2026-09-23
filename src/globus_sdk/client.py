@@ -17,11 +17,6 @@ from globus_sdk.scopes import Scope, ScopeCollection
 from globus_sdk.transport import RequestCallerInfo, RequestsTransport, RetryConfig
 from globus_sdk.transport.default_retry_checks import DEFAULT_RETRY_CHECKS
 
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
-
 if sys.version_info >= (3, 11):
     from typing import Self
 else:
@@ -32,7 +27,7 @@ if t.TYPE_CHECKING:
 
 log = logging.getLogger(__name__)
 
-_DataParamType: TypeAlias = t.Union[None, str, bytes, t.Dict[str, t.Any]]
+_DataParamType: t.TypeAlias = t.Union[None, str, bytes, dict[str, t.Any]]
 
 
 class BaseClient:
