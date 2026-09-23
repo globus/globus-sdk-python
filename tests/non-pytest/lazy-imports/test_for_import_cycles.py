@@ -30,7 +30,7 @@ MODULE_NAMES = sorted(
 
 
 @pytest.mark.parametrize(
-    "first_module, second_module", itertools.permutations(MODULE_NAMES, 2)
+    "first_module, second_module", list(itertools.permutations(MODULE_NAMES, 2))
 )
 def test_import_pairwise(first_module, second_module):
     command = (
