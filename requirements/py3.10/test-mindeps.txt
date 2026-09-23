@@ -8,7 +8,7 @@ certifi==2026.7.22
     # via requests
 cffi==2.1.1
     # via cryptography
-chardet==3.0.4
+charset-normalizer==2.0.12
     # via requests
 coverage==7.16.1
     # via -r .test-mindeps.in
@@ -20,7 +20,7 @@ execnet==2.1.2
     # via pytest-xdist
 flaky==3.8.1
     # via -r .test-mindeps.in
-idna==2.8
+idna==3.20
     # via requests
 iniconfig==2.3.0
     # via pytest
@@ -45,7 +45,7 @@ pytest-xdist==3.8.0
     # via -r .test-mindeps.in
 pyyaml==6.0.3
     # via responses
-requests==2.22.0
+requests==2.27.0
     # via
     #   -r .test-mindeps.in
     #   responses
@@ -61,7 +61,7 @@ types-pyyaml==6.0.12.20260906
     # via responses
 typing-extensions==4.0.0
     # via -r .test-mindeps.in
-urllib3==1.25.11
+urllib3==1.26.20
     # via
     #   requests
     #   responses
