@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import re
 import sys
 import typing as t
 
@@ -10,6 +11,9 @@ if sys.version_info >= (3, 10):
     _add_dataclass_kwargs: dict[str, bool] = {"slots": True}
 else:
     _add_dataclass_kwargs: dict[str, bool] = {}
+
+
+_BAD_SCOPE_CHARS_PATTERN: re.Pattern[str] = re.compile(r"[\[\]* ]")
 
 
 @dataclasses.dataclass(frozen=True, repr=False, **_add_dataclass_kwargs)
@@ -40,7 +44,7 @@ class Scope:
     def __post_init__(
         self,
     ) -> None:
-        if any(c in self.scope_string for c in "[]* "):
+        if _BAD_SCOPE_CHARS_PATTERN.search(self.scope_string):
             raise ValueError(
                 "Scope instances may not contain the special characters '[]* '. "
                 "Use Scope.parse instead."

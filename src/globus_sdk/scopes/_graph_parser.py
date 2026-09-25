@@ -113,7 +113,7 @@ else:
     _add_dataclass_kwargs: dict[str, bool] = {}
 
 
-@dataclasses.dataclass(**_add_dataclass_kwargs)
+@dataclasses.dataclass(repr=False, eq=False, order=False, **_add_dataclass_kwargs)
 class ScopeTreeNode:
     #
     # This is an intermediate representation for scope parsing.
