@@ -39,15 +39,14 @@ jobs:
           - name: "Linux"
             runner: "ubuntu-latest"
             cpythons:
-              - "3.9"
               - "3.10"
               - "3.11"
               - "3.12"
               - "3.13"
               - "3.14"
             tox-post-environments:
-              - "py3.9-mindeps"
-              - "py3.9-orjson"
+              - "py3.10-mindeps"
+              - "py3.10-orjson"
               - "py3.14-orjson"
               - "py3.11-sphinxext"
               - "doctest"
@@ -66,10 +65,10 @@ jobs:
           - name: "Windows"
             runner: "windows-latest"
             cpythons:
-              - "3.9"
+              - "3.10"
               - "3.11"
             tox-post-environments:
-              - "py3.9-mindeps"
+              - "py3.10-mindeps"
               - "py3.14-orjson"
               - "py3.11-sphinxext"
               - "doctest"
@@ -78,12 +77,12 @@ jobs:
           - name: "Quality"
             runner: "ubuntu-latest"
             cpythons:
-              - "3.9"
+              - "3.10"
               - "3.14"
             tox-environments:
               - "check-min-python-is-tested"
               - "mypy-py3.14"
-              - "mypy-py3.9"
+              - "mypy-py3.10"
               - "mypy-test"
               - "mypy-docs"
               - "poetry-check"

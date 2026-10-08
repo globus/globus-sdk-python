@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 import typing as t
 import uuid
 
@@ -12,12 +11,7 @@ from globus_sdk.scopes import GroupsScopes, Scope
 from .data import BatchMembershipActions, GroupPolicies
 from .errors import GroupsAPIError
 
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
-
-_VALID_STATUSES_T: TypeAlias = t.Literal[
+_VALID_STATUSES_T: t.TypeAlias = t.Literal[
     "active",
     "declined",
     "invited",

@@ -3,18 +3,12 @@ from __future__ import annotations
 import abc
 import functools
 import inspect
-import sys
 import typing as t
 
 from globus_sdk.response import GlobusHTTPResponse
 
-if sys.version_info >= (3, 10):
-    from typing import ParamSpec
-else:
-    from typing_extensions import ParamSpec
-
 PageT = t.TypeVar("PageT", bound=GlobusHTTPResponse)
-P = ParamSpec("P")
+P = t.ParamSpec("P")
 R = t.TypeVar("R", bound=GlobusHTTPResponse)
 C = t.TypeVar("C", bound=t.Callable[..., GlobusHTTPResponse])
 
