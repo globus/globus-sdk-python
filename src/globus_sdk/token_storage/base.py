@@ -153,10 +153,6 @@ class FileTokenStorage(TokenStorage, metaclass=abc.ABCMeta):
     def __init__(
         self, filepath: pathlib.Path | str, *, namespace: str = "DEFAULT"
     ) -> None:
-        """
-        :param filepath: the name of the file to write to and read from
-        :param namespace: A user-supplied namespace for partitioning token data
-        """
         self.filepath = str(filepath)
         try:
             self._ensure_containing_dir_exists()
