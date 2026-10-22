@@ -2,4 +2,4 @@
 Security
 --------
 
-- Pin certifi to an uncompromised version number. (:pr:`NUMBER`)
+- Pin certifi to an uncompromised version number. (:pr:`1440`)
