@@ -12,6 +12,16 @@ to a major new version of the SDK.
 
 .. scriv-insert-here
 
+.. _changelog-4.10.0:
+
+v4.10.0 (2026-10-22)
+====================
+
+Security
+--------
+
+- Pin certifi to an uncompromised version number. (:pr:`1440`)
+
 .. _changelog-4.9.1:
 
 v4.9.1 (2026-09-23)
