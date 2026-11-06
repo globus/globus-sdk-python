@@ -37,7 +37,7 @@ class LocalGlobusConnectServer:
         Server on the container host.
         """
         if self._loaded_info is None:
-            if self.info_path.is_file():
+            try:
                 with open(self.info_path, encoding="utf-8") as fp:
                     try:
                         parsed_data = json.load(fp)
@@ -46,6 +46,8 @@ class LocalGlobusConnectServer:
                     else:
                         if isinstance(parsed_data, dict):
                             self._loaded_info = t.cast(t.Dict[str, t.Any], parsed_data)
+            except (FileNotFoundError, IsADirectoryError):
+                pass
         return self._loaded_info
 
     @info_dict.deleter
