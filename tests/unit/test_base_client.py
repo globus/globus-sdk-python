@@ -391,3 +391,31 @@ def test_client_context_manager_exit_calls_close(base_client_class):
         with base_client_class():
             client_close_method.assert_not_called()
         client_close_method.assert_called_once()
+
+
+def test_clients_sharing_a_retry_config_do_not_accumulate_retry_checks(
+    base_client_class,
+):
+    """
+    Verify RetryConfig doesn't accumulate duplicate checks.
+
+    This is a regression test.
+
+    Previously, instantiating a client with a shared RetryConfig
+    (for example, by using a module- or class-level RetryConfig instance)
+    would cause duplicate checks to be added to the retry config.
+    """
+
+    # One RetryConfig passed to many clients must not accumulate checks
+    # every time a client is instantiated.
+    retry_config = globus_sdk.transport.RetryConfig()
+
+    base_client_class(retry_config=retry_config)
+    checks_after_first_client = list(retry_config.checks)
+    assert len(checks_after_first_client)  # Guard against a vacuous test.
+
+    for _ in range(3):
+        base_client_class(retry_config=retry_config)
+
+    # A list, rather than a set, is used to verify check ordering as well.
+    assert list(retry_config.checks) == checks_after_first_client
