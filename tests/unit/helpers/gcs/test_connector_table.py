@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import inspect
-import sys
 import uuid
 
 import pytest
@@ -64,9 +63,6 @@ def test_all_connector_names_map_to_attributes(name):
     assert getattr(ConnectorTable, name) == connector
 
 
-@pytest.mark.skipif(
-    sys.version_info < (3, 10), reason="inspect.get_annotations added in 3.10"
-)
 def test_all_connector_attributes_are_assigned():
     # build a list of attribute names annotated with
     # `t.ClassVar[GlobusConnectServerConnector]`

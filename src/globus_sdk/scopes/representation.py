@@ -2,21 +2,12 @@ from __future__ import annotations
 
 import dataclasses
 import re
-import sys
 import typing as t
-
-# pass slots=True on 3.10+
-# it's not strictly necessary, but it improves performance
-if sys.version_info >= (3, 10):
-    _add_dataclass_kwargs: dict[str, bool] = {"slots": True}
-else:
-    _add_dataclass_kwargs: dict[str, bool] = {}
-
 
 _BAD_SCOPE_CHARS_PATTERN: re.Pattern[str] = re.compile(r"[\[\]* ]")
 
 
-@dataclasses.dataclass(frozen=True, repr=False, **_add_dataclass_kwargs)
+@dataclasses.dataclass(frozen=True, repr=False, slots=True)
 class Scope:
     """
     A scope object is a representation of a scope and its dynamic dependencies

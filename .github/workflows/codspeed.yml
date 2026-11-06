@@ -13,7 +13,7 @@ jobs:
   benchmark:
     if: github.repository == 'globus/globus-sdk-python'
     name: run benchmarks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       # required for OIDC authentication with CodSpeed
