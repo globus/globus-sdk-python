@@ -1,8 +1,12 @@
 import pathlib
+import uuid
 from unittest import mock
 
 import pytest
+import responses
 
+import globus_sdk
+from globus_sdk.testing import get_last_request
 from globus_sdk.transport import RequestsTransport, RetryConfig, RetryContext
 from globus_sdk.transport.retry_config import _exponential_backoff
 
@@ -136,3 +140,49 @@ def test_transport_close_closes_session():
     with mock.patch.object(transport, "session") as mocked_session:
         transport.close()
         mocked_session.close.assert_called_once_with()
+
+
+@pytest.mark.parametrize(
+    "per_request_headers",
+    (
+        pytest.param(None, id="no-headers"),
+        pytest.param({}, id="empty-headers"),
+        pytest.param({"X-Per-Request": "1"}, id="per-request-headers"),
+    ),
+)
+def test_request_survives_transport_headers_changing_during_encoding(
+    per_request_headers,
+):
+    # Another thread changing `transport.headers` while a request is being encoded
+    # must not make that unrelated request fail with
+    # "RuntimeError: dictionary changed size during iteration".
+    client = globus_sdk.BaseClient(base_url="https://example.invalid/")
+    format_calls = 0
+
+    class MutatesHeadersWhenFormatted(uuid.UUID):
+        """
+        A header value which mutates ``transport.headers`` when the SDK formats it.
+
+        Formatting happens while the request encoder is iterating over headers.
+        This value type acts like another thread mutating the headers
+        (say, via ``app_name``, ``globus_client_info``, or ``headers`` directly).
+        """
+
+        def __str__(self):
+            nonlocal format_calls
+            format_calls += 1
+            client.transport.headers[f"X-Added-Concurrently-{format_calls}"] = "1"
+            return super().__str__()
+
+    client.transport.headers["X-Trigger"] = MutatesHeadersWhenFormatted(int=1)
+
+    responses.add(responses.GET, "https://example.invalid/foo", json={})
+    client.get("/foo", headers=per_request_headers)
+    sent = get_last_request().headers
+
+    # If the SDK stops formatting header values this way,
+    # fail loudly rather than silently no longer testing anything.
+    assert format_calls == 1, "The header value was never formatted"
+    assert sent["X-Trigger"] == str(uuid.UUID(int=1))
+    if per_request_headers:
+        assert sent["X-Per-Request"] == "1"
