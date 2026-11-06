@@ -1,0 +1,10 @@
+Fixed
+-----
+
+- Fix a bug that allowed duplicate ``RetryConfig`` checks to accumulate. (:pr:`NUMBER`)
+
+  This bug could be triggered by instantiating ``RetryConfig`` once
+  and passing that instance to multiple SDK clients.
+
+  ``RetryCheckCollection.register_check`` now ignores a check
+  which is already registered.
