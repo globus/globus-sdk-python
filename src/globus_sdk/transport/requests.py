@@ -260,10 +260,8 @@ class RequestsTransport:
         headers: dict[str, str] | None = None,
         encoding: str | None = None,
     ) -> requests.Request:
-        if headers:
-            headers = {**self.headers, **headers}
-        else:
-            headers = self.headers
+        # Always snapshot the headers.
+        headers = {**self.headers, **(headers or {})}
 
         if encoding is None:
             if isinstance(data, (bytes, str)):

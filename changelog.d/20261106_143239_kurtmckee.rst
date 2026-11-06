@@ -1,0 +1,5 @@
+Fixed
+-----
+
+- Fix a ``RuntimeError`` that can occur if a request is in-flight in one thread
+  while another thread modifies transport headers. (:pr:`NUMBER`)
