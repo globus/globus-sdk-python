@@ -1,0 +1,9 @@
+Fixed
+-----
+
+- Fix session cookies being stored and sent on redirected requests. (:pr:`NUMBER`)
+
+  Previously, the SDK would not send session cookies when making an HTTP request,
+  but if the request was subsequently redirected then session cookies could be added.
+
+  Now, ``RequestsTransport`` no longer stores cookies set by responses.
