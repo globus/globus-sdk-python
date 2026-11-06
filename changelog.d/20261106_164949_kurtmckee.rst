@@ -1,0 +1,7 @@
+Fixed
+-----
+
+- ``RequestsTransport`` no longer stores cookies set by responses. (:pr:`NUMBER`)
+
+  Previously, a cookie set by one response could be sent on a later, unrelated request
+  that was redirected, if the client or transport was shared.
