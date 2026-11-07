@@ -241,11 +241,13 @@ class RequestsTransport:
                 self.verify_ssl = str(verify_ssl)
         if http_timeout is not None:
             self.http_timeout = http_timeout
-        yield
-        (
-            self.verify_ssl,
-            self.http_timeout,
-        ) = saved_settings
+        try:
+            yield
+        finally:
+            (
+                self.verify_ssl,
+                self.http_timeout,
+            ) = saved_settings
 
     @functools.cached_property
     def json_provider(self) -> RequestsRepresentationProvider:

@@ -91,9 +91,11 @@ class RetryConfig:
             self.max_sleep = max_sleep
         if max_retries is not None:
             self.max_retries = max_retries
-        yield
-        (
-            self.backoff,
-            self.max_sleep,
-            self.max_retries,
-        ) = saved_settings
+        try:
+            yield
+        finally:
+            (
+                self.backoff,
+                self.max_sleep,
+                self.max_retries,
+            ) = saved_settings
