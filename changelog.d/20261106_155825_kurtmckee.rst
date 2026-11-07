@@ -1,7 +1,7 @@
 Fixed
 -----
 
-- Fix a bug that allowed duplicate ``RetryConfig`` checks to accumulate. (:pr:`NUMBER`)
+- Fix a bug that allowed duplicate ``RetryConfig`` checks to accumulate. (:pr:`1446`)
 
   This bug could be triggered by instantiating ``RetryConfig`` once
   and passing that instance to multiple SDK clients.
