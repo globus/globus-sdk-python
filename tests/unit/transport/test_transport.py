@@ -71,6 +71,53 @@ def test_retry_tuning(param_name, init_value, tune_value):
     assert getattr(config, param_name) == init_value
 
 
+class _BodyFailed(Exception):
+    pass
+
+
+@pytest.mark.parametrize(
+    "param_name, init_value, tune_value",
+    [
+        ("verify_ssl", True, False),
+        ("verify_ssl", True, str(ca_bundle_file)),
+        ("http_timeout", 60, 120),
+    ],
+)
+def test_transport_tuning_is_reverted_when_the_block_raises(
+    param_name, init_value, tune_value
+):
+    transport = RequestsTransport(**{param_name: init_value})
+
+    with pytest.raises(_BodyFailed):
+        with transport.tune(**{param_name: tune_value}):
+            # guard: the tuning was in effect, so the revert is what is under test
+            assert getattr(transport, param_name) == tune_value
+            raise _BodyFailed
+
+    assert getattr(transport, param_name) == init_value
+
+
+@pytest.mark.parametrize(
+    "param_name, init_value, tune_value",
+    [
+        ("backoff", _exponential_backoff, _linear_backoff),
+        ("max_sleep", 10, 1),
+        ("max_retries", 10, 0),
+    ],
+)
+def test_retry_tuning_is_reverted_when_the_block_raises(
+    param_name, init_value, tune_value
+):
+    config = RetryConfig(**{param_name: init_value})
+
+    with pytest.raises(_BodyFailed):
+        with config.tune(**{param_name: tune_value}):
+            assert getattr(config, param_name) == tune_value
+            raise _BodyFailed
+
+    assert getattr(config, param_name) == init_value
+
+
 def test_transport_can_manipulate_user_agent():
     transport = RequestsTransport()
 
