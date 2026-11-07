@@ -121,9 +121,13 @@ class RetryCheckCollection:
         `check` should *not* perform any sleeps or delays.
         Multiple checks should be chainable and callable in any order.
 
+        Registering a check which is already present is a no-op.
+        The check keeps the position of its first registration.
+
         :param func: The function or other callable to register as a retry check
         """
-        self._data.append(func)
+        if func not in self._data:
+            self._data.append(func)
         return func
 
     def register_many_checks(self, funcs: t.Iterable[RetryCheck]) -> None:
