@@ -105,7 +105,10 @@ class RequestsTransport:
     ) -> None:
         import requests
 
+        from ._no_cookies import NoCookiesPolicy
+
         self.session = requests.Session()
+        self.session.cookies.set_policy(NoCookiesPolicy())
         self.verify_ssl = config.get_ssl_verify(verify_ssl)
         self.http_timeout = config.get_http_timeout(http_timeout)
         self._user_agent = self.BASE_USER_AGENT
