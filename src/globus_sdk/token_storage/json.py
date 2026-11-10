@@ -130,8 +130,7 @@ class JSONTokenStorage(FileTokenStorage):
         being written to the file at ``self.filepath``.
 
         Under the assumption that this may be running on a system with multiple
-        local users, this sets the umask such that only the owner of the
-        resulting file can read or write it.
+        local users, a newly created file can be read and written only by its owner.
 
         :param token_data_by_resource_server: A mapping of resource servers to token
             data.
@@ -149,10 +148,11 @@ class JSONTokenStorage(FileTokenStorage):
         # update globus-sdk version
         to_write["globus-sdk.version"] = __version__
 
-        # write the file, denying rwx to Group and World, exec to User
-        with self.user_only_umask():
-            with open(self.filepath, "w", encoding="utf-8") as f:
-                json.dump(to_write, f)
+        # write the file (a newly created file is owner read/write only)
+        with open(
+            self.filepath, "w", encoding="utf-8", opener=self._owner_only_opener
+        ) as f:
+            json.dump(to_write, f)
 
     def get_token_data_by_resource_server(self) -> dict[str, TokenStorageData]:
         """
@@ -180,9 +180,10 @@ class JSONTokenStorage(FileTokenStorage):
         # pop the token data out if it exists
         popped = to_write["data"].get(self.namespace, {}).pop(resource_server, None)
 
-        # overwrite the file, denying rwx to Group and World, exec to User
-        with self.user_only_umask():
-            with open(self.filepath, "w", encoding="utf-8") as f:
-                json.dump(to_write, f)
+        # overwrite the file (a newly created file is owner read/write only)
+        with open(
+            self.filepath, "w", encoding="utf-8", opener=self._owner_only_opener
+        ) as f:
+            json.dump(to_write, f)
 
         return popped is not None

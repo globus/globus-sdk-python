@@ -1,8 +1,14 @@
+import os
+import stat
+
 import pytest
 
 from globus_sdk import exc
 from globus_sdk.token_storage import SQLiteTokenStorage
 from globus_sdk.token_storage.legacy import SQLiteAdapter
+from tests.common.overlapping_writes import process_umask
+
+IS_WINDOWS = os.name == "nt"
 
 
 @pytest.fixture
@@ -130,3 +136,10 @@ def test_migrate_from_v1_adapter(mock_response, db_file, make_adapter):
     assert (
         new_adapter.get_token_data("resource_server_2").access_token == "access_token_2"
     )
+
+
+@pytest.mark.xfail(IS_WINDOWS, reason="cannot set umask perms on Windows")
+def test_created_file_perms_with_a_umask_that_denies_the_owner(db_file, make_adapter):
+    with process_umask(0o277):
+        make_adapter(db_file)
+    assert stat.S_IMODE(db_file.stat().st_mode) == 0o600
