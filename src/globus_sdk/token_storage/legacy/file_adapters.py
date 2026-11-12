@@ -114,8 +114,7 @@ class SimpleJSONFileAdapter(FileAdapter):
         which was in use.
 
         Under the assumption that this may be running on a system with multiple
-        local users, this sets the umask such that only the owner of the
-        resulting file can read or write it.
+        local users, a newly created file can be read and written only by its owner.
 
         :param token_response: The token data received from the refresh
         """
@@ -130,10 +129,11 @@ class SimpleJSONFileAdapter(FileAdapter):
         # newly received tokens
         to_write["by_rs"].update(token_response.by_resource_server)
 
-        # deny rwx to Group and World, exec to User
-        with self.user_only_umask():
-            with open(self.filename, "w", encoding="utf-8") as f:
-                json.dump(to_write, f)
+        # Newly-created files have owner-only read/write permissions.
+        with open(
+            self.filename, "w", encoding="utf-8", opener=self._owner_only_opener
+        ) as f:
+            json.dump(to_write, f)
 
     def get_by_resource_server(self) -> dict[str, t.Any]:
         """

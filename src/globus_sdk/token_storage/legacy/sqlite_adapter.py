@@ -61,12 +61,11 @@ class SQLiteAdapter(FileAdapter):
         init_tables = self._is_memory_db() or not self.file_exists()
         connect_params = connect_params or {}
         if init_tables and not self._is_memory_db():  # real file needs to be created
-            with self.user_only_umask():
-                conn: sqlite3.Connection = sqlite3.connect(
-                    self.dbname, **connect_params
-                )
-        else:
-            conn = sqlite3.connect(self.dbname, **connect_params)
+            # Create the file with owner-only permissions before SQLite opens it.
+            # "Append" mode prevents an existing file from being truncated.
+            with open(self.dbname, "ab", opener=self._owner_only_opener):
+                pass
+        conn: sqlite3.Connection = sqlite3.connect(self.dbname, **connect_params)
         if init_tables:
             conn.executescript("""
 CREATE TABLE config_storage (

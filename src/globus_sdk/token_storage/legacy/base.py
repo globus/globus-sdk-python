@@ -55,6 +55,37 @@ class FileAdapter(StorageAdapter, metaclass=abc.ABCMeta):
         """
         return os.path.exists(self.filename)
 
+    @staticmethod
+    def _owner_only_opener(path: str, flags: int) -> int:
+        """
+        An ``opener`` for the builtin ``open()``.
+
+        A new file will be created with the mode ``0o600``.
+        An existing file will keep its existing mode.
+        """
+
+        try:
+            # Open the file with a 0o600 mode set. (See below for a corner case.)
+            # The O_CREAT | O_EXCL flags will trigger `FileExistsError`
+            # if the file already exists.
+            fd = os.open(path, flags | os.O_CREAT | os.O_EXCL, 0o600)
+        except FileExistsError:
+            # The file already exists. Open and return the descriptor immediately
+            # to avoid falling through to the code below that changes the file mode.
+            # Note: a dangling symlink will reach this line and raise an exception.
+            return os.open(path, flags & ~os.O_CREAT)
+
+        # Corner case: the 0o600 mode, set above, may be further restricted
+        # by the process-level umask. Therefore, set the permissions exactly.
+        try:
+            os.fchmod(fd, 0o600)
+        except (AttributeError, OSError):
+            # `os.fchmod` doesn't exist on all platforms.
+            # In addition, some filesystems do not support changing modes.
+            pass
+
+        return fd
+
     @contextlib.contextmanager
     def user_only_umask(self) -> t.Iterator[None]:
         """
@@ -68,7 +99,23 @@ class FileAdapter(StorageAdapter, metaclass=abc.ABCMeta):
             On Windows, this has no effect. To control the permissions on files used for
             token storage, use ``%LOCALAPPDATA%`` or ``%APPDATA%``.
             These directories should only be accessible to the current user.
+
+        .. warning::
+
+            This method is deprecated and will be removed in version 5.
+
+            The umask of the entire Python process is changed, so it is not safe
+            to use this method while other threads create files or use this method.
         """
+
+        # In a context manager, the frames above this one are contextlib's
+        # ``__enter__`` and then the caller's ``with`` statement.
+        globus_sdk.exc.warn_deprecated(
+            "'user_only_umask' is deprecated and will be removed in version 5. "
+            "It changes the umask of the whole process, "
+            "which is not safe when other threads are running.",
+            stacklevel=4,
+        )
         old_umask = os.umask(0o177)
         try:
             yield

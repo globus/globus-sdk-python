@@ -51,10 +51,11 @@ class SQLiteTokenStorage(FileTokenStorage):
     ) -> sqlite3.Connection:
         connect_params = connect_params or {}
         if not self.file_exists():
-            with self.user_only_umask():
-                conn: sqlite3.Connection = sqlite3.connect(
-                    self.filepath, **connect_params
-                )
+            # Create the file with owner-only permissions before SQLite opens it.
+            # "Append" mode prevents an existing file from being truncated.
+            with open(self.filepath, "ab", opener=self._owner_only_opener):
+                pass
+            conn: sqlite3.Connection = sqlite3.connect(self.filepath, **connect_params)
             conn.executescript(textwrap.dedent("""
                     CREATE TABLE token_storage (
                         namespace VARCHAR NOT NULL,
