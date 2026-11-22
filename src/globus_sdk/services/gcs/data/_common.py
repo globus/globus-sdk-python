@@ -4,9 +4,9 @@ import typing as t
 
 from globus_sdk._missing import MISSING
 
-VersionTuple = t.Tuple[int, int, int]
+VersionTuple: t.TypeAlias = tuple[int, int, int]
 
-DatatypeCallback = t.Callable[["DocumentWithInducedDatatype"], t.Optional[VersionTuple]]
+DatatypeCallback = t.Callable[["DocumentWithInducedDatatype"], VersionTuple | None]
 
 
 class DocumentWithInducedDatatype(t.Protocol):

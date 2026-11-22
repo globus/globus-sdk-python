@@ -28,7 +28,7 @@ def register_response(
     args: t.Mapping[str, t.Any],
 ) -> RegisteredResponse:
     # Some name of args to create_client() have differenlty named fields.
-    body_fields: t.Dict[str, t.Any] = {}
+    body_fields: dict[str, t.Any] = {}
     for arg_name in args:
         if arg_name == "terms_and_conditions" or arg_name == "privacy_policy":
             body_fields["links"] = {

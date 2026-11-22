@@ -21,7 +21,7 @@ from .transport import TRANSFER_DEFAULT_RETRY_CHECKS
 
 log = logging.getLogger(__name__)
 
-TransferFilterDict = t.Dict[str, t.Union[str, t.List[str]]]
+TransferFilterDict: t.TypeAlias = dict[str, str | list[str]]
 
 
 def _datelike_to_str(x: DateLike) -> str:

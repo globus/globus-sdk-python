@@ -86,7 +86,7 @@ class _ByScopesGetter:
                 )
             )
         # pop the only element in the set
-        return t.cast(t.Dict[str, t.Union[str, int]], toks.pop())
+        return toks.pop()  # type: ignore[no-any-return]
 
     def __contains__(self, item: str) -> bool:
         """

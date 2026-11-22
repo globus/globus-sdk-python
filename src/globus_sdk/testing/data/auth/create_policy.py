@@ -12,7 +12,7 @@ POLICY_REQUEST_ARGS = {
 }
 
 
-def make_request_body(request_args: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
+def make_request_body(request_args: dict[str, t.Any]) -> dict[str, t.Any]:
     request_body = request_args.copy()
     request_body["project_id"] = str(request_args["project_id"])
 
@@ -26,7 +26,7 @@ def make_request_body(request_args: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
     return request_body
 
 
-def make_response_body(request_args: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
+def make_response_body(request_args: dict[str, t.Any]) -> dict[str, t.Any]:
     response_body = request_args.copy()
     response_body["project_id"] = str(request_args["project_id"])
     response_body["id"] = str(uuid.uuid1())

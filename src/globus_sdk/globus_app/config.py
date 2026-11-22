@@ -36,7 +36,7 @@ KNOWN_LOGIN_FLOW_MANAGERS: dict[KnownLoginFlowManager, LoginFlowManagerProvider]
     "local-server": LocalServerLoginFlowManager,
 }
 KnownTokenStorage = t.Literal["json", "sqlite", "memory"]
-KNOWN_TOKEN_STORAGES: dict[KnownTokenStorage, t.Type[TokenStorageProvider]] = {
+KNOWN_TOKEN_STORAGES: dict[KnownTokenStorage, type[TokenStorageProvider]] = {
     "json": JSONTokenStorage,
     "sqlite": SQLiteTokenStorage,
     "memory": MemoryTokenStorage,

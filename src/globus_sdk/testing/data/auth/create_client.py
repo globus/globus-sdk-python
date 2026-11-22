@@ -51,7 +51,7 @@ def register_response(
 
     # The request body follows almost directly from the request args. Some name of args
     # to create_client() have differenlty named fields.
-    request_body: t.Dict[str, t.Any] = {}
+    request_body: dict[str, t.Any] = {}
     for arg_name in request_args.keys():
         if arg_name == "terms_and_conditions" or arg_name == "privacy_policy":
             request_body["links"] = {

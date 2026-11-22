@@ -14,7 +14,7 @@ SCOPE_REQUEST_ARGS = {
 }
 
 
-def make_request_body(request_args: t.Mapping[str, t.Any]) -> t.Dict[str, t.Any]:
+def make_request_body(request_args: t.Mapping[str, t.Any]) -> dict[str, t.Any]:
     request_body = {
         "name": request_args["name"],
         "description": request_args["description"],
@@ -36,7 +36,7 @@ def make_request_body(request_args: t.Mapping[str, t.Any]) -> t.Dict[str, t.Any]
     return request_body
 
 
-def make_response_body(request_args: t.Mapping[str, t.Any]) -> t.Dict[str, t.Any]:
+def make_response_body(request_args: t.Mapping[str, t.Any]) -> dict[str, t.Any]:
     return {
         "scope_string": f"https://auth.globus.org/scopes/{request_args['client_id']}/{request_args['scope_suffix']}",  # noqa: E501
         "allows_refresh_token": request_args.get("allows_refresh_token", True),

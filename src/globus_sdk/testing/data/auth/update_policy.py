@@ -10,7 +10,7 @@ POLICY_REQUEST_ARGS = {
 }
 
 
-def make_request_body(request_args: t.Mapping[str, t.Any]) -> t.Dict[str, t.Any]:
+def make_request_body(request_args: t.Mapping[str, t.Any]) -> dict[str, t.Any]:
     request_body = {}
 
     for field in [
@@ -30,7 +30,7 @@ def make_request_body(request_args: t.Mapping[str, t.Any]) -> t.Dict[str, t.Any]
     return request_body
 
 
-def make_response_body(request_args: t.Mapping[str, t.Any]) -> t.Dict[str, t.Any]:
+def make_response_body(request_args: t.Mapping[str, t.Any]) -> dict[str, t.Any]:
     return {
         "project_id": str(request_args.get("project_id", uuid.uuid1())),
         "high_assurance": request_args.get("high_assurance", True),

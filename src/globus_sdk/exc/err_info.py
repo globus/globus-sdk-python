@@ -68,9 +68,7 @@ class AuthorizationParameterInfo(ErrorInfo):
     def __init__(self, error_data: dict[str, t.Any]) -> None:
         # data is there if this key is present and it is a dict
         self._has_data = isinstance(error_data.get("authorization_parameters"), dict)
-        data = t.cast(
-            t.Dict[str, t.Any], error_data.get("authorization_parameters", {})
-        )
+        data: dict[str, t.Any] = error_data.get("authorization_parameters", {})
 
         self.session_message: str | None = self._parse_session_message(data)
 
