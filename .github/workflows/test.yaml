@@ -81,6 +81,7 @@ jobs:
               - "3.14"
             tox-environments:
               - "check-min-python-is-tested"
+              - "check-paginated-docs"
               - "mypy-py3.14"
               - "mypy-py3.10"
               - "mypy-test"

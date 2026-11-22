@@ -627,6 +627,10 @@ class FlowsClient(client.BaseClient):
                     for run in flows.list_runs():
                         print(run["run_id"])
 
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: list_runs
+
             .. tab-item:: Example Response Data
 
                 .. expandtestfixture:: flows.list_runs

@@ -277,6 +277,10 @@ class GCSClient(client.BaseClient):
 
         .. tab-set::
 
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: get_collection_list
+
             .. tab-item:: API Info
 
                 ``GET /collections``
@@ -615,6 +619,10 @@ class GCSClient(client.BaseClient):
 
         .. tab-set::
 
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: get_role_list
+
             .. tab-item:: API Info
 
                 ``GET /roles``
@@ -730,6 +738,10 @@ class GCSClient(client.BaseClient):
             a request returns more values than the page size
 
         .. tab-set::
+
+            .. tab-item:: Paginated Usage
+
+                .. paginatedusage:: get_user_credential_list
 
             .. tab-item:: API Info
 
