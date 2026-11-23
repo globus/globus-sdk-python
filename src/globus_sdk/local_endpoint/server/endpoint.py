@@ -45,7 +45,7 @@ class LocalGlobusConnectServer:
                         pass
                     else:
                         if isinstance(parsed_data, dict):
-                            self._loaded_info = t.cast(t.Dict[str, t.Any], parsed_data)
+                            self._loaded_info = parsed_data
             except (FileNotFoundError, IsADirectoryError):
                 pass
         return self._loaded_info

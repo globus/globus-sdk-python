@@ -32,10 +32,10 @@ def get_last_request(
 def construct_error(
     *,
     http_status: int,
-    body: bytes | str | t.Dict[str, t.Any],
+    body: bytes | str | dict[str, t.Any],
     method: str = "GET",
-    response_headers: t.Dict[str, str] | None = None,
-    request_headers: t.Dict[str, str] | None = None,
+    response_headers: dict[str, str] | None = None,
+    request_headers: dict[str, str] | None = None,
     response_encoding: str = "utf-8",
     url: str = "https://bogus-url/",
 ) -> GlobusAPIError: ...
@@ -46,10 +46,10 @@ def construct_error(
     *,
     http_status: int,
     error_class: type[E],
-    body: bytes | str | t.Dict[str, t.Any],
+    body: bytes | str | dict[str, t.Any],
     method: str = "GET",
-    response_headers: t.Dict[str, str] | None = None,
-    request_headers: t.Dict[str, str] | None = None,
+    response_headers: dict[str, str] | None = None,
+    request_headers: dict[str, str] | None = None,
     response_encoding: str = "utf-8",
     url: str = "https://bogus-url/",
 ) -> E: ...
@@ -58,11 +58,11 @@ def construct_error(
 def construct_error(
     *,
     http_status: int,
-    body: bytes | str | t.Dict[str, t.Any],
-    error_class: type[E] | type[GlobusAPIError] = GlobusAPIError,
+    body: bytes | str | dict[str, t.Any],
+    error_class: type[E | GlobusAPIError] = GlobusAPIError,
     method: str = "GET",
-    response_headers: t.Dict[str, str] | None = None,
-    request_headers: t.Dict[str, str] | None = None,
+    response_headers: dict[str, str] | None = None,
+    request_headers: dict[str, str] | None = None,
     response_encoding: str = "utf-8",
     url: str = "https://bogus-url/",
 ) -> E | GlobusAPIError:
@@ -96,7 +96,7 @@ def construct_error(
     return error_class(raw_response)
 
 
-def _encode_body(body: bytes | str | t.Dict[str, t.Any], encoding: str) -> bytes:
+def _encode_body(body: bytes | str | dict[str, t.Any], encoding: str) -> bytes:
     if isinstance(body, bytes):
         return body
     elif isinstance(body, str):

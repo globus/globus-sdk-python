@@ -1,5 +1,3 @@
-import typing as t
-
 import pytest
 
 import globus_sdk
@@ -13,7 +11,7 @@ def flows_client():
 
 
 @pytest.fixture
-def specific_flow_client_class() -> t.Type[globus_sdk.SpecificFlowClient]:
+def specific_flow_client_class() -> type[globus_sdk.SpecificFlowClient]:
     class CustomSpecificFlowClient(globus_sdk.SpecificFlowClient):
         def __init__(self, **kwargs) -> None:
             super().__init__(**kwargs)

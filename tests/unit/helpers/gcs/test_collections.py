@@ -16,8 +16,6 @@ from globus_sdk import (
 from globus_sdk._missing import MISSING, MissingType, filter_missing
 from globus_sdk.transport import JSONRequestEncoder
 
-UnionTypes = (t.Union, types.UnionType)
-
 STUB_SG_ID = uuid.uuid1()  # storage gateway
 STUB_MC_ID = uuid.uuid1()  # mapped collection
 STUB_UC_ID = uuid.uuid1()  # user credential
@@ -255,7 +253,7 @@ common_collection_fields = [
     ("department", (str, None, MissingType)),
     ("description", (str, None, MissingType)),
     ("display_name", (str, MissingType)),
-    ("identity_id", (t.Union[uuid.UUID, str], MissingType)),
+    ("identity_id", (uuid.UUID | str, MissingType)),
     ("info_link", (str, None, MissingType)),
     ("organization", (str, MissingType)),
     ("user_message", (str, None, MissingType)),
@@ -272,17 +270,17 @@ common_collection_fields = [
 mapped_collection_fields = [
     *common_collection_fields,
     ("domain_name", (str, MissingType)),
-    ("guest_auth_policy_id", (t.Union[uuid.UUID, str], None, MissingType)),
+    ("guest_auth_policy_id", (uuid.UUID | str, None, MissingType)),
     ("disable_anonymous_writes", (bool, MissingType)),
-    ("policies", (t.Dict[str, t.Any], MissingType)),
+    ("policies", (dict[str, t.Any], MissingType)),
 ]
 
 
 guest_collection_fields = [
     *common_collection_fields,
-    ("mapped_collection_id", (t.Union[uuid.UUID, str], MissingType)),
-    ("user_credential_id", (t.Union[uuid.UUID, str], MissingType)),
-    ("activity_notification_policy", (t.Dict[str, t.List[str]], MissingType)),
+    ("mapped_collection_id", (uuid.UUID | str, MissingType)),
+    ("user_credential_id", (uuid.UUID | str, MissingType)),
+    ("activity_notification_policy", (dict[str, list[str]], MissingType)),
 ]
 
 
@@ -311,14 +309,18 @@ def _gen_value(_type):
     if _type is bool:
         return [True, False]
     # Union[UUID, str] | (UUID | str)
-    if t.get_origin(_type) in UnionTypes and set(t.get_args(_type)) == {uuid.UUID, str}:
+    if t.get_origin(_type) is types.UnionType and set(t.get_args(_type)) == {
+        uuid.UUID,
+        str,
+    }:
         return [str(uuid.uuid1()), uuid.uuid1()]
     if _type is t.Iterable[str]:
         return [[], ["a", "b", "c"]]
-    if _type is t.Dict[str, t.Any]:
-        return [{"A": 1}]
-    if _type is t.Dict[str, t.List[str]]:
-        return [{"a": ["b", "c"]}]
+    if t.get_origin(_type) is dict:
+        if t.get_args(_type) == (str, t.Any):
+            return [{"A": 1}]
+        if t.get_args(_type) == (str, list[str]):
+            return [{"a": ["b", "c"]}]
 
     raise AssertionError(f"Unexpected Type: {_type}")
 

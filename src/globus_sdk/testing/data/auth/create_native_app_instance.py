@@ -11,13 +11,13 @@ APP_REQUEST_ARGS = {
 }
 
 
-def make_app_request_body(request_args: t.Dict[str, t.Any]) -> t.Dict[str, t.Any]:
+def make_app_request_body(request_args: dict[str, t.Any]) -> dict[str, t.Any]:
     request_body = request_args.copy()
     request_body["template_id"] = str(request_args["template_id"])
     return request_body
 
 
-def make_app_response_body(request_args: t.Mapping[str, t.Any]) -> t.Dict[str, t.Any]:
+def make_app_response_body(request_args: t.Mapping[str, t.Any]) -> dict[str, t.Any]:
     return {
         "client": {
             "fqdns": [],

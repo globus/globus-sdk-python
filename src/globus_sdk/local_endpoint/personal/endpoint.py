@@ -152,7 +152,7 @@ class LocalGlobusConnectPersonal:
             raise ValueError("Something went wrong. Could not parse owner info.")
 
         try:  # could get no data back in theory, if the identity isn't visible
-            return t.cast(t.Dict[str, t.Any], res["identities"][0])
+            return res["identities"][0]  # type: ignore[no-any-return]
         except (KeyError, IndexError):
             return None
 
